@@ -1,0 +1,11 @@
+theme = gruvbox-material
+
+mouse-scroll-multiplier = 0.5
+window-decoration = true
+window-padding-x = 8
+window-padding-y = 8
+
+
+macos-option-as-alt = true
+keybind = alt+left=unbind
+keybind = alt+right=unbind
