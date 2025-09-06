@@ -16,7 +16,23 @@
     stripComponents = 2
     refreshPeriod = "168h"
     include = ["*/themes/**"]
-[".config/git/catppuccin.gitconfig"]
+[".config/git/delta/themes/catppuccin.gitconfig"]
     type = "file"
     url = "https://raw.githubusercontent.com/catppuccin/delta/refs/heads/main/catppuccin.gitconfig"
+    refreshPeriod = "168h"
+[".tmux/plugins/tpm"]
+    type = "git-repo"
+    url = "https://github.com/tmux-plugins/tpm.git"
+    refreshPeriod = "168h"
+[".config/tmux/plugins/tmux-nerd-font-window-name"]
+    type = "git-repo"
+    url = "https://github.com/joshmedeski/tmux-nerd-font-window-name.git"
+    refreshPeriod = "168h"
+[".config/tmux/plugins/vim-tmux-navigator"]
+    type = "git-repo"
+    url = "https://github.com/christoomey/vim-tmux-navigator.git"
+    refreshPeriod = "168h"
+[".config/tmux/plugins/tmux-sessionx"]
+    type = "git-repo"
+    url = "https://github.com/omerxx/tmux-sessionx.git"
     refreshPeriod = "168h"
