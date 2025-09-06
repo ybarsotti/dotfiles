@@ -1,0 +1,54 @@
+mcp_servers:
+  ccusage:
+    command: npx
+    args:
+      - ccusage@latest
+      - mcp
+
+  context7:
+    command: npx
+    args:
+      - -y
+      - "@upstash/context7-mcp"
+
+  playwright:
+    command: /bin/bash
+    args:
+      - -c
+      - npx @playwright/mcp@latest --config=${HOME}/.playwright/config.json
+
+  sequential-thinking:
+    command: npx
+    args:
+      - -y
+      - "@modelcontextprotocol/server-sequential-thinking"
+
+  terraform:
+    command: docker
+    args:
+      - run
+      - -i
+      - --rm
+      - hashicorp/terraform-mcp-server
+
+  blender:
+    command: uvx
+    args:
+      - blender-mcp
+
+  markitdown:
+    command: docker
+    args:
+      - run
+      - --rm
+      - -i
+      - markitdown-mcp:latest
+
+  notionApi:
+    command: docker
+    args:
+      - run
+      - --rm
+      - -i
+      - -e ${NOTION_TOKEN}
+      - mcp/notion

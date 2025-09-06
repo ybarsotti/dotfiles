@@ -1,4 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/jesseduffield/lazygit/master/schema/config.json
+---
 customCommands:
   - key: "W"
     prompts:
@@ -7,7 +8,6 @@ customCommands:
         initialValue: ""
     command: git commit -m "{{index .PromptResponses 0}}" --no-verify
     context: "global"
-    subprocess: true
   - key: "C"
     command: 'git commit -m "{{ .Form.Type }}{{if .Form.Scopes}}({{ .Form.Scopes }}){{end}}{{if eq .Form.Breaking `yes`}}!{{end}}: {{ .Form.Description }}"'
     description: "commit with commitizen"
@@ -70,28 +70,28 @@ customCommands:
         title: "Is the commit message correct?"
         body: "{{ .Form.Type }}{{if .Form.Scopes}}({{ .Form.Scopes }}){{end}}{{if eq .Form.Breaking `yes`}}!{{end}}: {{ .Form.Description }}"
 gui:
-    # cyberdream theme for lazygit
-    nerdFontsVersion: '3'
-    border: rounded
-    theme:
-        activeBorderColor:
-            - "#5ef1ff"
-        inactiveBorderColor:
-            - "#7b8496"
-        searchingActiveBorderColor:
-            - "#ff5ef1"
-        optionsTextColor:
-            - "#3c4048"
-        selectedLineBgColor:
-            - "#3c4048"
-        cherryPickedCommitBgColor:
-            - "#3c4048"
-        cherryPickedCommitFgColor:
-            - "#ff5ea0"
-        unstagedChangesColor:
-            - "#ffbd5e"
-        defaultFgColor:
-            - "#ffffff"
+  # cyberdream theme for lazygit
+  nerdFontsVersion: "3"
+  border: rounded
+  theme:
+    activeBorderColor:
+      - "#5ef1ff"
+    inactiveBorderColor:
+      - "#7b8496"
+    searchingActiveBorderColor:
+      - "#ff5ef1"
+    optionsTextColor:
+      - "#3c4048"
+    selectedLineBgColor:
+      - "#3c4048"
+    cherryPickedCommitBgColor:
+      - "#3c4048"
+    cherryPickedCommitFgColor:
+      - "#ff5ea0"
+    unstagedChangesColor:
+      - "#ffbd5e"
+    defaultFgColor:
+      - "#ffffff"
 os:
-  editPreset: 'vi'
+  editPreset: "vi"
   editInTerminal: true
