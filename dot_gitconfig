@@ -11,6 +11,11 @@
     whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
     pager = delta
     excludesfile = ~/.gitignore
+    trustctime = false
+    untrackedCache = true
+
+[fetch]
+    prune = true
 
 [pull]
     rebase = true
@@ -40,6 +45,9 @@
     added = green bold
     changed = yellow bold
     untracked = red bold
+
+[commit]
+    template = ~/.gitmessage.txt
 
 [delta]
     features = line-numbers decorations

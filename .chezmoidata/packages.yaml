@@ -1,11 +1,13 @@
 packages:
   brews:
     - bat
+    - btop
     - bfg
     - borders
     - chezmoi
     - docker
     - eza
+    - fastfetch
     - fd
     - fzf
     - gh
