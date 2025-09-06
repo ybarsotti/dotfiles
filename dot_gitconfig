@@ -50,7 +50,7 @@
     template = ~/.gitmessage.txt
 
 [delta]
-    features = line-numbers decorations
+    features = line-numbers decorations catppuccin-mocha
     line-numbers = true
 
 [help]
@@ -69,3 +69,6 @@
 
 [merge]
     conflictstyle = diff3
+
+[include]
+    path = .config/git/delta/themes/catppuccin.gitconfig
