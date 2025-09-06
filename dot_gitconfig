@@ -9,8 +9,11 @@
 [core]
     editor = nvim
     whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
-	pager = delta
+    pager = delta
     excludesfile = ~/.gitignore
+
+[pull]
+    rebase = true
 
 [web]
     browser = google-chrome
@@ -48,6 +51,13 @@
 [credential]
     helper = osxkeychain
 
-
 [safe]
-	directory = /var/task
+    directory = /var/task
+
+[difftool]
+    prompt = false
+    keepBackup = false
+    trustExitCode = false
+
+[merge]
+    conflictstyle = diff3
