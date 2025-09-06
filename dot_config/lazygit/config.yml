@@ -69,29 +69,27 @@ customCommands:
       - type: "confirm"
         title: "Is the commit message correct?"
         body: "{{ .Form.Type }}{{if .Form.Scopes}}({{ .Form.Scopes }}){{end}}{{if eq .Form.Breaking `yes`}}!{{end}}: {{ .Form.Description }}"
+
 gui:
-  # cyberdream theme for lazygit
-  nerdFontsVersion: "3"
-  border: rounded
   theme:
     activeBorderColor:
-      - "#5ef1ff"
+      - '#74c7ec'
+      - bold
     inactiveBorderColor:
-      - "#7b8496"
-    searchingActiveBorderColor:
-      - "#ff5ef1"
+      - '#a6adc8'
     optionsTextColor:
-      - "#3c4048"
+      - '#89b4fa'
     selectedLineBgColor:
-      - "#3c4048"
+      - '#313244'
     cherryPickedCommitBgColor:
-      - "#3c4048"
+      - '#45475a'
     cherryPickedCommitFgColor:
-      - "#ff5ea0"
+      - '#74c7ec'
     unstagedChangesColor:
-      - "#ffbd5e"
+      - '#f38ba8'
     defaultFgColor:
-      - "#ffffff"
-os:
-  editPreset: "vi"
-  editInTerminal: true
+      - '#cdd6f4'
+    searchingActiveBorderColor:
+      - '#f9e2af'
+  authorColors:
+    '*': '#b4befe'
