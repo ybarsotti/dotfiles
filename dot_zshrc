@@ -133,7 +133,7 @@ if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
 fi
 
 
-alias claude="$HOME/.claude/local/claude"
+alias claude="~/.claude/local/claude"
 
 . "$HOME/.atuin/bin/env"
 
