@@ -1,3 +1,4 @@
+---
 mcp_servers:
   ccusage:
     command: npx
@@ -12,10 +13,9 @@ mcp_servers:
       - "@upstash/context7-mcp"
 
   playwright:
-    command: /bin/bash
+    command: npx
     args:
-      - -c
-      - npx @playwright/mcp@latest --config=${HOME}/.playwright/config.json
+      - "@playwright/mcp@latest" 
 
   sequential-thinking:
     command: npx
