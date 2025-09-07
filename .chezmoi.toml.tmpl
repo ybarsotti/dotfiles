@@ -1,16 +1,23 @@
 encryption = "gpg"
 
 ################################################
+# Encryption
+################################################
+
+[gpg]
+  args = [
+    "--quiet",
+  ]
+  recipient = "..."
+  suffix = ".asc"
+
+################################################
 # Data
 ################################################
 
 {{- includeTemplate "cpu" . }}
 {{- includeTemplate "machine-type" . }}
-
 {{- includeTemplate "github-codespaces" . }}
-[data.cpu]
-  cores = {{ $cpuCores }}
-  threads = {{ $cpuThreads }}
 
 [data]
   email = "yuribarsotti@gmail.com"
