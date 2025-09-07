@@ -9,12 +9,12 @@ encryption = "gpg"
 
 {{- includeTemplate "github-codespaces" . }}
 [data.cpu]
-    cores = {{ $cpuCores }}
-    threads = {{ $cpuThreads }}
+  cores = {{ $cpuCores }}
+  threads = {{ $cpuThreads }}
 
-[data.dopplerProjectJson]
-    dopplerProjectJson = { command = "doppler", args = ["secrets", "download", "--no-file", "--format", "json"], format = "json" }
-
+[data]
+  email = "yuribarsotti@gmail.com"
+  dopplerProjectJson = { command = "doppler", args = ["secrets", "download", "--no-file", "--format", "json"], format = "json" }
 
 ################################################
 # Version Management
