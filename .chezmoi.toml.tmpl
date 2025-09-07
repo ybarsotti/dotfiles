@@ -1,5 +1,7 @@
 [data.cpu]
-cores = {{ $cpuCores }}
-threads = {{ $cpuThreads }}
+    cores = {{ $cpuCores }}
+    threads = {{ $cpuThreads }}
 
+[data.dopplerProjectJson]
+    dopplerProjectJson = { command = "doppler", args = ["secrets", "download", "--no-file", "--format", "json"], format = "json" }
 

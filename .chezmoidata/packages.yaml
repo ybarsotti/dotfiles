@@ -27,6 +27,7 @@ packages:
       - luarocks
       - shfmt
       - make
+      - doppler
       - neovim
       - node
       - nvm
