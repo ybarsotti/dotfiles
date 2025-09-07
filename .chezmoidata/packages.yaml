@@ -33,6 +33,7 @@ packages:
       - python3
       - prettier
       - ripgrep
+      - terraform
       - tmux
       - tree
       - tree-sitter

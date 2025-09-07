@@ -134,3 +134,7 @@ fi
 
 
 alias claude="/Users/yuri.mendes/.claude/local/claude"
+
+. "$HOME/.atuin/bin/env"
+
+eval "$(atuin init zsh)"

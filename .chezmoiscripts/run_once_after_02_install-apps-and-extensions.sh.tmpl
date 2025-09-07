@@ -1,0 +1,92 @@
+#!/bin/bash
+
+# run_once_after_02_install-apps-and-extensions.sh
+#
+# This script installs applications and extensions for already-installed tools.
+
+set -eufo pipefail
+
+# Ensure PATHs are sourced to find newly installed commands
+export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+
+# --- Install Cargo packages (Rust) ---
+echo "Installing Cargo packages..."
+if ! command -v selene &>/dev/null; then
+  cargo install selene
+else
+  echo "selene is already installed."
+fi
+
+# --- Install global Python packages using uv ---
+echo "Installing global Python packages with uv..."
+uv pip install --system invoke pyyaml requests
+
+# --- Install gh extensions ---
+echo "Installing gh extensions..."
+gh_extensions=(
+  "mislav/gh-branch"
+  "johnmanjiro13/gh-bump"
+  "davidraviv/gh-clean-branches"
+  "matt-bartel/gh-clone-org"
+  "dlvhdr/gh-dash"
+  "yuler/gh-download"
+  "jrnxf/gh-eco"
+  "redraw/gh-install"
+  "valeriobelli/gh-milestone"
+  "meiji163/gh-notify"
+  "seachicken/gh-poi"
+  "mona-actions/gh-repo-stats"
+  "github/gh-skyline"
+  "gpmtools/gh-task"
+  "jake-low/gh-log"
+)
+
+installed_extensions=$(gh extension list | awk '{print $1}')
+
+for ext in "${gh_extensions[@]}"; do
+  if echo "$installed_extensions" | grep -q "$ext"; then
+    echo "gh extension $ext is already installed."
+  else
+    echo "Installing gh extension $ext..."
+    gh extension install "$ext"
+  fi
+done
+
+# --- Install Global NPM Packages ---
+echo "Installing global NPM packages..."
+
+# Ensure mise is on the PATH and setup a global node version
+# This makes 'npm' available for the next steps.
+# Using 'lts' is a safe default.
+if command -v mise &>/dev/null; then
+    echo "Setting up Node.js via mise..."
+    mise use --global node@lts
+else
+    echo "Warning: mise command not found. Cannot set up Node.js to install NPM packages."
+fi
+
+# Check if 'npm' is available before proceeding
+if command -v npm &>/dev/null; then
+    # Package list
+    npm_packages=(
+        "@anthropic-ai/claude-code"
+        # "typescript"
+        # "vercel"
+    )
+
+    # Get list of globally installed packages
+    installed_npm_packages=$(npm list -g --depth=0)
+
+    for pkg in "${npm_packages[@]}"; do
+        if echo "$installed_npm_packages" | grep -q "$pkg"; then
+            echo "NPM package $pkg is already installed."
+        else
+            echo "Installing NPM package $pkg..."
+            npm install -g "$pkg"
+        fi
+    done
+else
+    echo "Warning: npm command not found. Skipping global NPM package installation."
+fi
+
+echo "Application and extension installation complete."

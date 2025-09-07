@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# This script installs SDKs and language version managers.
+
+set -eufo pipefail
+
+# --- Install Rust ---
+if ! command -v cargo &>/dev/null; then
+  echo "Installing Rust..."
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+else
+  echo "Rust is already installed."
+fi
+
+# --- Install mise ---
+if ! command -v mise &>/dev/null; then
+  echo "Installing mise..."
+  curl https://mise.run | sh
+else
+  echo "mise is already installed."
+fi
+
+# --- Install uv (Python) ---
+if ! command -v uv &>/dev/null; then
+  echo "Installing uv..."
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+else
+  echo "uv is already installed."
+fi
+
+# --- Install Atuin ---
+if ! command -v atuin &>/dev/null; then
+  echo "Installing Atuin..."
+  curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
+else
+  echo "Atuin is already installed."
+fi
+
+# --- Install NVM ---
+export NVM_DIR="$HOME/.nvm"
+if [ ! -d "$NVM_DIR" ]; then
+  echo "Installing NVM..."
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+else
+  echo "NVM is already installed."
+fi
