@@ -5,7 +5,8 @@ packages:
       - btop
       - bfg
       - borders
-      - chezmoi
+      - cmake
+      - commitizen
       - docker
       - eza
       - fastfetch
@@ -14,6 +15,9 @@ packages:
       - gh
       - git-flow
       - go
+      - gnupg
+      - gnu-sed
+      - gibo
       - jandedobbeleer/oh-my-posh/oh-my-posh
       - lazygit
       - httpie
@@ -39,7 +43,10 @@ packages:
       - tree-sitter
       - thefuck
       - yazi
+      - youplot
       - zellij
+      - zig
+      - zizmor
       - zsh-autosuggestions
       - zsh-syntax-highlighting
     casks:
