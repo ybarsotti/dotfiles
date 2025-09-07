@@ -1,3 +1,13 @@
+encryption = "gpg"
+
+################################################
+# Data
+################################################
+
+{{- includeTemplate "cpu" . }}
+{{- includeTemplate "machine-type" . }}
+
+{{- includeTemplate "github-codespaces" . }}
 [data.cpu]
     cores = {{ $cpuCores }}
     threads = {{ $cpuThreads }}
@@ -5,3 +15,31 @@
 [data.dopplerProjectJson]
     dopplerProjectJson = { command = "doppler", args = ["secrets", "download", "--no-file", "--format", "json"], format = "json" }
 
+
+################################################
+# Version Management
+################################################
+
+[git]
+  autoAdd = true
+  autoCommit = false
+
+################################################
+# Operation
+################################################
+
+# Format for data output, either `json` or `yaml`
+format = "yaml"
+
+[merge]
+  command = "nvim"
+  args = [
+    "-d",
+    "{{ "{{" }} .Destination {{ "}}" }}",
+    "{{ "{{" }} .Source {{ "}}" }}",
+    "{{ "{{" }} .Target {{ "}}" }}",
+  ]
+
+[update]
+  # Update submodules recursively
+  recurseSubmodules = true
