@@ -1,3 +1,4 @@
+{{- if eq .chezmoi.os "darwin" -}}
 #!/bin/bash
 
 # This script installs SDKs and language version managers.
@@ -16,6 +17,22 @@ fi
 if ! command -v mise &>/dev/null; then
   echo "Installing mise..."
   curl https://mise.run | sh
+
+  echo "Setting up mise tools..."
+  
+  # Install languages defined in mise config
+  mise install
+  
+  # Install lua plugins as requested
+  mise plugins add lua
+  mise use -g lua@5.1
+  
+  # Install neovim providers
+  echo "Installing neovim providers..."
+  npm install -g neovim
+  pip install pynvim
+  
+  echo "Mise setup completed!"
 else
   echo "mise is already installed."
 fi
@@ -44,3 +61,4 @@ if [ ! -d "$NVM_DIR" ]; then
 else
   echo "NVM is already installed."
 fi
+{{ end -}}
