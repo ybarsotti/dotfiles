@@ -71,22 +71,115 @@ Commands for keeping multiple machines in sync and checking the current state.
 
 ## Development Tools
 
-This dotfiles setup includes several development tools that are automatically installed:
+This dotfiles setup includes several development tools that are automatically installed through the packages.yaml configuration:
 
 ### Code Quality & Linting
 - **`shellcheck`** - Shell script static analysis tool for finding bugs and improving code quality
+  - Usage: `shellcheck script.sh`
 - **`yamllint`** - YAML linter for configuration files
+  - Usage: `yamllint config.yaml`
 - **`pre-commit`** - Git hooks framework for running checks before commits
+  - Setup: `pre-commit install`
+  - Usage: `pre-commit run --all-files`
 - **`prettier`** - Code formatter for consistent styling
+  - Usage: `prettier --write file.js`
+- **`shfmt`** - Shell script formatter
+  - Usage: `shfmt -w script.sh`
 
 ### Development Utilities
 - **`sst/tap/opencode`** - OpenCode CLI tool for development workflows
+  - Usage: `opencode .` to open current directory
 - **`commitizen`** - Tool for creating standardized commit messages
+  - Usage: `git cz` or `cz commit`
 - **`gh`** - GitHub CLI for repository management
+  - Usage: `gh repo clone`, `gh pr create`, `gh issue list`
 - **`lazygit`** - Terminal UI for git commands
+  - Usage: `lazygit`
+- **`lazydocker`** - Terminal UI for Docker
+  - Usage: `lazydocker`
+- **`git-flow`** - Git branching model extensions
+  - Usage: `git flow init`, `git flow feature start`
+- **`go`** - Go programming language
+  - Usage: `go run main.go`, `go build`, `go mod init`
+- **`node`** + **`nvm`** - Node.js runtime and version manager
+  - Usage: `nvm use 20`, `npm install`, `node script.js`
+- **`python3`** + **`pipx`** - Python runtime and isolated package installer
+  - Usage: `python3 script.py`, `pipx install package`
+- **`lua`**, **`luajit`**, **`luarocks`** - Lua runtime and package manager
+  - Usage: `lua script.lua`, `luarocks install package`
+- **`zig`** - Zig programming language
+  - Usage: `zig run main.zig`, `zig build`
+- **`terraform`** - Infrastructure as Code tool
+  - Usage: `terraform init`, `terraform plan`, `terraform apply`
 
-### System Tools
-- **`ripgrep`** - Fast text search tool (rg command)
-- **`fd`** - Modern find replacement
-- **`bat`** - Enhanced cat with syntax highlighting
-- **`eza`** - Modern ls replacement with better formatting
+### System Tools & Terminal Enhancements
+- **`ripgrep`** - Fast text search tool
+  - Usage: `rg "pattern" file.txt`, `rg -i "case insensitive"`
+- **`fd`** - Modern find replacement with better performance
+  - Usage: `fd filename`, `fd -e js` (find JS files)
+- **`bat`** - Enhanced cat with syntax highlighting and Git integration
+  - Usage: `bat file.txt`, `bat --style=numbers file.py`
+- **`eza`** - Modern ls replacement with better formatting and colors
+  - Usage: `eza -la`, `eza --tree`, `eza --git`
+- **`fzf`** - Fuzzy finder for command-line
+  - Usage: `**<TAB>` (fuzzy complete), `Ctrl+R` (history search)
+- **`tree`** - Directory tree viewer
+  - Usage: `tree`, `tree -L 2` (limit depth)
+- **`btop`** - Resource monitor with better interface than htop
+  - Usage: `btop`
+- **`fastfetch`** - System information display
+  - Usage: `fastfetch`
+- **`jq`** - JSON processor
+  - Usage: `echo '{"key":"value"}' | jq .key`
+- **`httpie`** - User-friendly HTTP client
+  - Usage: `http GET httpbin.org/json`
+- **`oha`** - HTTP load testing tool
+  - Usage: `oha -n 100 -c 10 https://example.com`
+- **`nmap`** - Network discovery and security auditing
+  - Usage: `nmap -sP 192.168.1.0/24`
+- **`yazi`** - Terminal file manager
+  - Usage: `yazi`
+- **`tmux`** - Terminal multiplexer
+  - Usage: `tmux new-session`, `tmux attach`
+- **`zellij`** - Terminal workspace with built-in multiplexer
+  - Usage: `zellij`
+- **`thefuck`** - Command correction tool
+  - Usage: Type command, get error, type `fuck` to get corrected version
+
+### Development Editors & Language Support
+- **`neovim`** - Modern Vim-based text editor
+  - Usage: `nvim file.txt`
+- **`tree-sitter`** - Incremental parsing system for syntax highlighting
+  - Used automatically by Neovim and other editors
+
+### Shell Enhancements
+- **`zsh-autosuggestions`** - Fish-like autosuggestions for Zsh
+- **`zsh-syntax-highlighting`** - Fish-like syntax highlighting for Zsh
+- **`jandedobbeleer/oh-my-posh/oh-my-posh`** - Cross-platform prompt theme engine
+
+### Security & System Tools
+- **`gnupg`** - GNU Privacy Guard for encryption
+  - Usage: `gpg --gen-key`, `gpg --encrypt file.txt`
+- **`borders`** - Window border customization for macOS
+- **`doppler`** - Secrets management
+  - Usage: `doppler login`, `doppler secrets`
+- **`gibo`** - .gitignore boilerplate generator
+  - Usage: `gibo dump Python > .gitignore`
+- **`bfg`** - Git repository cleaner
+  - Usage: `bfg --delete-files '*.jar' repo.git`
+- **`zizmor`** - GitHub Actions security scanner
+  - Usage: `zizmor .github/workflows/`
+
+### Package Visualization
+- **`youplot`** - Command-line data plotting
+  - Usage: `seq 1 10 | youplot line`
+
+### Build Tools
+- **`cmake`** - Cross-platform build system generator
+  - Usage: `cmake .`, `make`
+- **`make`** - Build automation tool
+  - Usage: `make`, `make install`
+
+### Containerization
+- **`docker`** - Container platform
+  - Usage: `docker run`, `docker build`, `docker-compose up`
