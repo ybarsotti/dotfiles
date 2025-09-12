@@ -35,9 +35,12 @@ packages:
       - jq
       - oha
       - pipx
+      - pre-commit
       - python3
       - prettier
       - ripgrep
+      - shellcheck
+      - yamllint
       - terraform
       - tmux
       - tree
@@ -56,6 +59,7 @@ packages:
       - arc
       - betterdisplay
       - figma
+      - firefox
       - font-hack-nerd-font
       - font-jetbrains-mono-nerd-font
       - font-sf-pro
