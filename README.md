@@ -85,6 +85,14 @@ This dotfiles setup includes several development tools that are automatically in
   - Usage: `prettier --write file.js`
 - **`shfmt`** - Shell script formatter
   - Usage: `shfmt -w script.sh`
+- **`black`** - Python code formatter with opinionated style
+  - Usage: `black script.py`, `black --check .`
+- **`isort`** - Python import sorter and organizer
+  - Usage: `isort script.py`, `isort --check-only .`
+- **`autopep8`** - Python PEP8 code formatter
+  - Usage: `autopep8 --in-place script.py`
+- **`clang-format`** - C/C++ code formatter
+  - Usage: `clang-format -i file.cpp`, `clang-format --style=Google file.c`
 
 ### Development Utilities
 - **`sst/tap/opencode`** - OpenCode CLI tool for development workflows

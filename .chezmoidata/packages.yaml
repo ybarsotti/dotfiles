@@ -1,10 +1,13 @@
 packages:
   darwin:
     brews:
+      - autopep8
       - bat
+      - black
       - btop
       - bfg
       - borders
+      - clang-format
       - cmake
       - commitizen
       - docker
@@ -21,6 +24,7 @@ packages:
       - jandedobbeleer/oh-my-posh/oh-my-posh
       - lazygit
       - httpie
+      - isort
       - lazydocker
       - lua
       - luajit
