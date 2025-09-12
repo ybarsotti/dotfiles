@@ -78,7 +78,7 @@ eval $(thefuck --alias fuck)
 # - mise: lua, go, zig, python (global versions)
 # - nvm: Node.js (kept as is)  
 # - uv: Python package and project management
-eval "$($HOME/.local/bin/mise activate zsh)"
+eval "$($HOME/.local/bin/mise activate zsh --shims)"
 
 # GPG Key 
 export GPG_TTY=$(tty)
