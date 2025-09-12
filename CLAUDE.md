@@ -65,3 +65,4 @@ When adding new packages:
 1. Edit `.chezmoidata/packages.yaml`
 2. Run `chezmoi apply` to trigger package installation
 3. The `run_onchange_*` scripts will automatically install new packages
+- When adding new packages, always update the @README.md file with instructions and information about the package, usage, main commands, etc

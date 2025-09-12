@@ -1,0 +1,48 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    "theme": "matrix",
+    "model": "anthropic/claude-sonnet-4-20250514",
+    "autoupdate": true,
+    "mcp": {
+        "ccusage": {
+            "type": "local",
+            "command": ["npx", "ccusage@latest", "mcp"],
+            "enabled": true
+        },
+        "context7": {
+            "type": "local",
+            "command": ["npx", "-y", "@upstash/context7-mcp"],
+            "enabled": true
+        },
+        "playwright": {
+            "type": "local",
+            "command": ["npx", "@playwright/mcp@latest"],
+            "enabled": true
+        },
+        "sequential-thinking": {
+            "type": "local",
+            "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+            "enabled": true
+        },
+        "terraform": {
+            "type": "local",
+            "command": ["docker", "run", "-i", "--rm", "hashicorp/terraform-mcp-server"],
+            "enabled": true
+        },
+        "blender": {
+            "type": "local",
+            "command": ["uvx", "blender-mcp"],
+            "enabled": true
+        },
+        "markitdown": {
+            "type": "local",
+            "command": ["docker", "run", "--rm", "-i", "markitdown-mcp:latest"],
+            "enabled": true
+        },
+        "notionApi": {
+            "type": "local",
+            "command": ["docker", "run", "--rm", "-i", "-e", "${NOTION_TOKEN}", "mcp/notion"],
+            "enabled": true
+        }
+    }
+}

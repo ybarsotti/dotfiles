@@ -68,3 +68,25 @@ Commands for keeping multiple machines in sync and checking the current state.
 - **`chezmoi purge`**
   - **Purpose**: Removes everything managed by `chezmoi` from your home directory. This effectively uninstalls your managed dotfiles, leaving your system clean.
   - **Example**: `chezmoi purge`
+
+## Development Tools
+
+This dotfiles setup includes several development tools that are automatically installed:
+
+### Code Quality & Linting
+- **`shellcheck`** - Shell script static analysis tool for finding bugs and improving code quality
+- **`yamllint`** - YAML linter for configuration files
+- **`pre-commit`** - Git hooks framework for running checks before commits
+- **`prettier`** - Code formatter for consistent styling
+
+### Development Utilities
+- **`sst/tap/opencode`** - OpenCode CLI tool for development workflows
+- **`commitizen`** - Tool for creating standardized commit messages
+- **`gh`** - GitHub CLI for repository management
+- **`lazygit`** - Terminal UI for git commands
+
+### System Tools
+- **`ripgrep`** - Fast text search tool (rg command)
+- **`fd`** - Modern find replacement
+- **`bat`** - Enhanced cat with syntax highlighting
+- **`eza`** - Modern ls replacement with better formatting
