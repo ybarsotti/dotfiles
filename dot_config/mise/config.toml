@@ -1,6 +1,10 @@
 [tools]
-node = "lts"
-python = "3.13"
+# Node.js managed by nvm (keeping existing setup)
+# node = "lts"  # Commented out to use nvm instead
+python = "3.12"  # Will be managed by uv primarily
+lua = "5.1"
+go = "latest"
+zig = "latest"
 
 [settings]
 idiomatic_version_file_enable_tools = []

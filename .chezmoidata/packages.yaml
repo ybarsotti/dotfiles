@@ -17,7 +17,6 @@ packages:
       - fzf
       - gh
       - git-flow
-      - go
       - gnupg
       - gnu-sed
       - gibo
@@ -26,22 +25,20 @@ packages:
       - httpie
       - isort
       - lazydocker
-      - lua
-      - luajit
       - luarocks
       - shfmt
       - make
       - doppler
+      - mise
       - neovim
-      - node
       - nvm
       - nmap
+      - uv
       - jq
       - oha
       - pipx
       - pngpaste
       - pre-commit
-      - python3
       - prettier
       - ripgrep
       - shellcheck
@@ -55,7 +52,6 @@ packages:
       - yazi
       - youplot
       - zellij
-      - zig
       - zizmor
       - zsh-autosuggestions
       - zsh-syntax-highlighting

@@ -49,8 +49,8 @@ bindkey -M vicmd "u" tmux-which-key
 export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
 export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
 
-# Go
-export GOROOT=/usr/local/go
+# Go (managed by mise)
+# export GOROOT=/usr/local/go  # Commented out - now managed by mise
 
 # Set home base config directory
 export XDG_CONFIG_HOME="$HOME/.config"
@@ -74,7 +74,10 @@ export FZF_TMUX_OPTS=" -p90%,70% "
 ## The fuck
 eval $(thefuck --alias fuck)
 
-# Initialize mise
+# Language Version Management:
+# - mise: lua, go, zig, python (global versions)
+# - nvm: Node.js (kept as is)  
+# - uv: Python package and project management
 eval "$($HOME/.local/bin/mise activate zsh)"
 
 # GPG Key 
@@ -99,9 +102,9 @@ export NVM_DIR="$HOME/.nvm"
 # PATHS
 export PATH="$PATH:/Users/yuri.mendes/.local/bin"
 export PATH="$PATH:$HOME/.cargo/bin"
-## Go 
-export PATH="$GOROOT/bin:$PATH"
-export PATH="$(go env GOPATH)/bin:$PATH"
+# Go paths (now managed by mise)
+# export PATH="$GOROOT/bin:$PATH"  # Commented out - now managed by mise
+# export PATH="$(go env GOPATH)/bin:$PATH"  # Commented out - now managed by mise
 
 # ------------///-------------------
 
