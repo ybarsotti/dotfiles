@@ -113,7 +113,7 @@ This dotfiles setup includes several development tools that are automatically in
   - Usage: `nvm use 20`, `npm install`, `node script.js`
 - **`python3`** + **`pipx`** - Python runtime and isolated package installer
   - Usage: `python3 script.py`, `pipx install package`
-- **`lua`**, **`luajit`**, **`luarocks`** - Lua runtime and package manager
+- **`lua`**, **`lua@5.1`**, **`luajit`**, **`luarocks`** - Lua runtime (multiple versions) and package manager
   - Usage: `lua script.lua`, `luarocks install package`
 - **`zig`** - Zig programming language
   - Usage: `zig run main.zig`, `zig build`
@@ -145,6 +145,9 @@ This dotfiles setup includes several development tools that are automatically in
   - Usage: `oha -n 100 -c 10 https://example.com`
 - **`nmap`** - Network discovery and security auditing
   - Usage: `nmap -sP 192.168.1.0/24`
+- **`pngpaste`** - PNG image clipboard utility for macOS
+  - Usage: `pngpaste output.png` (paste clipboard image to file)
+  - Required for Neovim img-clip.nvim plugin
 - **`yazi`** - Terminal file manager
   - Usage: `yazi`
 - **`tmux`** - Terminal multiplexer
