@@ -27,7 +27,6 @@
 {{-   $machineEmail = "yuri.mendes@company.com" }}
 {{-   $gitUser = "yuri.mendes" }}
 {{- else if .machinePurpose }}
-{{-   /* Use values set during init */}}
 {{-   $machinePurpose = .machinePurpose }}
 {{-   $machineEmail = .machineEmail }}
 {{-   $gitUser = .machineGitUser }}
