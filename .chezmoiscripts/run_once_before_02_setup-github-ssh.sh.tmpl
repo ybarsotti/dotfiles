@@ -1,0 +1,82 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# This script sets up SSH key for GitHub
+
+set -eufo pipefail
+
+SSH_DIR="$HOME/.ssh"
+SSH_KEY_FILE="$SSH_DIR/id_ed25519"
+SSH_CONFIG_FILE="$SSH_DIR/config"
+
+echo "Setting up GitHub SSH key..."
+
+# Create .ssh directory if it doesn't exist
+if [ ! -d "$SSH_DIR" ]; then
+    echo "Creating ~/.ssh directory..."
+    mkdir -p "$SSH_DIR"
+    chmod 700 "$SSH_DIR"
+fi
+
+# Generate SSH key if it doesn't exist
+if [ ! -f "$SSH_KEY_FILE" ]; then
+    echo "Generating new SSH key for GitHub..."
+    
+    # Use machine-specific email
+    EMAIL="{{ .machine.email }}"
+    
+    ssh-keygen -t ed25519 -C "$EMAIL" -f "$SSH_KEY_FILE" -N ""
+    chmod 600 "$SSH_KEY_FILE"
+    chmod 644 "$SSH_KEY_FILE.pub"
+    
+    echo "SSH key generated successfully!"
+else
+    echo "SSH key already exists at $SSH_KEY_FILE"
+fi
+
+# Start ssh-agent and add key
+if command -v ssh-add &>/dev/null; then
+    echo "Adding SSH key to ssh-agent..."
+    eval "$(ssh-agent -s)" >/dev/null 2>&1 || true
+    ssh-add --apple-use-keychain "$SSH_KEY_FILE" 2>/dev/null || ssh-add "$SSH_KEY_FILE" 2>/dev/null || true
+fi
+
+echo ""
+echo "🔑 SSH key setup complete!"
+echo ""
+echo "📋 Your public key (copy this to GitHub):"
+echo "────────────────────────────────────────"
+cat "$SSH_KEY_FILE.pub"
+echo "────────────────────────────────────────"
+echo ""
+echo "📝 To add this key to GitHub:"
+echo "   1. Go to https://github.com/settings/ssh/new"
+echo "   2. Give it a title (e.g., '{{ .machine.purpose | title }} - $(hostname)')"
+echo "   3. Paste the public key above"
+echo "   4. Click 'Add SSH key'"
+echo ""
+
+# Interactive check for GitHub setup completion
+echo "⏳ Waiting for GitHub SSH key setup..."
+read -p "Have you added the SSH key to GitHub? (y/N): " confirm
+if [[ $confirm == [yY] ]]; then
+    echo "✅ GitHub SSH key confirmed!"
+    
+    # Test SSH connection to GitHub
+    echo "🔍 Testing SSH connection to GitHub..."
+    if ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+        echo "✅ SSH connection to GitHub successful!"
+    else
+        echo "⚠️  SSH test inconclusive, but proceeding..."
+    fi
+    
+    # Create marker for other scripts
+    mkdir -p ~/.config/chezmoi
+    touch ~/.config/chezmoi/github-ssh-configured
+else
+    echo "❌ GitHub SSH key setup incomplete."
+    echo "💡 Run 'chezmoi apply' again after adding the key to GitHub."
+    exit 1
+fi
+echo ""
+{{ end -}}

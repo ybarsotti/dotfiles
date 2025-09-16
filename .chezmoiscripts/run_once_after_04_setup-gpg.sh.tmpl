@@ -1,0 +1,125 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# This script sets up GPG key for git signing and encryption
+
+set -eufo pipefail
+
+# Check if GitHub SSH was configured first
+if [ ! -f ~/.config/chezmoi/github-ssh-configured ]; then
+    echo "⚠️  GitHub SSH key must be configured first."
+    echo "💡 Please run 'chezmoi apply' to complete SSH setup."
+    exit 0
+fi
+
+echo "Setting up GPG key..."
+
+# Machine-specific settings
+MACHINE_PURPOSE="{{ .machine.purpose }}"
+EMAIL="{{ .machine.email }}"
+GIT_USER="{{ .machine.gitUser }}"
+
+# GPG key settings
+if [ "$MACHINE_PURPOSE" = "work" ]; then
+    KEY_NAME="Yuri Mendes (Work)"
+    KEY_COMMENT="Work GPG Key - $(hostname)"
+else
+    KEY_NAME="Yuri Barsotti"
+    KEY_COMMENT="Personal GPG Key - $(hostname)"
+fi
+
+echo "🔐 Setting up GPG for: $MACHINE_PURPOSE machine"
+echo "📧 Email: $EMAIL"
+echo "👤 Name: $KEY_NAME"
+
+# Check if GPG key already exists for this email
+if gpg --list-secret-keys --keyid-format LONG | grep -q "$EMAIL"; then
+    echo "✅ GPG key already exists for $EMAIL"
+    
+    # Get the key ID
+    KEY_ID=$(gpg --list-secret-keys --keyid-format LONG "$EMAIL" | grep sec | head -1 | cut -d'/' -f2 | cut -d' ' -f1)
+    echo "🔑 Using existing key ID: $KEY_ID"
+else
+    echo "🆕 Generating new GPG key..."
+    
+    # Create GPG key generation batch file
+    cat > /tmp/gpg-gen-key.batch << EOF
+Key-Type: RSA
+Key-Length: 4096
+Subkey-Type: RSA
+Subkey-Length: 4096
+Name-Real: $KEY_NAME
+Name-Comment: $KEY_COMMENT
+Name-Email: $EMAIL
+Expire-Date: 2y
+Passphrase: 
+%commit
+%echo GPG key generation complete
+EOF
+
+    # Generate the key
+    gpg --batch --generate-key /tmp/gpg-gen-key.batch
+    
+    # Clean up batch file
+    rm /tmp/gpg-gen-key.batch
+    
+    # Get the new key ID
+    KEY_ID=$(gpg --list-secret-keys --keyid-format LONG "$EMAIL" | grep sec | head -1 | cut -d'/' -f2 | cut -d' ' -f1)
+    echo "🆕 Generated new key ID: $KEY_ID"
+fi
+
+# Configure Git to use this GPG key
+echo "⚙️  Configuring Git to use GPG key..."
+git config --global user.signingkey "$KEY_ID"
+git config --global commit.gpgsign true
+git config --global tag.gpgsign true
+git config --global user.name "$KEY_NAME"
+git config --global user.email "$EMAIL"
+
+# Set GPG TTY for proper terminal interaction
+if ! grep -q "GPG_TTY" ~/.zshrc 2>/dev/null; then
+    echo 'export GPG_TTY=$(tty)' >> ~/.zshrc
+    echo "📝 Added GPG_TTY to ~/.zshrc"
+fi
+
+# Configure GPG agent for better UX
+GPG_AGENT_CONF="$HOME/.gnupg/gpg-agent.conf"
+mkdir -p "$(dirname "$GPG_AGENT_CONF")"
+
+if [ ! -f "$GPG_AGENT_CONF" ]; then
+    cat > "$GPG_AGENT_CONF" << EOF
+# Cache settings
+default-cache-ttl 28800
+max-cache-ttl 86400
+
+# macOS Keychain integration
+pinentry-program /opt/homebrew/bin/pinentry-mac
+EOF
+    echo "📝 Created GPG agent configuration"
+else
+    echo "✅ GPG agent configuration already exists"
+fi
+
+# Restart GPG agent
+gpgconf --kill gpg-agent
+gpgconf --launch gpg-agent
+
+echo ""
+echo "🎉 GPG setup complete!"
+echo ""
+echo "📋 Your public key (add this to GitHub/GitLab):"
+echo "────────────────────────────────────────────────"
+gpg --armor --export "$KEY_ID"
+echo "────────────────────────────────────────────────"
+echo ""
+echo "📝 To add this key to GitHub:"
+echo "   1. Go to https://github.com/settings/gpg/new"
+echo "   2. Paste the public key above"
+echo "   3. Click 'Add GPG key'"
+echo ""
+echo "🔍 Key information:"
+echo "   Key ID: $KEY_ID"
+echo "   Email: $EMAIL"
+echo "   Purpose: $MACHINE_PURPOSE"
+echo ""
+{{ end -}}

@@ -1,12 +1,31 @@
 # ~/. 📂 My dotfiles
 managed with [`chezmoi`](https://github.com/twpayne/chezmoi).
 
-## Instalation
-Install (new machine) with:
+## Installation
+
+### Optional: Set hostname for automatic machine detection
+
+For work machines, set a hostname containing "work", "corp", or "company" to automatically configure work-specific settings:
+
+```console
+# For work machines
+$ sudo scutil --set HostName "yuri-work-macbook"
+$ sudo scutil --set LocalHostName "yuri-work-macbook" 
+$ sudo scutil --set ComputerName "Yuri Work MacBook"
+
+# For personal machines (optional, will prompt if not set)
+$ sudo scutil --set HostName "yuri-personal-macbook"
+$ sudo scutil --set LocalHostName "yuri-personal-macbook"
+$ sudo scutil --set ComputerName "Yuri Personal MacBook"
+```
+
+### Install dotfiles
 
 ```console
 $ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply ybarsotti
 ```
+
+If you didn't set a work hostname, chezmoi will prompt you to choose machine purpose and configure appropriate email/git settings.
 
 
 ## Common Chezmoi Commands

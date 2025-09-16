@@ -16,5 +16,30 @@
 {{-   $machineType = (output "powershell.exe" "-NoProfile" "-NonInteractive" "-Command" "if ((Get-CimInstance -Class Win32_Battery | Measure-Object).Count -gt 0) { Write-Output 'laptop' } else { Write-Output 'desktop' }") | trim }}
 {{- end }}
 
+{{/* Determine machine purpose based on hostname or prompt */}}
+{{- $machinePurpose := "personal" }}
+{{- $machineEmail := "yuribarsotti@gmail.com" }}
+{{- $gitUser := "ybarsotti" }}
+
+{{- $hostname := .chezmoi.hostname | lower }}
+{{- if or (contains "work" $hostname) (contains "corp" $hostname) (contains "company" $hostname) }}
+{{-   $machinePurpose = "work" }}
+{{-   $machineEmail = "yuri.mendes@company.com" }}
+{{-   $gitUser = "yuri.mendes" }}
+{{- else }}
+{{-   /* If hostname doesn't contain work indicators, prompt user */}}
+{{-   if stdinIsATTY }}
+{{-     $purposePrompt := promptString "Machine purpose" "personal" }}
+{{-     if eq $purposePrompt "work" }}
+{{-       $machinePurpose = "work" }}
+{{-       $machineEmail = promptString "Work email" "yuri.mendes@company.com" }}
+{{-       $gitUser = promptString "Work git username" "yuri.mendes" }}
+{{-     end }}
+{{-   end }}
+{{- end }}
+
 [data.machine]
   type = {{ $machineType | quote }}
+  purpose = {{ $machinePurpose | quote }}
+  email = {{ $machineEmail | quote }}
+  gitUser = {{ $gitUser | quote }}
