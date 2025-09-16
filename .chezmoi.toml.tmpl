@@ -19,9 +19,29 @@ encryption = "gpg"
 {{- includeTemplate "machine-type" . }}
 {{- includeTemplate "github-codespaces" . }}
 
+{{/* Machine-specific prompts (only during init) */}}
+{{- $machinePurpose := "personal" }}
+{{- $machineEmail := "yuribarsotti@gmail.com" }}
+{{- $machineGitUser := "ybarsotti" }}
+
+{{- $hostname := .chezmoi.hostname | lower }}
+{{- if not (or (contains "work" $hostname) (contains "corp" $hostname) (contains "company" $hostname)) }}
+{{-   if stdinIsATTY }}
+{{-     $purposePrompt := promptString "Machine purpose" "personal" }}
+{{-     if eq $purposePrompt "work" }}
+{{-       $machinePurpose = "work" }}
+{{-       $machineEmail = promptString "Work email" "yuri.mendes@company.com" }}
+{{-       $machineGitUser = promptString "Work git username" "yuri.mendes" }}
+{{-     end }}
+{{-   end }}
+{{- end }}
+
 [data]
   email = "yuribarsotti@gmail.com"
   dopplerProjectJson = { command = "doppler", args = ["secrets", "download", "--no-file", "--format", "json"], format = "json" }
+  machinePurpose = {{ $machinePurpose | quote }}
+  machineEmail = {{ $machineEmail | quote }}
+  machineGitUser = {{ $machineGitUser | quote }}
 
 ################################################
 # Version Management
