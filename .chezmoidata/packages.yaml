@@ -60,6 +60,7 @@ packages:
       - apidog
       - arc
       - betterdisplay
+      - brave-browser
       - figma
       - firefox
       - font-hack-nerd-font
