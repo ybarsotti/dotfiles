@@ -27,13 +27,11 @@
 {{-   $machineEmail = "yuri.mendes@company.com" }}
 {{-   $gitUser = "yuri.mendes" }}
 {{- else }}
-{{-   if stdin.isatty }}
-{{-     $purposePrompt := promptString "Machine purpose" "personal" }}
-{{-     if eq $purposePrompt "work" }}
-{{-       $machinePurpose = "work" }}
-{{-       $machineEmail = promptString "Work email" "yuri.mendes@company.com" }}
-{{-       $gitUser = promptString "Work git username" "yuri.mendes" }}
-{{-     end }}
+{{-   $purposePrompt := promptString "Machine purpose" "personal" }}
+{{-   if eq $purposePrompt "work" }}
+{{-     $machinePurpose = "work" }}
+{{-     $machineEmail = promptString "Work email" "yuri.mendes@company.com" }}
+{{-     $gitUser = promptString "Work git username" "yuri.mendes" }}
 {{-   end }}
 {{- end }}
 
