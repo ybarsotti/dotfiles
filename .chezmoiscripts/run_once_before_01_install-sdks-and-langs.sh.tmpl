@@ -18,6 +18,9 @@ if ! command -v mise &>/dev/null; then
   echo "Installing mise..."
   curl https://mise.run | sh
 
+  # Add mise to PATH for this session
+  export PATH="$HOME/.local/bin:$PATH"
+  
   echo "Setting up mise tools..."
   
   # Install languages defined in mise config
@@ -41,6 +44,9 @@ fi
 if ! command -v uv &>/dev/null; then
   echo "Installing uv..."
   curl -LsSf https://astral.sh/uv/install.sh | sh
+  
+  # Add uv to PATH for this session
+  export PATH="$HOME/.cargo/bin:$PATH"
 else
   echo "uv is already installed."
 fi
@@ -49,6 +55,9 @@ fi
 if ! command -v atuin &>/dev/null; then
   echo "Installing Atuin..."
   curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
+  
+  # Add atuin to PATH for this session
+  export PATH="$HOME/.cargo/bin:$PATH"
 else
   echo "Atuin is already installed."
 fi
