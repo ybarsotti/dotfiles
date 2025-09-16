@@ -1,3 +1,4 @@
+{{/* chezmoi:template:missing-key=zero */}}
 {{- $cpuCores := 1 }}
 {{- $cpuThreads := 1 }}
 {{- if eq .chezmoi.os "darwin" }}
@@ -14,3 +15,4 @@
 [data.cpu]
   cores = {{ $cpuCores }}
   threads = {{ $cpuThreads }}
+  hyperthreaded = {{ gt $cpuThreads $cpuCores }}

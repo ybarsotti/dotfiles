@@ -1,3 +1,4 @@
+{{/* chezmoi:template:missing-key=zero */}}
 {{- $machineType := "desktop" }}
 {{- $is_codespaces:= env "CODESPACES" | not | not -}}
 {{- if eq .chezmoi.os "darwin" }}
@@ -16,24 +17,8 @@
 {{-   $machineType = (output "powershell.exe" "-NoProfile" "-NonInteractive" "-Command" "if ((Get-CimInstance -Class Win32_Battery | Measure-Object).Count -gt 0) { Write-Output 'laptop' } else { Write-Output 'desktop' }") | trim }}
 {{- end }}
 
-{{/* Determine machine purpose based on hostname or existing data */}}
-{{- $machinePurpose := "personal" }}
-{{- $machineEmail := "yuribarsotti@gmail.com" }}
-{{- $gitUser := "ybarsotti" }}
-
-{{- $hostname := .chezmoi.hostname | lower }}
-{{- if or (contains "work" $hostname) (contains "corp" $hostname) (contains "company" $hostname) }}
-{{-   $machinePurpose = "work" }}
-{{-   $machineEmail = "yuri.mendes@company.com" }}
-{{-   $gitUser = "yuri.mendes" }}
-{{- else if .machinePurpose }}
-{{-   $machinePurpose = .machinePurpose }}
-{{-   $machineEmail = .machineEmail }}
-{{-   $gitUser = .machineGitUser }}
-{{- end }}
-
 [data.machine]
   type = {{ $machineType | quote }}
-  purpose = {{ $machinePurpose | quote }}
-  email = {{ $machineEmail | quote }}
-  gitUser = {{ $gitUser | quote }}
+  purpose = {{ .machinePurpose | quote }}
+  email = {{ .machineEmail | quote }}
+  gitUser = {{ .machineGitUser | quote }}

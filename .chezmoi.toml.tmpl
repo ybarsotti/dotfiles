@@ -25,13 +25,17 @@ encryption = "gpg"
 {{- $machineGitUser := "ybarsotti" }}
 
 {{- $hostname := .chezmoi.hostname | lower }}
-{{- if not (or (contains "work" $hostname) (contains "corp" $hostname) (contains "company" $hostname)) }}
+{{- if or (contains "work" $hostname) (contains "corp" $hostname) (contains "company" $hostname) }}
+{{-   $machinePurpose = "work" }}
+{{-   $machineEmail = "yuri.mendes@company.com" }}
+{{-   $machineGitUser = "yuri.mendes" }}
+{{- else }}
 {{-   if stdinIsATTY }}
-{{-     $purposePrompt := promptString "Machine purpose" "personal" }}
+{{-     $purposePrompt := promptStringOnce . "machine.purpose" "Machine purpose" "personal" }}
 {{-     if eq $purposePrompt "work" }}
 {{-       $machinePurpose = "work" }}
-{{-       $machineEmail = promptString "Work email" "yuri.mendes@company.com" }}
-{{-       $machineGitUser = promptString "Work git username" "yuri.mendes" }}
+{{-       $machineEmail = promptStringOnce . "machine.email" "Work email" "yuri.mendes@company.com" }}
+{{-       $machineGitUser = promptStringOnce . "machine.gitUser" "Work git username" "yuri.mendes" }}
 {{-     end }}
 {{-   end }}
 {{- end }}

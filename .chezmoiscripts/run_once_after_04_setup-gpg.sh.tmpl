@@ -1,9 +1,16 @@
+{{/* chezmoi:template:missing-key=zero */}}
 {{- if eq .chezmoi.os "darwin" -}}
 #!/bin/bash
 
 # This script sets up GPG key for git signing and encryption
 
 set -eufo pipefail
+
+# Check dependencies
+if ! command -v gpg &>/dev/null; then
+    echo "❌ GPG not found. Please ensure gnupg is installed via Homebrew."
+    exit 1
+fi
 
 # Check if GitHub SSH was configured first
 if [ ! -f ~/.config/chezmoi/github-ssh-configured ]; then
@@ -87,15 +94,26 @@ GPG_AGENT_CONF="$HOME/.gnupg/gpg-agent.conf"
 mkdir -p "$(dirname "$GPG_AGENT_CONF")"
 
 if [ ! -f "$GPG_AGENT_CONF" ]; then
+    # Detect correct pinentry path
+    PINENTRY_PATH=""
+    if [ -f "/opt/homebrew/bin/pinentry-mac" ]; then
+        PINENTRY_PATH="/opt/homebrew/bin/pinentry-mac"
+    elif [ -f "/usr/local/bin/pinentry-mac" ]; then
+        PINENTRY_PATH="/usr/local/bin/pinentry-mac"
+    elif command -v pinentry-mac &>/dev/null; then
+        PINENTRY_PATH="$(command -v pinentry-mac)"
+    fi
+    
     cat > "$GPG_AGENT_CONF" << EOF
 # Cache settings
 default-cache-ttl 28800
 max-cache-ttl 86400
 
 # macOS Keychain integration
-pinentry-program /opt/homebrew/bin/pinentry-mac
+${PINENTRY_PATH:+pinentry-program $PINENTRY_PATH}
 EOF
     echo "📝 Created GPG agent configuration"
+    [ -n "$PINENTRY_PATH" ] && echo "🔐 Using pinentry at: $PINENTRY_PATH"
 else
     echo "✅ GPG agent configuration already exists"
 fi
