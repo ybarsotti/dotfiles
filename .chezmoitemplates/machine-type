@@ -27,7 +27,6 @@
 {{-   $machineEmail = "yuri.mendes@company.com" }}
 {{-   $gitUser = "yuri.mendes" }}
 {{- else }}
-{{-   /* If hostname doesn't contain work indicators, prompt user */}}
 {{-   if stdinIsATTY }}
 {{-     $purposePrompt := promptString "Machine purpose" "personal" }}
 {{-     if eq $purposePrompt "work" }}
