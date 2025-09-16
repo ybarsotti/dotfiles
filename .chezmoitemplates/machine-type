@@ -27,7 +27,7 @@
 {{-   $machineEmail = "yuri.mendes@company.com" }}
 {{-   $gitUser = "yuri.mendes" }}
 {{- else }}
-{{-   if stdinIsATTY }}
+{{-   if stdin.isatty }}
 {{-     $purposePrompt := promptString "Machine purpose" "personal" }}
 {{-     if eq $purposePrompt "work" }}
 {{-       $machinePurpose = "work" }}
