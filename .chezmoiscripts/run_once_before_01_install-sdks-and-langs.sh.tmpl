@@ -32,7 +32,7 @@ if ! command -v mise &>/dev/null; then
   
   # Install neovim providers
   echo "Installing neovim providers..."
-  npm install -g neovim
+  # Note: npm provider will be installed after NVM setup
   pip install pynvim
   
   echo "Mise setup completed!"
@@ -67,6 +67,11 @@ export NVM_DIR="$HOME/.nvm"
 if [ ! -d "$NVM_DIR" ]; then
   echo "Installing NVM..."
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+  
+  # Source NVM and install neovim npm provider
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  nvm install node
+  npm install -g neovim
 else
   echo "NVM is already installed."
 fi
