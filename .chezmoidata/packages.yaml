@@ -29,22 +29,28 @@ packages:
       - shfmt
       - make
       - doppler
+      - dust
+      - evans
+      - hyperfine
+      - jq
       - mise
       - neovim
-      - nvm
       - nmap
-      - uv
-      - jq
+      - nvm
       - oha
+      - ollama
       - pipx
       - pngpaste
       - pre-commit
       - prettier
+      - procs
       - ripgrep
       - shellcheck
       - sst/tap/opencode
-      - yamllint
       - terraform
+      - tokei
+      - uv
+      - yamllint
       # - tmux
       - tree
       - tree-sitter

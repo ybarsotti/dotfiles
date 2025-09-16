@@ -30,11 +30,6 @@ if ! command -v mise &>/dev/null; then
   mise plugins add lua
   mise use -g lua@5.1
   
-  # Install neovim providers
-  echo "Installing neovim providers..."
-  # Note: npm provider will be installed after NVM setup
-  pip install pynvim
-  
   echo "Mise setup completed!"
 else
   echo "mise is already installed."
@@ -68,10 +63,9 @@ if [ ! -d "$NVM_DIR" ]; then
   echo "Installing NVM..."
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
   
-  # Source NVM and install neovim npm provider
+  # Source NVM for this session
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
   nvm install node
-  npm install -g neovim
 else
   echo "NVM is already installed."
 fi

@@ -157,6 +157,25 @@ This dotfiles setup includes several development tools that are automatically in
 - **`thefuck`** - Command correction tool
   - Usage: Type command, get error, type `fuck` to get corrected version
 
+### Performance & Analysis Tools
+- **`hyperfine`** - Command-line benchmarking tool (better than `time`)
+  - Usage: `hyperfine 'command1' 'command2'`, `hyperfine --warmup 3 'npm test'`
+- **`procs`** - Modern process viewer (better than `ps`)
+  - Usage: `procs`, `procs firefox`, `procs --tree`
+- **`dust`** - Disk usage analyzer (better than `du`)
+  - Usage: `dust`, `dust -d 3` (limit depth), `dust -r` (reverse sort)
+- **`tokei`** - Code statistics and line counter
+  - Usage: `tokei`, `tokei --languages` (list supported languages), `tokei src/`
+
+### API Development & Testing
+- **`evans`** - More expressive gRPC client for testing gRPC services
+  - Usage: `evans -r repl -p 9090`, `evans --proto api.proto`
+
+### AI/ML Development
+- **`ollama`** - Run large language models locally
+  - Usage: `ollama run llama3.2`, `ollama list`, `ollama pull mistral`
+  - Start server: `ollama serve`
+
 ### Development Editors & Language Support
 - **`neovim`** - Modern Vim-based text editor
   - Usage: `nvim file.txt`

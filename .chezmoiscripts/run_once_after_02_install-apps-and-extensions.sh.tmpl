@@ -19,7 +19,7 @@ fi
 
 # --- Install global Python packages using uv ---
 echo "Installing global Python packages with uv..."
-uv pip install --system invoke pyyaml requests
+uv pip install --system invoke pyyaml requests pynvim
 
 # --- Install gh extensions ---
 echo "Installing gh extensions..."
@@ -70,6 +70,7 @@ if command -v npm &>/dev/null; then
     # Package list
     npm_packages=(
         "@anthropic-ai/claude-code"
+        "neovim"
         # "typescript"
         # "vercel"
     )
