@@ -130,14 +130,14 @@ esac
 # pnpm end
 eval "$(gh copilot alias -- zsh)"
 
-# NOTE: Must be the last line
-if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
- eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/slimfat.omp.json)"
-fi
-
 
 alias claude="~/.claude/local/claude"
 
 . "$HOME/.atuin/bin/env"
 
 eval "$(atuin init zsh)"
+
+# NOTE: Must be the last line
+if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
+ eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/slimfat.omp.json)"
+fi
