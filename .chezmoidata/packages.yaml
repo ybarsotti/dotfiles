@@ -45,7 +45,7 @@ packages:
       - sst/tap/opencode
       - yamllint
       - terraform
-      - tmux
+      # - tmux
       - tree
       - tree-sitter
       - thefuck
