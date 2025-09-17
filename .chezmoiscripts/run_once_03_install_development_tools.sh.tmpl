@@ -11,6 +11,36 @@ export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
 
 {{ template "homebrew_path_setup" . }}
 
+# --- Create Developer directory structure ---
+echo "Setting up development directory structure..."
+
+# Create main Developer directory and subdirectories
+DEVELOPER_DIRS=(
+    "$HOME/Developer"
+    "$HOME/Developer/Personal"
+    "$HOME/Developer/Work"
+    "$HOME/Developer/Experiments"
+    "$HOME/Developer/Open-Source" 
+    "$HOME/Developer/Archive"
+    "$HOME/Developer/Tools"
+)
+
+for dir in "${DEVELOPER_DIRS[@]}"; do
+    if [ ! -d "$dir" ]; then
+        mkdir -p "$dir"
+        echo "✅ Created $(basename "$dir") directory"
+    else
+        echo "✅ $(basename "$dir") directory already exists"
+    fi
+done
+
+echo "📁 Developer directory structure complete:"
+echo "   ~/Developer/Personal    - Personal projects and side projects"
+echo "   ~/Developer/Work        - Work-related projects"
+echo "   ~/Developer/Experiments - Learning, tutorials, proof-of-concepts"
+echo "   ~/Developer/Open-Source - Open source contributions"
+echo "   ~/Developer/Archive     - Completed or archived projects"
+echo "   ~/Developer/Tools       - Custom scripts and development tools"
 
 # --- Install Cargo packages (Rust) ---
 echo "Installing Cargo packages..."
