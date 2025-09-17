@@ -6,7 +6,7 @@
 
 set -eufo pipefail
 
-{{- template "homebrew_path_setup" . }}
+{{ template "homebrew_path_setup" . }}
 
 # Check dependencies
 if ! command -v gpg &>/dev/null; then

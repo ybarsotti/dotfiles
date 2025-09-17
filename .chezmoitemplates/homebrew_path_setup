@@ -7,4 +7,4 @@ if [[ -f "/opt/homebrew/bin/brew" ]]; then
 elif [[ -f "/usr/local/bin/brew" ]]; then
     export PATH="/usr/local/bin:$PATH"
 fi
-{{- end -}}
+{{- end }}

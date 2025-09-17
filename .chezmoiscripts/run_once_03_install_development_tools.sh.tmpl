@@ -9,7 +9,7 @@ set -eufo pipefail
 # Ensure PATHs are sourced to find newly installed commands
 export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
 
-{{- template "homebrew_path_setup" . }}
+{{ template "homebrew_path_setup" . }}
 
 
 # --- Install Cargo packages (Rust) ---
