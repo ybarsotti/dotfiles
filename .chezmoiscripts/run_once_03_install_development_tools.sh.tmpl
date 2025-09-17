@@ -14,16 +14,36 @@ export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
 # --- Create Developer directory structure ---
 echo "Setting up development directory structure..."
 
-# Create main Developer directory and subdirectories
-DEVELOPER_DIRS=(
-    "$HOME/Developer"
-    "$HOME/Developer/Personal"
-    "$HOME/Developer/Work"
-    "$HOME/Developer/Experiments"
-    "$HOME/Developer/Open-Source" 
-    "$HOME/Developer/Archive"
-    "$HOME/Developer/Tools"
-)
+# Machine-specific settings
+MACHINE_PURPOSE="{{ .machine.purpose }}"
+
+# Create main Developer directory
+if [ ! -d "$HOME/Developer" ]; then
+    mkdir -p "$HOME/Developer"
+    echo "✅ Created Developer directory"
+else
+    echo "✅ Developer directory already exists"
+fi
+
+# Create subdirectories based on machine purpose
+if [ "$MACHINE_PURPOSE" = "work" ]; then
+    # Work machine: only create Work directory
+    DEVELOPER_DIRS=(
+        "$HOME/Developer/Work"
+    )
+    echo "🏢 Work machine detected - creating work-focused directory structure"
+else
+    # Personal machine: create full structure
+    DEVELOPER_DIRS=(
+        "$HOME/Developer/Personal"
+        "$HOME/Developer/Work"
+        "$HOME/Developer/Experiments"
+        "$HOME/Developer/Open-Source" 
+        "$HOME/Developer/Archive"
+        "$HOME/Developer/Tools"
+    )
+    echo "🏠 Personal machine detected - creating full directory structure"
+fi
 
 for dir in "${DEVELOPER_DIRS[@]}"; do
     if [ ! -d "$dir" ]; then
@@ -35,12 +55,16 @@ for dir in "${DEVELOPER_DIRS[@]}"; do
 done
 
 echo "📁 Developer directory structure complete:"
-echo "   ~/Developer/Personal    - Personal projects and side projects"
-echo "   ~/Developer/Work        - Work-related projects"
-echo "   ~/Developer/Experiments - Learning, tutorials, proof-of-concepts"
-echo "   ~/Developer/Open-Source - Open source contributions"
-echo "   ~/Developer/Archive     - Completed or archived projects"
-echo "   ~/Developer/Tools       - Custom scripts and development tools"
+if [ "$MACHINE_PURPOSE" = "work" ]; then
+    echo "   ~/Developer/Work        - Work-related projects"
+else
+    echo "   ~/Developer/Personal    - Personal projects and side projects"
+    echo "   ~/Developer/Work        - Work-related projects"
+    echo "   ~/Developer/Experiments - Learning, tutorials, proof-of-concepts"
+    echo "   ~/Developer/Open-Source - Open source contributions"
+    echo "   ~/Developer/Archive     - Completed or archived projects"
+    echo "   ~/Developer/Tools       - Custom scripts and development tools"
+fi
 
 # --- Install Cargo packages (Rust) ---
 echo "Installing Cargo packages..."
