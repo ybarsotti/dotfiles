@@ -148,12 +148,20 @@ if [ ! -f "$GPG_AGENT_CONF" ]; then
     fi
     
     cat > "$GPG_AGENT_CONF" << EOF
-# Cache settings
-default-cache-ttl 28800
+# Cache settings for better UX
+# default-cache-ttl: How long (in seconds) to cache the passphrase after last use
+# max-cache-ttl: Maximum time to cache passphrase regardless of use
+default-cache-ttl 43200
 max-cache-ttl 86400
+
+# Allow loopback pinentry for scripted access
+allow-loopback-pinentry
 
 # macOS Keychain integration
 ${PINENTRY_PATH:+pinentry-program $PINENTRY_PATH}
+
+# Enable SSH support (optional, for SSH keys in GPG)
+# enable-ssh-support
 EOF
     echo "📝 Created GPG agent configuration"
     [ -n "$PINENTRY_PATH" ] && echo "🔐 Using pinentry at: $PINENTRY_PATH"
@@ -182,5 +190,16 @@ echo "🔍 Key information:"
 echo "   Key ID: $KEY_ID"
 echo "   Email: $EMAIL"
 echo "   Purpose: $MACHINE_PURPOSE"
+echo ""
+echo "⚡ Passphrase caching is configured:"
+echo "   • First time: Enter passphrase when prompted"
+echo "   • Cached for: 12 hours after last use (43200 seconds)"
+echo "   • Max cache: 24 hours regardless of use"
+echo "   • Uses macOS keychain integration for secure storage"
+echo ""
+echo "💡 Pro tips:"
+echo "   • Run 'gpg --sign' once to cache your passphrase"
+echo "   • Use 'gpg-connect-agent reloadagent /bye' to restart agent"
+echo "   • Use 'gpg-connect-agent \"keyinfo --list\" /bye' to see cached keys"
 echo ""
 {{ end -}}
