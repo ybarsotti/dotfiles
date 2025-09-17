@@ -21,7 +21,7 @@ packages:
       - gnupg
       - gnu-sed
       - gibo
-      - jandedobbeleer/oh-my-posh/oh-my-posh
+      - oh-my-posh
       - lazygit
       - httpie
       - isort
@@ -48,7 +48,7 @@ packages:
       - procs
       - ripgrep
       - shellcheck
-      - sst/tap/opencode
+      - opencode
       - terraform
       - tokei
       - uv
