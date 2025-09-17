@@ -72,6 +72,24 @@ if gpg --list-secret-keys --keyid-format LONG | grep -q "$EMAIL"; then
 else
     echo "🆕 Generating new GPG key..."
     
+    # Prompt for passphrase
+    echo "🔐 A passphrase is required to protect your GPG key."
+    echo "⚠️  Choose a strong passphrase that you won't forget!"
+    read -s -p "Enter passphrase for GPG key: " GPG_PASSPHRASE
+    echo ""
+    read -s -p "Confirm passphrase: " GPG_PASSPHRASE_CONFIRM
+    echo ""
+    
+    if [ "$GPG_PASSPHRASE" != "$GPG_PASSPHRASE_CONFIRM" ]; then
+        echo "❌ Passphrases do not match. Exiting."
+        exit 1
+    fi
+    
+    if [ -z "$GPG_PASSPHRASE" ]; then
+        echo "❌ Empty passphrase not allowed. Exiting."
+        exit 1
+    fi
+    
     # Create GPG key generation batch file
     cat > /tmp/gpg-gen-key.batch << EOF
 Key-Type: RSA
@@ -82,7 +100,7 @@ Name-Real: $KEY_NAME
 Name-Comment: $KEY_COMMENT
 Name-Email: $EMAIL
 Expire-Date: 2y
-Passphrase: 
+Passphrase: $GPG_PASSPHRASE
 %commit
 %echo GPG key generation complete
 EOF
@@ -90,8 +108,10 @@ EOF
     # Generate the key
     gpg --batch --generate-key /tmp/gpg-gen-key.batch
     
-    # Clean up batch file
+    # Clean up batch file and clear passphrase from memory
     rm /tmp/gpg-gen-key.batch
+    unset GPG_PASSPHRASE
+    unset GPG_PASSPHRASE_CONFIRM
     
     # Get the new key ID
     KEY_ID=$(gpg --list-secret-keys --keyid-format LONG "$EMAIL" | grep sec | head -1 | cut -d'/' -f2 | cut -d' ' -f1)
