@@ -69,6 +69,24 @@ if ! command -v gh &>/dev/null; then
     exit 1
 fi
 
+# Check if gh is authenticated
+if ! gh auth status &>/dev/null; then
+    echo "GitHub CLI is not authenticated. Please login..."
+    echo "This will open your browser for authentication."
+    read -p "Press Enter to continue with 'gh auth login'..."
+    gh auth login
+    
+    # Verify authentication was successful
+    if ! gh auth status &>/dev/null; then
+        echo "Error: GitHub CLI authentication failed."
+        echo "Please run 'gh auth login' manually and try again."
+        exit 1
+    fi
+    echo "✅ GitHub CLI authentication successful!"
+else
+    echo "✅ GitHub CLI is already authenticated."
+fi
+
 gh_extensions=(
   "mislav/gh-branch"
   "johnmanjiro13/gh-bump"
