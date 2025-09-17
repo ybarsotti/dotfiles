@@ -6,12 +6,7 @@
 
 set -eufo pipefail
 
-# Add Homebrew to PATH (for both Apple Silicon and Intel Macs)
-if [[ -f "/opt/homebrew/bin/brew" ]]; then
-    export PATH="/opt/homebrew/bin:$PATH"
-elif [[ -f "/usr/local/bin/brew" ]]; then
-    export PATH="/usr/local/bin:$PATH"
-fi
+{{- template "homebrew_path_setup" . }}
 
 # Check dependencies
 if ! command -v gpg &>/dev/null; then

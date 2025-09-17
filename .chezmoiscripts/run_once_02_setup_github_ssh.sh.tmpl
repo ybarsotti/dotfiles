@@ -12,6 +12,12 @@ SSH_CONFIG_FILE="$SSH_DIR/config"
 
 echo "Setting up GitHub SSH key..."
 
+# Check if GitHub SSH was already configured
+if [ -f ~/.config/chezmoi/github-ssh-configured ]; then
+    echo "✅ GitHub SSH key already configured, skipping setup."
+    exit 0
+fi
+
 # Create .ssh directory if it doesn't exist
 if [ ! -d "$SSH_DIR" ]; then
     echo "Creating ~/.ssh directory..."
