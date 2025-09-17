@@ -28,6 +28,7 @@ alias dtree="tree -L 3 -a -d -I '.git' --charset X "
 ## Other
 alias c="clear"
 alias e="exit"
+alias dev="cd ~/Developer"
 
 # Yazi
 function y() {
