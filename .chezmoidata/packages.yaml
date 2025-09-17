@@ -40,6 +40,7 @@ packages:
       - oha
       - ollama
       - pipx
+      - pinentry-mac
       - pngpaste
       - pre-commit
       - prettier

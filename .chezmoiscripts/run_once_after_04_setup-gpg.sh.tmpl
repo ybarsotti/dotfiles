@@ -6,10 +6,33 @@
 
 set -eufo pipefail
 
+# Add Homebrew to PATH (for both Apple Silicon and Intel Macs)
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
+    export PATH="/opt/homebrew/bin:$PATH"
+elif [[ -f "/usr/local/bin/brew" ]]; then
+    export PATH="/usr/local/bin:$PATH"
+fi
+
 # Check dependencies
 if ! command -v gpg &>/dev/null; then
-    echo "❌ GPG not found. Please ensure gnupg is installed via Homebrew."
-    exit 1
+    echo "GPG not found. Attempting to install gnupg..."
+    if command -v brew &>/dev/null; then
+        brew install gnupg pinentry-mac
+    else
+        echo "❌ Neither gpg nor brew found. Cannot install GPG."
+        echo "Please ensure Homebrew packages are installed first."
+        exit 1
+    fi
+    
+    # Verify gpg is now available
+    if ! command -v gpg &>/dev/null; then
+        echo "❌ Failed to install or find GPG."
+        echo "Please install it manually: brew install gnupg pinentry-mac"
+        exit 1
+    fi
+    echo "✅ GPG installed successfully."
+else
+    echo "✅ GPG is available."
 fi
 
 # Check if GitHub SSH was configured first
