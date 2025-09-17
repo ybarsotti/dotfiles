@@ -52,7 +52,7 @@ echo "────────────────────────�
 echo ""
 echo "📝 To add this key to GitHub:"
 echo "   1. Go to https://github.com/settings/ssh/new"
-echo "   2. Give it a title (e.g., '{{ .machine.purpose | title }} - $(hostname)')"
+echo "   2. Give it a title (e.g., '{{ .machine.purpose | default "Personal" | title }} - $(hostname)')"
 echo "   3. Paste the public key above"
 echo "   4. Click 'Add SSH key'"
 echo ""

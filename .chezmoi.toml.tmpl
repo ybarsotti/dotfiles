@@ -16,7 +16,6 @@ encryption = "gpg"
 ################################################
 
 {{- includeTemplate "cpu" . }}
-{{- includeTemplate "machine-type" . }}
 {{- includeTemplate "github-codespaces" . }}
 
 {{/* Machine-specific prompts (only during init) */}}
@@ -24,28 +23,43 @@ encryption = "gpg"
 {{- $machineEmail := "yuribarsotti@gmail.com" }}
 {{- $machineGitUser := "ybarsotti" }}
 
-{{- $hostname := .chezmoi.hostname | lower }}
-{{- if or (contains "work" $hostname) (contains "corp" $hostname) (contains "company" $hostname) }}
-{{-   $machinePurpose = "work" }}
-{{-   $machineEmail = "yuri.mendes@company.com" }}
-{{-   $machineGitUser = "yuri.mendes" }}
-{{- else }}
-{{-   if stdinIsATTY }}
-{{-     $purposePrompt := promptStringOnce . "machine.purpose" "Machine purpose" "personal" }}
-{{-     if eq $purposePrompt "work" }}
-{{-       $machinePurpose = "work" }}
-{{-       $machineEmail = promptStringOnce . "machine.email" "Work email" "yuri.mendes@company.com" }}
-{{-       $machineGitUser = promptStringOnce . "machine.gitUser" "Work git username" "yuri.mendes" }}
-{{-     end }}
+{{- if stdinIsATTY }}
+{{-   $purposePrompt := promptStringOnce . "machine.purpose" "Machine purpose" "personal" }}
+{{-   if eq $purposePrompt "work" }}
+{{-     $machinePurpose = "work" }}
+{{-     $machineEmail = promptStringOnce . "machine.email" "Work email" "yuri.mendes@company.com" }}
+{{-     $machineGitUser = promptStringOnce . "machine.gitUser" "Work git username" "yuri.mendes" }}
 {{-   end }}
 {{- end }}
+
+{{/* Machine type detection */}}
+{{- $machineType := "desktop" }}
+{{- $is_codespaces:= env "CODESPACES" | not | not -}}
+{{- if eq .chezmoi.os "darwin" }}
+{{-   if contains "MacBook" (output "/usr/sbin/system_profiler" "SPHardwareDataType") }}
+{{-     $machineType = "laptop" }}
+{{-   else }}
+{{-     $machineType = "desktop" }}
+{{-   end }}
+{{- else if eq .chezmoi.os "linux" }}
+{{-   if $is_codespaces }}
+{{-     $machineType = "virtual" }}
+{{-   else }}
+{{-     $machineType = (output "hostnamectl" "--json=short" | mustFromJson).Chassis }}
+{{-   end }}
+{{- else if eq .chezmoi.os "windows" }}
+{{-   $machineType = (output "powershell.exe" "-NoProfile" "-NonInteractive" "-Command" "if ((Get-CimInstance -Class Win32_Battery | Measure-Object).Count -gt 0) { Write-Output 'laptop' } else { Write-Output 'desktop' }") | trim }}
+{{- end }}
+
+[data.machine]
+  type = {{ $machineType | quote }}
+  purpose = {{ $machinePurpose | quote }}
+  email = {{ $machineEmail | quote }}
+  gitUser = {{ $machineGitUser | quote }}
 
 [data]
   email = "yuribarsotti@gmail.com"
   dopplerProjectJson = { command = "doppler", args = ["secrets", "download", "--no-file", "--format", "json"], format = "json" }
-  machinePurpose = {{ $machinePurpose | quote }}
-  machineEmail = {{ $machineEmail | quote }}
-  machineGitUser = {{ $machineGitUser | quote }}
 
 ################################################
 # Version Management
