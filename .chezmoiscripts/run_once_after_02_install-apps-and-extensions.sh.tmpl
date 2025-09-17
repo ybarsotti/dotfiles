@@ -16,6 +16,21 @@ elif [[ -f "/usr/local/bin/brew" ]]; then
     export PATH="/usr/local/bin:$PATH"
 fi
 
+# --- Install chezmoi ---
+echo "Installing chezmoi..."
+if ! command -v chezmoi &>/dev/null; then
+    if command -v brew &>/dev/null; then
+        brew install chezmoi
+        echo "✅ chezmoi installed via Homebrew"
+    else
+        echo "Installing chezmoi via direct download..."
+        sh -c "$(curl -fsLS get.chezmoi.io)"
+        echo "✅ chezmoi installed directly"
+    fi
+else
+    echo "✅ chezmoi is already installed"
+fi
+
 # --- Install Cargo packages (Rust) ---
 echo "Installing Cargo packages..."
 if ! command -v selene &>/dev/null; then
