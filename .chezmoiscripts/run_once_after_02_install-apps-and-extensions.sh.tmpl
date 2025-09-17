@@ -9,6 +9,13 @@ set -eufo pipefail
 # Ensure PATHs are sourced to find newly installed commands
 export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
 
+# Add Homebrew to PATH (for both Apple Silicon and Intel Macs)
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
+    export PATH="/opt/homebrew/bin:$PATH"
+elif [[ -f "/usr/local/bin/brew" ]]; then
+    export PATH="/usr/local/bin:$PATH"
+fi
+
 # --- Install Cargo packages (Rust) ---
 echo "Installing Cargo packages..."
 if ! command -v selene &>/dev/null; then
@@ -42,6 +49,26 @@ fi
 
 # --- Install gh extensions ---
 echo "Installing gh extensions..."
+
+# Check if gh is available, if not try to install it
+if ! command -v gh &>/dev/null; then
+    echo "GitHub CLI (gh) not found. Attempting to install..."
+    if command -v brew &>/dev/null; then
+        brew install gh
+    else
+        echo "Error: Neither gh nor brew found. Cannot install GitHub CLI."
+        echo "Please ensure Homebrew packages are installed first."
+        exit 1
+    fi
+fi
+
+# Verify gh is now available
+if ! command -v gh &>/dev/null; then
+    echo "Error: Failed to install or find GitHub CLI (gh)."
+    echo "Please install it manually: brew install gh"
+    exit 1
+fi
+
 gh_extensions=(
   "mislav/gh-branch"
   "johnmanjiro13/gh-bump"
