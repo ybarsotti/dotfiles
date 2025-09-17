@@ -1,0 +1,10 @@
+{{/* chezmoi:template:missing-key=zero */}}
+{{/* Homebrew PATH setup function for scripts */}}
+{{- define "homebrew_path_setup" -}}
+# Ensure Homebrew is in PATH for this session
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
+    export PATH="/opt/homebrew/bin:$PATH"
+elif [[ -f "/usr/local/bin/brew" ]]; then
+    export PATH="/usr/local/bin:$PATH"
+fi
+{{- end -}}

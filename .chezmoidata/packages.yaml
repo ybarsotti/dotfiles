@@ -1,83 +1,148 @@
 packages:
   darwin:
     brews:
-      - autopep8
-      - bat
-      - black
-      - btop
-      - bfg
-      - borders
-      - chezmoi
-      - clang-format
-      - cmake
-      - commitizen
-      - docker
-      - eza
-      - fastfetch
-      - fd
-      - fzf
-      - gh
-      - git-flow
-      - gnupg
-      - gnu-sed
-      - gibo
-      - oh-my-posh
-      - lazygit
-      - httpie
-      - isort
-      - lazydocker
-      - luarocks
-      - shfmt
-      - make
-      - doppler
-      - dust
-      - evans
-      - hyperfine
-      - jq
-      - mise
-      - neovim
-      - nmap
-      - nvm
-      - oha
-      - ollama
-      - pipx
-      - pinentry-mac
-      - pngpaste
-      - pre-commit
-      - prettier
-      - procs
-      - ripgrep
-      - shellcheck
-      - opencode
-      - terraform
-      - tokei
-      - uv
-      - yamllint
-      # - tmux
-      - tree
-      - tree-sitter
-      - thefuck
-      - yazi
-      - youplot
-      - zellij
-      - zizmor
-      - zsh-autosuggestions
-      - zsh-syntax-highlighting
+      # Core Development Tools
+      development:
+        version_managers:
+          - mise              # Universal runtime version manager (replaces nvm, rbenv, etc.)
+          - nvm               # Node.js version manager
+          - pipx              # Python package installer in isolated environments
+          - uv                # Fast Python package installer and resolver
+        
+        git_tools:
+          - gh                # GitHub CLI
+          - git-flow          # Git branching model extensions
+          - lazygit           # Terminal UI for git commands
+        
+        containerization:
+          - docker            # Container platform
+          - lazydocker        # Terminal UI for Docker
+        
+        infrastructure:
+          - terraform         # Infrastructure as Code tool
+        
+        ai_ml:
+          - ollama            # Local LLM runner
+      
+      # Code Quality & Formatting
+      code_quality:
+        linters:
+          - shellcheck        # Shell script static analysis
+          - yamllint          # YAML linter
+          - zizmor            # GitHub Actions security scanner
+        
+        formatters:
+          - prettier          # Multi-language code formatter
+          - autopep8          # Python PEP8 formatter
+          - black             # Python code formatter
+          - isort             # Python import sorter
+          - clang-format      # C/C++ code formatter
+          - shfmt             # Shell script formatter
+        
+        hooks:
+          - pre-commit        # Git hooks framework
+          - commitizen        # Standardized commit messages
+      
+      # Build Tools & Compilers
+      build_tools:
+        - cmake               # Cross-platform build system
+        - make                # Build automation tool
+        - chezmoi             # Dotfiles manager
+      
+      # Language Support
+      languages:
+        - neovim              # Modern Vim-based editor
+        - tree-sitter         # Syntax highlighting parser
+        - luarocks            # Lua package manager
+      
+      # Terminal & System Tools
+      terminal:
+        file_tools:
+          - ripgrep           # Fast text search (rg)
+          - fd                # Modern find replacement
+          - bat               # Enhanced cat with syntax highlighting
+          - eza               # Modern ls replacement
+          - tree              # Directory tree viewer
+          - fzf               # Fuzzy finder
+          - yazi              # Terminal file manager
+        
+        system_monitoring:
+          - btop              # Resource monitor
+          - fastfetch         # System information display
+          - procs             # Modern ps replacement
+        
+        network_tools:
+          - httpie            # User-friendly HTTP client
+          - nmap              # Network discovery and security auditing
+          - oha               # HTTP load testing tool
+          - evans             # gRPC client
+        
+        shell_enhancements:
+          - zsh-autosuggestions     # Fish-like autosuggestions
+          - zsh-syntax-highlighting # Fish-like syntax highlighting
+          - oh-my-posh              # Cross-platform prompt theme engine
+          - thefuck                 # Command correction tool
+        
+        multiplexers:
+          - zellij            # Terminal workspace with built-in multiplexer
+          - tmux              # Terminal multiplexer
+        
+        utilities:
+          - jq                # JSON processor
+          - dust              # Modern du replacement
+          - hyperfine         # Command-line benchmarking tool
+          - tokei             # Code statistics tool
+          - youplot           # Command-line data plotting
+          - gibo              # .gitignore boilerplate generator
+          - bfg               # Git repository cleaner
+          - pngpaste          # PNG image clipboard utility (required for nvim img-clip)
+          - gnu-sed           # GNU version of sed
+      
+      # Security & Privacy
+      security:
+        - gnupg               # GNU Privacy Guard
+        - pinentry-mac        # macOS keychain integration for GPG
+        - doppler             # Secrets management
+      
+      # macOS-specific Tools
+      macos:
+        - borders             # Window border customization
+        - opencode            # OpenCode CLI tool
+    
     casks:
-      - alt-tab
-      - apidog
-      - arc
-      - betterdisplay
-      - brave-browser
-      - figma
-      - firefox
-      - font-hack-nerd-font
-      - font-jetbrains-mono-nerd-font
-      - font-sf-pro
-      - notion
-      - ghostty
-      - raycast
-      - slack
-      - obs
-      - spotify
-      - stats
+      # Web Browsers
+      browsers:
+        - arc                 # Arc browser
+        - brave-browser       # Privacy-focused browser
+        - firefox             # Mozilla Firefox
+      
+      # Development Tools
+      development:
+        - apidog              # API development and testing
+        - figma               # Design and prototyping tool
+        - ghostty             # Fast, feature-rich terminal emulator
+      
+      # Productivity & Utilities
+      productivity:
+        window_management:
+          - alt-tab           # Windows-style Alt-Tab for macOS
+          - raycast           # Spotlight replacement and productivity tool
+        
+        system_enhancement:
+          - betterdisplay     # Display management utility
+          - stats             # System monitoring in menu bar
+        
+        communication:
+          - slack             # Team communication
+          - notion            # Note-taking and collaboration
+      
+      # Media & Entertainment
+      media:
+        - obs                 # Open Broadcaster Software
+        - spotify             # Music streaming
+      
+      # Fonts
+      fonts:
+        - font-hack-nerd-font           # Hack Nerd Font
+        - font-jetbrains-mono-nerd-font # JetBrains Mono Nerd Font
+        - font-sf-pro                   # San Francisco Pro font
