@@ -37,7 +37,10 @@ else
     DEVELOPER_DIRS=(
         "$HOME/Developer/Personal"
         "$HOME/Developer/Work"
-        "$HOME/Developer/Experiments"
+        "$HOME/Developer/Learning"
+        "$HOME/Developer/Learning/Courses"
+        "$HOME/Developer/Learning/Tutorials"
+        "$HOME/Developer/Learning/Experiments"
         "$HOME/Developer/Open-Source" 
         "$HOME/Developer/Archive"
         "$HOME/Developer/Tools"
@@ -58,12 +61,15 @@ echo "📁 Developer directory structure complete:"
 if [ "$MACHINE_PURPOSE" = "work" ]; then
     echo "   ~/Developer/Work        - Work-related projects"
 else
-    echo "   ~/Developer/Personal    - Personal projects and side projects"
-    echo "   ~/Developer/Work        - Work-related projects"
-    echo "   ~/Developer/Experiments - Learning, tutorials, proof-of-concepts"
-    echo "   ~/Developer/Open-Source - Open source contributions"
-    echo "   ~/Developer/Archive     - Completed or archived projects"
-    echo "   ~/Developer/Tools       - Custom scripts and development tools"
+    echo "   ~/Developer/Personal         - Personal projects and side projects"
+    echo "   ~/Developer/Work             - Work-related projects"
+    echo "   ~/Developer/Learning/        - Educational and study projects"
+    echo "     ├── Courses/               - Online courses, bootcamps, structured learning"
+    echo "     ├── Tutorials/             - Follow-along tutorials and guides"
+    echo "     └── Experiments/           - Code experiments and proof-of-concepts"
+    echo "   ~/Developer/Open-Source      - Open source contributions"
+    echo "   ~/Developer/Archive          - Completed or archived projects"
+    echo "   ~/Developer/Tools            - Custom scripts and development tools"
 fi
 
 # --- Install Cargo packages (Rust) ---
