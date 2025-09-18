@@ -1,0 +1,188 @@
+{{/* chezmoi:template:missing-key=zero */}}
+# Load env vars
+[ -f "$HOME/.zsh_env_vars" ] && source "$HOME/.zsh_env_vars"
+
+# Terminal Setup (interactive shell specific)
+export TERM="xterm-256color"
+
+# Note: Core environment variables (EDITOR, XDG_CONFIG_HOME, LANG, GPG_TTY, compiler flags) 
+# are now properly located in .zprofile
+
+# Core Aliases
+## Programming Languages
+alias python=/usr/bin/python3 
+
+## Development Tools
+alias lg='lazygit'
+alias ld="lazydocker"
+alias vi="nvim"
+alias vim="nvim"
+
+## Terminal Enhancements
+alias ls='eza -l -a --icons --group-directories-first --color=always --icons=always --no-user'
+alias c="clear"
+alias e="exit"
+
+## Directory Navigation
+{{- if eq .machine.purpose "personal" }}
+alias dev="cd ~/Developer"
+{{- end }}
+
+## Debugging
+alias chrome-debug="open -a 'Google Chrome' --args --remote-debugging-port=9222"
+
+## Tree Views
+alias tree="tree -L 3 -a -I '.git' --charset X "
+alias dtree="tree -L 3 -a -d -I '.git' --charset X "
+
+# Yazi
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}
+export YAZI_CONFIG_HOME="$HOME/.config/yazi"
+
+# Tmux which key
+# NOTE: ESC + u
+tmux-which-key() { tmux show-wk-menu-root ; }
+zle -N tmux-which-key
+bindkey -M vicmd "u" tmux-which-key
+
+# Tmux Configuration
+export TMUX_PLUGIN_MANAGER_PATH="$XDG_CONFIG_HOME/tmux/plugins"
+
+# Tool Configurations
+
+{{- if (lookPath "fzf") }}
+## FZF - Fuzzy Finder
+eval "$(fzf --zsh)"
+export FZF_DEFAULT_COMMAND="fd --hidden --strip-cwd-prefix --exclude .git"
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND="fd --type=d --hidden --strip-cwd-prefix --exclude .git"
+export FZF_DEFAULT_OPTS="--height 50% --layout=default --border --color=hl:#2dd4bf"
+export FZF_CTRL_T_OPTS="--preview 'bat --color=always -n --line-range :500 {}'"
+export FZF_ALT_C_OPTS="--preview 'eza --icons=always --tree --color=always {} | head -200'"
+export FZF_TMUX_OPTS=" -p90%,70% "
+{{- end }}
+
+{{- if (lookPath "thefuck") }}
+## The Fuck - Command Correction
+eval $(thefuck --alias fuck)
+{{- end }}
+
+# Language Version Management:
+# Note: mise activation is handled in .zprofile
+# Note: nvm, uv configurations below
+
+{{- if eq .chezmoi.os "darwin" }}
+# Zsh Enhancements (optimized brew prefix lookup)
+BREW_PREFIX="${BREW_PREFIX:-/opt/homebrew}"
+if [[ -f "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+    source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+    typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=12'
+fi
+if [[ -f "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+    source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi
+{{- end }}
+
+{{- if (lookPath "nvm") }}
+# NVM - Node Version Manager
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+{{- end }}
+
+# Tool-specific Completions and Configurations
+
+{{- if (lookPath "invoke") }}
+# Python Invoke completion
+[ -f "$HOME/.invoke-completion.zsh" ] && source "$HOME/.invoke-completion.zsh"
+{{- end }}
+
+{{- if (lookPath "gh") }}
+# GitHub CLI copilot aliases
+eval "$(gh copilot alias -- zsh)"
+{{- end }}
+
+{{- if (lookPath "atuin") }}
+# Atuin - Shell History
+. "$HOME/.atuin/bin/env"
+eval "$(atuin init zsh)"
+{{- end }}
+
+# Development Environment Setup
+
+## Python debugger
+export PYTHONBREAKPOINT="pudb.set_trace"
+
+## PATH exports (fixed hardcoded paths)
+export PATH="$PATH:$HOME/.local/bin"
+export PATH="$PATH:$HOME/.cargo/bin"
+
+{{- if (lookPath "windsurf") }}
+# Windsurf Editor
+export PATH="$HOME/.codeium/windsurf/bin:$PATH"
+{{- end }}
+
+{{- if (lookPath "bun") }}
+# Bun JavaScript Runtime
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+{{- end }}
+
+{{- if (lookPath "pnpm") }}
+# PNPM Package Manager
+export PNPM_HOME="$HOME/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+{{- end }}
+
+# Additional Tool Aliases
+alias claude="$HOME/.claude/local/claude"
+
+# Missing Package Configurations
+
+{{- if (lookPath "doppler") }}
+# Doppler CLI completion
+if [[ -f "$HOME/.doppler/completion/zsh/_doppler" ]]; then
+    fpath=("$HOME/.doppler/completion/zsh" $fpath)
+fi
+{{- end }}
+
+{{- if (lookPath "gibo") }}
+# Gibo completion
+eval "$(gibo completion zsh 2>/dev/null)"
+{{- end }}
+
+{{- if (lookPath "commitizen") }}
+# Commitizen aliases
+alias gc="git cz"
+alias gcz="git cz"
+{{- end }}
+
+# Performance benchmarking aliases
+{{- if (lookPath "hyperfine") }}
+alias bench="hyperfine"
+alias quickbench="hyperfine --warmup 3"
+{{- end }}
+
+{{- if (lookPath "tokei") }}
+# Code statistics shortcuts
+alias codestat="tokei"
+alias lines="tokei --files"
+{{- end }}
+
+# Prompt Setup (Must be last)
+{{- if and (eq .chezmoi.os "darwin") (lookPath "oh-my-posh") }}
+if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
+    eval "$(oh-my-posh init zsh --config $BREW_PREFIX/share/oh-my-posh/themes/slimfat.omp.json)"
+fi
+{{- end }}
