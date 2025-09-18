@@ -146,7 +146,17 @@ esac
 {{- end }}
 
 # Additional Tool Aliases
-alias claude="$HOME/.claude/local/claude"
+{{- if (lookPath "claude") }}
+# Claude Code alias (use global installation if available)
+alias claude="claude"
+{{- else }}
+# Claude Code alias (fallback to local installation)
+if [[ -f "$HOME/.claude/local/claude" ]]; then
+    alias claude="$HOME/.claude/local/claude"
+elif command -v npx &>/dev/null; then
+    alias claude="npx @anthropic-ai/claude-code"
+fi
+{{- end }}
 
 # Missing Package Configurations
 
