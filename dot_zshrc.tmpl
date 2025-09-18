@@ -59,19 +59,20 @@ export TMUX_PLUGIN_MANAGER_PATH="$XDG_CONFIG_HOME/tmux/plugins"
 
 {{- if (lookPath "fzf") }}
 ## FZF - Fuzzy Finder
-eval "$(fzf --zsh)"
-export FZF_DEFAULT_COMMAND="fd --hidden --strip-cwd-prefix --exclude .git"
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_ALT_C_COMMAND="fd --type=d --hidden --strip-cwd-prefix --exclude .git"
-export FZF_DEFAULT_OPTS="--height 50% --layout=default --border --color=hl:#2dd4bf"
-export FZF_CTRL_T_OPTS="--preview 'bat --color=always -n --line-range :500 {}'"
-export FZF_ALT_C_OPTS="--preview 'eza --icons=always --tree --color=always {} | head -200'"
-export FZF_TMUX_OPTS=" -p90%,70% "
+if eval "$(fzf --zsh)" 2>/dev/null; then
+    export FZF_DEFAULT_COMMAND="fd --hidden --strip-cwd-prefix --exclude .git"
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    export FZF_ALT_C_COMMAND="fd --type=d --hidden --strip-cwd-prefix --exclude .git"
+    export FZF_DEFAULT_OPTS="--height 50% --layout=default --border --color=hl:#2dd4bf"
+    export FZF_CTRL_T_OPTS="--preview 'bat --color=always -n --line-range :500 {}'"
+    export FZF_ALT_C_OPTS="--preview 'eza --icons=always --tree --color=always {} | head -200'"
+    export FZF_TMUX_OPTS=" -p90%,70% "
+fi
 {{- end }}
 
 {{- if (lookPath "thefuck") }}
 ## The Fuck - Command Correction
-eval $(thefuck --alias fuck)
+eval $(thefuck --alias fuck 2>/dev/null)
 {{- end }}
 
 # Language Version Management:
@@ -106,13 +107,15 @@ export NVM_DIR="$HOME/.nvm"
 
 {{- if (lookPath "gh") }}
 # GitHub CLI copilot aliases
-eval "$(gh copilot alias -- zsh)"
+eval "$(gh copilot alias -- zsh 2>/dev/null)"
 {{- end }}
 
 {{- if (lookPath "atuin") }}
 # Atuin - Shell History
-. "$HOME/.atuin/bin/env"
-eval "$(atuin init zsh)"
+if [[ -f "$HOME/.atuin/bin/env" ]]; then
+    . "$HOME/.atuin/bin/env"
+    eval "$(atuin init zsh 2>/dev/null)"
+fi
 {{- end }}
 
 # Development Environment Setup
@@ -168,8 +171,10 @@ fi
 {{- end }}
 
 {{- if (lookPath "gibo") }}
-# Gibo completion
-eval "$(gibo completion zsh 2>/dev/null)"
+# Gibo completion (only if compdef is available)
+if command -v compdef &>/dev/null; then
+    eval "$(gibo completion zsh 2>/dev/null)"
+fi
 {{- end }}
 
 {{- if (lookPath "commitizen") }}
@@ -193,6 +198,13 @@ alias lines="tokei --files"
 # Prompt Setup (Must be last)
 {{- if and (eq .chezmoi.os "darwin") (lookPath "oh-my-posh") }}
 if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
-    eval "$(oh-my-posh init zsh --config $BREW_PREFIX/share/oh-my-posh/themes/slimfat.omp.json)"
+    # Check for theme file existence before loading
+    POSH_THEME="$BREW_PREFIX/share/oh-my-posh/themes/slimfat.omp.json"
+    if [[ -f "$POSH_THEME" ]]; then
+        eval "$(oh-my-posh init zsh --config $POSH_THEME)"
+    else
+        # Fallback to default theme if slimfat is not available
+        eval "$(oh-my-posh init zsh)"
+    fi
 fi
 {{- end }}
