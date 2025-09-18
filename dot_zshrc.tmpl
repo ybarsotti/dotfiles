@@ -198,12 +198,16 @@ alias lines="tokei --files"
 # Prompt Setup (Must be last)
 {{- if and (eq .chezmoi.os "darwin") (lookPath "oh-my-posh") }}
 if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
-    # Check for theme file existence before loading
-    POSH_THEME="$BREW_PREFIX/share/oh-my-posh/themes/slimfat.omp.json"
-    if [[ -f "$POSH_THEME" ]]; then
-        eval "$(oh-my-posh init zsh --config $POSH_THEME)"
+    # Use custom Gruvbox theme
+    CUSTOM_POSH_THEME="$XDG_CONFIG_HOME/oh-my-posh/themes/gruvbox-custom.omp.json"
+    FALLBACK_POSH_THEME="$BREW_PREFIX/share/oh-my-posh/themes/gruvbox.omp.json"
+    
+    if [[ -f "$CUSTOM_POSH_THEME" ]]; then
+        eval "$(oh-my-posh init zsh --config $CUSTOM_POSH_THEME)"
+    elif [[ -f "$FALLBACK_POSH_THEME" ]]; then
+        eval "$(oh-my-posh init zsh --config $FALLBACK_POSH_THEME)"
     else
-        # Fallback to default theme if slimfat is not available
+        # Fallback to default theme if neither is available
         eval "$(oh-my-posh init zsh)"
     fi
 fi
