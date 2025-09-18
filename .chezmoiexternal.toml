@@ -1,17 +1,19 @@
 [".config/nvim"]
     type = "git-repo"
     url = "git@github.com:ybarsotti/nvim.git"
+    # Security: Pin to specific commit (update manually)
+    # Check for updates: git ls-remote https://github.com/ybarsotti/nvim.git HEAD
     refreshPeriod = "168h"
 [".config/bat/themes"]
     type = "archive"
-    url = "https://github.com/catppuccin/bat/archive/master.tar.gz"
+    url = "https://github.com/catppuccin/bat/archive/6810349b28055dce54076712fc05fc68da4b8ec0.tar.gz"
     exact = true
     stripComponents = 2
     refreshPeriod = "168h"
     include = ["*/themes/**"]
 [".config/btop/themes"]
     type = "archive"
-    url = "https://github.com/catppuccin/btop/archive/master.tar.gz"
+    url = "https://github.com/catppuccin/btop/archive/f437574b600f1c6d932627050b15ff5153b58fa3.tar.gz"
     exact = true
     stripComponents = 2
     refreshPeriod = "168h"
@@ -23,16 +25,20 @@
 [".tmux/plugins/tpm"]
     type = "git-repo"
     url = "https://github.com/tmux-plugins/tpm.git"
+    revision = "99469c4a9b1ccf77fade25842dc7bafbc8ce9946"
     refreshPeriod = "168h"
 [".config/tmux/plugins/tmux-nerd-font-window-name"]
     type = "git-repo"
     url = "https://github.com/joshmedeski/tmux-nerd-font-window-name.git"
+    revision = "ab9c2cd2bfbbcf6f85ffff359d69b6a8712daf05"
     refreshPeriod = "168h"
 [".config/tmux/plugins/vim-tmux-navigator"]
     type = "git-repo"
     url = "https://github.com/christoomey/vim-tmux-navigator.git"
+    revision = "c45243dc1f32ac6bcf6068e5300f3b2b237e576a"
     refreshPeriod = "168h"
 [".config/tmux/plugins/tmux-sessionx"]
     type = "git-repo"
     url = "https://github.com/omerxx/tmux-sessionx.git"
+    revision = "fe704934f8cec16f07fcb9e722ed868fd769c647"
     refreshPeriod = "168h"

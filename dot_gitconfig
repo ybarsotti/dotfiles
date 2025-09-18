@@ -2,7 +2,7 @@
     name = Yuri Barsotti Mendes
     email = yuribarsotti@gmail.com
     username = ybarsotti
-    signingkey = !gpg --export-secret-keys --armor yuribarsotti@gmail.com
+    signingkey = !gpg --list-secret-keys --keyid-format LONG yuribarsotti@gmail.com | grep sec | head -1 | cut -d'/' -f2 | cut -d' ' -f1
 
 [init]
     defaultBranch = main

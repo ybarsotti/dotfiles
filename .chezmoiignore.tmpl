@@ -7,6 +7,34 @@
 LICENSE
 README.md
 
+# Security: Ignore sensitive files and patterns
+**/*.key
+**/*.pem
+**/*.p12
+**/*.pfx
+**/*.crt
+**/*.csr
+**/*.cer
+**/*.der
+**/.env
+**/.env.*
+**/secrets.*
+**/credentials.*
+**/*password*
+**/*secret*
+**/*token*
+**/*key*
+**/.aws/
+**/.ssh/id_*
+**/.ssh/known_hosts
+**/.gnupg/private-keys-v1.d/
+**/.gnupg/openpgp-revocs.d/
+**/.gnupg/random_seed
+**/node_modules/
+**/.git/
+**/.DS_Store
+**/Thumbs.db
+
 
 {{ if ne .chezmoi.os "darwin" }}
 .chezmoiscripts/darwin/**
