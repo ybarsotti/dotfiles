@@ -1,8 +1,16 @@
+{{/* chezmoi:template:missing-key=zero */}}
 [user]
-    name = Yuri Barsotti Mendes
-    email = yuribarsotti@gmail.com
+    name = {{ .machine.gitUser | default "Yuri Barsotti Mendes" }}
+    email = {{ .machine.email | default "yuribarsotti@gmail.com" }}
     username = ybarsotti
-    signingkey = !gpg --list-secret-keys --keyid-format LONG yuribarsotti@gmail.com | grep sec | head -1 | cut -d'/' -f2 | cut -d' ' -f1
+{{- $gpgKeyId := "" }}
+{{- if lookPath "gpg" }}
+{{-   $gpgOutput := output "sh" "-c" (printf "gpg --list-secret-keys --keyid-format LONG '%s' 2>/dev/null | grep sec | head -1 | cut -d'/' -f2 | cut -d' ' -f1 || true" (.machine.email | default "yuribarsotti@gmail.com")) }}
+{{-   $gpgKeyId = $gpgOutput | trim }}
+{{- end }}
+{{- if $gpgKeyId }}
+    signingkey = {{ $gpgKeyId }}
+{{- end }}
 
 [init]
     defaultBranch = main
@@ -22,7 +30,7 @@
     rebase = true
 
 [web]
-    browser = google-chrome
+    browser = firefox
 
 [color]
     diff = auto
