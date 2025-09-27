@@ -1,4 +1,4 @@
-theme = gruvbox-material
+theme = Catppuccin Mocha
 
 mouse-scroll-multiplier = 0.5
 window-decoration = true
