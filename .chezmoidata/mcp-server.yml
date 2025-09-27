@@ -3,8 +3,7 @@ mcp_servers:
   ccusage:
     command: npx
     args:
-      - ccusage@latest
-      - mcp
+      - "@ccusage/mcp@latest"
 
   context7:
     command: npx
@@ -16,6 +15,9 @@ mcp_servers:
     command: npx
     args:
       - "@playwright/mcp@latest"
+      - --browser
+      - firefox
+      - --headless
 
   sequential-thinking:
     command: npx
