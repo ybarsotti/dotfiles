@@ -121,6 +121,7 @@ packages:
         - apidog              # API development and testing
         - figma               # Design and prototyping tool
         - ghostty             # Fast, feature-rich terminal emulator
+        - visual-studio-code  # IDE
       
       # Productivity & Utilities
       productivity:
