@@ -93,32 +93,24 @@ if [[ -f "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 {{- end }}
 
-{{- if (lookPath "nvm") }}
 # NVM - Node Version Manager
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-{{- end }}
 
 # Tool-specific Completions and Configurations
 
-{{- if (lookPath "invoke") }}
 # Python Invoke completion
 [ -f "$HOME/.invoke-completion.zsh" ] && source "$HOME/.invoke-completion.zsh"
-{{- end }}
 
-{{- if (lookPath "gh") }}
 # GitHub CLI copilot aliases
 eval "$(gh copilot alias -- zsh 2>/dev/null)"
-{{- end }}
 
-{{- if (lookPath "atuin") }}
 # Atuin - Shell History
 if [[ -f "$HOME/.atuin/bin/env" ]]; then
     . "$HOME/.atuin/bin/env"
     eval "$(atuin init zsh 2>/dev/null)"
 fi
-{{- end }}
 
 # Development Environment Setup
 
@@ -197,6 +189,16 @@ alias codestat="tokei"
 alias lines="tokei --files"
 {{- end }}
 
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/barsotti/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/barsotti/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/barsotti/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/barsotti/google-cloud-sdk/completion.zsh.inc'; fi
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/barsotti/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+
 # Prompt Setup (Must be last)
 {{- if and (eq .chezmoi.os "darwin") (lookPath "oh-my-posh") }}
 if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
@@ -213,4 +215,6 @@ if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
         eval "$(oh-my-posh init zsh)"
     fi
 fi
+
+
 {{- end }}
