@@ -33,6 +33,11 @@ mcp_servers:
       - --rm
       - hashicorp/terraform-mcp-server
 
+  chrome-devtools:
+    command: npx
+    args:
+      - "chrome-devtools-mcp@latest"
+
   blender:
     command: uvx
     args:
