@@ -8,6 +8,7 @@ packages:
           - nvm               # Node.js version manager
           - pipx              # Python package installer in isolated environments
           - uv                # Fast Python package installer and resolver
+          - pnpm              # Package manager
         
         git_tools:
           - gh                # GitHub CLI
