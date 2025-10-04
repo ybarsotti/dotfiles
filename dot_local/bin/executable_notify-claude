@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Read JSON input with timeout
+read -t 1 -d '}' json || {
+  echo "Missing json from claude" >&2
+  exit 2
+}
+
+title="Claude"
+subtitle=$(basename "$(pwd)")
+message=$(echo "$json}" | jq -r '.message // "Stopped"')
+
+sounds=(
+  Basso Blow Bottle Frog Funk Glass
+  Hero Morse Ping Pop Purr Sosumi
+  Submarine Tink
+)
+sound=${sounds[12]}  # Submarine
+
+# Escape message for AppleScript
+escaped_message=$(printf '%s' "$message" | sed 's/"/\\"/g')
+
+osascript -e "display notification \"$escaped_message\" with title \"$title\" subtitle \"$subtitle\" sound name \"$sound\""
