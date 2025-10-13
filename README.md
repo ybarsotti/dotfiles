@@ -188,6 +188,9 @@ This dotfiles setup includes several development tools that are automatically in
 ### Development Editors & Language Support
 - **`neovim`** - Modern Vim-based text editor
   - Usage: `nvim file.txt`
+- **`cursor`** - AI-powered code editor CLI
+  - Usage: `cursor .` to open current directory
+  - Note: Installed via official Cursor install script
 - **`tree-sitter`** - Incremental parsing system for syntax highlighting
   - Used automatically by Neovim and other editors
 
