@@ -209,4 +209,14 @@ else
     echo "Warning: npm command not found. Skipping global NPM package installation."
 fi
 
+# --- Install Cursor CLI ---
+echo "Installing Cursor CLI..."
+if ! command -v cursor &>/dev/null; then
+    echo "Cursor CLI not found. Installing..."
+    curl https://cursor.com/install -fsS | bash
+    echo "✅ Cursor CLI installed successfully."
+else
+    echo "✅ Cursor CLI is already installed."
+fi
+
 echo "Application and extension installation complete."

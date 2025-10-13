@@ -102,3 +102,6 @@ When adding new packages:
 - `packages.darwin.brews.terminal.*` - File tools, monitoring, shell enhancements
 - `packages.darwin.brews.security.*` - Security and privacy tools
 - `packages.darwin.casks.*` - GUI applications organized by purpose
+
+** IMPORTANT **
+After updating any script step, apply the changes with chezmoi
