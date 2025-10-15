@@ -200,21 +200,17 @@ autoload -Uz compinit
 compinit
 
 # Prompt Setup (Must be last)
-{{- if and (eq .chezmoi.os "darwin") (lookPath "oh-my-posh") }}
 if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
-    # Use custom Gruvbox theme
-    CUSTOM_POSH_THEME="$XDG_CONFIG_HOME/oh-my-posh/themes/gruvbox-custom.omp.json"
+    # Use custom theme from XDG config directory
+    CUSTOM_POSH_THEME="$HOME/.config/oh-my-posh/themes/catppuccin_macchiato.omp.json"
     FALLBACK_POSH_THEME="$BREW_PREFIX/share/oh-my-posh/themes/gruvbox.omp.json"
-    
+
     if [[ -f "$CUSTOM_POSH_THEME" ]]; then
         eval "$(oh-my-posh init zsh --config $CUSTOM_POSH_THEME)"
     elif [[ -f "$FALLBACK_POSH_THEME" ]]; then
         eval "$(oh-my-posh init zsh --config $FALLBACK_POSH_THEME)"
     else
         # Fallback to default theme if neither is available
-        eval "$(oh-my-posh init zsh)"
+        eval "$(oh-my-posh init zsh --config 'https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/refs/heads/main/themes/catppuccin_mocha.omp.json')"
     fi
 fi
-
-
-{{- end }}
