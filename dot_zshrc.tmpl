@@ -93,10 +93,17 @@ if [[ -f "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 {{- end }}
 
-# NVM - Node Version Manager
+# NVM - Node Version Manager (lazy loading for faster shell startup)
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+# Lazy load NVM - only load when needed
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+    # Create alias functions that will load NVM on first use
+    alias nvm='unalias nvm npm node npx && source "$NVM_DIR/nvm.sh" && nvm'
+    alias npm='unalias nvm npm node npx && source "$NVM_DIR/nvm.sh" && npm'
+    alias node='unalias nvm npm node npx && source "$NVM_DIR/nvm.sh" && node'
+    alias npx='unalias nvm npm node npx && source "$NVM_DIR/nvm.sh" && npx'
+fi
 
 # Tool-specific Completions and Configurations
 
@@ -104,7 +111,9 @@ export NVM_DIR="$HOME/.nvm"
 [ -f "$HOME/.invoke-completion.zsh" ] && source "$HOME/.invoke-completion.zsh"
 
 # GitHub CLI copilot aliases
-eval "$(gh copilot alias -- zsh 2>/dev/null)"
+if command -v gh &>/dev/null; then
+    eval "$(gh copilot alias -- zsh 2>/dev/null)"
+fi
 
 # Atuin - Shell History
 if [[ -f "$HOME/.atuin/bin/env" ]]; then
@@ -117,9 +126,7 @@ fi
 ## Python debugger
 export PYTHONBREAKPOINT="pudb.set_trace"
 
-## PATH exports (fixed hardcoded paths)
-export PATH="$PATH:$HOME/.local/bin"
-export PATH="$PATH:$HOME/.cargo/bin"
+## Note: PATH for .local/bin and .cargo/bin are set in .zprofile
 
 {{- if (lookPath "windsurf") }}
 # Windsurf Editor
@@ -143,11 +150,8 @@ esac
 {{- end }}
 
 # Additional Tool Aliases
-{{- if (lookPath "claude") }}
-# Claude Code alias (use global installation if available)
-alias claude="claude"
-{{- else }}
-# Claude Code alias (fallback to local installation)
+{{- if not (lookPath "claude") }}
+# Claude Code alias (fallback to local installation if not in PATH)
 if [[ -f "$HOME/.claude/local/claude" ]]; then
     alias claude="$HOME/.claude/local/claude"
 elif command -v npx &>/dev/null; then
@@ -159,15 +163,8 @@ fi
 
 {{- if (lookPath "doppler") }}
 # Doppler CLI completion
-if [[ -f "$HOME/.doppler/completion/zsh/_doppler" ]]; then
+if [[ -d "$HOME/.doppler/completion/zsh" ]]; then
     fpath=("$HOME/.doppler/completion/zsh" $fpath)
-fi
-{{- end }}
-
-{{- if (lookPath "gibo") }}
-# Gibo completion (only if compdef is available)
-if command -v compdef &>/dev/null; then
-    eval "$(gibo completion zsh 2>/dev/null)"
 fi
 {{- end }}
 
@@ -189,15 +186,27 @@ alias codestat="tokei"
 alias lines="tokei --files"
 {{- end }}
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/barsotti/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/barsotti/google-cloud-sdk/path.zsh.inc'; fi
+# Google Cloud SDK
+if [ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]; then
+    source "$HOME/google-cloud-sdk/path.zsh.inc"
+fi
+if [ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]; then
+    source "$HOME/google-cloud-sdk/completion.zsh.inc"
+fi
 
-# The next line enables shell command completion for gcloud.
-if [ -f '/Users/barsotti/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/barsotti/google-cloud-sdk/completion.zsh.inc'; fi
-# The following lines have been added by Docker Desktop to enable Docker CLI completions.
-fpath=(/Users/barsotti/.docker/completions $fpath)
+# Docker CLI completions
+if [ -d "$HOME/.docker/completions" ]; then
+    fpath=("$HOME/.docker/completions" $fpath)
+fi
+
+# Initialize completion system (must be after all fpath additions)
 autoload -Uz compinit
 compinit
+
+# Tool completions that use compdef (must be after compinit)
+{{- if (lookPath "gibo") }}
+eval "$(gibo completion zsh 2>/dev/null)"
+{{- end }}
 
 # Prompt Setup (Must be last)
 if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
