@@ -19,7 +19,7 @@
     editor = nvim
     whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
     pager = delta
-    excludesfile = ~/.gitignore
+    excludesfile = ~/.gitignore_global
     trustctime = false
     untrackedCache = true
 
@@ -79,6 +79,121 @@
 
 [merge]
     conflictstyle = diff3
+    tool = p4merge
+
+[mergetool]
+    prompt = false
+    keepBackup = false
+
+[mergetool "nvimdiff"]
+    cmd = nvim -d $LOCAL $REMOTE $MERGED -c '$wincmd w' -c 'wincmd J'
+
+[mergetool "p4merge"]
+    cmd = /Applications/p4merge.app/Contents/MacOS/p4merge "$BASE" "$LOCAL" "$REMOTE" "$MERGED"
+    trustExitCode = false
+
+[difftool "p4merge"]
+    cmd = /Applications/p4merge.app/Contents/MacOS/p4merge "$LOCAL" "$REMOTE"
+
+[diff]
+    algorithm = histogram
+    colorMoved = default
+
+[push]
+    default = current
+    autoSetupRemote = true
+    followTags = true
+
+[rerere]
+    enabled = true
+
+[rebase]
+    autoStash = true
+    autoSquash = true
+
+[alias]
+    # Status & Info
+    s = status -sb
+    st = status
+
+    # Branch Management
+    br = branch
+    bra = branch -a
+    brd = branch -d
+    brD = branch -D
+
+    # Checkout & Switch
+    co = checkout
+    cob = checkout -b
+    sw = switch
+    swc = switch -c
+
+    # Commit
+    c = commit
+    cm = commit -m
+    ca = commit --amend
+    can = commit --amend --no-edit
+
+    # Add
+    a = add
+    aa = add --all
+    ap = add --patch
+
+    # Diff
+    d = diff
+    ds = diff --staged
+    dt = difftool
+
+    # Log & History
+    l = log --oneline --decorate --graph
+    la = log --oneline --decorate --graph --all
+    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    lga = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all
+    last = log -1 HEAD --stat
+
+    # Fetch & Pull
+    f = fetch
+    fa = fetch --all
+    p = pull
+    pr = pull --rebase
+
+    # Push
+    ps = push
+    psf = push --force-with-lease
+    psu = push -u origin HEAD
+
+    # Stash
+    sh = stash
+    shp = stash pop
+    shl = stash list
+    shd = stash drop
+
+    # Remote
+    r = remote
+    rv = remote -v
+
+    # Reset
+    unstage = reset HEAD --
+    undo = reset --soft HEAD^
+
+    # Clean
+    clean-branches = "!git branch --merged | grep -v '\\*\\|main\\|master\\|develop' | xargs -n 1 git branch -d"
+
+    # Show
+    show-files = show --pretty="" --name-only
+
+    # Worktree
+    wt = worktree
+    wta = worktree add
+    wtl = worktree list
+    wtr = worktree remove
+
+    # Maintenance
+    optimize = "!git gc --aggressive && git prune && git repack -a -d -f --depth=250 --window=250"
+
+[maintenance]
+    auto = true
+    strategy = incremental
 
 [include]
     path = .config/git/delta/themes/catppuccin.gitconfig

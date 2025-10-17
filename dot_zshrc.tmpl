@@ -18,6 +18,17 @@ alias ld="lazydocker"
 alias vi="nvim"
 alias vim="nvim"
 
+## Git shortcuts (additional to gitconfig aliases)
+alias gst="git status"
+alias gco="git checkout"
+alias gcb="git checkout -b"
+alias gp="git pull"
+alias gps="git push"
+alias gd="git diff"
+alias gds="git diff --staged"
+alias gl="git log --oneline --graph"
+alias gla="git log --oneline --graph --all"
+
 ## Terminal Enhancements
 alias lseza='eza -l -a --icons --group-directories-first --color=always --icons=always --no-user'
 alias c="clear"
@@ -120,6 +131,17 @@ if [[ -f "$HOME/.atuin/bin/env" ]]; then
     . "$HOME/.atuin/bin/env"
     eval "$(atuin init zsh 2>/dev/null)"
 fi
+
+{{- if (lookPath "zoxide") }}
+# Zoxide - Smarter cd command
+eval "$(zoxide init zsh)"
+alias cd="z"
+{{- end }}
+
+{{- if (lookPath "direnv") }}
+# Direnv - Load/unload environment variables per directory
+eval "$(direnv hook zsh)"
+{{- end }}
 
 # Development Environment Setup
 

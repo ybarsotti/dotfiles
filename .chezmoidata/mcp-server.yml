@@ -11,13 +11,13 @@ mcp_servers:
       - -y
       - "@upstash/context7-mcp"
 
-  # playwright:
-  #   command: npx
-  #   args:
-  #     - "@playwright/mcp@latest"
-  #     - --browser
-  #     - firefox
-  #     - --headless
+  playwright:
+    command: npx
+    args:
+      - "@playwright/mcp@latest"
+      - --browser
+      - firefox
+      - --headless
 
   sequential-thinking:
     command: npx
@@ -66,3 +66,16 @@ mcp_servers:
       - -y
       - mcp-remote
       - https://mcp.linear.app/sse
+
+  filesystem:
+    command: npx
+    args:
+      - -y
+      - "@modelcontextprotocol/server-filesystem"
+      - /Users/barsotti/Developer
+
+  memory:
+    command: npx
+    args:
+      - -y
+      - "@modelcontextprotocol/server-memory"
