@@ -156,6 +156,7 @@ packages:
       # Development Tools
       development:
         - apidog              # API development and testing
+        - beekeeper-studio    # Modern SQL editor and database manager
         - figma               # Design and prototyping tool
         - ghostty             # Fast, feature-rich terminal emulator
         - visual-studio-code  # IDE
