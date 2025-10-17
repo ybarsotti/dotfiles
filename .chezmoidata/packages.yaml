@@ -14,6 +14,9 @@ packages:
           - gh                # GitHub CLI
           - git-flow          # Git branching model extensions
           - lazygit           # Terminal UI for git commands
+          - git-delta         # Enhanced git diff viewer
+          - gitleaks          # Detect secrets in git repos
+          - git-sizer         # Compute size metrics for git repos
         
         containerization:
           - docker            # Container platform
@@ -21,9 +24,19 @@ packages:
         
         infrastructure:
           - terraform         # Infrastructure as Code tool
-        
+
         ai_ml:
           - ollama            # Local LLM runner
+
+        data_engineering:
+          - duckdb            # Fast in-process analytical database (embedded, no server)
+          # - clickhouse      # OLAP database CLI client (not available via brew, use Docker)
+
+        productivity:
+          - direnv            # Load/unload environment variables per directory
+          - just              # Modern command runner (better than Make)
+          - watchexec         # Execute commands when files change
+          - entr              # Run commands when files change
       
       # Code Quality & Formatting
       code_quality:
@@ -31,6 +44,13 @@ packages:
           - shellcheck        # Shell script static analysis
           - yamllint          # YAML linter
           - zizmor            # GitHub Actions security scanner
+          - hadolint          # Dockerfile linter
+          - actionlint        # GitHub Actions workflow linter
+          - markdownlint-cli  # Markdown linter
+          - vale              # Prose linter for documentation
+          - typos-cli         # Source code spell checker (fast)
+          - codespell         # Find/fix common misspellings
+          - ruff              # Extremely fast Python linter
         
         formatters:
           - prettier          # Multi-language code formatter
@@ -77,12 +97,17 @@ packages:
           - nmap              # Network discovery and security auditing
           - oha               # HTTP load testing tool
           - evans             # gRPC client
+          - grpcurl           # curl for gRPC services
+          - gping             # Ping with graph
+          - bandwhich         # Network utilization by process
         
         shell_enhancements:
           - zsh-autosuggestions     # Fish-like autosuggestions
           - zsh-syntax-highlighting # Fish-like syntax highlighting
           - oh-my-posh              # Cross-platform prompt theme engine
           - thefuck                 # Command correction tool
+          - zoxide                  # Smarter cd command (tracks most-used dirs)
+          - atuin                   # Shell history with sync and search
         
         multiplexers:
           - zellij            # Terminal workspace with built-in multiplexer
@@ -98,12 +123,23 @@ packages:
           - bfg               # Git repository cleaner
           - pngpaste          # PNG image clipboard utility (required for nvim img-clip)
           - gnu-sed           # GNU version of sed
+          - tldr              # Simplified man pages
+          - duf               # Better disk usage/free utility
+          - bottom            # System monitor (alternative to btop)
+
+        data_tools:
+          - xsv               # Fast CSV command-line toolkit
+          - miller            # Like awk/sed/cut for data formats (CSV, JSON, etc.)
+          - visidata          # Interactive multitool for tabular data (TUI)
       
       # Security & Privacy
       security:
         - gnupg               # GNU Privacy Guard
         - pinentry-mac        # macOS keychain integration for GPG
         - doppler             # Secrets management
+        - age                 # Simple file encryption (modern GPG alternative)
+        - sops                # Encrypted secrets in Git repos
+        - trivy               # Container/IaC security scanner
       
       # macOS-specific Tools
       macos:
@@ -123,6 +159,7 @@ packages:
         - figma               # Design and prototyping tool
         - ghostty             # Fast, feature-rich terminal emulator
         - visual-studio-code  # IDE
+        - p4v                 # Perforce Visual Merge Tool (P4Merge) for Git merge conflicts
       
       # Productivity & Utilities
       productivity:
@@ -145,6 +182,18 @@ packages:
       
       # Fonts
       fonts:
-        - font-hack-nerd-font           # Hack Nerd Font
-        - font-jetbrains-mono-nerd-font # JetBrains Mono Nerd Font
-        - font-sf-pro                   # San Francisco Pro font
+        # Nerd Fonts (with icon support)
+        - font-hack-nerd-font              # Hack Nerd Font
+        - font-jetbrains-mono-nerd-font    # JetBrains Mono Nerd Font
+        - font-fira-code-nerd-font         # Fira Code Nerd Font (popular ligatures)
+        - font-meslo-lg-nerd-font          # Meslo LG Nerd Font (recommended for Oh My Zsh)
+        - font-sauce-code-pro-nerd-font    # Sauce Code Pro Nerd Font (Source Code Pro variant)
+        - font-caskaydia-cove-nerd-font    # Caskaydia Cove Nerd Font (Cascadia Code variant)
+        - font-iosevka-nerd-font           # Iosevka Nerd Font (narrow, efficient)
+        - font-victor-mono-nerd-font       # Victor Mono Nerd Font (cursive italics)
+
+        # Standard Developer Fonts
+        - font-sf-pro                      # San Francisco Pro font (Apple's system font)
+        - font-fira-code                   # Fira Code (ligatures)
+        - font-cascadia-code               # Cascadia Code (Microsoft)
+        - font-monaspace                   # Monaspace (GitHub's superfamily)
