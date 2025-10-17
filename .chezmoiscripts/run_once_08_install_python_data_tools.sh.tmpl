@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# run_once_08_install_python_data_tools.sh.tmpl
+#
+# This script installs Python data science and machine learning tools via pipx
+# These tools are installed in isolated environments to avoid dependency conflicts
+
+{{ template "error_handling" }}
+
+echo "Installing Python data science and ML tools via pipx..."
+
+# Check if pipx is available
+if ! command -v pipx &>/dev/null; then
+    echo "⚠️  pipx not found. Please install pipx first."
+    echo "Run: brew install pipx"
+    exit 1
+fi
+
+# Ensure pipx path is set up
+pipx ensurepath &>/dev/null || true
+
+# Array of Python tools to install
+python_tools=(
+    # Jupyter Ecosystem
+    "jupyterlab"
+    "jupytext"
+    "nbconvert"
+    "nbdime"
+    "ipython"
+
+    # ML & Data Engineering
+    "dvc"
+    "mlflow"
+    "great-expectations"
+
+    # CLI Tools
+    "polars-cli"
+)
+
+# Install each tool
+for tool in "${python_tools[@]}"; do
+    if pipx list 2>/dev/null | grep -q "package $tool"; then
+        echo "✓ $tool is already installed"
+    else
+        echo "Installing $tool..."
+        if pipx install "$tool" 2>/dev/null; then
+            echo "✓ Successfully installed $tool"
+        else
+            echo "✗ Failed to install $tool (continuing...)"
+        fi
+    fi
+done
+
+echo ""
+echo "Python data science tools installation complete!"
+echo ""
+echo "Installed tools:"
+echo "  📊 Jupyter: jupyterlab, jupytext, nbconvert, nbdime, ipython"
+echo "  🤖 MLOps: dvc, mlflow, great-expectations"
+echo "  ⚡ CLI: polars-cli"
+echo ""
+echo "Quick start:"
+echo "  • Launch JupyterLab: jupyter lab"
+echo "  • Initialize DVC: dvc init"
+echo "  • Start MLflow UI: mlflow ui"
+echo "  • Interactive Python: ipython"
+echo ""
+echo "Note: You may need to restart your shell for PATH changes to take effect."

@@ -1,0 +1,107 @@
+#!/bin/bash
+
+# run_once_07_install_cursor_extensions.sh
+#
+# This script installs recommended Cursor extensions
+
+set -eufo pipefail
+
+echo "Installing Cursor extensions..."
+
+# Check if cursor CLI is available
+if ! command -v cursor &>/dev/null; then
+    echo "Cursor CLI not found. Skipping extension installation."
+    echo "Note: You can install extensions manually from within Cursor."
+    exit 0
+fi
+
+# Cursor-compatible Extensions
+# Note: Cursor has built-in AI features, so Copilot is not needed
+extensions=(
+    # Git Tools
+    "eamodio.gitlens"
+    "mhutchie.git-graph"
+    "donjayamanne.githistory"
+
+    # Code Quality
+    "dbaeumer.vscode-eslint"
+    "esbenp.prettier-vscode"
+    "ms-python.black-formatter"
+    "ms-python.isort"
+    "ms-python.pylint"
+    "charliermarsh.ruff"
+
+    # Language Support
+    "ms-python.python"
+    "ms-python.vscode-pylance"
+    "golang.go"
+    "rust-lang.rust-analyzer"
+    "bradlc.vscode-tailwindcss"
+
+    # Data Science & Jupyter
+    "ms-toolsai.jupyter"
+    "ms-toolsai.vscode-jupyter-powertoys"
+    "ms-toolsai.datawrangler"
+    "donjayamanne.python-environment-manager"
+
+    # Data Engineering
+    "iterative.dvc"
+    "mechatroner.rainbow-csv"
+    "GrapeCity.gc-excelviewer"
+    "RandomFractalsInc.vscode-data-preview"
+
+    # Development Tools
+    "ms-azuretools.vscode-docker"
+    "hashicorp.terraform"
+
+    # API Development
+    "humao.rest-client"
+    "rangav.vscode-thunder-client"
+
+    # Utilities
+    "usernamehw.errorlens"
+    "streetsidesoftware.code-spell-checker"
+    "aaron-bond.better-comments"
+    "wayou.vscode-todo-highlight"
+    "gruntfuggly.todo-tree"
+    "christian-kohler.path-intellisense"
+    "formulahendry.auto-rename-tag"
+    "formulahendry.auto-close-tag"
+
+    # Themes & Icons
+    "Catppuccin.catppuccin-vsc"
+    "Catppuccin.catppuccin-vsc-icons"
+    "PKief.material-icon-theme"
+
+    # Markdown
+    "yzhang.markdown-all-in-one"
+    "DavidAnson.vscode-markdownlint"
+
+    # YAML & JSON
+    "redhat.vscode-yaml"
+    "tamasfe.even-better-toml"
+
+    # Indentation
+    "oderwat.indent-rainbow"
+)
+
+# Get list of installed extensions
+installed_extensions=$(cursor --list-extensions 2>/dev/null || echo "")
+
+# Install each extension
+for ext in "${extensions[@]}"; do
+    if echo "$installed_extensions" | grep -qi "^$ext$"; then
+        echo "✓ Extension $ext is already installed."
+    else
+        echo "Installing extension $ext..."
+        if cursor --install-extension "$ext" --force; then
+            echo "✓ Successfully installed $ext"
+        else
+            echo "✗ Failed to install $ext (continuing...)"
+        fi
+    fi
+done
+
+echo "Cursor extension installation complete."
+echo ""
+echo "Note: Some extensions may require Cursor to be restarted to take full effect."

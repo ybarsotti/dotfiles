@@ -1,0 +1,177 @@
+# Cursor AI Rules
+
+## General Coding Principles
+
+- Write clean, maintainable, and well-documented code
+- Follow the DRY (Don't Repeat Yourself) principle
+- Use meaningful variable and function names
+- Prefer composition over inheritance
+- Write code that is easy to test
+- Consider edge cases and error handling
+
+## Code Style
+
+- Use consistent indentation (2 spaces for JS/TS/JSON/YAML, 4 spaces for Python)
+- Add trailing commas in multi-line arrays and objects
+- Use single quotes for strings in JS/TS unless template literals are needed
+- Maximum line length: 100 characters (soft limit), 120 characters (hard limit)
+- Add blank lines to separate logical sections
+- Use async/await over raw promises when possible
+
+## Documentation
+
+- Add JSDoc/docstrings for all public functions and classes
+- Include type annotations (TypeScript, Python type hints, etc.)
+- Write clear commit messages following conventional commits format
+- Update README files when adding new features
+- Document complex algorithms and business logic
+- Add inline comments for non-obvious code
+
+## Testing
+
+- Write tests for new features and bug fixes
+- Aim for high test coverage on critical paths
+- Use descriptive test names that explain what is being tested
+- Follow the AAA pattern: Arrange, Act, Assert
+- Mock external dependencies appropriately
+- Test edge cases and error scenarios
+
+## Security
+
+- Never commit secrets, API keys, or passwords
+- Use environment variables for sensitive configuration
+- Validate and sanitize all user inputs
+- Use parameterized queries to prevent SQL injection
+- Keep dependencies up to date
+- Follow OWASP security best practices
+
+## Performance
+
+- Avoid premature optimization
+- Profile before optimizing
+- Use appropriate data structures
+- Consider time and space complexity
+- Implement pagination for large datasets
+- Cache expensive computations when appropriate
+
+## Git Workflow
+
+- Write atomic commits that represent a single logical change
+- Use conventional commit format: `type(scope): description`
+- Types: feat, fix, docs, style, refactor, test, chore
+- Keep commits small and focused
+- Write descriptive PR descriptions
+- Reference issues in commit messages when applicable
+
+## Language-Specific Guidelines
+
+### JavaScript/TypeScript
+- Use const by default, let when reassignment is needed, avoid var
+- Prefer arrow functions for callbacks
+- Use destructuring for object and array access
+- Leverage TypeScript's type system fully
+- Use strict null checks
+- Prefer interfaces over type aliases for object shapes
+
+### Python
+- Follow PEP 8 style guide
+- Use type hints for function signatures
+- Use f-strings for string formatting
+- Prefer list comprehensions over map/filter when readable
+- Use context managers (with statements) for resource management
+- Use dataclasses or Pydantic models for data structures
+
+### Go
+- Follow Go conventions (gofmt, golint)
+- Handle all errors explicitly
+- Use defer for cleanup operations
+- Keep functions small and focused
+- Use meaningful package names
+- Prefer table-driven tests
+
+### Rust
+- Follow Rust naming conventions
+- Use the borrow checker effectively
+- Prefer Result/Option over panics
+- Write comprehensive error types
+- Use cargo fmt and cargo clippy
+- Document public APIs thoroughly
+
+## Infrastructure as Code
+
+### Terraform
+- Use remote state with locking
+- Organize code into modules
+- Use variables and outputs appropriately
+- Add descriptions to all variables
+- Use workspaces for multiple environments
+- Always run `terraform plan` before `terraform apply`
+
+### Docker
+- Use multi-stage builds to reduce image size
+- Don't run containers as root
+- Use .dockerignore to exclude unnecessary files
+- Pin base image versions
+- Minimize the number of layers
+- Use COPY instead of ADD unless you need extraction
+
+## API Design
+
+- Use RESTful conventions
+- Version your APIs (v1, v2, etc.)
+- Return appropriate HTTP status codes
+- Use consistent error response formats
+- Document APIs with OpenAPI/Swagger
+- Implement rate limiting and authentication
+- Use pagination for list endpoints
+- Support filtering and sorting
+
+## Database
+
+- Use migrations for schema changes
+- Add indexes for frequently queried columns
+- Avoid N+1 query problems
+- Use transactions for multi-step operations
+- Normalize data appropriately (usually 3NF)
+- Consider query performance when designing schema
+- Use database constraints to enforce data integrity
+
+## Frontend Best Practices
+
+- Keep components small and focused
+- Use proper semantic HTML
+- Make UIs accessible (WCAG 2.1 AA compliance)
+- Optimize images and assets
+- Implement responsive design
+- Handle loading and error states
+- Avoid prop drilling (use context or state management)
+- Follow React/Vue/Angular best practices
+
+## Project Structure
+
+- Organize files by feature, not by type
+- Keep related files close together
+- Use index files for clean imports
+- Separate business logic from UI components
+- Use environment-specific configuration files
+- Keep configuration at the root level
+
+## When Suggesting Code Changes
+
+- Explain why the change is beneficial
+- Consider backwards compatibility
+- Suggest tests for the changes
+- Highlight potential breaking changes
+- Provide migration paths when necessary
+- Consider performance implications
+- Think about maintainability
+
+## AI-Specific Guidelines
+
+- Ask clarifying questions when requirements are ambiguous
+- Suggest multiple approaches when appropriate
+- Highlight trade-offs between different solutions
+- Reference relevant documentation
+- Provide complete, working code examples
+- Consider the context of the existing codebase
+- Be proactive about potential issues
