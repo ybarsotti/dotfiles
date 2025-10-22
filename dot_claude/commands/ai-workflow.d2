@@ -1,0 +1,397 @@
+direction: down
+
+title: {
+  label: "AI-Assisted TDD Workflow"
+  near: top-center
+  shape: text
+  style: {
+    font-size: 24
+    bold: true
+  }
+}
+
+# ============= DESIGN PHASE =============
+Design: {
+  label: "1. DESIGN PHASE"
+  style: {
+    fill: "#E3F2FD"
+    stroke: "#1976D2"
+    stroke-width: 3
+  }
+
+  User: {
+    label: "User\n(You)"
+    shape: person
+    style: {
+      fill: "#64B5F6"
+      stroke: "#1976D2"
+    }
+  }
+
+  Discover: {
+    label: "Discover\n/design-solution"
+    style: {
+      fill: "#FFE0B2"
+      stroke: "#F57C00"
+      stroke-width: 2
+    }
+  }
+
+  DesignDoc: {
+    label: "tmp/DESIGN.md"
+    shape: page
+    style: {
+      fill: "#FFFFFF"
+      stroke: "#1976D2"
+    }
+  }
+
+  ReviewDesign: {
+    label: "Review Design\n/review-solution-design"
+    style: {
+      fill: "#FFE0B2"
+      stroke: "#F57C00"
+      stroke-width: 2
+    }
+  }
+
+  User -> Discover: "Problem\nDescription"
+  Discover -> User: "Questions &\nClarifications"
+  Discover -> DesignDoc: "creates"
+  DesignDoc -> ReviewDesign: "input"
+  ReviewDesign -> DesignDoc: "adds review\nsection"
+
+  legend: {
+    label: "📋 Commands:\n• /design-solution\n• /review-solution-design"
+    shape: text
+    style: {
+      fill: "#FFF9C4"
+      stroke: "#F57C00"
+      font-size: 12
+    }
+  }
+}
+
+# ============= DEVELOP PHASE =============
+Develop: {
+  label: "2. DEVELOP PHASE (TDD)"
+  style: {
+    fill: "#F3E5F5"
+    stroke: "#7B1FA2"
+    stroke-width: 3
+  }
+
+  TDD: {
+    label: "TDD Orchestrator\n/develop-solution"
+    style: {
+      fill: "#E0E0E0"
+      stroke: "#F57C00"
+      stroke-width: 2
+    }
+
+    Red: {
+      label: "🔴 RED\nWrite Failing Tests"
+      shape: parallelogram
+      style: {
+        fill: "#A5D6A7"
+        stroke: "#2E7D32"
+        stroke-width: 2
+      }
+    }
+
+    Green: {
+      label: "🟢 GREEN\nMake Tests Pass"
+      shape: parallelogram
+      style: {
+        fill: "#A5D6A7"
+        stroke: "#2E7D32"
+        stroke-width: 2
+      }
+    }
+
+    Refactor: {
+      label: "🔵 REFACTOR\nImprove Code"
+      shape: parallelogram
+      style: {
+        fill: "#A5D6A7"
+        stroke: "#2E7D32"
+        stroke-width: 2
+      }
+    }
+
+    Red -> Green: "implement"
+    Green -> Refactor: "clean up"
+    Refactor -> Red: "next test"
+  }
+
+  CodeFiles: {
+    label: "Code Files\n+ Tests"
+    shape: page
+    style: {
+      fill: "#FFFFFF"
+      stroke: "#7B1FA2"
+    }
+  }
+
+  ImplDoc: {
+    label: "tmp/IMPLEMENTATION.md"
+    shape: page
+    style: {
+      fill: "#FFFFFF"
+      stroke: "#7B1FA2"
+    }
+  }
+
+  TDD -> CodeFiles: "creates"
+  TDD -> ImplDoc: "documents"
+
+  legend: {
+    label: "📋 Command:\n• /develop-solution"
+    shape: text
+    style: {
+      fill: "#FFF9C4"
+      stroke: "#7B1FA2"
+      font-size: 12
+    }
+  }
+}
+
+# ============= REVIEW PHASE =============
+Review: {
+  label: "3. REVIEW PHASE"
+  style: {
+    fill: "#E1F5FE"
+    stroke: "#0288D1"
+    stroke-width: 3
+  }
+
+  # Auto Review Process
+  AutoReview: {
+    label: "Automated Review"
+    style: {
+      fill: "#B3E5FC"
+      stroke: "#0277BD"
+      stroke-dash: 3
+    }
+
+    LLMAgent: {
+      label: "LLM Agent\n/review-solution-code"
+      style: {
+        fill: "#FFE0B2"
+        stroke: "#F57C00"
+        stroke-width: 2
+      }
+    }
+
+    ReviewDoc: {
+      label: "tmp/REVIEW.md"
+      shape: page
+      style: {
+        fill: "#FFFFFF"
+        stroke: "#0277BD"
+      }
+    }
+
+    Fixer: {
+      label: "Fixer\n(You/AI)"
+      style: {
+        fill: "#FFE0B2"
+        stroke: "#F57C00"
+      }
+    }
+
+    LLMAgent -> ReviewDoc: "generates\nreport"
+    ReviewDoc -> Fixer: "issues\nfound"
+    Fixer -> LLMAgent: "fixes\napplied"
+  }
+
+  # Self Review Process
+  SelfReview: {
+    label: "Manual Review"
+    style: {
+      fill: "#B3E5FC"
+      stroke: "#0277BD"
+      stroke-dash: 3
+    }
+
+    Self: {
+      label: "Self\n(You)"
+      shape: person
+      style: {
+        fill: "#64B5F6"
+        stroke: "#0277BD"
+      }
+    }
+
+    SelfReviewDoc: {
+      label: "review.md"
+      shape: page
+      style: {
+        fill: "#FFFFFF"
+        stroke: "#0277BD"
+      }
+    }
+
+    SelfFixer: {
+      label: "Fixer\n(You)"
+      style: {
+        fill: "#FFE0B2"
+        stroke: "#F57C00"
+      }
+    }
+
+    Self -> SelfReviewDoc: "reviews"
+    SelfReviewDoc -> SelfFixer: "report"
+    SelfFixer -> Self: "fixes"
+  }
+
+  # Split for large changes
+  Split: {
+    label: "Split Strategy\n(for complex changes)"
+    style: {
+      fill: "#FFFFFF"
+      stroke: "#0277BD"
+      stroke-dash: 3
+    }
+
+    Branch1: {
+      label: "Branch 1\n(Feature Part 1)"
+      shape: page
+    }
+
+    Branch2: {
+      label: "Branch 2\n(Feature Part 2)"
+      shape: page
+    }
+
+    Branch3: {
+      label: "Branch 3\n(Feature Part 3)"
+      shape: page
+    }
+
+    Branch1 -> Branch2: "split into\nsmaller branches"
+    Branch2 -> Branch3: "split into\nsmaller branches"
+  }
+
+  # Peer Review
+  PeerReview: {
+    label: "Peer Review\n/review-pr"
+    style: {
+      fill: "#B3E5FC"
+      stroke: "#0277BD"
+      stroke-dash: 3
+    }
+
+    Peer: {
+      label: "Peer Reviewer"
+      shape: person
+      style: {
+        fill: "#64B5F6"
+        stroke: "#0277BD"
+      }
+    }
+
+    Dev: {
+      label: "Developer\n(You)"
+      shape: person
+      style: {
+        fill: "#64B5F6"
+        stroke: "#0277BD"
+      }
+    }
+
+    Feedback: {
+      label: "Feedback\n(PR Comments)"
+      shape: page
+      style: {
+        fill: "#FFFFFF"
+        stroke: "#0277BD"
+      }
+    }
+
+    Peer -> Feedback: "reviews &\ncomments"
+    Feedback -> Dev: "receives"
+    Dev -> Peer: "addresses &\nresponds"
+  }
+
+  legend: {
+    label: "📋 Commands:\n• /review-solution-code\n• /review-pr"
+    shape: text
+    style: {
+      fill: "#FFF9C4"
+      stroke: "#0277BD"
+      font-size: 12
+    }
+  }
+}
+
+# ============= SHIP PHASE =============
+Ship: {
+  label: "4. SHIP PHASE 🚀"
+  style: {
+    fill: "#E8F5E9"
+    stroke: "#2E7D32"
+    stroke-width: 5
+  }
+
+  ShipIt: {
+    label: "🚀 SHIP IT!\n/ship-it"
+    shape: hexagon
+    style: {
+      fill: "#81C784"
+      stroke: "#1B5E20"
+      stroke-width: 3
+      font-size: 18
+      bold: true
+    }
+  }
+
+  Checks: {
+    label: "Pre-Flight Checks\n\n✓ Format code\n✓ Run linters\n✓ Run tests\n✓ Security scan\n✓ Performance check"
+    style: {
+      fill: "#C8E6C9"
+      stroke: "#2E7D32"
+    }
+  }
+
+  PR: {
+    label: "Pull Request"
+    shape: page
+    style: {
+      fill: "#FFFFFF"
+      stroke: "#2E7D32"
+      stroke-width: 2
+    }
+  }
+
+  Checks -> ShipIt: "all pass"
+  ShipIt -> PR: "creates"
+
+  BigDeal: {
+    label: "🎉 THIS IS A BIG DEAL! 🎉\nYour code is production-ready!"
+    shape: text
+    style: {
+      fill: "#FFF9C4"
+      stroke: "#F57C00"
+      font-size: 14
+      bold: true
+    }
+  }
+
+  legend: {
+    label: "📋 Command:\n• /ship-it"
+    shape: text
+    style: {
+      fill: "#FFF9C4"
+      stroke: "#2E7D32"
+      font-size: 12
+    }
+  }
+}
+
+# ============= CONNECTIONS BETWEEN PHASES =============
+Design.DesignDoc -> Develop.TDD: "input"
+Develop.CodeFiles -> Review.AutoReview: "review"
+Review.Split -> Review.PeerReview: "sometimes"
+Review.PeerReview -> Ship.ShipIt: "approved"
+Review.SelfReview -> Ship.ShipIt: "ready"
