@@ -198,19 +198,32 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 
 # Delegate to branch-analyzer agent
 Task(
-  description="Analyze branch to identify files and dependencies",
+  description="Analyze branch with dependency-aware file grouping",
   prompt="""
-  Use the branch-analyzer agent to analyze the current branch.
-  
+  Use the branch-analyzer agent to analyze the current branch with ACTUAL DEPENDENCY ANALYSIS.
+
   Branch: $CURRENT_BRANCH
   Base: $BASE_BRANCH
   Output TOML: $CONFIG_FILE
-  
+
+  CRITICAL REQUIREMENT: The agent MUST:
+  1. READ actual file contents (not just look at filenames)
+  2. PARSE import statements to identify dependencies between files
+  3. BUILD a dependency graph showing which files import from which other files
+  4. GROUP files based on actual import relationships (not filename patterns)
+  5. ORDER groups so foundation files (no internal dependencies) come first
+
+  Example: If orchestrator.py imports from validator.py, they have a dependency relationship
+  and should be grouped accordingly.
+
+  DO NOT group files by directory structure or file type patterns alone!
+
   The agent should identify:
   - All changed files
-  - File types and layers (models, repos, services, API)
-  - Import dependencies
-  - Logical grouping suggestions
+  - Actual import relationships (by reading file contents)
+  - Foundation files (no dependencies on other changed files)
+  - Dependent files (files that import foundation files)
+  - Logical grouping based on tight coupling through imports
   """
 )
 
