@@ -573,6 +573,32 @@ for i in "${!PR_NUMBERS[@]}"; do
   # Get branch short name (last part after /)
   BRANCH_SHORT="${BRANCH_NAME##*/}"
 
+  # Extract ticket/issue number from branch name or source branch
+  # Common patterns: feature/TICKET-123, feature/ticket-123, feature/123-description
+  TICKET_NUMBER=""
+
+  # Try to extract from current branch name
+  if [[ "$BRANCH_NAME" =~ ([A-Z]+-[0-9]+) ]]; then
+    # Pattern: TICKET-123 (Jira-style)
+    TICKET_NUMBER="${BASH_REMATCH[1]}"
+  elif [[ "$BRANCH_NAME" =~ ([a-z]+-[0-9]+) ]]; then
+    # Pattern: ticket-123 (lowercase)
+    TICKET_NUMBER="${BASH_REMATCH[1]}"
+  elif [[ "$BRANCH_NAME" =~ /([0-9]+)- ]]; then
+    # Pattern: feature/123-description
+    TICKET_NUMBER="${BASH_REMATCH[1]}"
+  fi
+
+  # If not found in branch name, try source branch from config
+  if [ -z "$TICKET_NUMBER" ]; then
+    SOURCE_BRANCH=$(grep "source_branch = " "$CONFIG_FILE" | head -1 | cut -d'"' -f2)
+    if [[ "$SOURCE_BRANCH" =~ ([A-Z]+-[0-9]+) ]]; then
+      TICKET_NUMBER="${BASH_REMATCH[1]}"
+    elif [[ "$SOURCE_BRANCH" =~ ([a-z]+-[0-9]+) ]]; then
+      TICKET_NUMBER="${BASH_REMATCH[1]}"
+    fi
+  fi
+
   # Build comprehensive PR description
   DESCRIPTION="## Summary
 
@@ -580,7 +606,16 @@ ${BRANCH_DESC}
 
 This is **PR #$((i+1)) of $TOTAL** in the stack.
 
-## Stack Context
+"
+
+  # Add ticket reference if found
+  if [ -n "$TICKET_NUMBER" ]; then
+    DESCRIPTION+="**Related Issue**: $TICKET_NUMBER
+
+"
+  fi
+
+  DESCRIPTION+="## Stack Context
 
 This PR is part of a larger feature implementation split into reviewable chunks:
 
