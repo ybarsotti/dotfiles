@@ -73,93 +73,199 @@ SOURCE_BRANCH=$(grep "source_branch" "$CONFIG_FILE" | cut -d'"' -f2)
 BASE_BRANCH=$(grep "base_branch" "$CONFIG_FILE" | cut -d'"' -f2)
 BRANCH_PREFIX="${SOURCE_BRANCH%/*}"  # Get username/feature prefix
 
-# Extract files from the [files] section comments
+# Get recommended strategy
+STRATEGY=$(grep "recommended_strategy" "$CONFIG_FILE" | cut -d'"' -f2)
+echo "📊 Recommended strategy: $STRATEGY"
+
+# Extract ALL files categorized
 FOUNDATION_FILES=$(grep "^# Model:\|^# Migration:\|^# Type:" "$CONFIG_FILE" | sed 's/^# [^:]*: //')
 REPO_FILES=$(grep "^# Repository:" "$CONFIG_FILE" | sed 's/^# Repository: //')
 SERVICE_FILES=$(grep "^# Service:" "$CONFIG_FILE" | sed 's/^# Service: //')
 API_FILES=$(grep "^# API:\|^# Schema:" "$CONFIG_FILE" | sed 's/^# [^:]*: //')
+SCRIPT_FILES=$(grep "^# Script:" "$CONFIG_FILE" | sed 's/^# Script: //')
 TEST_FILES=$(grep "^# Test:" "$CONFIG_FILE" | sed 's/^# Test: //')
 FIXTURE_FILES=$(grep "^# Fixture:" "$CONFIG_FILE" | sed 's/^# Fixture: //')
+
+echo ""
+echo "File counts:"
+echo "  Foundation: $(echo "$FOUNDATION_FILES" | grep -c '.' || echo 0)"
+echo "  Repositories: $(echo "$REPO_FILES" | grep -c '.' || echo 0)"
+echo "  Services: $(echo "$SERVICE_FILES" | grep -c '.' || echo 0)"
+echo "  API: $(echo "$API_FILES" | grep -c '.' || echo 0)"
+echo "  Scripts: $(echo "$SCRIPT_FILES" | grep -c '.' || echo 0)"
+echo "  Tests: $(echo "$TEST_FILES" | grep -c '.' || echo 0)"
+echo "  Fixtures: $(echo "$FIXTURE_FILES" | grep -c '.' || echo 0)"
 ```
 
-### Step 3: Assign Tests and Fixtures to Correct Layers
-
-**CRITICAL RULE**: Tests and fixtures MUST be in the SAME branch as the code they test!
+### Step 2.5: Load Pattern Data (NEW!)
 
 ```bash
 echo ""
-echo "🔗 Assigning tests and fixtures to layers..."
+echo "🔍 Loading pattern data..."
 
-# Helper function to determine which layer a test belongs to
-assign_test_layer() {
-  local test_file="$1"
+# Check if we have script groups
+HAS_SCRIPT_GROUPS=false
+if grep -q "\[analysis.script_groups\]" "$CONFIG_FILE"; then
+  HAS_SCRIPT_GROUPS=true
+  echo "  ✓ Script groups detected"
+fi
+
+# Check if we have feature groups
+HAS_FEATURE_GROUPS=false
+if grep -q "\[analysis.feature_groups\]" "$CONFIG_FILE"; then
+  HAS_FEATURE_GROUPS=true
+  echo "  ✓ Feature groups detected"
+fi
+
+# Load test relationships (CRITICAL!)
+declare -A TEST_TO_IMPL
+if grep -q "\[analysis.test_relationships\]" "$CONFIG_FILE"; then
+  echo "  ✓ Test relationships detected"
   
-  # Repository tests
-  if echo "$test_file" | grep -q "test.*repo"; then
-    echo "repository"
-  # Service tests
-  elif echo "$test_file" | grep -q "test.*service"; then
-    echo "service"
-  # API tests
-  elif echo "$test_file" | grep -q "test.*api\|test.*endpoint"; then
-    echo "api"
-  # Model tests (rare, but possible)
-  elif echo "$test_file" | grep -q "test.*model\|test.*row"; then
-    echo "foundation"
-  else
-    echo "unknown"
-  fi
-}
+  # Parse test relationships
+  IN_TEST_SECTION=false
+  while IFS= read -r line; do
+    if [[ "$line" == "[analysis.test_relationships]" ]]; then
+      IN_TEST_SECTION=true
+      continue
+    elif [[ "$line" =~ ^\[.*\] ]]; then
+      IN_TEST_SECTION=false
+    elif [ "$IN_TEST_SECTION" = true ] && [[ "$line" =~ \"(.+)\"[[:space:]]*=[[:space:]]*\"(.+)\" ]]; then
+      TEST="${BASH_REMATCH[1]}"
+      IMPL="${BASH_REMATCH[2]}"
+      TEST_TO_IMPL["$TEST"]="$IMPL"
+      echo "    • $TEST → $IMPL"
+    fi
+  done < "$CONFIG_FILE"
+fi
 
-# Categorize tests
-FOUNDATION_TESTS=""
-REPO_TESTS=""
-SERVICE_TESTS=""
-API_TESTS=""
+# Load fixture relationships (CRITICAL!)
+declare -A FIXTURE_TO_TESTS
+if grep -q "\[analysis.fixture_relationships\]" "$CONFIG_FILE"; then
+  echo "  ✓ Fixture relationships detected"
+  # Similar parsing logic for fixtures
+fi
+```
 
-while IFS= read -r test_file; do
+### Step 3: Assign Tests Using Relationships (CRITICAL!)
+
+**Tests MUST go with their implementation - using analysis relationships**
+
+```bash
+echo ""
+echo "🔗 Assigning tests and fixtures using relationships..."
+
+# For each test file, add it to the same group as its implementation
+for test_file in $TEST_FILES; do
   [ -z "$test_file" ] && continue
   
-  layer=$(assign_test_layer "$test_file")
-  case "$layer" in
-    foundation) FOUNDATION_TESTS="$FOUNDATION_TESTS$test_file"$'\n' ;;
-    repository) REPO_TESTS="$REPO_TESTS$test_file"$'\n' ;;
-    service) SERVICE_TESTS="$SERVICE_TESTS$test_file"$'\n' ;;
-    api) API_TESTS="$API_TESTS$test_file"$'\n' ;;
-  esac
-done <<< "$TEST_FILES"
+  # Check if we have a relationship for this test
+  if [ -n "${TEST_TO_IMPL[$test_file]}" ]; then
+    IMPL_FILE="${TEST_TO_IMPL[$test_file]}"
+    
+    # Add test to the same category as implementation
+    if echo "$FOUNDATION_FILES" | grep -q "$IMPL_FILE"; then
+      FOUNDATION_FILES="$FOUNDATION_FILES"$'\n'"$test_file"
+      echo "  ✓ $test_file → Foundation (with $IMPL_FILE)"
+    elif echo "$REPO_FILES" | grep -q "$IMPL_FILE"; then
+      REPO_FILES="$REPO_FILES"$'\n'"$test_file"
+      echo "  ✓ $test_file → Repositories (with $IMPL_FILE)"
+    elif echo "$SERVICE_FILES" | grep -q "$IMPL_FILE"; then
+      SERVICE_FILES="$SERVICE_FILES"$'\n'"$test_file"
+      echo "  ✓ $test_file → Services (with $IMPL_FILE)"
+    elif echo "$API_FILES" | grep -q "$IMPL_FILE"; then
+      API_FILES="$API_FILES"$'\n'"$test_file"
+      echo "  ✓ $test_file → API (with $IMPL_FILE)"
+    elif echo "$SCRIPT_FILES" | grep -q "$IMPL_FILE"; then
+      SCRIPT_FILES="$SCRIPT_FILES"$'\n'"$test_file"
+      echo "  ✓ $test_file → Scripts (with $IMPL_FILE)"
+    fi
+  else
+    # Fallback: infer from test name
+    if echo "$test_file" | grep -q "test.*repo"; then
+      REPO_FILES="$REPO_FILES"$'\n'"$test_file"
+      echo "  ℹ️  $test_file → Repositories (inferred)"
+    elif echo "$test_file" | grep -q "test.*service"; then
+      SERVICE_FILES="$SERVICE_FILES"$'\n'"$test_file"
+      echo "  ℹ️  $test_file → Services (inferred)"
+    elif echo "$test_file" | grep -q "test.*api"; then
+      API_FILES="$API_FILES"$'\n'"$test_file"
+      echo "  ℹ️  $test_file → API (inferred)"
+    elif echo "$test_file" | grep -q "test.*script"; then
+      SCRIPT_FILES="$SCRIPT_FILES"$'\n'"$test_file"
+      echo "  ℹ️  $test_file → Scripts (inferred)"
+    fi
+  fi
+done
 
-# Similarly for fixtures - they go with the tests that use them
-# For simplicity, assume fixture naming convention matches test naming
-FOUNDATION_FIXTURES=$(echo "$FIXTURE_FILES" | grep "model.*fixture" || echo "")
-REPO_FIXTURES=$(echo "$FIXTURE_FILES" | grep "repo.*fixture" || echo "")
-SERVICE_FIXTURES=$(echo "$FIXTURE_FILES" | grep "service.*fixture" || echo "")
-API_FIXTURES=$(echo "$FIXTURE_FILES" | grep "api.*fixture" || echo "")
+# Similarly assign fixtures to where their tests are
+for fixture_file in $FIXTURE_FILES; do
+  [ -z "$fixture_file" ] && continue
+  
+  # Fixtures go wherever their tests are
+  if echo "$FOUNDATION_FILES" | grep -q "test.*$(basename $fixture_file _fixtures.py)"; then
+    FOUNDATION_FILES="$FOUNDATION_FILES"$'\n'"$fixture_file"
+    echo "  ✓ $fixture_file → Foundation (with its tests)"
+  elif echo "$REPO_FILES" | grep -q "test.*$(basename $fixture_file _fixtures.py)"; then
+    REPO_FILES="$REPO_FILES"$'\n'"$fixture_file"
+    echo "  ✓ $fixture_file → Repositories (with its tests)"
+  elif echo "$SERVICE_FILES" | grep -q "test.*$(basename $fixture_file _fixtures.py)"; then
+    SERVICE_FILES="$SERVICE_FILES"$'\n'"$fixture_file"
+    echo "  ✓ $fixture_file → Services (with its tests)"
+  elif echo "$API_FILES" | grep -q "test.*$(basename $fixture_file _fixtures.py)"; then
+    API_FILES="$API_FILES"$'\n'"$fixture_file"
+    echo "  ✓ $fixture_file → API (with its tests)"
+  fi
+done
 ```
 
-### Step 4: Build Branches Array
-
-**CRITICAL**: Foundation MUST be first! Other branches build on it.
+### Step 4: Choose Planning Strategy
 
 ```bash
 echo ""
-echo "🏗️  Building branch structure..."
+echo "📋 Selecting planning strategy..."
+
+case "$STRATEGY" in
+  "by-script-group")
+    echo "  🎯 Using SCRIPT-GROUPED strategy"
+    PLANNING_MODE="scripts"
+    ;;
+  "by-feature")
+    echo "  🎯 Using FEATURE-BASED strategy"
+    PLANNING_MODE="features"
+    ;;
+  "by-layer")
+    echo "  🎯 Using LAYER-BASED strategy"
+    PLANNING_MODE="layers"
+    ;;
+  *)
+    echo "  🎯 Using LAYER-BASED strategy (default)"
+    PLANNING_MODE="layers"
+    ;;
+esac
+```
+
+### Step 5: Build Branches Based on Strategy
+
+```bash
+echo ""
+echo "🏗️  Building branch structure using $PLANNING_MODE mode..."
 
 # Create branches section in TOML
 {
   echo ""
-  echo "# Branch split strategy"
+  echo "# Branch split strategy: $PLANNING_MODE"
   echo "# Generated by stack-planner at $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
   echo ""
 } >> "$CONFIG_FILE"
 
 BRANCH_COUNT=0
 
-# LAYER 1: Foundation (MUST BE FIRST)
-if [ -n "$FOUNDATION_FILES" ] || [ -n "$FOUNDATION_TESTS" ]; then
+# ALWAYS start with foundation if it has files (dependency rule!)
+if [ -n "$FOUNDATION_FILES" ]; then
   ((BRANCH_COUNT++))
   
-  echo "Creating branch $BRANCH_COUNT: Foundation..."
+  echo "Creating branch $BRANCH_COUNT: Foundation (required for dependencies)..."
   
   cat >> "$CONFIG_FILE" << EOF
 
@@ -172,160 +278,325 @@ description = "Foundation layer: models, migrations, shared types"
 files = [
 EOF
 
-  # Add foundation files
   while IFS= read -r file; do
     [ -z "$file" ] && continue
     echo "  \"$file\"," >> "$CONFIG_FILE"
   done <<< "$FOUNDATION_FILES"
   
-  # Add foundation tests
-  while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    echo "  \"$file\"," >> "$CONFIG_FILE"
-  done <<< "$FOUNDATION_TESTS"
-  
-  # Add foundation fixtures
-  while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    echo "  \"$file\"," >> "$CONFIG_FILE"
-  done <<< "$FOUNDATION_FIXTURES"
-  
   echo "]" >> "$CONFIG_FILE"
 fi
 
-# LAYER 2: Repositories
-if [ -n "$REPO_FILES" ] || [ -n "$REPO_TESTS" ]; then
-  ((BRANCH_COUNT++))
-  
-  echo "Creating branch $BRANCH_COUNT: Repositories..."
-  
-  cat >> "$CONFIG_FILE" << EOF
+# Now split based on strategy
+case "$PLANNING_MODE" in
+  "scripts")
+    # SCRIPT-GROUPED MODE: Group scripts by purpose
+    echo ""
+    echo "  📜 Using script-grouped splitting..."
+    
+    # Extract script groups from analysis
+    if [ "$HAS_SCRIPT_GROUPS" = true ]; then
+      IN_SCRIPT_SECTION=false
+      CURRENT_GROUP=""
+      
+      while IFS= read -r line; do
+        if [[ "$line" == "[analysis.script_groups]" ]]; then
+          IN_SCRIPT_SECTION=true
+          continue
+        elif [[ "$line" =~ ^\[.*\] ]]; then
+          IN_SCRIPT_SECTION=false
+        elif [ "$IN_SCRIPT_SECTION" = true ]; then
+          if [[ "$line" =~ ^([a-z_]+)[[:space:]]*= ]]; then
+            ((BRANCH_COUNT++))
+            CURRENT_GROUP="${BASH_REMATCH[1]}"
+            GROUP_NAME=$(echo "$CURRENT_GROUP" | sed 's/_/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)}1')
+            
+            echo "Creating branch $BRANCH_COUNT: $GROUP_NAME..."
+            
+            # Start branch definition
+            BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
+            PREV_BRANCH_NUM=$(printf "%02d" $((BRANCH_COUNT - 1)))
+            
+            cat >> "$CONFIG_FILE" << EOF
 
 [[branches]]
-branch = "$BRANCH_PREFIX/02-repositories"
+branch = "$BRANCH_PREFIX/$BRANCH_NUM-$CURRENT_GROUP"
+commit = "feat: add $GROUP_NAME"
+layer = $BRANCH_COUNT
+depends_on = "$BRANCH_PREFIX/$PREV_BRANCH_NUM-"
+description = "$GROUP_NAME scripts and their tests"
+
+files = [
+EOF
+            # Files will be added as we parse them
+          elif [[ "$line" =~ \"([^\"]+)\" ]]; then
+            # This is a file in the current group
+            FILE="${BASH_REMATCH[1]}"
+            echo "  \"$FILE\"," >> "$CONFIG_FILE"
+          elif [[ "$line" == "]" ]] && [ -n "$CURRENT_GROUP" ]; then
+            # End of this group
+            echo "]" >> "$CONFIG_FILE"
+            CURRENT_GROUP=""
+          fi
+        fi
+      done < "$CONFIG_FILE"
+    fi
+    
+    # Add remaining layers if they exist (repos, services, API)
+    if [ -n "$REPO_FILES" ]; then
+      ((BRANCH_COUNT++))
+      BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
+      echo "Creating branch $BRANCH_COUNT: Repositories..."
+      
+      cat >> "$CONFIG_FILE" << EOF
+
+[[branches]]
+branch = "$BRANCH_PREFIX/$BRANCH_NUM-repositories"
+commit = "feat: add repository layer"
+layer = $BRANCH_COUNT
+description = "Repository layer with tests"
+
+files = [
+EOF
+      
+      while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        echo "  \"$file\"," >> "$CONFIG_FILE"
+      done <<< "$REPO_FILES"
+      
+      echo "]" >> "$CONFIG_FILE"
+    fi
+    
+    if [ -n "$SERVICE_FILES" ]; then
+      ((BRANCH_COUNT++))
+      BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
+      echo "Creating branch $BRANCH_COUNT: Services..."
+      
+      cat >> "$CONFIG_FILE" << EOF
+
+[[branches]]
+branch = "$BRANCH_PREFIX/$BRANCH_NUM-services"
+commit = "feat: add service layer"
+layer = $BRANCH_COUNT
+description = "Service layer with tests"
+
+files = [
+EOF
+      
+      while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        echo "  \"$file\"," >> "$CONFIG_FILE"
+      done <<< "$SERVICE_FILES"
+      
+      echo "]" >> "$CONFIG_FILE"
+    fi
+    
+    if [ -n "$API_FILES" ]; then
+      ((BRANCH_COUNT++))
+      BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
+      echo "Creating branch $BRANCH_COUNT: API..."
+      
+      cat >> "$CONFIG_FILE" << EOF
+
+[[branches]]
+branch = "$BRANCH_PREFIX/$BRANCH_NUM-api"
+commit = "feat: add API endpoints"
+layer = $BRANCH_COUNT
+description = "API layer with tests"
+
+files = [
+EOF
+      
+      while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        echo "  \"$file\"," >> "$CONFIG_FILE"
+      done <<< "$API_FILES"
+      
+      echo "]" >> "$CONFIG_FILE"
+    fi
+    ;;
+    
+  "features")
+    # FEATURE-BASED MODE: Group by feature
+    echo ""
+    echo "  🎯 Using feature-based splitting..."
+    
+    if [ "$HAS_FEATURE_GROUPS" = true ]; then
+      IN_FEATURE_SECTION=false
+      CURRENT_FEATURE=""
+      
+      while IFS= read -r line; do
+        if [[ "$line" == "[analysis.feature_groups]" ]]; then
+          IN_FEATURE_SECTION=true
+          continue
+        elif [[ "$line" =~ ^\[.*\] ]]; then
+          IN_FEATURE_SECTION=false
+        elif [ "$IN_FEATURE_SECTION" = true ]; then
+          if [[ "$line" =~ ^([a-z_]+)[[:space:]]*= ]]; then
+            ((BRANCH_COUNT++))
+            CURRENT_FEATURE="${BASH_REMATCH[1]}"
+            FEATURE_NAME=$(echo "$CURRENT_FEATURE" | sed 's/_/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)}1')
+            
+            echo "Creating branch $BRANCH_COUNT: $FEATURE_NAME feature..."
+            
+            BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
+            
+            cat >> "$CONFIG_FILE" << EOF
+
+[[branches]]
+branch = "$BRANCH_PREFIX/$BRANCH_NUM-$CURRENT_FEATURE-feature"
+commit = "feat: add $FEATURE_NAME feature"
+layer = $BRANCH_COUNT
+description = "$FEATURE_NAME feature with tests"
+
+files = [
+EOF
+          elif [[ "$line" =~ \"([^\"]+)\" ]]; then
+            FILE="${BASH_REMATCH[1]}"
+            echo "  \"$FILE\"," >> "$CONFIG_FILE"
+          elif [[ "$line" == "]" ]] && [ -n "$CURRENT_FEATURE" ]; then
+            echo "]" >> "$CONFIG_FILE"
+            CURRENT_FEATURE=""
+          fi
+        fi
+      done < "$CONFIG_FILE"
+    fi
+    ;;
+    
+  "layers"|*)
+    # LAYER-BASED MODE: Traditional architecture layers
+    echo ""
+    echo "  🏗️  Using layer-based splitting..."
+    
+    # Layer 2: Repositories
+    if [ -n "$REPO_FILES" ]; then
+      ((BRANCH_COUNT++))
+      PREV_NUM=$((BRANCH_COUNT - 1))
+      BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
+      PREV_BRANCH_NUM=$(printf "%02d" $PREV_NUM)
+      
+      echo "Creating branch $BRANCH_COUNT: Repositories..."
+      
+      cat >> "$CONFIG_FILE" << EOF
+
+[[branches]]
+branch = "$BRANCH_PREFIX/$BRANCH_NUM-repositories"
 commit = "feat: add repository layer for data access"
-layer = 2
-depends_on = "$BRANCH_PREFIX/01-foundation"
-description = "Repository layer: data access, filters, repo tests"
+layer = $BRANCH_COUNT
+depends_on = "$BRANCH_PREFIX/$PREV_BRANCH_NUM-foundation"
+description = "Repository layer: data access, filters, tests"
 
 files = [
 EOF
-
-  # Add repo files
-  while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    echo "  \"$file\"," >> "$CONFIG_FILE"
-  done <<< "$REPO_FILES"
-  
-  # Add repo tests
-  while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    echo "  \"$file\"," >> "$CONFIG_FILE"
-  done <<< "$REPO_TESTS"
-  
-  # Add repo fixtures
-  while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    echo "  \"$file\"," >> "$CONFIG_FILE"
-  done <<< "$REPO_FIXTURES"
-  
-  echo "]" >> "$CONFIG_FILE"
-fi
-
-# LAYER 3: Services/Business Logic
-if [ -n "$SERVICE_FILES" ] || [ -n "$SERVICE_TESTS" ]; then
-  ((BRANCH_COUNT++))
-  
-  # Determine the previous branch name
-  if [ $BRANCH_COUNT -eq 2 ]; then
-    PREV_BRANCH="$BRANCH_PREFIX/01-foundation"
-  else
-    PREV_BRANCH="$BRANCH_PREFIX/02-repositories"
-  fi
-  
-  echo "Creating branch $BRANCH_COUNT: Services..."
-  
-  cat >> "$CONFIG_FILE" << EOF
+      
+      while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        echo "  \"$file\"," >> "$CONFIG_FILE"
+      done <<< "$REPO_FILES"
+      
+      echo "]" >> "$CONFIG_FILE"
+    fi
+    
+    # Layer 3: Services/Business Logic
+    if [ -n "$SERVICE_FILES" ]; then
+      ((BRANCH_COUNT++))
+      PREV_NUM=$((BRANCH_COUNT - 1))
+      BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
+      PREV_BRANCH_NUM=$(printf "%02d" $PREV_NUM)
+      
+      if [ $PREV_NUM -eq 1 ]; then
+        PREV_BRANCH="$BRANCH_PREFIX/01-foundation"
+      else
+        PREV_BRANCH="$BRANCH_PREFIX/$PREV_BRANCH_NUM-repositories"
+      fi
+      
+      echo "Creating branch $BRANCH_COUNT: Services..."
+      
+      cat >> "$CONFIG_FILE" << EOF
 
 [[branches]]
-branch = "$BRANCH_PREFIX/03-business-logic"
+branch = "$BRANCH_PREFIX/$BRANCH_NUM-business-logic"
 commit = "feat: add service layer with business rules"
-layer = 3
+layer = $BRANCH_COUNT
 depends_on = "$PREV_BRANCH"
-description = "Service layer: business logic, orchestration"
+description = "Service layer: business logic, orchestration, tests"
 
 files = [
 EOF
-
-  # Add service files
-  while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    echo "  \"$file\"," >> "$CONFIG_FILE"
-  done <<< "$SERVICE_FILES"
-  
-  # Add service tests
-  while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    echo "  \"$file\"," >> "$CONFIG_FILE"
-  done <<< "$SERVICE_TESTS"
-  
-  # Add service fixtures
-  while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    echo "  \"$file\"," >> "$CONFIG_FILE"
-  done <<< "$SERVICE_FIXTURES"
-  
-  echo "]" >> "$CONFIG_FILE"
-fi
-
-# LAYER 4: API
-if [ -n "$API_FILES" ] || [ -n "$API_TESTS" ]; then
-  ((BRANCH_COUNT++))
-  
-  # Determine the previous branch name
-  PREV_NUM=$((BRANCH_COUNT - 1))
-  if [ $PREV_NUM -eq 1 ]; then
-    PREV_BRANCH="$BRANCH_PREFIX/01-foundation"
-  elif [ $PREV_NUM -eq 2 ]; then
-    PREV_BRANCH="$BRANCH_PREFIX/02-repositories"
-  else
-    PREV_BRANCH="$BRANCH_PREFIX/03-business-logic"
-  fi
-  
-  echo "Creating branch $BRANCH_COUNT: API..."
-  
-  cat >> "$CONFIG_FILE" << EOF
+      
+      while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        echo "  \"$file\"," >> "$CONFIG_FILE"
+      done <<< "$SERVICE_FILES"
+      
+      echo "]" >> "$CONFIG_FILE"
+    fi
+    
+    # Layer 4: API
+    if [ -n "$API_FILES" ]; then
+      ((BRANCH_COUNT++))
+      PREV_NUM=$((BRANCH_COUNT - 1))
+      BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
+      PREV_BRANCH_NUM=$(printf "%02d" $PREV_NUM)
+      
+      # Determine previous branch
+      if [ $PREV_NUM -eq 1 ]; then
+        PREV_BRANCH="$BRANCH_PREFIX/01-foundation"
+      elif [ $PREV_NUM -eq 2 ]; then
+        PREV_BRANCH="$BRANCH_PREFIX/02-repositories"
+      else
+        PREV_BRANCH="$BRANCH_PREFIX/03-business-logic"
+      fi
+      
+      echo "Creating branch $BRANCH_COUNT: API..."
+      
+      cat >> "$CONFIG_FILE" << EOF
 
 [[branches]]
-branch = "$BRANCH_PREFIX/04-api-and-endpoints"
+branch = "$BRANCH_PREFIX/$BRANCH_NUM-api-and-endpoints"
 commit = "feat: add API endpoints and schemas"
-layer = 4
+layer = $BRANCH_COUNT
 depends_on = "$PREV_BRANCH"
-description = "API layer: HTTP endpoints, request/response schemas"
+description = "API layer: HTTP endpoints, request/response schemas, tests"
 
 files = [
 EOF
+      
+      while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        echo "  \"$file\"," >> "$CONFIG_FILE"
+      done <<< "$API_FILES"
+      
+      echo "]" >> "$CONFIG_FILE"
+    fi
+    
+    # Scripts (if not in script-grouped mode)
+    if [ -n "$SCRIPT_FILES" ]; then
+      ((BRANCH_COUNT++))
+      PREV_NUM=$((BRANCH_COUNT - 1))
+      BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
+      
+      echo "Creating branch $BRANCH_COUNT: Scripts..."
+      
+      cat >> "$CONFIG_FILE" << EOF
 
-  # Add API files
-  while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    echo "  \"$file\"," >> "$CONFIG_FILE"
-  done <<< "$API_FILES"
-  
-  # Add API tests
-  while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    echo "  \"$file\"," >> "$CONFIG_FILE"
-  done <<< "$API_TESTS"
-  
-  # Add API fixtures
-  while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    echo "  \"$file\"," >> "$CONFIG_FILE"
-  done <<< "$API_FIXTURES"
-  
-  echo "]" >> "$CONFIG_FILE"
-fi
+[[branches]]
+branch = "$BRANCH_PREFIX/$BRANCH_NUM-scripts"
+commit = "feat: add utility scripts"
+layer = $BRANCH_COUNT
+description = "Utility scripts with tests"
+
+files = [
+EOF
+      
+      while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        echo "  \"$file\"," >> "$CONFIG_FILE"
+      done <<< "$SCRIPT_FILES"
+      
+      echo "]" >> "$CONFIG_FILE"
+    fi
+    ;;
+esac
 ```
 
 ### Step 5: Validate Plan
