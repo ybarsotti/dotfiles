@@ -535,7 +535,10 @@ PR_NUMBERS=()
 for i in "${!BRANCHES[@]}"; do
   BRANCH_NAME="${BRANCHES[$i]}"
   BASE_BRANCH=$(grep -A 10 "branch = \"$BRANCH_NAME\"" "$CONFIG_FILE" | grep "base = " | head -1 | cut -d'"' -f2)
-  PR_TITLE=$(grep -A 10 "branch = \"$BRANCH_NAME\"" "$CONFIG_FILE" | grep "title = " | head -1 | cut -d'"' -f2-)
+
+  # Get meaningful title from commit message
+  COMMIT_MSG=$(grep -A 10 "branch = \"$BRANCH_NAME\"" "$CONFIG_FILE" | grep "commit = " | head -1 | cut -d'"' -f2-)
+  PR_TITLE="$COMMIT_MSG"
 
   # Create PR
   PR_URL=$(gh pr create \
@@ -560,34 +563,155 @@ for i in "${!PR_NUMBERS[@]}"; do
   PR_NUM="${PR_NUMBERS[$i]}"
   BRANCH_NAME="${BRANCHES[$i]}"
 
-  # Build proper description with correct PR refs
-  DESCRIPTION="Part $((i+1))/$TOTAL of the PR stack
+  # Get branch metadata from config
+  BRANCH_DESC=$(grep -A 10 "branch = \"$BRANCH_NAME\"" "$CONFIG_FILE" | grep "description = " | head -1 | cut -d'"' -f2-)
+  LAYER_NUM=$(grep -A 10 "branch = \"$BRANCH_NAME\"" "$CONFIG_FILE" | grep "layer = " | head -1 | awk '{print $3}')
+
+  # Count files in this branch
+  FILE_COUNT=$(grep -A 100 "branch = \"$BRANCH_NAME\"" "$CONFIG_FILE" | grep '  ".*",' | wc -l | xargs)
+
+  # Get branch short name (last part after /)
+  BRANCH_SHORT="${BRANCH_NAME##*/}"
+
+  # Build comprehensive PR description
+  DESCRIPTION="## Summary
+
+${BRANCH_DESC}
+
+This is **PR #$((i+1)) of $TOTAL** in the stack.
+
+## Stack Context
+
+This PR is part of a larger feature implementation split into reviewable chunks:
 
 "
 
-  if [ $i -gt 0 ]; then
+  # Build numbered stack list
+  for j in "${!BRANCHES[@]}"; do
+    STACK_NUM=$((j+1))
+    STACK_BRANCH="${BRANCHES[$j]}"
+    STACK_SHORT="${STACK_BRANCH##*/}"
+    STACK_PR="${PR_NUMBERS[$j]}"
+    STACK_DESC=$(grep -A 10 "branch = \"$STACK_BRANCH\"" "$CONFIG_FILE" | grep "description = " | head -1 | cut -d'"' -f2-)
+
+    if [ $j -eq $i ]; then
+      DESCRIPTION+="$STACK_NUM. 🔄 **PR #$STACK_PR: $STACK_SHORT** ← You are here
+"
+    elif [ $j -lt $i ]; then
+      DESCRIPTION+="$STACK_NUM. ✅ PR #$STACK_PR: $STACK_SHORT
+"
+    else
+      DESCRIPTION+="$STACK_NUM. ⏳ PR #$STACK_PR: $STACK_SHORT
+"
+    fi
+
+    if [ -n "$STACK_DESC" ]; then
+      DESCRIPTION+="   - ${STACK_DESC}
+"
+    fi
+  done
+
+  DESCRIPTION+="
+**Merge Flow**: "
+  for j in $(seq 0 $((TOTAL-1))); do
+    if [ $j -eq $i ]; then
+      DESCRIPTION+="**#${PR_NUMBERS[$j]}**"
+    else
+      DESCRIPTION+="#${PR_NUMBERS[$j]}"
+    fi
+
+    if [ $j -lt $((TOTAL-1)) ]; then
+      DESCRIPTION+=" → "
+    fi
+  done
+
+  DESCRIPTION+="
+
+## Dependencies
+
+"
+
+  if [ $i -eq 0 ]; then
+    DESCRIPTION+="**Targets**: \`main\` (base branch)
+
+**No dependencies** - this is the foundation layer
+
+"
+  else
     PREV_PR="${PR_NUMBERS[$((i-1))]}"
-    DESCRIPTION+="**Depends on**: PR #$PREV_PR
+    PREV_BRANCH="${BRANCHES[$((i-1))]}"
+    PREV_SHORT="${PREV_BRANCH##*/}"
+
+    DESCRIPTION+="**Depends on**: PR #$PREV_PR (\`$PREV_SHORT\`)
+
+**Targets**: \`$PREV_SHORT\` branch
 
 "
   fi
 
   if [ $i -lt $((TOTAL-1)) ]; then
     NEXT_PR="${PR_NUMBERS[$((i+1))]}"
-    DESCRIPTION+="**Child PR**: PR #$NEXT_PR
+    NEXT_BRANCH="${BRANCHES[$((i+1))]}"
+    NEXT_SHORT="${NEXT_BRANCH##*/}"
+
+    DESCRIPTION+="**Child PR**: PR #$NEXT_PR (\`$NEXT_SHORT\`) - will merge after this one
 
 "
   fi
 
-  DESCRIPTION+="**Review order**: "
-  for j in $(seq 0 $TOTAL); do
-    if [ $j -eq $i ]; then
-      DESCRIPTION+="**#${PR_NUMBERS[$j]}** → "
-    elif [ $j -lt ${#PR_NUMBERS[@]} ]; then
-      DESCRIPTION+="#${PR_NUMBERS[$j]} → "
-    fi
-  done
-  DESCRIPTION="${DESCRIPTION% → }"
+  DESCRIPTION+="## Review Notes
+
+**Focus areas for review**:
+
+- [ ] Code follows project conventions and patterns
+- [ ] Changes align with the layer's purpose
+- [ ] No unintended dependencies on future PRs
+- [ ] Documentation is clear and accurate
+
+"
+
+  if [ $i -eq $((TOTAL-1)) ]; then
+    DESCRIPTION+="**Review order**: Review LAST (after all parent PRs approved)
+
+"
+  elif [ $i -eq 0 ]; then
+    DESCRIPTION+="**Review order**: Review FIRST (this is the foundation)
+
+"
+  else
+    DESCRIPTION+="**Review order**: Review after PR #$PREV_PR is approved
+
+"
+  fi
+
+  DESCRIPTION+="## Next Steps
+
+"
+
+  if [ $i -lt $((TOTAL-1)) ]; then
+    NEXT_PR="${PR_NUMBERS[$((i+1))]}"
+    DESCRIPTION+="**After this PR is merged:**
+
+1. Merge this PR into its base branch
+2. Continue with PR #$NEXT_PR (next in stack)
+3. Repeat until all PRs are merged
+
+"
+  else
+    DESCRIPTION+="**After this PR is merged:**
+
+This is the FINAL PR in the stack.
+
+1. Merge this PR to complete the feature
+2. Feature is complete and deployed
+3. Safe to delete feature branches
+
+"
+  fi
+
+  DESCRIPTION+="---
+
+*This PR description was generated to provide context for both human reviewers and LLMs analyzing the codebase later.*"
 
   # Update PR
   gh pr edit "$PR_NUM" --body "$DESCRIPTION"
