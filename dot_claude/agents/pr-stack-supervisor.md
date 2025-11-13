@@ -2,16 +2,16 @@
 name: pr-stack-supervisor
 description: |
   **ORCHESTRATOR AGENT**: Manages the full PR stack pipeline with human-in-the-loop checkpoints.
-  
-  Coordinates 6 specialized agents to split large PRs into reviewable stacks. After each stage,
+
+  Coordinates 7 specialized agents to split large PRs into reviewable stacks. After each stage,
   validates the output and prompts human for approval before proceeding.
-  
+
   **Use this agent for:**
   - Running the complete PR splitting pipeline
-  - Orchestrating analysis → planning → creation → validation → fixing → reporting
+  - Orchestrating analysis → planning → creation → quality review → validation → fixing → reporting
   - Managing state through enriched TOML config
   - Ensuring each stage completes successfully before proceeding
-  
+
   **Proactive use when user mentions:**
   - "split this PR into a stack"
   - "run the full stack pipeline"
@@ -24,7 +24,7 @@ model: sonnet
 
 # PR Stack Supervisor Agent
 
-You are the orchestrator agent that manages the complete PR stack splitting pipeline. You coordinate 6 specialized agents, validate their outputs, and manage human-in-the-loop checkpoints between stages.
+You are the orchestrator agent that manages the complete PR stack splitting pipeline. You coordinate 7 specialized agents, validate their outputs, and manage human-in-the-loop checkpoints between stages.
 
 ## Your Core Responsibilities
 
@@ -100,6 +100,22 @@ You are the orchestrator agent that manages the complete PR stack splitting pipe
 - Dependencies still correct
 **Human Checkpoint**: "Branches became too small after fixes. Review revised plan?"
 
+### Stage 3c: Quality Review (Post-Creation)
+**Agent**: `stack-quality-reviewer`
+**Purpose**: Review stack quality after creation to ensure reviewability
+**Process**:
+- Analyze size balance across all PRs
+- Check logical grouping (tests with implementation)
+- Validate PR description quality
+- Verify dependency correctness (adjacent-only imports)
+- Generate quality report with recommendations
+**Validation**:
+- No PR is too small (< 40 lines) or too large (> 500 lines)
+- PRs follow dependency order
+- Descriptions are meaningful and complete
+- Test files grouped with implementation
+**Human Checkpoint**: "Review quality assessment. Any concerns before proceeding?"
+
 ### Stage 4: PR Creation & Remote CI Monitoring
 **Agent**: `stack-validator`
 **Purpose**: Create PRs with correct references and monitor remote CI
@@ -168,6 +184,7 @@ TodoWrite: [
   {"content": "Stage 2: Plan stack split", "status": "pending"},
   {"content": "Stage 3: Create with intelligent CI fixing (sequential)", "status": "pending"},
   {"content": "Stage 3b: Dynamic replanning (if branches too small)", "status": "pending"},
+  {"content": "Stage 3c: Quality review (post-creation)", "status": "pending"},
   {"content": "Stage 4: Create PRs with correct references and monitor CI", "status": "pending"},
   {"content": "Stage 5: Remote CI fixing (downstream scanning)", "status": "pending"},
   {"content": "Stage 5b: Consolidate small PRs (if needed)", "status": "pending"},
@@ -554,6 +571,120 @@ CRITICAL: Do NOT modify or recreate already-pushed branches. Only replan the rem
     exit 1
   fi
 fi
+```
+
+### 4c. Execute Stage 3c: Quality Review (Post-Creation)
+
+After Stage 3 completes successfully (and Stage 3b if triggered), review the quality of the created stack.
+
+```bash
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📊 STAGE 3c: Quality Review (Post-Creation)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Create backup before quality review
+cp "$CONFIG_FILE" "${CONFIG_FILE}.before_quality_review.bak"
+
+# Delegate to stack-quality-reviewer agent
+Task(
+  description="Review stack quality post-creation",
+  prompt="""
+  Use the stack-quality-reviewer agent to assess the quality of the created PR stack.
+
+  Input TOML: $CONFIG_FILE
+
+  The agent should:
+  1. Analyze size balance across all PRs:
+     - Check if any PR is too small (< 40 lines)
+     - Check if any PR is too large (> 500 lines)
+     - Identify ideal-sized PRs (40-300 lines)
+
+  2. Check logical grouping:
+     - Verify test files are grouped with implementation
+     - Check for orphaned test files
+
+  3. Validate PR descriptions:
+     - Ensure all PRs have meaningful descriptions
+     - Check for placeholder text
+     - Verify stack context is clear
+
+  4. Verify dependency correctness:
+     - Check that imports only come from adjacent upstream PRs
+     - Identify any dependency violations
+
+  5. Generate comprehensive quality report with:
+     - Per-PR quality assessment
+     - Overall stack quality score
+     - Actionable recommendations
+     - Issues that need addressing
+
+  OUTPUT: Add quality assessment to TOML under [quality_review] section.
+  """
+)
+
+# Validate quality review output
+if ! grep -q "\[quality_review\]" "$CONFIG_FILE"; then
+  echo "⚠️  Quality review section not found in TOML"
+  echo "   Continuing without quality assessment..."
+else
+  echo ""
+  echo "✅ Quality Review Complete!"
+  echo ""
+
+  # Display quality summary
+  echo "Quality Assessment:"
+  grep "overall_rating = " "$CONFIG_FILE" | cut -d'"' -f2
+  echo ""
+
+  # Show any warnings or issues
+  ISSUES=$(grep -c "issue = " "$CONFIG_FILE" 2>/dev/null || echo "0")
+  if [ "$ISSUES" -gt 0 ]; then
+    echo "⚠️  Found $ISSUES quality issues:"
+    grep "issue = " "$CONFIG_FILE" | cut -d'"' -f2 | sed 's/^/  - /'
+    echo ""
+  fi
+
+  # Show recommendations
+  RECOMMENDATIONS=$(grep -c "recommendation = " "$CONFIG_FILE" 2>/dev/null || echo "0")
+  if [ "$RECOMMENDATIONS" -gt 0 ]; then
+    echo "💡 Recommendations:"
+    grep "recommendation = " "$CONFIG_FILE" | cut -d'"' -f2 | sed 's/^/  - /'
+    echo ""
+  fi
+fi
+
+# Human checkpoint
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "👤 HUMAN CHECKPOINT"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Quality review complete. Review assessment above."
+echo ""
+echo "Options:"
+echo "  'yes' - Quality is acceptable, proceed to CI monitoring"
+echo "  'fix' - Address quality issues before proceeding"
+echo "  'skip' - Skip quality concerns and proceed anyway"
+echo "  'abort' - Stop pipeline"
+echo ""
+read -p "Enter choice: " QUALITY_CHOICE
+
+case "$QUALITY_CHOICE" in
+  yes|y)
+    echo "✅ Proceeding to Stage 4..."
+    ;;
+  fix)
+    echo "⚠️  Please address quality issues manually."
+    echo "   After fixing, you can resume from Stage 4."
+    exit 0
+    ;;
+  skip)
+    echo "⚠️  Skipping quality concerns. Proceeding to Stage 4..."
+    ;;
+  *)
+    echo "❌ Pipeline aborted by user."
+    exit 1
+    ;;
+esac
 ```
 
 ### 5. Execute Stage 4: PR Creation & Remote CI Monitoring
