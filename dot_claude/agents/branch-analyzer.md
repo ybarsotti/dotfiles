@@ -152,37 +152,122 @@ echo "  Types: $TYPES"
 echo "  Other: $OTHER"
 ```
 
-### Step 4: Analyze Dependencies
+### Step 4: Analyze Dependencies (CRITICAL: Read Files and Parse Imports!)
 
 ```bash
 echo ""
 echo "🔗 Analyzing import dependencies..."
 
+# CRITICAL: Must read actual file contents and parse imports
+# Do NOT rely on filename patterns or assumptions!
+
 # Find Python files that import from each other
 PYTHON_FILES=$(echo "$CHANGED_FILES" | grep "\.py$")
 
-# Check for common dependency patterns
+# Build dependency graph by reading imports
+declare -A FILE_IMPORTS
+declare -A FILE_IMPORTED_BY
+
 echo ""
-echo "Import patterns detected:"
+echo "Reading file contents and parsing imports..."
 
-# Check models → repos dependencies
-if [ $REPOS -gt 0 ] && [ $MODELS -gt 0 ]; then
-  echo "  ✓ Repositories likely depend on models"
-fi
+# For each Python file, extract its imports
+while IFS= read -r file; do
+  if [ ! -f "$file" ]; then
+    continue
+  fi
 
-# Check repos → services dependencies
-if [ $SERVICES -gt 0 ] && [ $REPOS -gt 0 ]; then
-  echo "  ✓ Services likely depend on repositories"
-fi
+  # Extract import statements (from X import Y, import X)
+  IMPORTS=$(grep -E "^(from|import) " "$file" | sed 's/\s*#.*$//')
 
-# Check services → API dependencies
-if [ $API -gt 0 ] && [ $SERVICES -gt 0 ]; then
-  echo "  ✓ API endpoints likely depend on services"
-fi
+  # Store imports for this file
+  FILE_IMPORTS["$file"]="$IMPORTS"
 
-# Check test → fixture dependencies
-if [ $TESTS -gt 0 ] && [ $FIXTURES -gt 0 ]; then
-  echo "  ✓ Tests use fixtures (must be co-located)"
+  # Parse each import to find dependencies on other changed files
+  while IFS= read -r import_line; do
+    # Extract module name from import
+    if [[ "$import_line" =~ ^from[[:space:]]+([^[:space:]]+) ]]; then
+      MODULE="${BASH_REMATCH[1]}"
+    elif [[ "$import_line" =~ ^import[[:space:]]+([^[:space:],]+) ]]; then
+      MODULE="${BASH_REMATCH[1]}"
+    else
+      continue
+    fi
+
+    # Check if this module corresponds to any changed file
+    # Convert module path to file path (e.g., argos.models.foo → argos/models/foo.py)
+    POSSIBLE_PATH=$(echo "$MODULE" | tr '.' '/')
+
+    # Find matching file in changed files
+    MATCHING_FILE=$(echo "$CHANGED_FILES" | grep -F "$POSSIBLE_PATH.py" | head -1)
+
+    if [ -n "$MATCHING_FILE" ]; then
+      # Record dependency: file depends on MATCHING_FILE
+      FILE_IMPORTED_BY["$MATCHING_FILE"]+="$file"$'\n'
+      echo "  📦 $file → imports → $MATCHING_FILE"
+    fi
+  done <<< "$IMPORTS"
+done <<< "$PYTHON_FILES"
+
+echo ""
+echo "Dependency graph built:"
+echo "  Files analyzed: $(echo "$PYTHON_FILES" | wc -l)"
+echo "  Import relationships found: ${#FILE_IMPORTED_BY[@]}"
+
+# Identify foundation files (no dependencies on other changed files)
+declare -a FOUNDATION_FILES
+declare -a DEPENDENT_FILES
+
+for file in $PYTHON_FILES; do
+  # Check if this file imports any other changed files
+  IMPORTS_CHANGED=$(echo "${FILE_IMPORTS[$file]}" | while IFS= read -r import_line; do
+    if [[ "$import_line" =~ ^from[[:space:]]+([^[:space:]]+) ]]; then
+      MODULE="${BASH_REMATCH[1]}"
+      POSSIBLE_PATH=$(echo "$MODULE" | tr '.' '/')
+      echo "$CHANGED_FILES" | grep -q -F "$POSSIBLE_PATH.py" && echo "HAS_DEP"
+    elif [[ "$import_line" =~ ^import[[:space:]]+([^[:space:],]+) ]]; then
+      MODULE="${BASH_REMATCH[1]}"
+      POSSIBLE_PATH=$(echo "$MODULE" | tr '.' '/')
+      echo "$CHANGED_FILES" | grep -q -F "$POSSIBLE_PATH.py" && echo "HAS_DEP"
+    fi
+  done | grep -c "HAS_DEP")
+
+  if [ "$IMPORTS_CHANGED" -eq 0 ]; then
+    FOUNDATION_FILES+=("$file")
+  else
+    DEPENDENT_FILES+=("$file")
+  fi
+done
+
+echo ""
+echo "Foundation files (no dependencies on changed files): ${#FOUNDATION_FILES[@]}"
+for file in "${FOUNDATION_FILES[@]}"; do
+  echo "  🔷 $file"
+done
+
+echo ""
+echo "Dependent files (import other changed files): ${#DEPENDENT_FILES[@]}"
+for file in "${DEPENDENT_FILES[@]}"; do
+  DEPS=$(echo "${FILE_IMPORTS[$file]}" | grep -E "^(from|import)" | wc -l)
+  echo "  🔶 $file (imports $DEPS modules)"
+done
+
+# Check test → fixture dependencies (by reading test files)
+echo ""
+echo "Analyzing test fixture usage..."
+if [ $TESTS -gt 0 ]; then
+  for test_file in "${TEST_FILES_DETAILED[@]}"; do
+    if [ ! -f "$test_file" ]; then
+      continue
+    fi
+
+    # Find fixture imports in test file
+    FIXTURE_IMPORTS=$(grep -E "^from.*fixtures import|^import.*fixtures" "$test_file" || echo "")
+
+    if [ -n "$FIXTURE_IMPORTS" ]; then
+      echo "  ✓ $test_file uses fixtures (must be co-located)"
+    fi
+  done
 fi
 ```
 
