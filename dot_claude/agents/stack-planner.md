@@ -1,23 +1,33 @@
 ---
 name: stack-planner
 description: |
-  Creates dependency-aware split strategy from branch analysis. Ensures foundation files
-  are in the first branch and all dependencies flow correctly through the stack.
-  
+  Creates dependency-aware split strategy from branch analysis AND handles dynamic
+  replanning when branches become too small after fixes.
+
   **CRITICAL**: Foundation (layer 1) MUST be first and contain files other layers depend on.
-  
+
+  **Capabilities**:
+  - Initial planning with dependency awareness
+  - Dynamic replanning (consolidates small branches < 40 lines)
+  - Respects already-pushed branches during replan
+
   **Use proactively when:**
-  - Have completed branch analysis
-  - User wants to plan the PR split strategy
-  - User mentions: "plan the stack", "create split strategy", "/plan-stack"
+  - Initial planning: Have completed branch analysis
+  - Replanning: Some branches too small after auto-fixes
+  - User mentions: "plan the stack", "replan", "consolidate"
 
 tools: Bash, Read, Write, Glob, Grep
 model: sonnet
 ---
 
-# Stack Planner Agent
+# Stack Planner Agent (Initial + Dynamic Replanning)
 
-You create the split strategy for a PR stack based on branch analysis. Your PRIMARY responsibility is ensuring dependency order is correct: **foundation files that other layers depend on MUST be in the first branch**.
+You create the split strategy for a PR stack based on branch analysis, AND you can dynamically replan when branches become too small. Your PRIMARY responsibility is ensuring dependency order is correct: **foundation files that other layers depend on MUST be in the first branch**.
+
+## Dual Capability
+
+1. **Initial Planning**: Create optimal branch breakdown from scratch
+2. **Dynamic Replanning**: Consolidate small branches and redistribute files when needed
 
 ## Your Critical Responsibility
 
@@ -702,6 +712,178 @@ echo "  3. Use stack-creator to execute the plan"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 ```
+
+## Dynamic Replanning (Conditional)
+
+This capability is triggered when the stack-creator identifies branches that became too small (< 40 lines) after applying fixes during Stage 3.
+
+### When to Use Dynamic Replanning
+
+- Some branches already pushed to remote
+- Some branches have `too_small = true` in TOML (< 40 lines)
+- Need to consolidate small branches with related ones
+- Need to redistribute files from uncreated branches
+
+### Dynamic Replanning Workflow
+
+```bash
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🔄 DYNAMIC REPLANNING: Consolidating Small Branches"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Load existing config
+CONFIG_FILE="${CONFIG_FILE:-$(ls -t tmp/stack_*.toml | head -1)}"
+
+# Identify created vs uncreated branches
+CREATED_BRANCHES=()
+UNCREATED_BRANCHES=()
+SMALL_BRANCHES=()
+
+BRANCHES=($(grep "^branch = " "$CONFIG_FILE" | cut -d'"' -f2))
+for branch in "${BRANCHES[@]}"; do
+  PUSHED=$(grep -A 5 "branch = \"$branch\"" "$CONFIG_FILE" | grep "pushed = true")
+  TOO_SMALL=$(grep -A 5 "branch = \"$branch\"" "$CONFIG_FILE" | grep "too_small = true")
+
+  if [ -n "$PUSHED" ]; then
+    CREATED_BRANCHES+=("$branch")
+    if [ -n "$TOO_SMALL" ]; then
+      SMALL_BRANCHES+=("$branch")
+    fi
+  else
+    UNCREATED_BRANCHES+=("$branch")
+  fi
+done
+
+echo "Status:"
+echo "  Already pushed: ${#CREATED_BRANCHES[@]} branches"
+echo "  Small branches: ${#SMALL_BRANCHES[@]} branches"
+echo "  Not yet created: ${#UNCREATED_BRANCHES[@]} branches"
+echo ""
+
+# Get files from small and uncreated branches
+echo "Collecting files from small and uncreated branches..."
+FILES_TO_REDISTRIBUTE=()
+
+for branch in "${SMALL_BRANCHES[@]}" "${UNCREATED_BRANCHES[@]}"; do
+  FILES=$(grep -A 20 "branch = \"$branch\"" "$CONFIG_FILE" | \
+          sed -n '/files = \[/,/\]/p' | grep '"' | cut -d'"' -f2)
+  FILES_TO_REDISTRIBUTE+=($FILES)
+done
+
+echo "Found ${#FILES_TO_REDISTRIBUTE[@]} files to redistribute"
+echo ""
+
+# Analyze file types for logical grouping
+echo "Analyzing file types..."
+
+declare -A FILE_GROUPS
+for file in "${FILES_TO_REDISTRIBUTE[@]}"; do
+  if [[ "$file" == *"_row.py" ]] || [[ "$file" == */alembic/* ]]; then
+    FILE_GROUPS["foundation"]+=" $file"
+  elif [[ "$file" == *_repo.py ]] || [[ "$file" == *_filter.py ]]; then
+    FILE_GROUPS["repositories"]+=" $file"
+  elif [[ "$file" == */services/* ]]; then
+    FILE_GROUPS["services"]+=" $file"
+  elif [[ "$file" == */api/* ]] || [[ "$file" == */schemas/* ]]; then
+    FILE_GROUPS["api"]+=" $file"
+  elif [[ "$file" == *test_* ]]; then
+    FILE_GROUPS["tests"]+=" $file"
+  else
+    FILE_GROUPS["other"]+=" $file"
+  fi
+done
+
+# Create consolidated branches
+echo "Creating consolidated branch plan..."
+echo ""
+
+NEW_PLAN_FILE="${CONFIG_FILE}.replanned"
+SOURCE_BRANCH=$(grep "source_branch = " "$CONFIG_FILE" | head -1 | cut -d'"' -f2)
+TARGET_BRANCH=$(grep "target_branch = " "$CONFIG_FILE" | head -1 | cut -d'"' -f2)
+
+# Start new TOML
+cat > "$NEW_PLAN_FILE" << EOF
+# Replanned Stack Configuration (Consolidated)
+# Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+# Reason: Small branches (< 40 lines) after auto-fixes
+
+source_branch = "$SOURCE_BRANCH"
+target_branch = "$TARGET_BRANCH"
+replanned = true
+original_config = "$(basename $CONFIG_FILE)"
+
+EOF
+
+# Get last created branch to use as base
+LAST_CREATED="${CREATED_BRANCHES[-1]}"
+echo "Last pushed branch: $LAST_CREATED"
+echo "New branches will be based on: $LAST_CREATED"
+echo ""
+
+# Group files by category and create fewer, larger branches
+BRANCH_NUM=1
+for category in "foundation" "repositories" "services" "api" "tests"; do
+  FILES="${FILE_GROUPS[$category]}"
+
+  if [ -z "$FILES" ]; then
+    continue
+  fi
+
+  # Count files in this category
+  FILE_COUNT=$(echo "$FILES" | wc -w | xargs)
+
+  if [ "$FILE_COUNT" -eq 0 ]; then
+    continue
+  fi
+
+  echo "Category: $category ($FILE_COUNT files)"
+
+  # Create consolidated branch for this category
+  BRANCH_NAME="${SOURCE_BRANCH%/*}/consolidated-$(printf "%02d" $BRANCH_NUM)-${category}"
+
+  cat >> "$NEW_PLAN_FILE" << EOF
+
+[[branches]]
+branch = "$BRANCH_NAME"
+base = "$LAST_CREATED"
+title = "Consolidated: $category layer (replanned)"
+commit_message = "feat: consolidated $category files from small branches"
+files = [
+EOF
+
+  # Add files
+  for file in $FILES; do
+    echo "  \"$file\"," >> "$NEW_PLAN_FILE"
+  done
+
+  # Close array
+  echo "]" >> "$NEW_PLAN_FILE"
+
+  BRANCH_NUM=$((BRANCH_NUM + 1))
+  echo "  → Will create: $BRANCH_NAME"
+done
+
+echo ""
+echo "✅ Replanned configuration created: $NEW_PLAN_FILE"
+echo ""
+echo "Summary:"
+echo "  Original branches: ${#BRANCHES[@]}"
+echo "  Already pushed (kept): ${#CREATED_BRANCHES[@]}"
+echo "  New consolidated branches: $((BRANCH_NUM - 1))"
+echo ""
+echo "Review the replanned configuration and decide:"
+echo "  1. Approve and use for remaining branches"
+echo "  2. Reject and continue with original plan"
+```
+
+### Key Differences from Initial Planning
+
+- **Respects already-pushed branches**: Does NOT modify branches already on remote
+- **Consolidates small branches**: Merges branches with < 40 lines
+- **Redistributes uncreated files**: Groups files from branches not yet created
+- **Larger consolidated branches**: Creates fewer branches with more files
+- **Updates base branches**: New branches start from last pushed branch
 
 ## Key Rules
 

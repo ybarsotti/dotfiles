@@ -56,32 +56,97 @@ You are the orchestrator agent that manages the complete PR stack splitting pipe
 - Dependencies properly ordered
 **Human Checkpoint**: "Review the plan. Modify TOML if needed. Approve to continue?"
 
-### Stage 3: Creation
-**Agent**: `stack-creator`
-**Purpose**: Execute branch creation using stackify script
+### Stage 3: Sequential Creation with Intelligent CI Validation
+**Agent**: `stack-creator` (with auto-fix capability)
+**Purpose**: Create branches ONE AT A TIME with local CI validation and intelligent fixing
+**Process**:
+- Discover CI commands from .github/workflows/*.yml
+- For each branch:
+  1. Create branch locally
+  2. Run ALL discovered CI checks (format, lint, pyright, tests)
+  3. If PASS → Push to remote and continue to next branch
+  4. If FAIL → **Intelligent auto-fix attempt**:
+     a. Parse error logs to identify issue (missing imports, type errors, etc.)
+     b. **FIRST**: Search source branch (original large branch) for relevant code
+     c. **SECOND**: Search already-created branches for relevant fixes
+     d. If fix found → Apply it, re-run validation
+     e. If no fix found → Generate fix manually by analyzing codebase
+     f. Re-run validation after fix
+     g. If STILL FAILS after auto-fix → STOP, report to human
+  5. Once passing → Push to remote and continue
 **Validation**:
-- All branches created
-- Backup branch exists
-- Commit SHAs recorded
-**Human Checkpoint**: "Branches created. Push to remote?"
+- Each branch passes ALL CI checks before push (with auto-fix if needed)
+- Branches pushed sequentially (not batch)
+- Pipeline stops only if auto-fix cannot resolve failure
+- All fixes and commit SHAs recorded
+**Human Checkpoint**: "Review auto-fixes (if any). All branches validated and pushed."
 
-### Stage 4: Validation
+### Stage 3b: Dynamic Replanning (Conditional)
+**Agent**: `stack-planner` (rerun)
+**Purpose**: Replan branch breakdown when auto-fixes cause branches to become too small
+**Trigger**: When Stage 3 identifies branches with < 40 lines after fixing
+**Process**:
+- Analyze current state of all created branches
+- Identify branches that are too small (< 40 lines)
+- Identify branches not yet created
+- Regenerate plan with better groupings:
+  1. Merge small branches with related branches
+  2. Redistribute files from uncreated branches
+  3. Update dependencies and base branches
+- Generate new TOML config with revised plan
+**Validation**:
+- All files still accounted for
+- No branch has < 40 lines
+- Dependencies still correct
+**Human Checkpoint**: "Branches became too small after fixes. Review revised plan?"
+
+### Stage 4: PR Creation & Remote CI Monitoring
 **Agent**: `stack-validator`
-**Purpose**: Check CI status, identify failures
+**Purpose**: Create PRs with correct references and monitor remote CI
+**Process**:
+- Create PRs for all validated branches
+- Update PR descriptions with actual PR numbers (not #1 #2 placeholders)
+- Monitor remote CI to verify local validation matches remote
 **Validation**:
-- PR numbers obtained
-- CI status checked for all PRs
-- Failures identified (if any)
-**Human Checkpoint**: "CI status checked. Any failures need fixing?"
+- PR numbers obtained and referenced correctly
+- Remote CI status matches local validation
+- Any remote-only failures identified
+**Human Checkpoint**: "PRs created. Remote CI matches local? Any unexpected failures?"
 
-### Stage 5: Fixing (Conditional)
+### Stage 5: Intelligent CI Fixing (Conditional)
 **Agent**: `stack-fixer`
-**Purpose**: Fix CI failures by relocating files
+**Purpose**: Fix CI failures using intelligent downstream scanning
+**Process**:
+- For each failing PR (in order):
+  1. Parse CI error logs to identify issue (missing imports, type errors, etc.)
+  2. **FIRST**: Scan downstream PRs for relevant fixes (files/code that might solve the issue)
+  3. If found downstream → Cherry-pick/apply that fix to failing PR
+  4. If NOT found downstream → Generate fix manually by analyzing codebase
+  5. Apply fix to failing PR
+  6. Propagate fix to ALL downstream PRs (if they need it)
+  7. Verify fix locally, push updates
 **Validation**:
-- Files moved to correct branches
-- Tests pass locally
-- Changes propagated downstream
-**Human Checkpoint**: "Fixes applied. Review and push?"
+- All CI failures resolved
+- Fixes propagated downstream correctly
+- Tests pass locally on all updated branches
+**Human Checkpoint**: "Fixes applied and propagated. Review changes and approve push?"
+
+### Stage 5b: PR Consolidation (Conditional)
+**Agent**: `stack-consolidator` (new)
+**Purpose**: Merge PRs that became too small after fixes
+**Process**:
+- Scan all PRs for size (lines of code changed)
+- If any PR has < 40 lines of code:
+  1. Identify parent and child PRs
+  2. Merge small PR into parent (preferred) or child
+  3. Update ALL PR descriptions to skip the merged PR
+  4. Close small PR with comment "Merged into PR #XXXX"
+  5. Update review order in remaining PRs
+**Validation**:
+- Small PRs consolidated
+- PR chain descriptions updated
+- Review order still correct
+**Human Checkpoint**: "Small PRs consolidated. Review updated chain?"
 
 ### Stage 6: Reporting
 **Agent**: `slack-reporter`
@@ -101,9 +166,11 @@ You are the orchestrator agent that manages the complete PR stack splitting pipe
 TodoWrite: [
   {"content": "Stage 1: Analyze branch", "status": "pending"},
   {"content": "Stage 2: Plan stack split", "status": "pending"},
-  {"content": "Stage 3: Create branches", "status": "pending"},
-  {"content": "Stage 4: Validate CI status", "status": "pending"},
-  {"content": "Stage 5: Fix failures (if needed)", "status": "pending"},
+  {"content": "Stage 3: Create with intelligent CI fixing (sequential)", "status": "pending"},
+  {"content": "Stage 3b: Dynamic replanning (if branches too small)", "status": "pending"},
+  {"content": "Stage 4: Create PRs with correct references and monitor CI", "status": "pending"},
+  {"content": "Stage 5: Remote CI fixing (downstream scanning)", "status": "pending"},
+  {"content": "Stage 5b: Consolidate small PRs (if needed)", "status": "pending"},
   {"content": "Stage 6: Generate Slack report", "status": "pending"}
 ]
 
@@ -242,12 +309,12 @@ echo "Type 'yes' to proceed to branch creation, 'edit' to pause for manual edits
 
 **IMPORTANT**: Wait for user input. If user says 'edit', pause and let them modify TOML.
 
-### 4. Execute Stage 3: Creation
+### 4. Execute Stage 3: Sequential Creation with CI Validation
 
 ```bash
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🏗️  STAGE 3: Branch Creation"
+echo "🏗️  STAGE 3: Sequential Branch Creation with CI Validation"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Create backup before creation
@@ -255,43 +322,68 @@ cp "$CONFIG_FILE" "${CONFIG_FILE}.stage2.bak"
 
 # Delegate to stack-creator agent
 Task(
-  description="Execute branch creation using stackify script",
+  description="Create branches sequentially with local CI validation",
   prompt="""
-  Use the stack-creator agent to create the branch stack.
-  
+  Use the stack-creator agent to create the branch stack with validation.
+
   Input TOML: $CONFIG_FILE
-  
-  The agent should:
-  - Extract embedded Ruby stackify script
-  - Create backup branch
-  - Execute stackify
-  - Record commit SHAs in TOML
-  - Handle any errors with rollback
+
+  CRITICAL: The agent MUST:
+  1. Discover CI commands from .github/workflows/*.yml
+  2. Create branches ONE AT A TIME (not batch)
+  3. For EACH branch:
+     - Create locally
+     - Run ALL CI checks (format, lint, pyright, tests)
+     - If ALL PASS → Check branch size, push to remote and continue
+     - If ANY FAIL → **Attempt intelligent auto-fix**:
+       * Parse error logs to identify issue
+       * Search source branch (original large branch) for relevant code
+       * Search already-created branches for fixes
+       * Apply fix if found, re-run validation
+       * If still fails after auto-fix → STOP, report to human
+     - After any fixes → **Check branch size**:
+       * Count lines of code changed in this branch
+       * If branch now has < 40 lines → Mark for consolidation
+       * If multiple branches become too small → PAUSE, suggest replanning
+  4. Record commit SHAs, validation status, auto-fixes, and size changes in TOML
+
+  INTELLIGENT FIXING + SIZE MONITORING - pause for replanning if branches become too small.
   """
 )
 
-# Validate creation
-if ! grep -q "\[execution\]" "$CONFIG_FILE"; then
-  echo "❌ Creation failed: Missing [execution] section"
-  exit 1
-fi
-
-if ! grep -q "stack_created = true" "$CONFIG_FILE"; then
-  echo "❌ Creation failed: stack_created flag not set"
-  exit 1
-fi
-
-# Show created branches
-echo ""
-echo "✅ Branches Created!"
-echo ""
+# Check if pipeline stopped early
 BRANCHES=($(grep "^branch = " "$CONFIG_FILE" | cut -d'"' -f2))
+PUSHED=$(grep -c "pushed = true" "$CONFIG_FILE" 2>/dev/null || echo "0")
+TOTAL=${#BRANCHES[@]}
+
+echo ""
+if [ "$PUSHED" -eq "$TOTAL" ]; then
+  echo "✅ All $TOTAL branches validated and pushed!"
+else
+  echo "⚠️  Pipeline stopped: $PUSHED/$TOTAL branches validated and pushed"
+  echo ""
+  echo "A branch failed CI validation."
+  echo ""
+  FAILED_BRANCH=$(grep -B 5 "pushed = true" "$CONFIG_FILE" | tail -6 | grep "^branch = " | head -1 | cut -d'"' -f2)
+  if [ -z "$FAILED_BRANCH" ]; then
+    # First branch failed
+    FAILED_BRANCH="${BRANCHES[0]}"
+  fi
+  echo "Failed branch: $FAILED_BRANCH"
+  echo ""
+  echo "Check logs: tmp/ci_${FAILED_BRANCH}_*.log"
+fi
+echo ""
+
+# Show pushed branches
+echo "Pushed branches:"
 for branch in "${BRANCHES[@]}"; do
-  if git rev-parse --verify "$branch" >/dev/null 2>&1; then
+  if git rev-parse --verify "origin/$branch" >/dev/null 2>&1; then
     COMMIT=$(git rev-parse --short "$branch")
-    echo "  ✅ $branch ($COMMIT)"
-  else
-    echo "  ❌ $branch (NOT FOUND)"
+    echo "  ✅ $branch ($COMMIT) - PUSHED"
+  elif git rev-parse --verify "$branch" >/dev/null 2>&1; then
+    COMMIT=$(git rev-parse --short "$branch")
+    echo "  ⏸️  $branch ($COMMIT) - LOCAL ONLY (validation failed)"
   fi
 done
 echo ""
@@ -300,66 +392,234 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "👤 HUMAN CHECKPOINT"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Branches created successfully!"
-echo ""
-echo "Next steps:"
-echo "  1. Push branches to remote"
-echo "  2. Create PRs with cascade merge strategy"
-echo ""
-echo "Type 'yes' to continue to validation, 'no' to stop here:"
+if [ "$PUSHED" -eq "$TOTAL" ]; then
+  echo "All branches validated and pushed successfully!"
+  echo ""
+  echo "Type 'yes' to continue to PR creation, 'no' to stop here:"
+else
+  echo "Pipeline stopped due to CI failures."
+  echo ""
+  echo "Options:"
+  echo "  1. Fix the failing branch manually"
+  echo "  2. Re-run validation for that branch"
+  echo "  3. Adjust the plan and re-run from stage 3"
+  echo ""
+  echo "Type 'abort' to stop pipeline:"
+fi
 ```
 
-### 5. Execute Stage 4: Validation
+### 4b. Execute Stage 3b: Dynamic Replanning (Conditional)
+
+This stage is triggered when Stage 3 identifies branches that became too small (< 40 lines) after applying auto-fixes.
+
+```bash
+# Check if replanning is needed (Stage 3 should mark branches as too small in TOML)
+SMALL_BRANCHES=$(grep -E "too_small\s*=\s*true" "$CONFIG_FILE" | wc -l)
+
+if [ "$SMALL_BRANCHES" -gt 0 ]; then
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "🔄 STAGE 3b: Dynamic Replanning (Branches Too Small)"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+
+  echo "⚠️  Detected $SMALL_BRANCHES branches with < 40 lines after fixes."
+  echo "   Need to regenerate plan to merge small branches."
+  echo ""
+
+  # Show which branches are too small
+  echo "Small branches:"
+  grep -B 1 "too_small\s*=\s*true" "$CONFIG_FILE" | grep "^branch = " | cut -d'"' -f2 | sed 's/^/  - /'
+  echo ""
+
+  # Get current state for replanning
+  SOURCE_BRANCH=$(grep "source_branch = " "$CONFIG_FILE" | head -1 | cut -d'"' -f2)
+  TARGET_BRANCH=$(grep "target_branch = " "$CONFIG_FILE" | head -1 | cut -d'"' -f2)
+
+  # Identify which branches have been created/pushed vs not yet created
+  CREATED_BRANCHES=()
+  UNCREATED_BRANCHES=()
+
+  BRANCHES=($(grep "^branch = " "$CONFIG_FILE" | cut -d'"' -f2))
+  for branch in "${BRANCHES[@]}"; do
+    PUSHED=$(grep -A 5 "branch = \"$branch\"" "$CONFIG_FILE" | grep "pushed = true")
+    if [ -n "$PUSHED" ]; then
+      CREATED_BRANCHES+=("$branch")
+    else
+      UNCREATED_BRANCHES+=("$branch")
+    fi
+  done
+
+  echo "Status:"
+  echo "  Created and pushed: ${#CREATED_BRANCHES[@]} branches"
+  echo "  Not yet created: ${#UNCREATED_BRANCHES[@]} branches"
+  echo ""
+
+  # Create backup before replanning
+  cp "$CONFIG_FILE" "${CONFIG_FILE}.before_replan.bak"
+
+  # Launch stack-planner agent to regenerate plan
+  echo "🤖 Launching stack-planner to regenerate plan..."
+  echo ""
+
+  Task({
+    "subagent_type": "stack-planner",
+    "description": "Replan branch breakdown",
+    "prompt": """
+You are replanning the branch breakdown because some branches became too small (< 40 lines) after auto-fixes.
+
+**Original Source Branch**: $SOURCE_BRANCH
+**Target Branch**: $TARGET_BRANCH
+**Config File**: $CONFIG_FILE
+**Backup**: ${CONFIG_FILE}.before_replan.bak
+
+**Current State**:
+- Created branches (already pushed): ${CREATED_BRANCHES[@]}
+- Uncreated branches: ${UNCREATED_BRANCHES[@]}
+- Small branches (< 40 lines): [see config file with too_small = true]
+
+**Your Task**:
+1. Analyze the current state:
+   - Read $CONFIG_FILE to see which branches are too small
+   - Check the actual code in created branches to verify sizes
+   - Identify which files are in uncreated branches
+
+2. Generate a NEW plan that:
+   - Merges small branches with related branches
+   - Redistributes files from uncreated branches
+   - Ensures no branch has < 40 lines of code
+   - Maintains correct dependency order
+   - DOES NOT modify already-pushed branches (they stay as-is)
+
+3. Create a NEW TOML config at: ${CONFIG_FILE}.replanned
+   - Only include uncreated branches (and merged branches)
+   - Update base branches to point to last pushed branch
+   - Include clear commit messages explaining the consolidation
+
+4. Show a summary:
+   - Which small branches were merged
+   - New branch breakdown
+   - File distribution
+
+CRITICAL: Do NOT modify or recreate already-pushed branches. Only replan the remaining uncreated branches by consolidating and redistributing files.
+"""
+  })
+
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "🛑 HUMAN CHECKPOINT: Review Revised Plan"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "The stack-planner has generated a revised plan."
+  echo ""
+  echo "Files:"
+  echo "  Original plan: ${CONFIG_FILE}.before_replan.bak"
+  echo "  Revised plan:  ${CONFIG_FILE}.replanned"
+  echo ""
+  echo "Review the revised plan and decide:"
+  echo ""
+  echo "Options:"
+  echo "  1. Approve revised plan (continue with new breakdown)"
+  echo "  2. Reject and keep original plan (continue as-is)"
+  echo "  3. Abort pipeline"
+  echo ""
+  read -p "Enter choice (1/2/3): " REPLAN_CHOICE
+
+  if [ "$REPLAN_CHOICE" = "1" ]; then
+    echo "✅ Approved. Using revised plan."
+    mv "${CONFIG_FILE}.replanned" "$CONFIG_FILE"
+    echo ""
+    echo "Continuing with revised plan. Stage 3 will be re-executed for uncreated branches."
+    echo ""
+    # Note: Supervisor should loop back to Stage 3 with updated config
+    # But for now, just continue - the updated config will be used by Stage 4
+  elif [ "$REPLAN_CHOICE" = "2" ]; then
+    echo "⚠️  Keeping original plan. Continuing with small branches."
+    rm -f "${CONFIG_FILE}.replanned"
+  else
+    echo "❌ Pipeline aborted by user."
+    exit 1
+  fi
+fi
+```
+
+### 5. Execute Stage 4: PR Creation & Remote CI Monitoring
 
 ```bash
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🔍 STAGE 4: CI Validation"
+echo "📝 STAGE 4: PR Creation & Remote CI Monitoring"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# Create backup before validation
+# Create backup before PR creation
 cp "$CONFIG_FILE" "${CONFIG_FILE}.stage3.bak"
 
-# Check if PRs exist
-BRANCHES=($(grep "^branch = " "$CONFIG_FILE" | cut -d'"' -f2))
-echo "Checking if PRs have been created..."
+echo "Creating PRs and updating descriptions..."
+echo ""
 
-PR_COUNT=0
+# NOTE: stack-creator agent handles PR creation in its Step 4
+# It creates PRs and updates descriptions with actual PR numbers
+# We just need to validate this was done correctly
+
+BRANCHES=($(grep "^branch = " "$CONFIG_FILE" | cut -d'"' -f2))
+TOTAL=${#BRANCHES[@]}
+
+# Verify PRs were created
+PR_NUMBERS=()
+echo "Validating PRs created by stack-creator..."
 for branch in "${BRANCHES[@]}"; do
   PR_NUM=$(gh pr list --head "$branch" --json number --jq '.[0].number' 2>/dev/null)
   if [ -n "$PR_NUM" ]; then
-    ((PR_COUNT++))
+    PR_NUMBERS+=("$PR_NUM")
+    echo "  ✅ $branch → PR #$PR_NUM"
+  else
+    echo "  ❌ $branch → No PR found"
   fi
 done
+echo ""
 
-if [ $PR_COUNT -eq 0 ]; then
-  echo ""
-  echo "⚠️  No PRs found yet."
-  echo ""
-  echo "Please create PRs first:"
-  for branch in "${BRANCHES[@]}"; do
-    echo "  gh pr create --head $branch --base ..."
-  done
-  echo ""
-  echo "Type 'skip' to skip validation, 'retry' after creating PRs:"
-  # Wait for user input
-  exit 0
+if [ ${#PR_NUMBERS[@]} -ne $TOTAL ]; then
+  echo "⚠️  Not all PRs created: ${#PR_NUMBERS[@]}/$TOTAL"
+  echo "Expected stack-creator to create all PRs in Stage 3."
+  exit 1
 fi
 
-# Delegate to stack-validator agent
+# Verify PR descriptions reference actual PR numbers (not #1 #2 placeholders)
+echo "Verifying PR descriptions have correct references..."
+for i in "${!PR_NUMBERS[@]}"; do
+  PR_NUM="${PR_NUMBERS[$i]}"
+  DESCRIPTION=$(gh pr view "$PR_NUM" --json body --jq '.body')
+
+  # Check for placeholder references like "#1" or "#2"
+  if echo "$DESCRIPTION" | grep -qE "PR #[12]\\b"; then
+    echo "  ❌ PR #$PR_NUM still has placeholder references (#1 #2)"
+    echo "     stack-creator should have updated these!"
+    exit 1
+  else
+    echo "  ✅ PR #$PR_NUM references are correct"
+  fi
+done
+echo ""
+
+# Monitor remote CI status
+echo "Monitoring remote CI status..."
+echo ""
+
+# Delegate to stack-validator agent for remote CI monitoring
 Task(
-  description="Check CI status and identify failures",
+  description="Monitor remote CI and identify failures",
   prompt="""
-  Use the stack-validator agent to check CI status.
-  
+  Use the stack-validator agent to monitor remote CI.
+
   Input TOML: $CONFIG_FILE
-  
+  PR Numbers: ${PR_NUMBERS[@]}
+
   The agent should:
-  - Get PR numbers for all branches
-  - Check CI status using gh CLI
-  - Parse failure logs for errors
-  - Identify missing imports, fixtures, etc.
-  - Update TOML with validation results
+  - Check CI status for ALL PRs using gh CLI
+  - Compare remote CI results with local validation
+  - Identify any remote-only failures (shouldn't happen if local validation worked)
+  - Parse failure logs for any unexpected errors
+  - Update TOML with remote CI status
   """
 )
 
@@ -544,6 +804,10 @@ User: yes
 
 - **Always wait for human approval** between stages
 - **Validate outputs thoroughly** before proceeding
+- **CRITICAL: Stack-creator runs CI checks BEFORE pushing** - branches are validated locally first
+- **Sequential processing**: Branches created ONE AT A TIME, not batch
+- **Stop on first failure**: If any branch fails CI, pipeline STOPS for human intervention
+- **All checks must pass**: format, lint, pyright, tests - NO exceptions
 - **Maintain TOML state** throughout pipeline
 - **Create backups** before each stage
 - **Handle errors gracefully** with clear recovery steps
@@ -551,4 +815,4 @@ User: yes
 - **Log everything** to tmp/ for debugging
 - **Be patient** - this is a deliberate, careful process
 
-The goal is a **reliable, auditable, human-guided pipeline** that splits PRs correctly every time.
+The goal is a **reliable, auditable, human-guided pipeline** that splits PRs correctly every time with **zero broken branches pushed to remote**.
