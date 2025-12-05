@@ -2,7 +2,30 @@
 
 You are an expert software architect and problem solver. Your task is to analyze a problem, understand the codebase context, and create a comprehensive design document.
 
+**CRITICAL**: This command follows a "discover" pattern - you MUST ask clarifying questions BEFORE doing any design work.
+
 ## Design Process
+
+### 0. Clarifying Questions (MANDATORY - DO THIS FIRST)
+
+**STOP! Before any codebase exploration or design work, you MUST:**
+
+1. **Read the user's problem statement carefully**
+2. **Identify ambiguities, assumptions, and decision points**
+3. **Use the AskUserQuestion tool to ask 3-5 clarifying questions**
+
+Questions to consider:
+- What is the expected scope? (MVP vs full feature)
+- Are there existing patterns in the codebase to follow?
+- What are the performance requirements?
+- What edge cases are most important?
+- Are there any constraints not mentioned?
+- What's the priority: speed of delivery vs code quality vs performance?
+- Who are the users/consumers of this feature?
+
+**DO NOT proceed to Phase 1 until you have asked questions and received answers.**
+
+---
 
 ### 1. Problem Analysis
 - **Understand the problem statement** - Read and clarify the requirements
@@ -227,13 +250,15 @@ Create a comprehensive design document at `tmp/DESIGN.md` with the following str
 ## Commands to Execute
 
 When invoked, you should:
-1. **Clarify requirements** - Ask questions if anything is unclear
-2. **Explore the codebase** - Use Task tool with Explore subagent for thorough analysis
-3. **Research existing solutions** - Look for patterns and reusable code
-4. **Decompose the problem** - Break into manageable pieces
-5. **Design solutions** - Create detailed approach for each sub-problem
-6. **Document everything** - Create comprehensive `tmp/DESIGN.md`
-7. **Review and validate** - Ensure design is complete and feasible
+1. **ASK CLARIFYING QUESTIONS FIRST** - Use AskUserQuestion tool to ask 3-5 questions BEFORE any other work
+2. **Wait for answers** - Do not proceed until user has answered
+3. **Explore the codebase** - Use Task tool with Explore subagent for thorough analysis
+4. **Research existing solutions** - Look for patterns and reusable code
+5. **Decompose the problem** - Break into manageable pieces
+6. **Design solutions** - Create detailed approach for each sub-problem
+7. **Document everything** - Create comprehensive `tmp/DESIGN.md`
+8. **Generate task file** - Create `tmp/TASK.md` with actionable items
+9. **Review and validate** - Ensure design is complete and feasible
 
 Focus on creating a design that:
 - ✅ Leverages existing code and patterns
@@ -244,3 +269,51 @@ Focus on creating a design that:
 - ✅ Prevents N+1 queries and performance issues
 - ✅ Includes caching strategy where appropriate
 - ✅ Plans for bulk operations over sequential processing
+
+---
+
+## Output: TASK.md
+
+After creating DESIGN.md, also generate `tmp/TASK.md` with this structure:
+
+```markdown
+# Task: [Problem Title]
+
+## Status
+🟡 Ready for Implementation
+
+## Design Reference
+See: [tmp/DESIGN.md](tmp/DESIGN.md)
+
+## User Requirements Summary
+[Brief summary of what user asked for, based on clarifying question answers]
+
+## Actionable Tasks
+
+### Phase 1: [Phase Name from Design]
+- [ ] Task 1.1: [Specific, actionable implementation task]
+- [ ] Task 1.2: [Specific, actionable implementation task]
+
+### Phase 2: [Phase Name from Design]
+- [ ] Task 2.1: [Specific, actionable implementation task]
+- [ ] Task 2.2: [Specific, actionable implementation task]
+
+[Continue for all phases...]
+
+## Acceptance Criteria
+- [ ] [Criterion from success criteria in design]
+- [ ] [Criterion from success criteria in design]
+- [ ] All tests passing
+- [ ] No performance regressions
+
+## Test Requirements
+- [ ] Unit tests for [component/function]
+- [ ] Integration tests for [integration point]
+- [ ] Performance tests: [specific metrics]
+- [ ] Edge case tests: [specific edge cases]
+
+## Next Command
+Run `/do_it` to implement this task using TDD + refactoring.
+```
+
+**Important**: The TASK.md should contain SPECIFIC, ACTIONABLE items that can be checked off during implementation. Avoid vague tasks like "implement feature" - instead break down into concrete steps.

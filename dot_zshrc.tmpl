@@ -133,9 +133,8 @@ if [[ -f "$HOME/.atuin/bin/env" ]]; then
 fi
 
 {{- if (lookPath "zoxide") }}
-# Zoxide - Smarter cd command
+# Zoxide - Smarter cd command (use 'z' for smart jumping, 'cd' stays standard)
 eval "$(zoxide init zsh)"
-alias cd="z"
 {{- end }}
 
 {{- if (lookPath "direnv") }}
