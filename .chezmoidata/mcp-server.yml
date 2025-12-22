@@ -11,13 +11,13 @@ mcp_servers:
       - -y
       - "@upstash/context7-mcp"
 
-  playwright:
-    command: npx
-    args:
-      - "@playwright/mcp@latest"
-      - --browser
-      - firefox
-      - --headless
+  # playwright:
+  #   command: npx
+  #   args:
+  #     - "@playwright/mcp@latest"
+  #     - --browser
+  #     - firefox
+  #     - --headless
 
   sequential-thinking:
     command: npx
