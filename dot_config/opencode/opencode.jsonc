@@ -14,11 +14,6 @@
             "command": ["npx", "-y", "@upstash/context7-mcp"],
             "enabled": true
         },
-        "playwright": {
-            "type": "local",
-            "command": ["npx", "@playwright/mcp@latest"],
-            "enabled": true
-        },
         "sequential-thinking": {
             "type": "local",
             "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
@@ -27,21 +22,6 @@
         "terraform": {
             "type": "local",
             "command": ["docker", "run", "-i", "--rm", "hashicorp/terraform-mcp-server"],
-            "enabled": true
-        },
-        "blender": {
-            "type": "local",
-            "command": ["uvx", "blender-mcp"],
-            "enabled": true
-        },
-        "markitdown": {
-            "type": "local",
-            "command": ["docker", "run", "--rm", "-i", "markitdown-mcp:latest"],
-            "enabled": true
-        },
-        "notionApi": {
-            "type": "local",
-            "command": ["docker", "run", "--rm", "-i", "-e", "${NOTION_TOKEN}", "mcp/notion"],
             "enabled": true
         }
     }
