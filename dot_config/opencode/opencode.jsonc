@@ -3,25 +3,60 @@
     "theme": "matrix",
     "model": "anthropic/claude-sonnet-4-20250514",
     "autoupdate": true,
+    "plugin": [
+        "opencode-anthropic-auth@0.0.8",
+    ],
+    "provider": {
+        "anthropic": {
+            "models": {
+                "claude-sonnet-4-5-20250929": {
+                    "options": {
+                        "thinking": {
+                            "type": "enabled",
+                            "budgetTokens": 16000
+                        }
+                    }
+                }
+            }
+        }
+    },
     "mcp": {
         "ccusage": {
             "type": "local",
-            "command": ["npx", "ccusage@latest", "mcp"],
+            "command": [
+                "npx",
+                "ccusage@latest",
+                "mcp"
+            ],
             "enabled": true
         },
         "context7": {
             "type": "local",
-            "command": ["npx", "-y", "@upstash/context7-mcp"],
+            "command": [
+                "npx",
+                "-y",
+                "@upstash/context7-mcp"
+            ],
             "enabled": true
         },
         "sequential-thinking": {
             "type": "local",
-            "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+            "command": [
+                "npx",
+                "-y",
+                "@modelcontextprotocol/server-sequential-thinking"
+            ],
             "enabled": true
         },
         "terraform": {
             "type": "local",
-            "command": ["docker", "run", "-i", "--rm", "hashicorp/terraform-mcp-server"],
+            "command": [
+                "docker",
+                "run",
+                "-i",
+                "--rm",
+                "hashicorp/terraform-mcp-server"
+            ],
             "enabled": true
         }
     }
