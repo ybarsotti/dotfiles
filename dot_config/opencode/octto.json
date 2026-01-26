@@ -1,0 +1,6 @@
+{
+  "port": 0,
+  "agents": {
+    "probe": { "model": "anthropic/claude-sonnet-4" }
+  }
+}
