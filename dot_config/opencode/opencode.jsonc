@@ -1,11 +1,18 @@
 {
     "$schema": "https://opencode.ai/config.json",
     "theme": "matrix",
-    "model": "anthropic/claude-sonnet-4-5-20250929",
+    "model": "anthropic/claude-sonnet-4-5",
+    "small_model": "anthropic/claude-haiku-4-5",
     "autoupdate": true,
     "plugin": [
-        "opencode-anthropic-auth@0.0.8",
-    ],
+    "opencode-anthropic-auth@0.0.8",
+    "@franlol/opencode-md-table-formatter@0.0.3",
+    "oh-my-opencode@latest",
+    "@mohak34/opencode-notifier@latest",
+    "@zenobius/opencode-skillful",
+    "@plannotator/opencode@latest",
+    "octto"
+  ],
     "provider": {
         "anthropic": {
             "models": {
@@ -21,15 +28,6 @@
         }
     },
     "mcp": {
-        "ccusage": {
-            "type": "local",
-            "command": [
-                "npx",
-                "ccusage@latest",
-                "mcp"
-            ],
-            "enabled": true
-        },
         "context7": {
             "type": "local",
             "command": [
@@ -48,16 +46,11 @@
             ],
             "enabled": true
         },
-        "terraform": {
-            "type": "local",
-            "command": [
-                "docker",
-                "run",
-                "-i",
-                "--rm",
-                "hashicorp/terraform-mcp-server"
-            ],
-            "enabled": true
-        }
+        "exa": {
+      "type": "remote",
+      "url": "https://mcp.exa.ai/mcp",
+      "enabled": true
+    }
     }
 }
+
