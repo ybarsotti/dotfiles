@@ -5,7 +5,7 @@
     "small_model": "anthropic/claude-haiku-4-5",
     "autoupdate": true,
     "plugin": [
-    "opencode-anthropic-auth@0.0.8",
+    "opencode-anthropic-auth@latest",
     "@franlol/opencode-md-table-formatter@0.0.3",
     "oh-my-opencode@latest",
     "@mohak34/opencode-notifier@latest",
