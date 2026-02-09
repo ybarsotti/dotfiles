@@ -234,6 +234,9 @@ This dotfiles setup includes several development tools that are automatically in
 - **`ollama`** - Run large language models locally
   - Usage: `ollama run llama3.2`, `ollama list`, `ollama pull mistral`
   - Start server: `ollama serve`
+- **`openspec`** - Spec-driven planning layer for coding agents
+  - Usage: `openspec init`, `openspec propose`, `openspec status`
+  - Docs: https://openspec.dev/
 
 ### Data Engineering & Analytics
 
