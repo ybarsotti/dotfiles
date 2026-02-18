@@ -156,6 +156,8 @@ This dotfiles setup includes several development tools that are automatically in
   - Usage: `lua script.lua`, `luarocks install package`
 - **`zig`** - Zig programming language
   - Usage: `zig run main.zig`, `zig build`
+- **`act`** - Run GitHub Actions locally for testing CI workflows
+  - Usage: `act`, `act -l` (list workflows), `act push` (simulate push event)
 - **`terraform`** - Infrastructure as Code tool
   - Usage: `terraform init`, `terraform plan`, `terraform apply`
 
