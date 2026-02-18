@@ -60,12 +60,12 @@ mcp_servers:
   #     - -e ${NOTION_TOKEN}
   #     - mcp/notion
 
-  linear:
-    command: npx
-    args:
-      - -y
-      - mcp-remote
-      - https://mcp.linear.app/mcp
+  # linear:
+  #   command: npx
+  #   args:
+  #     - -y
+  #     - mcp-remote
+  #     - https://mcp.linear.app/mcp
 
   filesystem:
     command: npx
