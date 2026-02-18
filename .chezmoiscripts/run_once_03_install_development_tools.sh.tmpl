@@ -210,6 +210,16 @@ else
     echo "Warning: npm command not found. Skipping global NPM package installation."
 fi
 
+# --- Install act (run GitHub Actions locally) ---
+echo "Installing act..."
+if ! command -v act &>/dev/null; then
+    echo "act not found. Installing..."
+    curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+    echo "✅ act installed successfully."
+else
+    echo "✅ act is already installed."
+fi
+
 # --- Install Cursor CLI ---
 echo "Installing Cursor CLI..."
 if ! command -v cursor &>/dev/null; then
