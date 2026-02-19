@@ -157,6 +157,7 @@ packages:
       development:
         - apidog              # API development and testing
         - beekeeper-studio    # Modern SQL editor and database manager
+        - conductor           # Claude Code + GitHub integration for Mac
         - figma               # Design and prototyping tool
         - ghostty             # Fast, feature-rich terminal emulator
         - visual-studio-code  # IDE
