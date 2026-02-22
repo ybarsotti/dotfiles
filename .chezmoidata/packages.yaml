@@ -25,9 +25,6 @@ packages:
         infrastructure:
           - terraform         # Infrastructure as Code tool
 
-        ai_ml:
-          - ollama            # Local LLM runner
-
         data_engineering:
           - duckdb            # Fast in-process analytical database (embedded, no server)
           # - clickhouse      # OLAP database CLI client (not available via brew, use Docker)
@@ -118,6 +115,7 @@ packages:
           - dust              # Modern du replacement
           - hyperfine         # Command-line benchmarking tool
           - tokei             # Code statistics tool
+          - weathr            # CLI weather forecast tool
           - youplot           # Command-line data plotting
           - gibo              # .gitignore boilerplate generator
           - bfg               # Git repository cleaner
@@ -181,7 +179,7 @@ packages:
       media:
         - obs                 # Open Broadcaster Software
         - spotify             # Music streaming
-      
+
       # Fonts
       fonts:
         # Nerd Fonts (with icon support)
@@ -199,3 +197,8 @@ packages:
         - font-fira-code                   # Fira Code (ligatures)
         - font-cascadia-code               # Cascadia Code (Microsoft)
         - font-monaspace                   # Monaspace (GitHub's superfamily)
+
+    # Personal-only packages (installed only on personal machines)
+    personal_brews:
+      ai_ml:
+        - ollama              # Local LLM runner
