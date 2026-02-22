@@ -1,0 +1,51 @@
+# QMD Collections Configuration
+# Location: ~/.config/qmd/index.yml
+#
+# Personal knowledge base indexed from Obsidian vault (BrainDump).
+# Content is primarily in Portuguese (PT-BR) with English technical terms.
+
+global_context: "Personal knowledge base in Portuguese (PT-BR) with technical English terms. If you see a relevant [[WikiWord]], you can search for that WikiWord to get more context."
+
+collections:
+  # Deep PostgreSQL internals study
+  technical-studies-db:
+    path: {{ .chezmoi.homeDir }}/Documents/Obsidian/BrainDump/20 Projects/Database study
+    pattern: "**/*.md"
+    context:
+      "/": "PostgreSQL internals study: heap pages, MVCC, indexing (B-Tree, BRIN, GIN), query optimization, WAL, locks, and performance tuning. Hands-on labs with SQL examples."
+
+  # Software architecture MBA courses
+  technical-studies-courses:
+    path: {{ .chezmoi.homeDir }}/Documents/Obsidian/BrainDump/15 Library/Courses
+    pattern: "**/*.md"
+    context:
+      "/": "Software architecture courses: MBA modules covering DevOps, SRE, Cloud, microservices, SOLID patterns, CI/CD pipelines, observability, and infrastructure as code."
+
+  # Knowledge base / zettelkasten
+  resources:
+    path: {{ .chezmoi.homeDir }}/Documents/Obsidian/BrainDump/40 Resources
+    pattern: "**/*.md"
+    context:
+      "/": "Personal knowledge base organized by topic."
+      "/AI & ML": "AI and machine learning: LLM applications, prompt engineering, AI agents, design patterns for ML systems, professional development roadmap."
+      "/Snippets": "Reusable code patterns and snippets: React Query, custom hooks, testing setup, Python patterns."
+      "/Data Engineering": "Data engineering concepts, tools, and practices."
+      "/Database": "Database design, open-source solutions, and system design patterns."
+      "/DevOps": "DevOps practices and home server setup."
+      "/Security": "Security concepts and practices."
+      "/Rust": "Rust programming language resources."
+      "/Postgresql": "PostgreSQL-specific resources and references."
+
+  # Career development
+  career:
+    path: {{ .chezmoi.homeDir }}/Documents/Obsidian/BrainDump/15 Library/Career
+    pattern: "**/*.md"
+    context:
+      "/": "Career development: interview preparation, management skills, professional growth strategies."
+
+  # Archived projects (PRDs and architecture docs)
+  career-archive:
+    path: {{ .chezmoi.homeDir }}/Documents/Obsidian/BrainDump/50 Archive
+    pattern: "**/*.md"
+    context:
+      "/": "Archived projects with product requirement documents (PRDs), architecture overviews, and feature documentation. Useful as templates and reference."
