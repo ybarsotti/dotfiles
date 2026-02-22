@@ -54,6 +54,24 @@ cask {{ . | quote }}
 {{-     end }}
 {{-   end }}
 {{- end }}
+{{ if eq .machine.purpose "personal" }}
+{{/* Personal-only brew packages */}}
+{{- range $category, $items := .packages.darwin.personal_brews }}
+{{-   if kindIs "slice" $items }}
+{{-     range $items }}
+brew {{ . | quote }}
+{{-     end }}
+{{-   else }}
+{{-     range $subcategory, $subitems := $items }}
+{{-       if kindIs "slice" $subitems }}
+{{-         range $subitems }}
+brew {{ . | quote }}
+{{-         end }}
+{{-       end }}
+{{-     end }}
+{{-   end }}
+{{- end }}
+{{ end }}
 EOF
 
 # Install borders separately with version check

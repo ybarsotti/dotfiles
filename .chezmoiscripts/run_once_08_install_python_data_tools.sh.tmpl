@@ -35,10 +35,14 @@ python_tools=(
 
     # CLI Tools
     "polars-cli"
+)
 
-    # AI/ML Web Interfaces
+{{- if eq .machine.purpose "personal" }}
+# Personal-only Python tools
+python_tools+=(
     "open-webui"
 )
+{{- end }}
 
 # Install each tool
 for tool in "${python_tools[@]}"; do
@@ -61,7 +65,9 @@ echo "Installed tools:"
 echo "  📊 Jupyter: jupyterlab, jupytext, nbconvert, nbdime, ipython"
 echo "  🤖 MLOps: dvc, mlflow, great-expectations"
 echo "  ⚡ CLI: polars-cli"
+{{ if eq .machine.purpose "personal" -}}
 echo "  🌐 AI: open-webui (run: open-webui serve)"
+{{- end }}
 echo ""
 echo "Quick start:"
 echo "  • Launch JupyterLab: jupyter lab"
