@@ -212,6 +212,16 @@ else
     echo "Warning: npm command not found. Skipping global NPM package installation."
 fi
 
+# --- Install Ollama (local LLM runner) ---
+echo "Installing Ollama..."
+if ! command -v ollama &>/dev/null; then
+    echo "Ollama not found. Installing..."
+    curl -fsSL https://ollama.com/install.sh | sh
+    echo "✅ Ollama installed successfully."
+else
+    echo "✅ Ollama is already installed."
+fi
+
 # --- Install act (run GitHub Actions locally) ---
 echo "Installing act..."
 if ! command -v act &>/dev/null; then
