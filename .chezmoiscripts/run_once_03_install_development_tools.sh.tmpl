@@ -191,11 +191,17 @@ if command -v npm &>/dev/null; then
         "@anthropic-ai/claude-code"
         "@fission-ai/openspec"
         "@openai/codex"
-        "@tobilu/qmd"
         "neovim"
         # "typescript"
         # "vercel"
     )
+
+{{- if eq .machine.purpose "personal" }}
+    # Personal-only npm packages
+    npm_packages+=(
+        "@tobilu/qmd"
+    )
+{{- end }}
 
     # Get list of globally installed packages
     installed_npm_packages=$(npm list -g --depth=0)
@@ -212,7 +218,8 @@ else
     echo "Warning: npm command not found. Skipping global NPM package installation."
 fi
 
-# --- Install Ollama (local LLM runner) ---
+{{ if eq .machine.purpose "personal" }}
+# --- Install Ollama (local LLM runner) [Personal only] ---
 echo "Installing Ollama..."
 if ! command -v ollama &>/dev/null; then
     echo "Ollama not found. Installing..."
@@ -221,6 +228,7 @@ if ! command -v ollama &>/dev/null; then
 else
     echo "✅ Ollama is already installed."
 fi
+{{ end }}
 
 # --- Install act (run GitHub Actions locally) ---
 echo "Installing act..."
