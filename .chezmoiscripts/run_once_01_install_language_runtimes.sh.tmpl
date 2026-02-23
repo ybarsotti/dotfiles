@@ -74,8 +74,8 @@ NODE_BIN=$(find "$NVM_DIR/versions/node" -path "*/bin/node" -type f 2>/dev/null 
 if [ -z "$NODE_BIN" ]; then
   echo "Installing Node via NVM..."
   rm -rf "${NVM_DIR:?}/versions/node/"*
-  nvm install node
-  nvm alias default node
+  nvm install --lts
+  nvm alias default lts/*
   NODE_BIN=$(find "$NVM_DIR/versions/node" -path "*/bin/node" -type f 2>/dev/null | head -1)
 fi
 
