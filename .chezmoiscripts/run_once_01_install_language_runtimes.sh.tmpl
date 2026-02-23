@@ -77,7 +77,8 @@ fi
 set -uf
 
 # Directly add NVM's node bin to PATH (bypass nvm use — unreliable in scripts)
-NVM_NODE_BIN=$(ls -dt "$NVM_DIR/versions/node/"v*/bin 2>/dev/null | head -1)
+# Use find instead of glob — the script runs with set -f (noglob) so v*/bin won't expand.
+NVM_NODE_BIN=$(find "$NVM_DIR/versions/node" -mindepth 2 -maxdepth 2 -name bin -type d 2>/dev/null | sort | tail -1)
 if [ -n "$NVM_NODE_BIN" ] && [ -d "$NVM_NODE_BIN" ]; then
   export PATH="$NVM_NODE_BIN:$PATH"
   echo "Node $(node --version) available at $NVM_NODE_BIN"
