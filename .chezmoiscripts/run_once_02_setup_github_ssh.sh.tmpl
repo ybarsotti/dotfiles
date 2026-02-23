@@ -63,27 +63,31 @@ echo "   3. Paste the public key above"
 echo "   4. Click 'Add SSH key'"
 echo ""
 
-# Interactive check for GitHub setup completion
-echo "⏳ Waiting for GitHub SSH key setup..."
-read -p "Have you added the SSH key to GitHub? (y/N): " confirm
-if [[ $confirm == [yY] ]]; then
-    echo "✅ GitHub SSH key confirmed!"
-    
-    # Test SSH connection to GitHub
-    echo "🔍 Testing SSH connection to GitHub..."
-    if ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
-        echo "✅ SSH connection to GitHub successful!"
+# Interactive check for GitHub setup completion (skip if not a terminal)
+if [ -t 0 ]; then
+    echo "⏳ Waiting for GitHub SSH key setup..."
+    read -p "Have you added the SSH key to GitHub? (y/N): " confirm
+    if [[ $confirm == [yY] ]]; then
+        echo "✅ GitHub SSH key confirmed!"
+
+        # Test SSH connection to GitHub
+        echo "🔍 Testing SSH connection to GitHub..."
+        if ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+            echo "✅ SSH connection to GitHub successful!"
+        else
+            echo "⚠️  SSH test inconclusive, but proceeding..."
+        fi
+
+        # Create marker for other scripts
+        mkdir -p ~/.config/chezmoi
+        touch ~/.config/chezmoi/github-ssh-configured
     else
-        echo "⚠️  SSH test inconclusive, but proceeding..."
+        echo "⚠️  GitHub SSH key setup deferred."
+        echo "Add the key to GitHub, then run: chezmoi apply"
     fi
-    
-    # Create marker for other scripts
-    mkdir -p ~/.config/chezmoi
-    touch ~/.config/chezmoi/github-ssh-configured
 else
-    echo "❌ GitHub SSH key setup incomplete."
-    echo "💡 Run 'chezmoi apply' again after adding the key to GitHub."
-    exit 1
+    echo "⚠️  Non-interactive mode. Skipping GitHub SSH key confirmation."
+    echo "Add the key to GitHub manually, then run: chezmoi apply"
 fi
 echo ""
 {{ end -}}

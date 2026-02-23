@@ -14,9 +14,10 @@ echo "Installing Python data science and ML tools via pipx..."
 
 # Check if pipx is available
 if ! command -v pipx &>/dev/null; then
-    echo "⚠️  pipx not found. Please install pipx first."
-    echo "Run: brew install pipx"
-    exit 1
+    echo "⚠️  pipx not found. Skipping Python data tools."
+    echo "Install pipx with: brew install pipx"
+    echo "Then run: chezmoi apply"
+    exit 0
 fi
 
 # Ensure pipx path is set up
