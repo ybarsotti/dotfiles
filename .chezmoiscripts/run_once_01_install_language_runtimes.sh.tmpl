@@ -49,36 +49,34 @@ else
   echo "Atuin is already installed."
 fi
 
-# --- Install NVM + Node ---
-# NVM is a shell function that requires globbing (set +f) and allows unset
-# vars (set +u). Node install is best-effort — pnpm uses its own installer.
-set +uf
-export NVM_DIR="$HOME/.nvm"
+# --- Install NVM + Node (best-effort) ---
+# Entire block runs in a subshell so any failure is contained and the rest
+# of the script continues. NVM/node can be set up manually later if needed.
+(
+  set +eufo pipefail
+  export NVM_DIR="$HOME/.nvm"
 
-# Install NVM if nvm.sh is not present
-if [ ! -s "$NVM_DIR/nvm.sh" ]; then
-  echo "Installing NVM..."
-  [ -d "$NVM_DIR" ] && rm -rf "$NVM_DIR"
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-else
-  echo "NVM is already installed."
-fi
-
-# shellcheck source=/dev/null
-\. "$NVM_DIR/nvm.sh"
-
-# Install node (best-effort — don't fail the whole script if node install fails)
-NODE_BIN=$(find "$NVM_DIR/versions/node" -path "*/bin/node" -type f 2>/dev/null | head -1)
-if [ -z "$NODE_BIN" ]; then
-  echo "Installing Node LTS via NVM..."
-  rm -rf "${NVM_DIR:?}/versions/node/"* 2>/dev/null || true
-  if nvm install --lts; then
-    nvm alias default lts/*
+  # Install NVM
+  if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+    echo "Installing NVM..."
+    [ -d "$NVM_DIR" ] && rm -rf "$NVM_DIR"
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
   else
-    echo "WARNING: nvm install --lts failed. You can install node manually: nvm install --lts"
+    echo "NVM is already installed."
   fi
-fi
-set -uf
+
+  # Source NVM and install node
+  if [ -s "$NVM_DIR/nvm.sh" ]; then
+    # shellcheck source=/dev/null
+    \. "$NVM_DIR/nvm.sh"
+    if ! command -v node &>/dev/null; then
+      echo "Installing Node LTS via NVM..."
+      nvm install --lts && nvm alias default lts/*
+    else
+      echo "Node $(node --version) is already installed."
+    fi
+  fi
+) || echo "WARNING: NVM/Node installation failed. Install manually later: nvm install --lts"
 
 # --- Install pnpm (standalone — does not require npm) ---
 if ! command -v pnpm &>/dev/null; then
