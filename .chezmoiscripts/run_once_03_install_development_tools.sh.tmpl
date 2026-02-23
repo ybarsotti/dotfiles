@@ -1,6 +1,7 @@
+{{- if eq .chezmoi.os "darwin" -}}
 #!/bin/bash
 
-# run_once_after_02_install-apps-and-extensions.sh
+# run_once_03_install_development_tools.sh.tmpl
 #
 # This script installs applications and extensions for already-installed tools.
 
@@ -251,3 +252,4 @@ else
 fi
 
 echo "Application and extension installation complete."
+{{ end -}}

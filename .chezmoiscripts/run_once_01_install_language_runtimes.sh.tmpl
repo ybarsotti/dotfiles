@@ -50,40 +50,50 @@ else
 fi
 
 # --- Install NVM + Node + pnpm ---
-# NVM is a shell function (not a binary) so it runs inside the current shell.
-# It requires: globbing enabled (-f breaks version resolution patterns like v*)
-# and unset variables allowed (-u breaks its internal variable references).
-set +uf
+# NVM is a shell function designed for interactive shells. In non-interactive
+# scripts, its PATH manipulation (nvm use) is unreliable. After installing,
+# we locate node binaries directly on the filesystem instead.
 export NVM_DIR="$HOME/.nvm"
+
+# Install NVM if nvm.sh is not present
 if [ ! -s "$NVM_DIR/nvm.sh" ]; then
   echo "Installing NVM..."
-  # Remove leftover directory (e.g. from a brew-installed nvm) so the
-  # curl installer can set up a clean install with nvm.sh in $NVM_DIR.
+  # Remove leftover directory (e.g. from a brew-installed nvm)
   [ -d "$NVM_DIR" ] && rm -rf "$NVM_DIR"
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 else
   echo "NVM is already installed."
 fi
 
-# Source NVM for this session (always, not just after install)
+# Source NVM and install node (requires globbing and allows unset vars)
+set +uf
+# shellcheck source=/dev/null
 \. "$NVM_DIR/nvm.sh"
-
-# Install node if not available
-if ! command -v node &>/dev/null; then
+if [ -z "$(ls -A "$NVM_DIR/versions/node/" 2>/dev/null)" ]; then
   echo "Installing Node via NVM..."
   nvm install node
-fi
-
-# Ensure default alias is set and node/npm are in PATH
-nvm alias default node
-nvm use default
-
-# Install pnpm if not available
-if ! command -v pnpm &>/dev/null; then
-  echo "Installing pnpm..."
-  npm install -g pnpm
-else
-  echo "pnpm is already installed."
+  nvm alias default node
 fi
 set -uf
+
+# Directly add NVM's node bin to PATH (bypass nvm use — unreliable in scripts)
+NVM_NODE_BIN=$(ls -dt "$NVM_DIR/versions/node/"v*/bin 2>/dev/null | head -1)
+if [ -n "$NVM_NODE_BIN" ] && [ -d "$NVM_NODE_BIN" ]; then
+  export PATH="$NVM_NODE_BIN:$PATH"
+  echo "Node $(node --version) available at $NVM_NODE_BIN"
+else
+  echo "WARNING: No node installation found in $NVM_DIR/versions/node/"
+fi
+
+# Install pnpm if npm is available
+if command -v npm &>/dev/null; then
+  if ! command -v pnpm &>/dev/null; then
+    echo "Installing pnpm..."
+    npm install -g pnpm
+  else
+    echo "pnpm is already installed."
+  fi
+else
+  echo "WARNING: npm not found. Skipping pnpm installation."
+fi
 {{ end -}}
