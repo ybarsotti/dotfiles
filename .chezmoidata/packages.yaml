@@ -136,6 +136,7 @@ packages:
         - gnupg               # GNU Privacy Guard
         - pinentry-mac        # macOS keychain integration for GPG
         - doppler             # Secrets management
+        - aws-vault           # Securely store and access AWS credentials
         - age                 # Simple file encryption (modern GPG alternative)
         - sops                # Encrypted secrets in Git repos
         - trivy               # Container/IaC security scanner
