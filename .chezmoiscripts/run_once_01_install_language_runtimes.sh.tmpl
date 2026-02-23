@@ -50,35 +50,33 @@ else
 fi
 
 # --- Install NVM + Node + pnpm ---
-# NVM is a shell function designed for interactive shells. In non-interactive
-# scripts, its PATH manipulation (nvm use) is unreliable. After installing,
-# we locate node binaries directly on the filesystem instead.
+# NVM is a shell function that requires globbing (set +f) and allows unset
+# vars (set +u). Keep set +uf active for the ENTIRE section — including PATH
+# resolution and npm install — to avoid any noglob interference.
+set +uf
 export NVM_DIR="$HOME/.nvm"
 
 # Install NVM if nvm.sh is not present
 if [ ! -s "$NVM_DIR/nvm.sh" ]; then
   echo "Installing NVM..."
-  # Remove leftover directory (e.g. from a brew-installed nvm)
   [ -d "$NVM_DIR" ] && rm -rf "$NVM_DIR"
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 else
   echo "NVM is already installed."
 fi
 
-# Source NVM and install node (requires globbing and allows unset vars)
-set +uf
 # shellcheck source=/dev/null
 \. "$NVM_DIR/nvm.sh"
+
+# Install node if no version exists
 if [ -z "$(ls -A "$NVM_DIR/versions/node/" 2>/dev/null)" ]; then
   echo "Installing Node via NVM..."
   nvm install node
   nvm alias default node
 fi
-set -uf
 
-# Directly add NVM's node bin to PATH (bypass nvm use — unreliable in scripts)
-# Use find instead of glob — the script runs with set -f (noglob) so v*/bin won't expand.
-NVM_NODE_BIN=$(find "$NVM_DIR/versions/node" -mindepth 2 -maxdepth 2 -name bin -type d 2>/dev/null | sort | tail -1)
+# Add node bin to PATH directly (nvm use is unreliable in non-interactive scripts)
+NVM_NODE_BIN=$(ls -dt "$NVM_DIR/versions/node/"v*/bin 2>/dev/null | head -1)
 if [ -n "$NVM_NODE_BIN" ] && [ -d "$NVM_NODE_BIN" ]; then
   export PATH="$NVM_NODE_BIN:$PATH"
   echo "Node $(node --version) available at $NVM_NODE_BIN"
@@ -86,7 +84,7 @@ else
   echo "WARNING: No node installation found in $NVM_DIR/versions/node/"
 fi
 
-# Install pnpm if npm is available
+# Install pnpm
 if command -v npm &>/dev/null; then
   if ! command -v pnpm &>/dev/null; then
     echo "Installing pnpm..."
@@ -97,4 +95,5 @@ if command -v npm &>/dev/null; then
 else
   echo "WARNING: npm not found. Skipping pnpm installation."
 fi
+set -uf
 {{ end -}}
