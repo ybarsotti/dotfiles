@@ -55,15 +55,18 @@ fi
 # and unset variables allowed (-u breaks its internal variable references).
 set +uf
 export NVM_DIR="$HOME/.nvm"
-if [ ! -d "$NVM_DIR" ]; then
+if [ ! -s "$NVM_DIR/nvm.sh" ]; then
   echo "Installing NVM..."
+  # Remove leftover directory (e.g. from a brew-installed nvm) so the
+  # curl installer can set up a clean install with nvm.sh in $NVM_DIR.
+  [ -d "$NVM_DIR" ] && rm -rf "$NVM_DIR"
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 else
   echo "NVM is already installed."
 fi
 
 # Source NVM for this session (always, not just after install)
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+\. "$NVM_DIR/nvm.sh"
 
 # Install node if not available
 if ! command -v node &>/dev/null; then

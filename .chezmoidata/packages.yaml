@@ -5,7 +5,8 @@ packages:
       development:
         version_managers:
           - mise              # Universal runtime version manager (replaces nvm, rbenv, etc.)
-          - nvm               # Node.js version manager
+          # nvm is installed via curl in run_once_01_install_language_runtimes.sh.tmpl
+          # (brew's nvm formula conflicts with the curl installer)
           - pipx              # Python package installer in isolated environments
           - uv                # Fast Python package installer and resolver
           # - pnpm              # Package manager
