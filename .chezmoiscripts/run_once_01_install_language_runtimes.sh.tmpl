@@ -49,10 +49,9 @@ else
   echo "Atuin is already installed."
 fi
 
-# --- Install NVM + Node + pnpm ---
+# --- Install NVM + Node ---
 # NVM is a shell function that requires globbing (set +f) and allows unset
-# vars (set +u). Keep set +uf active for the ENTIRE section — including PATH
-# resolution and npm install — to avoid any noglob interference.
+# vars (set +u). Node install is best-effort — pnpm uses its own installer.
 set +uf
 export NVM_DIR="$HOME/.nvm"
 
@@ -60,7 +59,7 @@ export NVM_DIR="$HOME/.nvm"
 if [ ! -s "$NVM_DIR/nvm.sh" ]; then
   echo "Installing NVM..."
   [ -d "$NVM_DIR" ] && rm -rf "$NVM_DIR"
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 else
   echo "NVM is already installed."
 fi
@@ -68,35 +67,26 @@ fi
 # shellcheck source=/dev/null
 \. "$NVM_DIR/nvm.sh"
 
-# Install node — check for actual binary, not just directory contents
-# (previous failed runs may leave partial directories without a working binary)
+# Install node (best-effort — don't fail the whole script if node install fails)
 NODE_BIN=$(find "$NVM_DIR/versions/node" -path "*/bin/node" -type f 2>/dev/null | head -1)
 if [ -z "$NODE_BIN" ]; then
-  echo "Installing Node via NVM..."
-  rm -rf "${NVM_DIR:?}/versions/node/"*
-  nvm install --lts
-  nvm alias default lts/*
-  NODE_BIN=$(find "$NVM_DIR/versions/node" -path "*/bin/node" -type f 2>/dev/null | head -1)
-fi
-
-# Add node bin to PATH directly (nvm use is unreliable in non-interactive scripts)
-if [ -n "$NODE_BIN" ]; then
-  export PATH="$(dirname "$NODE_BIN"):$PATH"
-  echo "Node $(node --version) ready"
-else
-  echo "WARNING: Failed to install node via NVM."
-fi
-
-# Install pnpm
-if command -v npm &>/dev/null; then
-  if ! command -v pnpm &>/dev/null; then
-    echo "Installing pnpm..."
-    npm install -g pnpm
+  echo "Installing Node LTS via NVM..."
+  rm -rf "${NVM_DIR:?}/versions/node/"* 2>/dev/null || true
+  if nvm install --lts; then
+    nvm alias default lts/*
   else
-    echo "pnpm is already installed."
+    echo "WARNING: nvm install --lts failed. You can install node manually: nvm install --lts"
   fi
-else
-  echo "WARNING: npm not found. Skipping pnpm installation."
 fi
 set -uf
+
+# --- Install pnpm (standalone — does not require npm) ---
+if ! command -v pnpm &>/dev/null; then
+  echo "Installing pnpm..."
+  curl -fsSL https://get.pnpm.io/install.sh | sh -
+  export PNPM_HOME="$HOME/Library/pnpm"
+  export PATH="$PNPM_HOME:$PATH"
+else
+  echo "pnpm is already installed."
+fi
 {{ end -}}
