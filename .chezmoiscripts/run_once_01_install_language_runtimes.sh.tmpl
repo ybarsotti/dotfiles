@@ -50,10 +50,10 @@ else
 fi
 
 # --- Install NVM + Node + pnpm ---
-# NVM's shell scripts are not compatible with set -u (they reference unset
-# variables), and NVM wraps node/npm with shell functions that also use them.
-# Keep set +u active for the entire NVM/npm section.
-set +u
+# NVM is a shell function (not a binary) so it runs inside the current shell.
+# It requires: globbing enabled (-f breaks version resolution patterns like v*)
+# and unset variables allowed (-u breaks its internal variable references).
+set +uf
 export NVM_DIR="$HOME/.nvm"
 if [ ! -d "$NVM_DIR" ]; then
   echo "Installing NVM..."
@@ -71,6 +71,10 @@ if ! command -v node &>/dev/null; then
   nvm install node
 fi
 
+# Ensure default alias is set and node/npm are in PATH
+nvm alias default node
+nvm use default
+
 # Install pnpm if not available
 if ! command -v pnpm &>/dev/null; then
   echo "Installing pnpm..."
@@ -78,5 +82,5 @@ if ! command -v pnpm &>/dev/null; then
 else
   echo "pnpm is already installed."
 fi
-set -u
+set -uf
 {{ end -}}
