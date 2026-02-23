@@ -1,3 +1,4 @@
+{{- if eq .chezmoi.os "darwin" -}}
 #!/bin/bash
 
 # run_once_08_install_python_data_tools.sh.tmpl
@@ -6,6 +7,8 @@
 # These tools are installed in isolated environments to avoid dependency conflicts
 
 {{ template "error_handling" }}
+
+{{ template "homebrew_path_setup" . }}
 
 echo "Installing Python data science and ML tools via pipx..."
 
@@ -76,3 +79,4 @@ echo "  • Start MLflow UI: mlflow ui"
 echo "  • Interactive Python: ipython"
 echo ""
 echo "Note: You may need to restart your shell for PATH changes to take effect."
+{{ end -}}

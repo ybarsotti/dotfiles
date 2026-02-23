@@ -1,3 +1,4 @@
+{{- if eq .chezmoi.os "darwin" -}}
 #!/bin/bash
 
 # run_once_07_install_cursor_extensions.sh
@@ -105,3 +106,4 @@ done
 echo "Cursor extension installation complete."
 echo ""
 echo "Note: Some extensions may require Cursor to be restarted to take full effect."
+{{ end -}}
