@@ -68,20 +68,23 @@ fi
 # shellcheck source=/dev/null
 \. "$NVM_DIR/nvm.sh"
 
-# Install node if no version exists
-if [ -z "$(ls -A "$NVM_DIR/versions/node/" 2>/dev/null)" ]; then
+# Install node — check for actual binary, not just directory contents
+# (previous failed runs may leave partial directories without a working binary)
+NODE_BIN=$(find "$NVM_DIR/versions/node" -path "*/bin/node" -type f 2>/dev/null | head -1)
+if [ -z "$NODE_BIN" ]; then
   echo "Installing Node via NVM..."
+  rm -rf "${NVM_DIR:?}/versions/node/"*
   nvm install node
   nvm alias default node
+  NODE_BIN=$(find "$NVM_DIR/versions/node" -path "*/bin/node" -type f 2>/dev/null | head -1)
 fi
 
 # Add node bin to PATH directly (nvm use is unreliable in non-interactive scripts)
-NVM_NODE_BIN=$(ls -dt "$NVM_DIR/versions/node/"v*/bin 2>/dev/null | head -1)
-if [ -n "$NVM_NODE_BIN" ] && [ -d "$NVM_NODE_BIN" ]; then
-  export PATH="$NVM_NODE_BIN:$PATH"
-  echo "Node $(node --version) available at $NVM_NODE_BIN"
+if [ -n "$NODE_BIN" ]; then
+  export PATH="$(dirname "$NODE_BIN"):$PATH"
+  echo "Node $(node --version) ready"
 else
-  echo "WARNING: No node installation found in $NVM_DIR/versions/node/"
+  echo "WARNING: Failed to install node via NVM."
 fi
 
 # Install pnpm
