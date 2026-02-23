@@ -11,6 +11,10 @@ if ! command -v brew &>/dev/null; then
     exit 0
 fi
 
+# Ensure Homebrew's package index is up to date (critical on fresh installs)
+echo "Updating Homebrew..."
+brew update
+
 brew bundle --file=/dev/stdin <<EOF
 tap "hashicorp/tap"
 tap "jandedobbeleer/oh-my-posh"
