@@ -105,6 +105,10 @@ fi
 # --- Install gh extensions ---
 echo "Installing gh extensions..."
 
+# Add GitHub's SSH host key to known_hosts to prevent interactive prompt
+mkdir -p "$HOME/.ssh"
+ssh-keyscan -t ed25519,rsa,ecdsa github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null || true
+
 # Check if gh is available, if not try to install it
 if ! command -v gh &>/dev/null; then
     echo "GitHub CLI (gh) not found. Attempting to install..."
