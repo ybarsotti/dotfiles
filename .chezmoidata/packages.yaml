@@ -20,7 +20,7 @@ packages:
           - git-sizer         # Compute size metrics for git repos
         
         containerization:
-          - docker            # Container platform
+          # docker CLI is included with Docker Desktop cask
           - lazydocker        # Terminal UI for Docker
         
         infrastructure:
@@ -159,6 +159,7 @@ packages:
         - beekeeper-studio    # Modern SQL editor and database manager
         - conductor           # Claude Code + GitHub integration for Mac
         - figma               # Design and prototyping tool
+        - docker              # Docker Desktop (includes Docker Engine, CLI, Compose)
         - ghostty             # Fast, feature-rich terminal emulator
         - visual-studio-code  # IDE
         - p4v                 # Perforce Visual Merge Tool (P4Merge) for Git merge conflicts
