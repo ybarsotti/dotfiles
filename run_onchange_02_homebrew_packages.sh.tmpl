@@ -3,6 +3,8 @@
 
 set -eufo pipefail
 
+{{ template "homebrew_path_setup" . }}
+
 # Ensure brew is available before running
 if ! command -v brew &>/dev/null; then
     echo "Homebrew not found, skipping package installation"
