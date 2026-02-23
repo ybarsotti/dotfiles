@@ -169,7 +169,8 @@ echo "Installing global NPM packages..."
 # Using 'lts' is a safe default.
 if command -v mise &>/dev/null; then
     echo "Setting up Node.js via mise..."
-    mise use --global node@lts
+    mise use --global node@lts || echo "WARNING: mise failed to install node. npm packages will be skipped."
+    eval "$(mise env)" 2>/dev/null || true
 else
     echo "Warning: mise command not found. Cannot set up Node.js to install NPM packages."
 fi
