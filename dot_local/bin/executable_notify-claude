@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Read JSON input with timeout
-read -t 1 -d '}' json || {
+# Read all of stdin
+json=$(cat)
+
+if [ -z "$json" ]; then
   echo "Missing json from claude" >&2
   exit 2
-}
+fi
 
 title="Claude"
 subtitle=$(basename "$(pwd)")
-message=$(echo "$json}" | jq -r '.message // "Stopped"')
+message=$(echo "$json" | jq -r '.message // "Stopped"')
 
 sounds=(
   Basso Blow Bottle Frog Funk Glass
