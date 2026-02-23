@@ -18,7 +18,9 @@ brew update
 # Check macOS version for borders compatibility
 MACOS_VERSION=$(sw_vers -productVersion | cut -d. -f1)
 
-brew bundle --file=/dev/stdin <<EOF
+# Allow brew bundle to continue past individual package failures
+# (set -e would abort the entire script if any single package fails)
+brew bundle --no-lock --file=/dev/stdin <<EOF || echo "WARNING: Some packages failed to install. Review output above."
 {{/* Iterate through all brew categories and subcategories */}}
 {{- range $category, $items := .packages.darwin.brews }}
 {{-   if kindIs "slice" $items }}
