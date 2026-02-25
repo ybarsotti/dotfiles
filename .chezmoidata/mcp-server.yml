@@ -5,19 +5,11 @@ mcp_servers:
     args:
       - "@ccusage/mcp@latest"
 
-  context7:
+  memory:
     command: npx
     args:
       - -y
-      - "@upstash/context7-mcp"
-
-  # playwright:
-  #   command: npx
-  #   args:
-  #     - "@playwright/mcp@latest"
-  #     - --browser
-  #     - firefox
-  #     - --headless
+      - "@modelcontextprotocol/server-memory"
 
   sequential-thinking:
     command: npx
@@ -25,6 +17,16 @@ mcp_servers:
       - -y
       - "@modelcontextprotocol/server-sequential-thinking"
 
+  # Optional / situational (uncomment as needed):
+  #
+  # playwright:
+  #   command: npx
+  #   args:
+  #     - "@playwright/mcp@latest"
+  #     - --browser
+  #     - firefox
+  #     - --headless
+  #
   # terraform:
   #   command: docker
   #   args:
@@ -33,49 +35,16 @@ mcp_servers:
   #     - --rm
   #     - hashicorp/terraform-mcp-server
   #
-  # chrome-devtools:
+  # filesystem:
   #   command: npx
   #   args:
-  #     - "chrome-devtools-mcp@latest"
+  #     - -y
+  #     - "@modelcontextprotocol/server-filesystem"
+  #     - /Users/barsotti/Developer
   #
-  # blender:
-  #   command: uvx
-  #   args:
-  #     - blender-mcp
-  #
-  # markitdown:
-  #   command: docker
-  #   args:
-  #     - run
-  #     - --rm
-  #     - -i
-  #     - markitdown-mcp:latest
-  #
-  # notionApi:
-  #   command: docker
-  #   args:
-  #     - run
-  #     - --rm
-  #     - -i
-  #     - -e ${NOTION_TOKEN}
-  #     - mcp/notion
-
   # linear:
   #   command: npx
   #   args:
   #     - -y
   #     - mcp-remote
   #     - https://mcp.linear.app/mcp
-
-  filesystem:
-    command: npx
-    args:
-      - -y
-      - "@modelcontextprotocol/server-filesystem"
-      - /Users/barsotti/Developer
-
-  memory:
-    command: npx
-    args:
-      - -y
-      - "@modelcontextprotocol/server-memory"

@@ -29,8 +29,25 @@
       }
     ]
   },
+  "enabledPlugins": {
+    "swift-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true
+  },
   "mcpServers": {
+{{- $first := true -}}
 {{- range $name, $config := .mcp_servers }}
+{{- if $first }}{{- $first = false }}{{- else }},{{- end }}
     "{{ $name }}": {
       "type": "stdio",
       "command": "{{ $config.command }}",
@@ -38,26 +55,7 @@
 {{- if hasKey $config "env" }},
       "env": {{ $config.env | toJson }}
 {{- end }}
-    },
-{{- end }}
-    "github": {
-      "type": "stdio",
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-e",
-        "GITHUB_PERSONAL_ACCESS_TOKEN",
-        "ghcr.io/github/github-mcp-server"
-      ]
-{{- if hasKey .chezmoi "env" }}
-{{- if hasKey .chezmoi.env "GITHUB_PAT" }},
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "{{ .chezmoi.env.GITHUB_PAT }}"
-      }
-{{- end }}
-{{- end }}
     }
+{{- end }}
   }
 }
