@@ -6,18 +6,8 @@
 default:
     @just --list
 
-# Run all validations (shellcheck, yamllint, etc.)
-check:
-    @echo "Running validations..."
-    @echo "Checking shell scripts..."
-    @find . -name "*.sh" -type f -not -path "*/\.*" -exec shellcheck {} \;
-    @echo "✅ Shell scripts validated"
-    @echo "Checking YAML files..."
-    @yamllint .
-    @echo "✅ YAML files validated"
-    @echo "Checking for secrets..."
-    @gitleaks detect --no-git
-    @echo "✅ No secrets detected"
+# Run all validations (alias for lint)
+check: lint
 
 # Show what changes chezmoi would make
 diff:
@@ -130,10 +120,56 @@ backup:
     @tar -czf ~/dotfiles-backup-$(date +%Y%m%d-%H%M%S).tar.gz ~/.config ~/.zshrc ~/.gitconfig ~/.tmux.conf 2>/dev/null || true
     @echo "✅ Backup created"
 
-# Test dotfiles installation in a clean environment (requires Docker)
-test-install:
-    @echo "Testing dotfiles installation..."
-    docker run --rm -it -v $(chezmoi source-path):/dotfiles ubuntu:latest bash -c "apt-get update && apt-get install -y git && cd /dotfiles && ./install.sh"
+# --- Testing (requires Docker) ---
+
+# Build the test Docker image
+_build-test-image:
+    @echo "Building test Docker image..."
+    docker build -t chezmoi-test -f .github/Dockerfile .
+
+# Test fresh chezmoi apply from a clean state
+test-fresh: _build-test-image
+    @echo "Running fresh install test..."
+    docker run --rm chezmoi-test /home/testuser/.local/share/chezmoi/.github/test-scripts/test-fresh-install.sh
+
+# Test that running chezmoi apply twice is safe (idempotency)
+test-idempotency: _build-test-image
+    @echo "Running idempotency test..."
+    docker run --rm chezmoi-test /home/testuser/.local/share/chezmoi/.github/test-scripts/test-idempotency.sh
+
+# Run all Docker tests
+test-all: test-fresh test-idempotency
+    @echo "All tests passed."
+
+# --- Linting ---
+
+# Run linters (shellcheck, yamllint, gitleaks)
+lint:
+    @echo "Running shellcheck on .sh files..."
+    @find . -name "*.sh" -type f -not -path "*/.git/*" -exec shellcheck {} \;
+    @echo "Running shellcheck on .sh.tmpl files..."
+    @find . -name "*.sh.tmpl" -type f -not -path "*/.git/*" -exec sh -c 'grep -v "^\s*{{" "$$1" | shellcheck -s bash --severity=error -' _ {} \;
+    @echo "Running yamllint..."
+    @yamllint -d relaxed .chezmoidata/packages.yaml
+    @echo "Running gitleaks..."
+    @gitleaks detect --no-git
+    @echo "All lint checks passed."
+
+# --- Local CI validation ---
+
+# Run pre-commit hooks on all files
+validate-hooks:
+    @echo "Running pre-commit hooks..."
+    pre-commit run --all-files
+
+# Run GitHub Actions locally with act (requires: brew install act)
+validate-ci:
+    @echo "Running CI workflow locally with act..."
+    act --container-architecture linux/amd64
+
+# Full local validation: lint + pre-commit + Docker tests
+validate: lint validate-hooks test-all
+    @echo "Full validation passed — safe to push."
 
 # Show system information
 info:
