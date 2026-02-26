@@ -3,7 +3,7 @@ name: branch-analyzer
 description: |
   Analyzes a feature branch to identify changed files, their types, and dependencies.
   First stage of PR stack splitting pipeline.
-  
+
   **Use proactively when:**
   - User wants to understand what changed in a branch
   - Starting the PR splitting process
@@ -97,41 +97,41 @@ while IFS= read -r file; do
     # Database layer
     *_row.py) ((MODELS++)); echo "  [MODEL] $file" ;;
     */alembic/versions/*.py) ((MIGRATIONS++)); echo "  [MIGRATION] $file" ;;
-    
+
     # Repository layer
     *_repo.py|*_filter.py) ((REPOS++)); echo "  [REPO] $file" ;;
-    
+
     # Service layer
     */services/*.py) ((SERVICES++)); echo "  [SERVICE] $file" ;;
-    
+
     # API layer
     */api/*.py) ((API++)); echo "  [API] $file" ;;
     */schemas/*_schema.py) ((SCHEMAS++)); echo "  [SCHEMA] $file" ;;
-    
+
     # Scripts - IMPORTANT pattern!
     */scripts/*.py|scripts/*.py)
       ((SCRIPTS++))
       SCRIPT_FILES+=("$file")
       echo "  [SCRIPT] $file"
       ;;
-    
+
     # Test files - track with details
     *test_*.py|*/tests/*_test.py|*/test_*.py)
       ((TESTS++))
       TEST_FILES_DETAILED+=("$file")
       echo "  [TEST] $file"
       ;;
-    
+
     # Fixtures - track with details
     *_fixtures.py|*/fixtures/*.py)
       ((FIXTURES++))
       FIXTURE_FILES_DETAILED+=("$file")
       echo "  [FIXTURE] $file"
       ;;
-    
+
     # Type definitions
     *_types.py|*id_types.py) ((TYPES++)); echo "  [TYPE] $file" ;;
-    
+
     # Other
     *) ((OTHER++)); echo "  [OTHER] $file" ;;
   esac
@@ -285,14 +285,14 @@ declare -a DETECTED_PATTERNS
 if [ $SCRIPTS -ge 5 ]; then
   DETECTED_PATTERNS+=("script-heavy")
   echo "  📜 SCRIPT-HEAVY pattern detected ($SCRIPTS scripts)"
-  
+
   # Analyze script purposes
   declare -A SCRIPT_GROUPS
-  
+
   for script in "${SCRIPT_FILES[@]}"; do
     # Extract script category from path or name
     SCRIPT_NAME=$(basename "$script" .py)
-    
+
     # Common script patterns
     if [[ "$script" =~ migration|migrate|db ]]; then
       SCRIPT_GROUPS[db_scripts]+="$script"$'\n'
@@ -308,7 +308,7 @@ if [ $SCRIPTS -ge 5 ]; then
       SCRIPT_GROUPS[misc_scripts]+="$script"$'\n'
     fi
   done
-  
+
   echo "  Script groups found:"
   for group in "${!SCRIPT_GROUPS[@]}"; do
     COUNT=$(echo "${SCRIPT_GROUPS[$group]}" | grep -c '.')
@@ -358,10 +358,10 @@ declare -A TEST_TO_IMPL
 
 for test_file in "${TEST_FILES_DETAILED[@]}"; do
   TEST_NAME=$(basename "$test_file" .py | sed 's/^test_//')
-  
+
   # Find what this test is testing
   IMPL_FILE=""
-  
+
   # Check for corresponding implementation file
   if [[ "$test_file" =~ test_(.+)_repo.py ]]; then
     IMPL_FILE=$(echo "$CHANGED_FILES" | grep "${BASH_REMATCH[1]}_repo.py" | grep -v "test_")
@@ -370,7 +370,7 @@ for test_file in "${TEST_FILES_DETAILED[@]}"; do
   elif [[ "$test_file" =~ test_(.+).py ]]; then
     IMPL_FILE=$(echo "$CHANGED_FILES" | grep "${BASH_REMATCH[1]}.py" | grep -v "test_")
   fi
-  
+
   if [ -n "$IMPL_FILE" ]; then
     TEST_TO_IMPL["$test_file"]="$IMPL_FILE"
     echo "    ✓ $test_file → $IMPL_FILE"
@@ -386,10 +386,10 @@ declare -A FIXTURE_TO_TESTS
 
 for fixture_file in "${FIXTURE_FILES_DETAILED[@]}"; do
   FIXTURE_NAME=$(basename "$fixture_file" .py | sed 's/_fixtures$//')
-  
+
   # Find which tests use this fixture
   USING_TESTS=$(echo "$CHANGED_FILES" | grep "test.*$FIXTURE_NAME" || echo "")
-  
+
   if [ -n "$USING_TESTS" ]; then
     FIXTURE_TO_TESTS["$fixture_file"]="$USING_TESTS"
     echo "    ✓ $fixture_file → used by $(echo "$USING_TESTS" | wc -l) test(s)"
@@ -634,28 +634,28 @@ EOF
 while IFS= read -r file; do
   # Classify and add to appropriate category
   case "$file" in
-    *_row.py) 
+    *_row.py)
       echo "# Model: $file" >> "$CONFIG_FILE"
       ;;
-    */alembic/versions/*.py) 
+    */alembic/versions/*.py)
       echo "# Migration: $file" >> "$CONFIG_FILE"
       ;;
-    *_repo.py|*_filter.py) 
+    *_repo.py|*_filter.py)
       echo "# Repository: $file" >> "$CONFIG_FILE"
       ;;
-    */services/*.py) 
+    */services/*.py)
       echo "# Service: $file" >> "$CONFIG_FILE"
       ;;
-    */api/*.py) 
+    */api/*.py)
       echo "# API: $file" >> "$CONFIG_FILE"
       ;;
     */scripts/*.py|scripts/*.py)
       echo "# Script: $file" >> "$CONFIG_FILE"
       ;;
-    *test_*.py) 
+    *test_*.py)
       echo "# Test: $file" >> "$CONFIG_FILE"
       ;;
-    *_fixtures.py|*/fixtures/*.py) 
+    *_fixtures.py|*/fixtures/*.py)
       echo "# Fixture: $file" >> "$CONFIG_FILE"
       ;;
     *)

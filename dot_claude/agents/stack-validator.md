@@ -2,7 +2,7 @@
 name: stack-validator
 description: |
   Checks CI status for all PRs in the stack, identifies failures, and categorizes errors.
-  
+
   **Use proactively when:**
   - Branches have been pushed and PRs created
   - User wants to check CI status
@@ -44,7 +44,7 @@ declare -A PR_NUMBERS
 
 for branch in "${BRANCHES[@]}"; do
   PR_NUM=$(gh pr list --head "$branch" --json number --jq '.[0].number' 2>/dev/null)
-  
+
   if [ -n "$PR_NUM" ]; then
     PR_NUMBERS[$branch]=$PR_NUM
     echo "  ✓ $branch → PR #$PR_NUM"
@@ -70,27 +70,27 @@ EOF
 
 for branch in "${BRANCHES[@]}"; do
   PR_NUM="${PR_NUMBERS[$branch]}"
-  
+
   if [ -z "$PR_NUM" ]; then
     continue
   fi
-  
+
   # Get CI status
   CI_STATUS=$(gh pr view "$PR_NUM" --json statusCheckRollup \
     --jq '.statusCheckRollup[] | select(.status == "COMPLETED") | .conclusion' | head -1)
-  
+
   # Get PR URL
   PR_URL=$(gh pr view "$PR_NUM" --json url --jq '.url')
-  
+
   # Update branch section in TOML
   sed -i.bak "/branch = \"$branch\"/a\\
 pr_number = $PR_NUM\\
 pr_url = \"$PR_URL\"\\
 ci_status = \"${CI_STATUS:-PENDING}\"" "$CONFIG_FILE"
-  
+
   if [ "$CI_STATUS" == "FAILURE" ]; then
     echo "  ❌ PR #$PR_NUM: FAILING"
-    
+
     # Save failure logs
     gh run view $(gh pr view "$PR_NUM" --json statusCheckRollup \
       --jq '.statusCheckRollup[0].workflowRun.databaseId') \
@@ -112,32 +112,32 @@ echo "🔬 Analyzing failures..."
 for branch in "${BRANCHES[@]}"; do
   PR_NUM="${PR_NUMBERS[$branch]}"
   LOG_FILE="tmp/failure_log_${PR_NUM}_${TIMESTAMP}.txt"
-  
+
   if [ ! -f "$LOG_FILE" ]; then
     continue
   fi
-  
+
   # Extract error patterns
   ERRORS=""
-  
+
   # Import errors
   if grep -q "ModuleNotFoundError\|ImportError\|cannot import" "$LOG_FILE"; then
     MISSING_MODULE=$(grep -o "No module named '[^']*'" "$LOG_FILE" | head -1 | cut -d"'" -f2)
     ERRORS="$ERRORS\"ImportError: $MISSING_MODULE\", "
   fi
-  
+
   # Fixture errors
   if grep -q "fixture.*not found" "$LOG_FILE"; then
     MISSING_FIXTURE=$(grep -o "fixture '[^']*' not found" "$LOG_FILE" | head -1 | cut -d"'" -f2)
     ERRORS="$ERRORS\"FixtureError: $MISSING_FIXTURE\", "
   fi
-  
+
   # Type errors
   if grep -q "is not defined" "$LOG_FILE"; then
     MISSING_TYPE=$(grep -o '"[^"]*" is not defined' "$LOG_FILE" | head -1 | cut -d'"' -f2)
     ERRORS="$ERRORS\"TypeError: $MISSING_TYPE\", "
   fi
-  
+
   # Add errors to TOML if found
   if [ -n "$ERRORS" ]; then
     sed -i.bak "/branch = \"$branch\"/,/^$/s/$/\nci_errors = [${ERRORS%, }]/" "$CONFIG_FILE"

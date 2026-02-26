@@ -221,13 +221,13 @@ reason = "$REASON"
 error_type = "ImportError"
 
 EOF
-      
+
     elif [[ "$error" == FixtureError:* ]]; then
       # Similar logic for fixtures
       FIXTURE=$(echo "$error" | cut -d':' -f2 | xargs)
       echo "🔎 Missing Fixture: $FIXTURE"
       # ... handle fixture moves ...
-      
+
     fi
   done <<< "$(echo "$ERRORS" | tr ',' '\n')"
 done
@@ -247,19 +247,19 @@ ORDERED_BRANCHES=($(grep "^branch = " "$CONFIG_FILE" | cut -d'"' -f2))
 # For each branch that had a file added, propagate to all downstream
 for ((i=0; i<${#ORDERED_BRANCHES[@]}; i++)); do
   CURRENT="${ORDERED_BRANCHES[$i]}"
-  
+
   # Check if this branch had fixes
   if grep -q "to_branch = \"$CURRENT\"" "$CONFIG_FILE" 2>/dev/null; then
     echo ""
     echo "📤 Propagating from: $CURRENT"
-    
+
     # Update all downstream branches
     for ((j=$((i+1)); j<${#ORDERED_BRANCHES[@]}; j++)); do
       DOWNSTREAM="${ORDERED_BRANCHES[$j]}"
       UPSTREAM="${ORDERED_BRANCHES[$((j-1))]}"
-      
+
       echo "  → $DOWNSTREAM"
-      
+
       git checkout "$DOWNSTREAM"
       git merge "$UPSTREAM" --no-edit || {
         echo "⚠️  Merge conflict in $DOWNSTREAM"
@@ -301,11 +301,11 @@ sleep 15
 
 for failing_branch in "${FAILING_BRANCHES[@]}"; do
   PR_NUM=$(grep -A 3 "branch = \"$failing_branch\"" "$CONFIG_FILE" | grep "pr_number" | grep -o '[0-9]\+')
-  
+
   if [ -n "$PR_NUM" ]; then
     NEW_STATUS=$(gh pr view "$PR_NUM" --json statusCheckRollup \
       --jq '.statusCheckRollup[] | select(.status != "QUEUED") | .conclusion' | head -1)
-    
+
     if [ "$NEW_STATUS" == "SUCCESS" ]; then
       echo "  ✅ PR #$PR_NUM: Now passing!"
     else
