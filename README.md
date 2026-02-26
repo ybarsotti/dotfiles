@@ -239,6 +239,10 @@ This dotfiles setup includes several development tools that are automatically in
 - **`openspec`** - Spec-driven planning layer for coding agents
   - Usage: `openspec init`, `openspec propose`, `openspec status`
   - Docs: https://openspec.dev/
+- **`specify`** (GitHub Spec Kit) - Toolkit for Spec-Driven Development with AI coding agents
+  - Usage: `specify init <project>`, `specify plan`, `specify build`
+  - Install: Via `uv tool install` (automatic)
+  - Docs: https://github.com/github/spec-kit
 
 ### Data Engineering & Analytics
 

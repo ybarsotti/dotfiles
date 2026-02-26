@@ -76,7 +76,7 @@ fi
 # --- Install Cargo packages (Rust) ---
 echo "Installing Cargo packages..."
 if ! command -v selene &>/dev/null; then
-  cargo install selene
+  cargo install selene || echo "⚠️  Failed to install selene. Continuing."
 else
   echo "selene is already installed."
 fi
@@ -94,12 +94,34 @@ if command -v pipx &>/dev/null; then
             echo "pipx package $pkg is already installed."
         else
             echo "Installing pipx package $pkg..."
-            pipx install "$pkg"
+            if pipx install "$pkg" 2>&1; then
+                echo "✅ $pkg installed successfully."
+            else
+                echo "⚠️  Failed to install $pkg. Continuing with remaining packages."
+            fi
         fi
     done
 else
     echo "Warning: pipx not found. Skipping Python package installation."
     echo "Note: pipx should be installed via Homebrew in the packages script."
+fi
+
+# --- Install specify-cli (GitHub Spec Kit) via uv ---
+echo "Installing specify-cli (GitHub Spec Kit)..."
+if command -v uv &>/dev/null; then
+    if uv tool list 2>/dev/null | grep -q "specify-cli"; then
+        echo "✅ specify-cli is already installed."
+    else
+        echo "Installing specify-cli..."
+        if uv tool install specify-cli --from git+https://github.com/github/spec-kit.git 2>&1; then
+            echo "✅ specify-cli installed successfully."
+        else
+            echo "⚠️  Failed to install specify-cli. Continuing."
+        fi
+    fi
+else
+    echo "Warning: uv not found. Skipping specify-cli installation."
+    echo "Note: uv should be installed via the language runtimes script."
 fi
 
 # --- Install gh extensions ---
@@ -156,7 +178,7 @@ if command -v gh &>/dev/null && gh auth status &>/dev/null; then
         echo "gh extension $ext is already installed."
       else
         echo "Installing gh extension $ext..."
-        gh extension install "$ext"
+        gh extension install "$ext" || echo "⚠️  Failed to install gh extension $ext. Continuing."
       fi
     done
 fi
@@ -202,7 +224,11 @@ if command -v npm &>/dev/null; then
             echo "NPM package $pkg is already installed."
         else
             echo "Installing NPM package $pkg..."
-            npm install -g "$pkg"
+            if npm install -g "$pkg" 2>&1; then
+                echo "✅ $pkg installed successfully."
+            else
+                echo "⚠️  Failed to install $pkg. Continuing with remaining packages."
+            fi
         fi
     done
 else
