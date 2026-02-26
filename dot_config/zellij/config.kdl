@@ -144,6 +144,12 @@ keybinds clear-defaults=true {
         bind "Alt i" { MoveTab "left"; }
         bind "Alt n" { NewPane; }
         bind "Alt o" { MoveTab "right"; }
+        bind "Alt z" {
+            LaunchOrFocusPlugin "zorch" {
+                floating true
+                move_to_focused_tab true
+            }
+        }
         bind "Ctrl Q" { Quit; }
     }
     shared_except "locked" "move" {
@@ -261,6 +267,8 @@ plugins {
     welcome-screen location="zellij:session-manager" {
         welcome_screen true
     }
+    zjstatus location="file:~/.config/zellij/plugins/zjstatus.wasm"
+    zorch location="file:~/.config/zellij/plugins/zorch.wasm"
 }
 
 // Plugins to load in the background when a new session starts
@@ -298,7 +306,7 @@ default_mode "normal"
 // The name of the default layout to load on startup
 // Default: "default"
 // 
-// default_layout "compact"
+default_layout "default"
  
 // The folder in which Zellij will look for layouts
 // (Requires restart)
