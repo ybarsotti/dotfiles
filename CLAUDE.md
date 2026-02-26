@@ -103,5 +103,32 @@ When adding new packages:
 - `packages.darwin.brews.security.*` - Security and privacy tools
 - `packages.darwin.casks.*` - GUI applications organized by purpose
 
+## Testing & CI
+
+### Local Validation (before pushing)
+- **`just validate`** — Full validation pipeline: lint + pre-commit + Docker tests
+- **`just lint`** — Run shellcheck (`.sh` + `.sh.tmpl`), yamllint, gitleaks
+- **`just validate-hooks`** — Run pre-commit hooks on all files
+- **`just validate-ci`** — Run GitHub Actions locally with `act`
+- **`just test-fresh`** — Docker test: fresh `chezmoi apply` from clean state
+- **`just test-idempotency`** — Docker test: verify `chezmoi apply` twice is safe
+- **`just test-all`** — Run both Docker tests
+
+### CI Pipeline (GitHub Actions)
+Three jobs run on push/PR to `main`:
+1. **Lint** — shellcheck, yamllint, gitleaks
+2. **Fresh Install** — Docker-based `chezmoi apply` on Ubuntu 24.04
+3. **Idempotency** — Verifies running apply twice produces no changes
+
+### Docker Test Architecture
+- `.github/Dockerfile` — Ubuntu 24.04 container with pre-seeded `chezmoi.toml` (bypasses GPG, Doppler, interactive prompts)
+- `CODESPACES=true` env tricks `system_info` template to avoid `hostnamectl`
+- `--exclude=externals,encrypted` skips SSH-requiring git repos and GPG-encrypted files
+- All macOS-only scripts are no-ops on Linux via `{{ if eq .chezmoi.os "darwin" }}` guards
+
+### Pre-commit Hooks
+The repo has `.pre-commit-config.yaml` with: trailing-whitespace, shellcheck, yamllint, gitleaks, detect-private-key.
+Install with `just install-hooks` or `pre-commit install`.
+
 ** IMPORTANT **
 After updating any script step, apply the changes with chezmoi
