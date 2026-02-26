@@ -1,0 +1,88 @@
+layout {
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="zjstatus" {
+                // ── Catppuccin Mocha ────────────────────────────────────
+                color_rosewater "#f5e0dc"
+                color_flamingo  "#f2cdcd"
+                color_pink      "#f5c2e7"
+                color_mauve     "#cba6f7"
+                color_red       "#f38ba8"
+                color_maroon    "#eba0ac"
+                color_peach     "#fab387"
+                color_yellow    "#f9e2af"
+                color_green     "#a6e3a1"
+                color_teal      "#94e2d5"
+                color_sky       "#89dceb"
+                color_sapphire  "#74c7ec"
+                color_blue      "#89b4fa"
+                color_lavender  "#b4befe"
+                color_text      "#cdd6f4"
+                color_subtext1  "#bac2de"
+                color_subtext0  "#a6adc8"
+                color_overlay2  "#9399b2"
+                color_overlay1  "#7f849c"
+                color_overlay0  "#6c7086"
+                color_surface2  "#585b70"
+                color_surface1  "#45475a"
+                color_surface0  "#313244"
+                color_base      "#1e1e2e"
+                color_mantle    "#181825"
+                color_crust     "#11111b"
+
+                // ── Layout ──────────────────────────────────────────────
+                format_left   "{mode}#[fg=$blue,bold] {session}"
+                format_center "{tabs}"
+                format_right  "{command_git_branch}{datetime}"
+                format_space  "#[bg=$base]"
+                format_hide_on_overlength "true"
+                format_precedence         "lrc"
+
+                border_enabled "false"
+                hide_frame_for_single_pane "true"
+
+                // ── Mode Indicators ─────────────────────────────────────
+                mode_normal       "#[bg=$green,fg=$crust,bold] NORMAL #[bg=$base] "
+                mode_locked       "#[bg=$red,fg=$crust,bold] LOCKED #[bg=$base] "
+                mode_resize       "#[bg=$yellow,fg=$crust,bold] RESIZE #[bg=$base] "
+                mode_pane         "#[bg=$teal,fg=$crust,bold] PANE #[bg=$base] "
+                mode_tab          "#[bg=$peach,fg=$crust,bold] TAB #[bg=$base] "
+                mode_scroll       "#[bg=$flamingo,fg=$crust,bold] SCROLL #[bg=$base] "
+                mode_enter_search "#[bg=$mauve,fg=$crust,bold] SEARCH #[bg=$base] "
+                mode_search       "#[bg=$mauve,fg=$crust,bold] SEARCH #[bg=$base] "
+                mode_rename_tab   "#[bg=$peach,fg=$crust,bold] RENAME TAB #[bg=$base] "
+                mode_rename_pane  "#[bg=$peach,fg=$crust,bold] RENAME PANE #[bg=$base] "
+                mode_session      "#[bg=$lavender,fg=$crust,bold] SESSION #[bg=$base] "
+                mode_move         "#[bg=$sky,fg=$crust,bold] MOVE #[bg=$base] "
+                mode_prompt       "#[bg=$sapphire,fg=$crust,bold] PROMPT #[bg=$base] "
+                mode_tmux         "#[bg=$mauve,fg=$crust,bold] TMUX #[bg=$base] "
+                mode_default_to_mode "normal"
+
+                // ── Tabs ────────────────────────────────────────────────
+                tab_normal            "#[fg=$overlay1,bg=$surface0] {index}:{name}{floating_indicator} "
+                tab_normal_fullscreen "#[fg=$overlay1,bg=$surface0] {index}:{name}{fullscreen_indicator} "
+                tab_normal_sync       "#[fg=$overlay1,bg=$surface0] {index}:{name}{sync_indicator} "
+                tab_active            "#[fg=$crust,bg=$mauve,bold] {index}:{name}{floating_indicator} "
+                tab_active_fullscreen "#[fg=$crust,bg=$mauve,bold] {index}:{name}{fullscreen_indicator} "
+                tab_active_sync       "#[fg=$crust,bg=$green,bold] {index}:{name}{sync_indicator} "
+                tab_separator         "#[bg=$base] "
+                tab_rename            "#[fg=$crust,bg=$peach,italic] {index}:{name} "
+                tab_sync_indicator       " "
+                tab_fullscreen_indicator " "
+                tab_floating_indicator   " "
+
+                // ── Git Branch ──────────────────────────────────────────
+                command_git_branch_command    "bash -c 'git rev-parse --abbrev-ref HEAD 2>/dev/null'"
+                command_git_branch_format     "#[fg=$blue] {stdout}#[bg=$base] "
+                command_git_branch_interval   "5"
+                command_git_branch_rendermode "static"
+
+                // ── Date/Time ───────────────────────────────────────────
+                datetime          "#[fg=$overlay2,bold]{format}"
+                datetime_format   " %a %d %b %H:%M"
+                datetime_timezone "America/Sao_Paulo"
+            }
+        }
+    }
+}
