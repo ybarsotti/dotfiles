@@ -16,10 +16,15 @@ jobs:
           fetch-depth: 0
 
       - name: Install shellcheck
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
+        run: |
+          if command -v sudo >/dev/null 2>&1; then
+            sudo apt-get update && sudo apt-get install -y shellcheck
+          else
+            apt-get update && apt-get install -y shellcheck
+          fi
 
       - name: Install yamllint
-        run: pip install yamllint
+        run: pip install --break-system-packages yamllint || pip install yamllint
 
       - name: Shellcheck — .sh files
         run: |
@@ -38,6 +43,7 @@ jobs:
         run: yamllint -d relaxed .chezmoidata/packages.yaml
 
       - name: Gitleaks — detect secrets
+        if: ${{ !env.ACT }}
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

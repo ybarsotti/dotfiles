@@ -165,7 +165,7 @@ validate-hooks:
 # Run GitHub Actions locally with act (requires: brew install act)
 validate-ci:
     @echo "Running CI workflow locally with act..."
-    act --container-architecture linux/amd64
+    act --container-architecture linux/amd64 -P ubuntu-latest=catthehacker/ubuntu:act-latest
 
 # Full local validation: lint + pre-commit + Docker tests
 validate: lint validate-hooks test-all
