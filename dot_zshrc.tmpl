@@ -5,12 +5,12 @@
 # Terminal Setup (interactive shell specific)
 export TERM="xterm-256color"
 
-# Note: Core environment variables (EDITOR, XDG_CONFIG_HOME, LANG, GPG_TTY, compiler flags) 
+# Note: Core environment variables (EDITOR, XDG_CONFIG_HOME, LANG, GPG_TTY, compiler flags)
 # are now properly located in .zprofile
 
 # Core Aliases
 ## Programming Languages
-alias python=/usr/bin/python3 
+alias python=/usr/bin/python3
 
 ## Development Tools
 alias lg='lazygit'
@@ -145,8 +145,8 @@ eval "$(direnv hook zsh)"
 # Development Environment Setup
 
 ## Java
-export ANDROID_HOME=$HOME/Library/Android/sdk 
-export PATH=$PATH:$ANDROID_HOME/emulator 
+export ANDROID_HOME=$HOME/Library/Android/sdk
+export PATH=$PATH:$ANDROID_HOME/emulator
 export PATH=$PATH:$ANDROID_HOME/platform-tools
 export JAVA_HOME=$(/usr/libexec/java_home -v 17)
 

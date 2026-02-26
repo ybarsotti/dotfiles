@@ -10,7 +10,7 @@ packages:
           - pipx              # Python package installer in isolated environments
           - uv                # Fast Python package installer and resolver
           # - pnpm              # Package manager
-        
+
         git_tools:
           - gh                # GitHub CLI
           - git-flow          # Git branching model extensions
@@ -18,11 +18,11 @@ packages:
           - git-delta         # Enhanced git diff viewer
           - gitleaks          # Detect secrets in git repos
           - git-sizer         # Compute size metrics for git repos
-        
+
         containerization:
           # docker CLI is included with Docker Desktop cask
           - lazydocker        # Terminal UI for Docker
-        
+
         infrastructure:
           - terraform         # Infrastructure as Code tool
 
@@ -35,7 +35,7 @@ packages:
           - just              # Modern command runner (better than Make)
           - watchexec         # Execute commands when files change
           - entr              # Run commands when files change
-      
+
       # Code Quality & Formatting
       code_quality:
         linters:
@@ -49,7 +49,7 @@ packages:
           - typos-cli         # Source code spell checker (fast)
           - codespell         # Find/fix common misspellings
           - ruff              # Extremely fast Python linter
-        
+
         formatters:
           - prettier          # Multi-language code formatter
           - autopep8          # Python PEP8 formatter
@@ -57,23 +57,23 @@ packages:
           - isort             # Python import sorter
           - clang-format      # C/C++ code formatter
           - shfmt             # Shell script formatter
-        
+
         hooks:
           - pre-commit        # Git hooks framework
           - commitizen        # Standardized commit messages
-      
+
       # Build Tools & Compilers
       build_tools:
         - cmake               # Cross-platform build system
         - make                # Build automation tool
         - chezmoi             # Dotfiles manager
-      
+
       # Language Support
       languages:
         - neovim              # Modern Vim-based editor
         - tree-sitter         # Syntax highlighting parser
         - luarocks            # Lua package manager
-      
+
       # Terminal & System Tools
       terminal:
         file_tools:
@@ -84,12 +84,12 @@ packages:
           - tree              # Directory tree viewer
           - fzf               # Fuzzy finder
           - yazi              # Terminal file manager
-        
+
         system_monitoring:
           - btop              # Resource monitor
           - fastfetch         # System information display
           - procs             # Modern ps replacement
-        
+
         network_tools:
           - httpie            # User-friendly HTTP client
           - nmap              # Network discovery and security auditing
@@ -98,7 +98,7 @@ packages:
           - grpcurl           # curl for gRPC services
           - gping             # Ping with graph
           - bandwhich         # Network utilization by process
-        
+
         shell_enhancements:
           - zsh-autosuggestions     # Fish-like autosuggestions
           - zsh-syntax-highlighting # Fish-like syntax highlighting
@@ -106,11 +106,11 @@ packages:
           - thefuck                 # Command correction tool
           - zoxide                  # Smarter cd command (tracks most-used dirs)
           - atuin                   # Shell history with sync and search
-        
+
         multiplexers:
           - zellij            # Terminal workspace with built-in multiplexer
           - tmux              # Terminal multiplexer
-        
+
         utilities:
           - jq                # JSON processor
           - dust              # Modern du replacement
@@ -130,7 +130,7 @@ packages:
           - xsv               # Fast CSV command-line toolkit
           - miller            # Like awk/sed/cut for data formats (CSV, JSON, etc.)
           - visidata          # Interactive multitool for tabular data (TUI)
-      
+
       # Security & Privacy
       security:
         - gnupg               # GNU Privacy Guard
@@ -140,19 +140,19 @@ packages:
         - age                 # Simple file encryption (modern GPG alternative)
         - sops                # Encrypted secrets in Git repos
         - trivy               # Container/IaC security scanner
-      
+
       # macOS-specific Tools
       macos:
         - borders             # Window border customization
         - opencode            # OpenCode CLI tool
-    
+
     casks:
       # Web Browsers
       browsers:
         - arc                 # Arc browser
         - brave-browser       # Privacy-focused browser
         - firefox             # Mozilla Firefox
-      
+
       # Development Tools
       development:
         - apidog              # API development and testing
@@ -163,21 +163,21 @@ packages:
         - ghostty             # Fast, feature-rich terminal emulator
         - visual-studio-code  # IDE
         - p4v                 # Perforce Visual Merge Tool (P4Merge) for Git merge conflicts
-      
+
       # Productivity & Utilities
       productivity:
         window_management:
           - alt-tab           # Windows-style Alt-Tab for macOS
           - raycast           # Spotlight replacement and productivity tool
-        
+
         system_enhancement:
           - betterdisplay     # Display management utility
           - stats             # System monitoring in menu bar
-        
+
         communication:
           - slack             # Team communication
           - notion            # Note-taking and collaboration
-      
+
       # Media & Entertainment
       media:
         - obs                 # Open Broadcaster Software

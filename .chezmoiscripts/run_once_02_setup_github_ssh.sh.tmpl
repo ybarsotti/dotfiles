@@ -28,14 +28,14 @@ fi
 # Generate SSH key if it doesn't exist
 if [ ! -f "$SSH_KEY_FILE" ]; then
     echo "Generating new SSH key for GitHub..."
-    
+
     # Use machine-specific email
     EMAIL="{{ .machine.email }}"
-    
+
     ssh-keygen -t ed25519 -C "$EMAIL" -f "$SSH_KEY_FILE" -N ""
     chmod 600 "$SSH_KEY_FILE"
     chmod 644 "$SSH_KEY_FILE.pub"
-    
+
     echo "SSH key generated successfully!"
 else
     echo "SSH key already exists at $SSH_KEY_FILE"

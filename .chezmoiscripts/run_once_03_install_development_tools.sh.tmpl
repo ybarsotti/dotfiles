@@ -42,7 +42,7 @@ else
         "$HOME/Developer/Learning/Courses"
         "$HOME/Developer/Learning/Tutorials"
         "$HOME/Developer/Learning/Experiments"
-        "$HOME/Developer/Open-Source" 
+        "$HOME/Developer/Open-Source"
         "$HOME/Developer/Archive"
         "$HOME/Developer/Tools"
     )
@@ -88,7 +88,7 @@ if command -v pipx &>/dev/null; then
         "invoke"
         "pynvim"
     )
-    
+
     for pkg in "${pipx_packages[@]}"; do
         if pipx list | grep -q "$pkg"; then
             echo "pipx package $pkg is already installed."

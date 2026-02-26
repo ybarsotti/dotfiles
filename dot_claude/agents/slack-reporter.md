@@ -2,7 +2,7 @@
 name: slack-reporter
 description: |
   Generates clean Slack announcement message for the PR stack with links and review order.
-  
+
   **Use proactively when:**
   - Stack is complete and ready to share
   - User mentions: "generate slack message", "share with team", "/report-slack"
@@ -69,11 +69,11 @@ INDEX=0
 
 for entry in "${PR_DATA[@]}"; do
   IFS='|' read -r branch_name pr_num pr_url <<< "$entry"
-  
+
   # Format branch name (remove prefixes)
   DISPLAY_NAME=$(echo "$branch_name" | sed 's/^[0-9]*-//' | sed 's/-/ /g' | \
                  awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1')
-  
+
   MESSAGE+="${EMOJIS[$INDEX]} $DISPLAY_NAME - <$pr_url|PR #$pr_num>\n"
   ((INDEX++))
 done
