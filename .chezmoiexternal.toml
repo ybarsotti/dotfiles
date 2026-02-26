@@ -42,3 +42,12 @@
     url = "https://github.com/omerxx/tmux-sessionx.git"
     revision = "fe704934f8cec16f07fcb9e722ed868fd769c647"
     refreshPeriod = "168h"
+[".config/zellij/plugins/zjstatus.wasm"]
+    type = "file"
+    url = "https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm"
+    refreshPeriod = "168h"
+# zorch.wasm — uncomment after first GitHub release is published
+# [".config/zellij/plugins/zorch.wasm"]
+#     type = "file"
+#     url = "https://github.com/ybarsotti/zorch/releases/latest/download/zorch.wasm"
+#     refreshPeriod = "168h"
