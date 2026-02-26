@@ -40,7 +40,7 @@ You are the orchestrator agent that manages the complete PR stack splitting pipe
 ### Stage 1: Analysis
 **Agent**: `branch-analyzer`
 **Purpose**: Understand what files changed and their dependencies
-**Validation**: 
+**Validation**:
 - Analysis section exists in TOML
 - All changed files detected
 - Concerns/layers identified
@@ -290,15 +290,15 @@ Task(
   description="Create split strategy with dependency-aware grouping",
   prompt="""
   Use the stack-planner agent to create the split plan.
-  
+
   Input TOML: $CONFIG_FILE
-  
+
   The agent should:
   - Group files by layer (foundation MUST be first)
   - Create branches array with proper dependencies
   - Ensure all files accounted for exactly once
   - Generate meaningful branch names and commit messages
-  
+
   CRITICAL: Files that other layers depend on MUST go in foundation (layer 1).
   """
 )
@@ -799,9 +799,9 @@ if [ "$FAILURES" -gt 0 ]; then
     description="Fix CI failures by relocating files",
     prompt="""
     Use the stack-fixer agent to fix the failures.
-    
+
     Input TOML: $CONFIG_FILE
-    
+
     The agent should:
     - Parse CI error logs from validation
     - Identify misplaced files
@@ -850,9 +850,9 @@ Task(
   description="Generate Slack announcement message",
   prompt="""
   Use the slack-reporter agent to generate the Slack message.
-  
+
   Input TOML: $CONFIG_FILE
-  
+
   The agent should:
   - Extract feature name from branch
   - Get all PR links
@@ -911,7 +911,7 @@ if [ <validation_fails> ]; then
   echo ""
   echo "To resume from this stage:"
   echo "  /continue-pipeline config: $CONFIG_FILE stage: <N>"
-  
+
   exit 1
 fi
 ```

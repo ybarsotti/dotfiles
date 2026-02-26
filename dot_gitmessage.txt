@@ -26,4 +26,3 @@
 ;
 ; See https://www.conventionalcommits.org/
 ; See https://github.com/angular/angular.js/blob/master/DEVELOPERS.md
-

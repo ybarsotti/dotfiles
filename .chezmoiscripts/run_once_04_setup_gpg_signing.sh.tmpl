@@ -18,7 +18,7 @@ if ! command -v gpg &>/dev/null; then
         echo "Please ensure Homebrew packages are installed first."
         exit 1
     fi
-    
+
     # Verify gpg is now available
     if ! command -v gpg &>/dev/null; then
         echo "❌ Failed to install or find GPG."
@@ -60,13 +60,13 @@ echo "👤 Name: $KEY_NAME"
 # Check if GPG key already exists for this email
 if gpg --list-secret-keys --keyid-format LONG | grep -q "$EMAIL"; then
     echo "✅ GPG key already exists for $EMAIL"
-    
+
     # Get the key ID
     KEY_ID=$(gpg --list-secret-keys --keyid-format LONG "$EMAIL" | grep sec | head -1 | cut -d'/' -f2 | cut -d' ' -f1)
     echo "🔑 Using existing key ID: $KEY_ID"
 else
     echo "🆕 Generating new GPG key..."
-    
+
     # Prompt for passphrase
     echo "🔐 A passphrase is required to protect your GPG key."
     echo "⚠️  Choose a strong passphrase that you won't forget!"
@@ -74,17 +74,17 @@ else
     echo ""
     read -s -p "Confirm passphrase: " GPG_PASSPHRASE_CONFIRM
     echo ""
-    
+
     if [ "$GPG_PASSPHRASE" != "$GPG_PASSPHRASE_CONFIRM" ]; then
         echo "❌ Passphrases do not match. Exiting."
         exit 1
     fi
-    
+
     if [ -z "$GPG_PASSPHRASE" ]; then
         echo "❌ Empty passphrase not allowed. Exiting."
         exit 1
     fi
-    
+
     # Create GPG key generation batch file
     cat > /tmp/gpg-gen-key.batch << EOF
 Key-Type: RSA
@@ -102,12 +102,12 @@ EOF
 
     # Generate the key
     gpg --batch --generate-key /tmp/gpg-gen-key.batch
-    
+
     # Clean up batch file and clear passphrase from memory
     rm /tmp/gpg-gen-key.batch
     unset GPG_PASSPHRASE
     unset GPG_PASSPHRASE_CONFIRM
-    
+
     # Get the new key ID
     KEY_ID=$(gpg --list-secret-keys --keyid-format LONG "$EMAIL" | grep sec | head -1 | cut -d'/' -f2 | cut -d' ' -f1)
     echo "🆕 Generated new key ID: $KEY_ID"
@@ -141,7 +141,7 @@ if [ ! -f "$GPG_AGENT_CONF" ]; then
     elif command -v pinentry-mac &>/dev/null; then
         PINENTRY_PATH="$(command -v pinentry-mac)"
     fi
-    
+
     cat > "$GPG_AGENT_CONF" << EOF
 # Cache settings for better UX
 # default-cache-ttl: How long (in seconds) to cache the passphrase after last use

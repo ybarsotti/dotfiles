@@ -131,7 +131,7 @@ fi
 declare -A TEST_TO_IMPL
 if grep -q "\[analysis.test_relationships\]" "$CONFIG_FILE"; then
   echo "  ✓ Test relationships detected"
-  
+
   # Parse test relationships
   IN_TEST_SECTION=false
   while IFS= read -r line; do
@@ -168,11 +168,11 @@ echo "🔗 Assigning tests and fixtures using relationships..."
 # For each test file, add it to the same group as its implementation
 for test_file in $TEST_FILES; do
   [ -z "$test_file" ] && continue
-  
+
   # Check if we have a relationship for this test
   if [ -n "${TEST_TO_IMPL[$test_file]}" ]; then
     IMPL_FILE="${TEST_TO_IMPL[$test_file]}"
-    
+
     # Add test to the same category as implementation
     if echo "$FOUNDATION_FILES" | grep -q "$IMPL_FILE"; then
       FOUNDATION_FILES="$FOUNDATION_FILES"$'\n'"$test_file"
@@ -211,7 +211,7 @@ done
 # Similarly assign fixtures to where their tests are
 for fixture_file in $FIXTURE_FILES; do
   [ -z "$fixture_file" ] && continue
-  
+
   # Fixtures go wherever their tests are
   if echo "$FOUNDATION_FILES" | grep -q "test.*$(basename $fixture_file _fixtures.py)"; then
     FOUNDATION_FILES="$FOUNDATION_FILES"$'\n'"$fixture_file"
@@ -274,9 +274,9 @@ BRANCH_COUNT=0
 # ALWAYS start with foundation if it has files (dependency rule!)
 if [ -n "$FOUNDATION_FILES" ]; then
   ((BRANCH_COUNT++))
-  
+
   echo "Creating branch $BRANCH_COUNT: Foundation (required for dependencies)..."
-  
+
   cat >> "$CONFIG_FILE" << EOF
 
 [[branches]]
@@ -292,7 +292,7 @@ EOF
     [ -z "$file" ] && continue
     echo "  \"$file\"," >> "$CONFIG_FILE"
   done <<< "$FOUNDATION_FILES"
-  
+
   echo "]" >> "$CONFIG_FILE"
 fi
 
@@ -302,12 +302,12 @@ case "$PLANNING_MODE" in
     # SCRIPT-GROUPED MODE: Group scripts by purpose
     echo ""
     echo "  📜 Using script-grouped splitting..."
-    
+
     # Extract script groups from analysis
     if [ "$HAS_SCRIPT_GROUPS" = true ]; then
       IN_SCRIPT_SECTION=false
       CURRENT_GROUP=""
-      
+
       while IFS= read -r line; do
         if [[ "$line" == "[analysis.script_groups]" ]]; then
           IN_SCRIPT_SECTION=true
@@ -319,13 +319,13 @@ case "$PLANNING_MODE" in
             ((BRANCH_COUNT++))
             CURRENT_GROUP="${BASH_REMATCH[1]}"
             GROUP_NAME=$(echo "$CURRENT_GROUP" | sed 's/_/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)}1')
-            
+
             echo "Creating branch $BRANCH_COUNT: $GROUP_NAME..."
-            
+
             # Start branch definition
             BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
             PREV_BRANCH_NUM=$(printf "%02d" $((BRANCH_COUNT - 1)))
-            
+
             cat >> "$CONFIG_FILE" << EOF
 
 [[branches]]
@@ -350,13 +350,13 @@ EOF
         fi
       done < "$CONFIG_FILE"
     fi
-    
+
     # Add remaining layers if they exist (repos, services, API)
     if [ -n "$REPO_FILES" ]; then
       ((BRANCH_COUNT++))
       BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
       echo "Creating branch $BRANCH_COUNT: Repositories..."
-      
+
       cat >> "$CONFIG_FILE" << EOF
 
 [[branches]]
@@ -367,20 +367,20 @@ description = "Repository layer with tests"
 
 files = [
 EOF
-      
+
       while IFS= read -r file; do
         [ -z "$file" ] && continue
         echo "  \"$file\"," >> "$CONFIG_FILE"
       done <<< "$REPO_FILES"
-      
+
       echo "]" >> "$CONFIG_FILE"
     fi
-    
+
     if [ -n "$SERVICE_FILES" ]; then
       ((BRANCH_COUNT++))
       BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
       echo "Creating branch $BRANCH_COUNT: Services..."
-      
+
       cat >> "$CONFIG_FILE" << EOF
 
 [[branches]]
@@ -391,20 +391,20 @@ description = "Service layer with tests"
 
 files = [
 EOF
-      
+
       while IFS= read -r file; do
         [ -z "$file" ] && continue
         echo "  \"$file\"," >> "$CONFIG_FILE"
       done <<< "$SERVICE_FILES"
-      
+
       echo "]" >> "$CONFIG_FILE"
     fi
-    
+
     if [ -n "$API_FILES" ]; then
       ((BRANCH_COUNT++))
       BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
       echo "Creating branch $BRANCH_COUNT: API..."
-      
+
       cat >> "$CONFIG_FILE" << EOF
 
 [[branches]]
@@ -415,25 +415,25 @@ description = "API layer with tests"
 
 files = [
 EOF
-      
+
       while IFS= read -r file; do
         [ -z "$file" ] && continue
         echo "  \"$file\"," >> "$CONFIG_FILE"
       done <<< "$API_FILES"
-      
+
       echo "]" >> "$CONFIG_FILE"
     fi
     ;;
-    
+
   "features")
     # FEATURE-BASED MODE: Group by feature
     echo ""
     echo "  🎯 Using feature-based splitting..."
-    
+
     if [ "$HAS_FEATURE_GROUPS" = true ]; then
       IN_FEATURE_SECTION=false
       CURRENT_FEATURE=""
-      
+
       while IFS= read -r line; do
         if [[ "$line" == "[analysis.feature_groups]" ]]; then
           IN_FEATURE_SECTION=true
@@ -445,11 +445,11 @@ EOF
             ((BRANCH_COUNT++))
             CURRENT_FEATURE="${BASH_REMATCH[1]}"
             FEATURE_NAME=$(echo "$CURRENT_FEATURE" | sed 's/_/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)}1')
-            
+
             echo "Creating branch $BRANCH_COUNT: $FEATURE_NAME feature..."
-            
+
             BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
-            
+
             cat >> "$CONFIG_FILE" << EOF
 
 [[branches]]
@@ -471,21 +471,21 @@ EOF
       done < "$CONFIG_FILE"
     fi
     ;;
-    
+
   "layers"|*)
     # LAYER-BASED MODE: Traditional architecture layers
     echo ""
     echo "  🏗️  Using layer-based splitting..."
-    
+
     # Layer 2: Repositories
     if [ -n "$REPO_FILES" ]; then
       ((BRANCH_COUNT++))
       PREV_NUM=$((BRANCH_COUNT - 1))
       BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
       PREV_BRANCH_NUM=$(printf "%02d" $PREV_NUM)
-      
+
       echo "Creating branch $BRANCH_COUNT: Repositories..."
-      
+
       cat >> "$CONFIG_FILE" << EOF
 
 [[branches]]
@@ -497,30 +497,30 @@ description = "Repository layer: data access, filters, tests"
 
 files = [
 EOF
-      
+
       while IFS= read -r file; do
         [ -z "$file" ] && continue
         echo "  \"$file\"," >> "$CONFIG_FILE"
       done <<< "$REPO_FILES"
-      
+
       echo "]" >> "$CONFIG_FILE"
     fi
-    
+
     # Layer 3: Services/Business Logic
     if [ -n "$SERVICE_FILES" ]; then
       ((BRANCH_COUNT++))
       PREV_NUM=$((BRANCH_COUNT - 1))
       BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
       PREV_BRANCH_NUM=$(printf "%02d" $PREV_NUM)
-      
+
       if [ $PREV_NUM -eq 1 ]; then
         PREV_BRANCH="$BRANCH_PREFIX/01-foundation"
       else
         PREV_BRANCH="$BRANCH_PREFIX/$PREV_BRANCH_NUM-repositories"
       fi
-      
+
       echo "Creating branch $BRANCH_COUNT: Services..."
-      
+
       cat >> "$CONFIG_FILE" << EOF
 
 [[branches]]
@@ -532,22 +532,22 @@ description = "Service layer: business logic, orchestration, tests"
 
 files = [
 EOF
-      
+
       while IFS= read -r file; do
         [ -z "$file" ] && continue
         echo "  \"$file\"," >> "$CONFIG_FILE"
       done <<< "$SERVICE_FILES"
-      
+
       echo "]" >> "$CONFIG_FILE"
     fi
-    
+
     # Layer 4: API
     if [ -n "$API_FILES" ]; then
       ((BRANCH_COUNT++))
       PREV_NUM=$((BRANCH_COUNT - 1))
       BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
       PREV_BRANCH_NUM=$(printf "%02d" $PREV_NUM)
-      
+
       # Determine previous branch
       if [ $PREV_NUM -eq 1 ]; then
         PREV_BRANCH="$BRANCH_PREFIX/01-foundation"
@@ -556,9 +556,9 @@ EOF
       else
         PREV_BRANCH="$BRANCH_PREFIX/03-business-logic"
       fi
-      
+
       echo "Creating branch $BRANCH_COUNT: API..."
-      
+
       cat >> "$CONFIG_FILE" << EOF
 
 [[branches]]
@@ -570,23 +570,23 @@ description = "API layer: HTTP endpoints, request/response schemas, tests"
 
 files = [
 EOF
-      
+
       while IFS= read -r file; do
         [ -z "$file" ] && continue
         echo "  \"$file\"," >> "$CONFIG_FILE"
       done <<< "$API_FILES"
-      
+
       echo "]" >> "$CONFIG_FILE"
     fi
-    
+
     # Scripts (if not in script-grouped mode)
     if [ -n "$SCRIPT_FILES" ]; then
       ((BRANCH_COUNT++))
       PREV_NUM=$((BRANCH_COUNT - 1))
       BRANCH_NUM=$(printf "%02d" $BRANCH_COUNT)
-      
+
       echo "Creating branch $BRANCH_COUNT: Scripts..."
-      
+
       cat >> "$CONFIG_FILE" << EOF
 
 [[branches]]
@@ -597,12 +597,12 @@ description = "Utility scripts with tests"
 
 files = [
 EOF
-      
+
       while IFS= read -r file; do
         [ -z "$file" ] && continue
         echo "  \"$file\"," >> "$CONFIG_FILE"
       done <<< "$SCRIPT_FILES"
-      
+
       echo "]" >> "$CONFIG_FILE"
     fi
     ;;
@@ -691,11 +691,11 @@ echo ""
 BRANCH_NUM=1
 while read -r branch_line; do
   BRANCH_NAME=$(echo "$branch_line" | cut -d'"' -f2)
-  
+
   # Get file count for this branch
   FILE_COUNT=$(grep -A 100 "branch = \"$BRANCH_NAME\"" "$CONFIG_FILE" | \
                grep '  ".*",' | wc -l)
-  
+
   echo "$BRANCH_NUM. ${BRANCH_NAME##*/} ($FILE_COUNT files)"
   ((BRANCH_NUM++))
 done < <(grep "^branch = " "$CONFIG_FILE")
