@@ -141,6 +141,10 @@ packages:
         - sops                # Encrypted secrets in Git repos
         - trivy               # Container/IaC security scanner
 
+      # AI & Agent Tools
+      ai_agents:
+        - gastown             # Multi-agent orchestration for Claude Code/Codex/Gemini
+
       # macOS-specific Tools
       macos:
         - borders             # Window border customization
