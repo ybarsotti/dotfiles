@@ -32,9 +32,9 @@ layout {
                 color_crust     "#11111b"
 
                 // ── Layout ──────────────────────────────────────────────
-                format_left   "{mode}#[fg=$blue,bold] {session}"
-                format_center "{tabs}"
-                format_right  "{command_git_branch}{datetime}"
+                format_left   "{mode} #[fg=$blue,bold]{session} #[fg=$overlay0]│ {tabs}"
+                format_center ""
+                format_right  "{command_git_branch}{command_git_status}{swap_layout}{notifications}{datetime}"
                 format_space  "#[bg=$base]"
                 format_hide_on_overlength "true"
                 format_precedence         "lrc"
@@ -43,43 +43,58 @@ layout {
                 hide_frame_for_single_pane "true"
 
                 // ── Mode Indicators ─────────────────────────────────────
-                mode_normal       "#[bg=$green,fg=$crust,bold] NORMAL #[bg=$base] "
-                mode_locked       "#[bg=$red,fg=$crust,bold] LOCKED #[bg=$base] "
-                mode_resize       "#[bg=$yellow,fg=$crust,bold] RESIZE #[bg=$base] "
-                mode_pane         "#[bg=$teal,fg=$crust,bold] PANE #[bg=$base] "
-                mode_tab          "#[bg=$peach,fg=$crust,bold] TAB #[bg=$base] "
-                mode_scroll       "#[bg=$flamingo,fg=$crust,bold] SCROLL #[bg=$base] "
-                mode_enter_search "#[bg=$mauve,fg=$crust,bold] SEARCH #[bg=$base] "
-                mode_search       "#[bg=$mauve,fg=$crust,bold] SEARCH #[bg=$base] "
-                mode_rename_tab   "#[bg=$peach,fg=$crust,bold] RENAME TAB #[bg=$base] "
-                mode_rename_pane  "#[bg=$peach,fg=$crust,bold] RENAME PANE #[bg=$base] "
-                mode_session      "#[bg=$lavender,fg=$crust,bold] SESSION #[bg=$base] "
-                mode_move         "#[bg=$sky,fg=$crust,bold] MOVE #[bg=$base] "
-                mode_prompt       "#[bg=$sapphire,fg=$crust,bold] PROMPT #[bg=$base] "
-                mode_tmux         "#[bg=$mauve,fg=$crust,bold] TMUX #[bg=$base] "
+                mode_normal       "#[fg=$green]  "
+                mode_locked       "#[fg=$red,bold]  "
+                mode_resize       "#[fg=$yellow]  "
+                mode_pane         "#[fg=$teal]  "
+                mode_tab          "#[fg=$peach] 󰓩 "
+                mode_scroll       "#[fg=$flamingo]  "
+                mode_enter_search "#[fg=$mauve]  "
+                mode_search       "#[fg=$mauve]  "
+                mode_rename_tab   "#[fg=$peach] 󰏫 "
+                mode_rename_pane  "#[fg=$peach] 󰏫 "
+                mode_session      "#[fg=$lavender]  "
+                mode_move         "#[fg=$sky]  "
+                mode_prompt       "#[fg=$sapphire]  "
+                mode_tmux         "#[fg=$mauve] 󰊠 "
                 mode_default_to_mode "normal"
 
                 // ── Tabs ────────────────────────────────────────────────
-                tab_normal            "#[fg=$overlay1,bg=$surface0] {index}:{name}{floating_indicator} "
-                tab_normal_fullscreen "#[fg=$overlay1,bg=$surface0] {index}:{name}{fullscreen_indicator} "
-                tab_normal_sync       "#[fg=$overlay1,bg=$surface0] {index}:{name}{sync_indicator} "
-                tab_active            "#[fg=$crust,bg=$mauve,bold] {index}:{name}{floating_indicator} "
-                tab_active_fullscreen "#[fg=$crust,bg=$mauve,bold] {index}:{name}{fullscreen_indicator} "
-                tab_active_sync       "#[fg=$crust,bg=$green,bold] {index}:{name}{sync_indicator} "
-                tab_separator         "#[bg=$base] "
-                tab_rename            "#[fg=$crust,bg=$peach,italic] {index}:{name} "
-                tab_sync_indicator       " "
-                tab_fullscreen_indicator " "
-                tab_floating_indicator   " "
+                tab_normal            "#[fg=$overlay1] {name} "
+                tab_normal_fullscreen "#[fg=$overlay1] {name}{fullscreen_indicator} "
+                tab_normal_sync       "#[fg=$overlay1] {name}{sync_indicator} "
+                tab_active            "#[fg=$mauve,bold] {name} "
+                tab_active_fullscreen "#[fg=$mauve,bold] {name}{fullscreen_indicator} "
+                tab_active_sync       "#[fg=$green,bold] {name}{sync_indicator} "
+                tab_separator         "#[fg=$surface2]⋮ "
+                tab_rename            "#[fg=$peach,italic] {name} "
+                tab_sync_indicator       " 󰓦"
+                tab_fullscreen_indicator " 󰊓"
+                tab_floating_indicator   " 󰉈"
 
                 // ── Git Branch ──────────────────────────────────────────
                 command_git_branch_command    "bash -c 'git rev-parse --abbrev-ref HEAD 2>/dev/null'"
-                command_git_branch_format     "#[fg=$blue] {stdout}#[bg=$base] "
+                command_git_branch_format     "#[fg=$blue]  {stdout} "
                 command_git_branch_interval   "5"
                 command_git_branch_rendermode "static"
 
+                // ── Git Status (dirty/clean) ────────────────────────────
+                command_git_status_command    "bash -c 'if [ -n \"$(git status --porcelain 2>/dev/null)\" ]; then echo \"●\"; fi'"
+                command_git_status_format     "#[fg=$yellow]{stdout}"
+                command_git_status_interval   "5"
+                command_git_status_rendermode "static"
+
+                // ── Swap Layout ─────────────────────────────────────────
+                swap_layout_format       "#[fg=$overlay0,italic] 󰕰 {name} "
+                swap_layout_hide_if_empty "true"
+
+                // ── Notifications ───────────────────────────────────────
+                notification_format_unread           "#[fg=$peach,bold] 󰂞 {message} "
+                notification_format_no_notifications ""
+                notification_show_interval           "10"
+
                 // ── Date/Time ───────────────────────────────────────────
-                datetime          "#[fg=$overlay2,bold]{format}"
+                datetime          "#[fg=$overlay2] {format}"
                 datetime_format   " %a %d %b %H:%M"
                 datetime_timezone "America/Sao_Paulo"
             }
