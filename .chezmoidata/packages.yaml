@@ -144,6 +144,7 @@ packages:
       # AI & Agent Tools
       ai_agents:
         - gastown             # Multi-agent orchestration for Claude Code/Codex/Gemini
+        - asheshgoplani/tap/agent-deck  # Terminal session manager TUI for AI coding agents
 
       # macOS-specific Tools
       macos:
