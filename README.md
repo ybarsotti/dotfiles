@@ -117,8 +117,18 @@ This dotfiles setup includes several development tools that are automatically in
 - **`clang-format`** - C/C++ code formatter
   - Usage: `clang-format -i file.cpp`, `clang-format --style=Google file.c`
 
+### Version Managers & Runtimes
+- **`mise`** - Universal runtime version manager (replaces nvm, rbenv, etc.)
+  - Usage: `mise use node@lts`, `mise use python@3.12`, `mise list`
+- **`pipx`** - Install Python packages in isolated environments
+  - Usage: `pipx install package`, `pipx list`
+- **`uv`** - Fast Python package installer and resolver
+  - Usage: `uv pip install package`, `uv tool install package`
+- **`luarocks`** - Lua package manager
+  - Usage: `luarocks install package`
+
 ### Development Utilities
-- **`sst/tap/opencode`** - OpenCode CLI tool for development workflows
+- **`opencode`** - OpenCode CLI tool for development workflows
   - Usage: `opencode .` to open current directory
 - **`commitizen`** - Tool for creating standardized commit messages
   - Usage: `git cz` or `cz commit`
@@ -144,18 +154,6 @@ This dotfiles setup includes several development tools that are automatically in
   - Usage: `watchexec -e js npm test`
 - **`entr`** - Run commands when files change
   - Usage: `ls *.py | entr pytest`
-- **`devbox`** - Portable, isolated dev environments
-  - Usage: `devbox init`, `devbox add python`, `devbox shell`
-- **`go`** - Go programming language
-  - Usage: `go run main.go`, `go build`, `go mod init`
-- **`node`** + **`nvm`** - Node.js runtime and version manager
-  - Usage: `nvm use 20`, `npm install`, `node script.js`
-- **`python3`** + **`pipx`** - Python runtime and isolated package installer
-  - Usage: `python3 script.py`, `pipx install package`
-- **`lua`**, **`lua@5.1`**, **`luajit`**, **`luarocks`** - Lua runtime (multiple versions) and package manager
-  - Usage: `lua script.lua`, `luarocks install package`
-- **`zig`** - Zig programming language
-  - Usage: `zig run main.zig`, `zig build`
 - **`act`** - Run GitHub Actions locally for testing CI workflows
   - Usage: `act`, `act -l` (list workflows), `act push` (simulate push event)
 - **`terraform`** - Infrastructure as Code tool
@@ -196,8 +194,10 @@ This dotfiles setup includes several development tools that are automatically in
   - Usage: `oha -n 100 -c 10 https://example.com`
 - **`grpcurl`** - curl for gRPC services
   - Usage: `grpcurl localhost:9090 list`
-- **`dog`** - Modern DNS client (dig alternative)
-  - Usage: `dog example.com`, `dog example.com MX`
+- **`gnu-sed`** - GNU version of sed (macOS ships BSD sed)
+  - Usage: `gsed 's/old/new/g' file`
+- **`weathr`** - CLI weather forecast tool
+  - Usage: `weathr`
 - **`gping`** - Ping with a graph
   - Usage: `gping google.com`
 - **`bandwhich`** - Network utilization by process
@@ -232,17 +232,30 @@ This dotfiles setup includes several development tools that are automatically in
 - **`grpcurl`** - curl for gRPC services
   - Usage: `grpcurl localhost:9090 list`, `grpcurl -d '{"name":"test"}' localhost:9090 Service/Method`
 
-### AI/ML Development
-- **`ollama`** - Run large language models locally
+### AI & Agent Tools
+- **`ollama`** - Run large language models locally (personal machines only)
   - Usage: `ollama run llama3.2`, `ollama list`, `ollama pull mistral`
   - Start server: `ollama serve`
+- **`claude-code`** - Anthropic's Claude Code CLI agent
+  - Usage: `claude`, installed via `npm install -g @anthropic-ai/claude-code`
+- **`codex`** - OpenAI Codex CLI agent
+  - Usage: `codex`, installed via `npm install -g @openai/codex`
 - **`openspec`** - Spec-driven planning layer for coding agents
   - Usage: `openspec init`, `openspec propose`, `openspec status`
-  - Docs: https://openspec.dev/
 - **`specify`** (GitHub Spec Kit) - Toolkit for Spec-Driven Development with AI coding agents
   - Usage: `specify init <project>`, `specify plan`, `specify build`
   - Install: Via `uv tool install` (automatic)
-  - Docs: https://github.com/github/spec-kit
+- **`gastown`** - Multi-agent orchestration (coordinates Claude, Codex, Gemini workers)
+  - Usage: `gt install ~/gt --git`, `gt mayor attach`
+  - Install: Via `brew install gastown`
+- **`agent-deck`** - Terminal session manager TUI for AI coding agents
+  - Usage: `agent-deck`
+  - Install: Via `brew install asheshgoplani/tap/agent-deck`
+- **`gitnexus`** - Codebase knowledge graph engine for AI agents
+  - Usage: `npx gitnexus analyze`, `npx gitnexus setup`
+  - MCP server: `claude mcp add gitnexus -- npx -y gitnexus@latest mcp`
+- **`bmad-method`** - AI-driven agile development framework with 34+ workflows
+  - Usage: `npx bmad-method install` (per-project)
 
 ### Data Engineering & Analytics
 
@@ -256,36 +269,10 @@ This dotfiles setup includes several development tools that are automatically in
 #### Data Format Tools
 - **`xsv`** - Fast CSV command-line toolkit written in Rust
   - Usage: `xsv stats data.csv`, `xsv select column1,column3 data.csv`, `xsv search pattern data.csv`
-  - Extremely fast for large CSV files
 - **`miller`** - Like awk/sed/cut for structured data (CSV, JSON, TSV, etc.)
   - Usage: `mlr --csv cut -f name,age data.csv`, `mlr --json stats1 -a sum -f price data.json`
 - **`visidata`** - Interactive multitool for tabular data with TUI
   - Usage: `vd data.csv`, `vd data.json`, `vd database.db`
-  - Excel-like interface in the terminal
-
-#### Python Data Science & ML Tools (via pipx)
-- **`jupyterlab`** - Modern notebook interface with extensions
-  - Usage: `jupyter lab`, `jupyter notebook`
-- **`jupytext`** - Bi-directional sync between notebooks and scripts (for version control)
-  - Usage: `jupytext --to py notebook.ipynb`, `jupytext --sync notebook.ipynb`
-  - Essential for Git-friendly Jupyter workflows
-- **`nbconvert`** - Convert notebooks to HTML, PDF, Markdown, etc.
-  - Usage: `jupyter nbconvert --to html notebook.ipynb`, `jupyter nbconvert --to pdf notebook.ipynb`
-- **`nbdime`** - Diff and merge for Jupyter notebooks (Git integration)
-  - Usage: `nbdiff notebook1.ipynb notebook2.ipynb`, `nbmerge base.ipynb local.ipynb remote.ipynb`
-  - Git integration: `nbdime config-git --enable`
-- **`ipython`** - Enhanced interactive Python shell with auto-completion and magic commands
-  - Usage: `ipython`
-- **`dvc`** - Data Version Control - Git for data and ML models
-  - Usage: `dvc init`, `dvc add data/`, `dvc push`, `dvc pull`
-  - Track datasets and models with Git-like commands
-- **`mlflow`** - ML experiment tracking and model registry
-  - Usage: `mlflow ui` (start tracking UI), track experiments in Python with mlflow API
-  - See Docker Compose example for production-ready setup
-- **`great-expectations`** - Data quality validation and profiling
-  - Usage: `great_expectations init`, data validation in Python
-- **`polars-cli`** - Fast DataFrame library with CLI (Rust-based, 30x faster than pandas)
-  - Usage: Via Python API, alternative to pandas for large datasets
 
 #### Docker Infrastructure
 For databases and heavy services (PostgreSQL, Kafka, Spark, etc.), use Docker Compose:
@@ -310,25 +297,20 @@ For databases and heavy services (PostgreSQL, Kafka, Spark, etc.), use Docker Co
 - **`atuin`** - Shell history with sync and search (see System Tools section)
 - **`direnv`** - Per-directory environment variables (see Development Utilities section)
 
-### Security & System Tools
+### Security & Privacy
 - **`gnupg`** - GNU Privacy Guard for encryption
   - Usage: `gpg --gen-key`, `gpg --encrypt file.txt`
+- **`pinentry-mac`** - macOS keychain integration for GPG
 - **`age`** - Simple file encryption (modern GPG alternative)
   - Usage: `age-keygen -o key.txt`, `age -r recipient file.txt`
 - **`sops`** - Encrypted secrets in Git repos
   - Usage: `sops -e secrets.yaml > secrets.enc.yaml`
 - **`trivy`** - Container and IaC security scanner
   - Usage: `trivy image nginx:latest`, `trivy config .`
-- **`gitleaks`** - Detect secrets in git repos (see Development Utilities section)
-- **`borders`** - Window border customization for macOS
 - **`doppler`** - Secrets management
   - Usage: `doppler login`, `doppler secrets`
-- **`gibo`** - .gitignore boilerplate generator
-  - Usage: `gibo dump Python > .gitignore`
-- **`bfg`** - Git repository cleaner
-  - Usage: `bfg --delete-files '*.jar' repo.git`
-- **`zizmor`** - GitHub Actions security scanner
-  - Usage: `zizmor .github/workflows/`
+- **`aws-vault`** - Securely store and access AWS credentials
+  - Usage: `aws-vault exec profile -- aws s3 ls`
 
 ### Package Visualization
 - **`youplot`** - Command-line data plotting
@@ -341,8 +323,43 @@ For databases and heavy services (PostgreSQL, Kafka, Spark, etc.), use Docker Co
   - Usage: `make`, `make install`
 
 ### Containerization
-- **`docker`** - Container platform
-  - Usage: `docker run`, `docker build`, `docker-compose up`
+- **`docker`** (Docker Desktop cask) - Container platform with Docker Engine, CLI, and Compose
+  - Usage: `docker run`, `docker build`, `docker compose up`
+
+### GUI Applications (Casks)
+
+**Browsers:** Arc, Brave, Firefox
+
+**Development:** Apidog (API testing), Beekeeper Studio (SQL editor), Conductor (Claude Code + GitHub), Docker Desktop, Figma, Ghostty (terminal emulator), Visual Studio Code, P4Merge (visual merge tool)
+
+**Productivity:** Alt-Tab (window switcher), Raycast (launcher), BetterDisplay, Stats (menu bar monitor), Slack, Notion
+
+**Media:** OBS, Spotify
+
+### Fonts
+
+**Nerd Fonts** (with icon support): Hack, JetBrains Mono, Fira Code, Meslo LG, Sauce Code Pro, Caskaydia Cove, Iosevka, Victor Mono
+
+**Standard Developer Fonts:** SF Pro, Fira Code, Cascadia Code, Monaspace (GitHub's superfamily)
+
+### GitHub CLI Extensions
+
+15 extensions auto-installed via `gh extension install`:
+- **`gh-branch`** - Branch management
+- **`gh-bump`** - Version bumping
+- **`gh-clean-branches`** - Delete merged branches
+- **`gh-clone-org`** - Clone all repos in an org
+- **`gh-dash`** - Dashboard TUI for PRs and issues
+- **`gh-download`** - Download release assets
+- **`gh-eco`** - Explore repos in an ecosystem
+- **`gh-install`** - Install tools from GitHub releases
+- **`gh-milestone`** - Milestone management
+- **`gh-notify`** - GitHub notifications in terminal
+- **`gh-poi`** - Delete merged local branches
+- **`gh-repo-stats`** - Repository statistics
+- **`gh-skyline`** - 3D contribution graph
+- **`gh-task`** - Task management
+- **`gh-log`** - View commit logs
 
 ## Justfile Commands
 
@@ -429,8 +446,7 @@ The following MCP servers are configured for Claude Code:
 - **playwright** - Browser automation for testing
 - **filesystem** - Enhanced file operations in ~/Developer
 - **memory** - Persistent context across sessions
-- **linear** - Linear issue tracking integration
-- **github** - GitHub integration (requires GITHUB_PAT env var)
+- **gitnexus** - Codebase knowledge graph for AI agents
 
 ## Git Workflow Enhancements
 
