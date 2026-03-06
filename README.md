@@ -330,7 +330,7 @@ For databases and heavy services (PostgreSQL, Kafka, Spark, etc.), use Docker Co
 
 **Browsers:** Arc, Brave, Firefox
 
-**Development:** Apidog (API testing), Beekeeper Studio (SQL editor), Conductor (Claude Code + GitHub), Docker Desktop, Figma, Ghostty (terminal emulator), Visual Studio Code, P4Merge (visual merge tool)
+**Development:** Apidog (API testing), Beekeeper Studio (SQL editor), cmux (Claude Code terminal session manager), Conductor (Claude Code + GitHub), Docker Desktop, Figma, Ghostty (terminal emulator), Visual Studio Code, P4Merge (visual merge tool)
 
 **Productivity:** Alt-Tab (window switcher), Raycast (launcher), BetterDisplay, Stats (menu bar monitor), Slack, Notion
 
