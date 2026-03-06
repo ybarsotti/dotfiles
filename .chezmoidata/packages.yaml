@@ -162,6 +162,7 @@ packages:
       development:
         - apidog              # API development and testing
         - beekeeper-studio    # Modern SQL editor and database manager
+        - cmux                # Claude Code terminal session manager (multiplexer)
         - conductor           # Claude Code + GitHub integration for Mac
         - figma               # Design and prototyping tool
         - docker              # Docker Desktop (includes Docker Engine, CLI, Compose)
