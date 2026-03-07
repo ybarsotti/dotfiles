@@ -1,4 +1,8 @@
 theme = Catppuccin Mocha
+font-family = JetBrains Mono
+font-size = 14
+scrollback-limit = 10000
+working-directory = ~/Developer
 
 mouse-scroll-multiplier = 0.5
 window-decoration = true
