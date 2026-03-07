@@ -10,20 +10,23 @@ ext="${file##*.}"
 
 case "$ext" in
   ts|tsx|js|jsx|mjs|cjs|json|css|scss|html)
-    command -v prettier &>/dev/null && prettier --write "$file" --log-level silent || true
+    if command -v prettier &>/dev/null; then prettier --write "$file" --log-level silent; fi
     ;;
   py)
-    command -v ruff &>/dev/null && ruff format "$file" --quiet || \
-    command -v black &>/dev/null && black "$file" --quiet || true
+    if command -v ruff &>/dev/null; then
+      ruff format "$file" --quiet
+    elif command -v black &>/dev/null; then
+      black "$file" --quiet
+    fi
     ;;
   go)
-    command -v gofmt &>/dev/null && gofmt -w "$file" || true
+    if command -v gofmt &>/dev/null; then gofmt -w "$file"; fi
     ;;
   rs)
-    command -v rustfmt &>/dev/null && rustfmt "$file" --quiet 2>/dev/null || true
+    if command -v rustfmt &>/dev/null; then rustfmt "$file" --quiet 2>/dev/null; fi
     ;;
   rb)
-    command -v rubocop &>/dev/null && rubocop --autocorrect "$file" --no-color 2>/dev/null || true
+    if command -v rubocop &>/dev/null; then rubocop --autocorrect "$file" --no-color 2>/dev/null; fi
     ;;
 esac
 
