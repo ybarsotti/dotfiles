@@ -8,7 +8,9 @@
       "WebSearch",
       "mcp__filesystem__read_multiple_files",
       "mcp__filesystem__list_directory",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(act:*)",
+      "Bash(pre-commit run:*)"
     ],
     "deny": [],
     "ask": []
