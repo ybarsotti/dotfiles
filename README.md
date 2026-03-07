@@ -245,6 +245,8 @@ This dotfiles setup includes several development tools that are automatically in
 - **`specify`** (GitHub Spec Kit) - Toolkit for Spec-Driven Development with AI coding agents
   - Usage: `specify init <project>`, `specify plan`, `specify build`
   - Install: Via `uv tool install` (automatic)
+- **`gemini-cli`** - Google Gemini CLI agent
+  - Usage: `gemini`, installed via `brew install gemini-cli`
 - **`gastown`** - Multi-agent orchestration (coordinates Claude, Codex, Gemini workers)
   - Usage: `gt install ~/gt --git`, `gt mayor attach`
   - Install: Via `brew install gastown`
