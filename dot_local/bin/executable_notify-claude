@@ -1,26 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Read all of stdin
 json=$(cat)
-
-if [ -z "$json" ]; then
-  echo "Missing json from claude" >&2
-  exit 2
-fi
+[ -z "$json" ] && exit 0
 
 title="Claude"
 subtitle=$(basename "$(pwd)")
-message=$(echo "$json" | jq -r '.message // "Stopped"')
+message=$(/opt/homebrew/bin/jq -r '.message // "Done"' <<< "$json" 2>/dev/null || echo "Done")
+escaped=$(printf '%s' "$message" | sed 's/"/\\"/g')
 
-sounds=(
-  Basso Blow Bottle Frog Funk Glass
-  Hero Morse Ping Pop Purr Sosumi
-  Submarine Tink
-)
-sound=${sounds[12]}  # Submarine
-
-# Escape message for AppleScript
-escaped_message=$(printf '%s' "$message" | sed 's/"/\\"/g')
-
-osascript -e "display notification \"$escaped_message\" with title \"$title\" subtitle \"$subtitle\" sound name \"$sound\""
+osascript -e "display notification \"$escaped\" with title \"$title\" subtitle \"$subtitle\" sound name \"Tink\""
