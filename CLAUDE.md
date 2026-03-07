@@ -26,6 +26,24 @@ This is a dotfiles repository managed with [chezmoi](https://github.com/twpayne/
 - **Update package list**: Edit `.chezmoidata/packages.yaml` and run `chezmoi apply`
 - **Manual brew bundle**: The install scripts use `brew bundle` with dynamically generated Brewfiles
 
+## Machine Purpose (Personal vs Work)
+
+This repo supports two machine types via `machine.purpose` (set during `chezmoi init`):
+- **personal** — Uses `yuribarsotti@gmail.com` / `ybarsotti`, includes tools like qmd, Linear, ollama
+- **work** — Uses work email / git username, may exclude personal-only tools
+
+To make a template conditional per machine, use:
+```
+{{ if eq .machine.purpose "personal" }}
+  ...personal-only...
+{{ else if eq .machine.purpose "work" }}
+  ...work-only...
+{{ end }}
+```
+
+The value is stored in `.chezmoi.toml` under `[data.machine]` and accessed as `.machine.purpose` in templates.
+Files that differ per machine should use `.tmpl` extension with these conditionals.
+
 ## Architecture and Structure
 
 ### Key Files and Directories

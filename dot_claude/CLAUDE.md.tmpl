@@ -1,4 +1,5 @@
 # Global CLAUDE.md
+{{- if eq .machine.purpose "personal" }}
 
 ## Project Management
 
@@ -51,3 +52,4 @@ qmd query "topic" --json
 - Content is primarily in Portuguese (PT-BR) with English technical terms
 - Search queries work in both Portuguese and English
 - Run `qmd --help` for full CLI reference
+{{- end }}
