@@ -1,3 +1,6 @@
 {{- /* chezmoi:modify-template */ -}}
 {{- $json := .chezmoi.stdin | default "{}" | fromJson -}}
-{{ $json | setValueAtPath "mcpServers" .mcp_servers | toPrettyJson }}
+{{- $shared := .mcp_servers.shared -}}
+{{- $typed := index .mcp_servers .machine.purpose -}}
+{{- $all := merge $shared $typed -}}
+{{ $json | setValueAtPath "mcpServers" $all | toPrettyJson }}

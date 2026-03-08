@@ -1,1 +1,4 @@
-{{ dict "mcpServers" .mcp_servers | toPrettyJson }}
+{{- $shared := .mcp_servers.shared -}}
+{{- $typed := index .mcp_servers .machine.purpose -}}
+{{- $all := merge $shared $typed -}}
+{{ dict "mcpServers" $all | toPrettyJson }}

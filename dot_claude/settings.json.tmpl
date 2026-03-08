@@ -54,23 +54,31 @@
     ]
   },
   "enabledPlugins": {
-    "swift-lsp@claude-plugins-official": true,
-    "pyright-lsp@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true,
-    "context7@claude-plugins-official": true,
-    "github@claude-plugins-official": true,
-    "feature-dev@claude-plugins-official": true,
-    "code-simplifier@claude-plugins-official": true,
-    "playwright@claude-plugins-official": true,
-    "commit-commands@claude-plugins-official": true,
-    "security-guidance@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true
+    "code-review@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "serena@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "supabase@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true
   },
   "mcpServers": {
+{{- $shared := .mcp_servers.shared -}}
+{{- $typed := index .mcp_servers .machine.purpose -}}
+{{- $all := merge $shared $typed -}}
 {{- $first := true -}}
-{{- range $name, $config := .mcp_servers }}
+{{- range $name, $config := $all }}
 {{- if $first }}{{- $first = false }}{{- else }},{{- end }}
     "{{ $name }}": {
       "type": "stdio",

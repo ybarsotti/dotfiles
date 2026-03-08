@@ -1,50 +1,61 @@
 ---
+# MCP servers separated by account type.
+# - shared: loaded on all machines (personal + work)
+# - personal: loaded only when machine.purpose = "personal"
+# - work: loaded only when machine.purpose = "work"
+
 mcp_servers:
-  ccusage:
-    command: npx
-    args:
-      - "@ccusage/mcp@latest"
+  shared:
+    memory:
+      command: npx
+      args:
+        - -y
+        - "@modelcontextprotocol/server-memory"
 
-  memory:
-    command: npx
-    args:
-      - -y
-      - "@modelcontextprotocol/server-memory"
+    sequential-thinking:
+      command: npx
+      args:
+        - -y
+        - "@modelcontextprotocol/server-sequential-thinking"
 
-  sequential-thinking:
-    command: npx
-    args:
-      - -y
-      - "@modelcontextprotocol/server-sequential-thinking"
+  personal:
+    ccusage:
+      command: npx
+      args:
+        - "@ccusage/mcp@latest"
 
-  # Optional / situational (uncomment as needed):
+  work: {}
+
+  # Optional / situational (uncomment and move to the right section):
   #
-  # playwright:
-  #   command: npx
-  #   args:
-  #     - "@playwright/mcp@latest"
-  #     - --browser
-  #     - firefox
-  #     - --headless
+  # shared:
+  #   playwright:
+  #     command: npx
+  #     args:
+  #       - "@playwright/mcp@latest"
+  #       - --browser
+  #       - firefox
+  #       - --headless
   #
-  # terraform:
-  #   command: docker
-  #   args:
-  #     - run
-  #     - -i
-  #     - --rm
-  #     - hashicorp/terraform-mcp-server
+  #   terraform:
+  #     command: docker
+  #     args:
+  #       - run
+  #       - -i
+  #       - --rm
+  #       - hashicorp/terraform-mcp-server
   #
-  # filesystem:
-  #   command: npx
-  #   args:
-  #     - -y
-  #     - "@modelcontextprotocol/server-filesystem"
-  #     - /Users/barsotti/Developer
+  #   filesystem:
+  #     command: npx
+  #     args:
+  #       - -y
+  #       - "@modelcontextprotocol/server-filesystem"
+  #       - /Users/barsotti/Developer
   #
-  # linear:
-  #   command: npx
-  #   args:
-  #     - -y
-  #     - mcp-remote
-  #     - https://mcp.linear.app/mcp
+  # personal:
+  #   linear:
+  #     command: npx
+  #     args:
+  #       - -y
+  #       - mcp-remote
+  #       - https://mcp.linear.app/mcp
