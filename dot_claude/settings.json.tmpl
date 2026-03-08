@@ -74,8 +74,55 @@
     "typescript-lsp@claude-plugins-official": true,
     "everything-claude-code@everything-claude-code": true,
     "ui-ux-pro-max@ui-ux-pro-max-skill": true,
-    "agent-browser@agent-browser": true
+    "agent-browser@agent-browser": true,
+    "find-skills@vercel-labs-skills": true
   },
+  "extraKnownMarketplaces": {
+    "prompts.chat": {
+      "source": {
+        "source": "github",
+        "repo": "f/awesome-chatgpt-prompts"
+      }
+    },
+    "superpowers-dev": {
+      "source": {
+        "source": "github",
+        "repo": "obra/superpowers"
+      }
+    },
+    "context7-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "upstash/context7"
+      }
+    },
+    "everything-claude-code": {
+      "source": {
+        "source": "github",
+        "repo": "affaan-m/everything-claude-code"
+      }
+    },
+    "ui-ux-pro-max-skill": {
+      "source": {
+        "source": "github",
+        "repo": "nextlevelbuilder/ui-ux-pro-max-skill"
+      },
+      "autoUpdate": true
+    },
+    "agent-browser": {
+      "source": {
+        "source": "github",
+        "repo": "vercel-labs/agent-browser"
+      }
+    },
+    "vercel-labs-skills": {
+      "source": {
+        "source": "github",
+        "repo": "vercel-labs/skills"
+      }
+    }
+  },
+  "skipDangerousModePermissionPrompt": true,
   "mcpServers": {
 {{- $shared := .mcp_servers.shared -}}
 {{- $typed := index .mcp_servers .machine.purpose -}}
