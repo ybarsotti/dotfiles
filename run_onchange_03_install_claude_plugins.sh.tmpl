@@ -15,8 +15,21 @@ if command -v claude &>/dev/null; then
   CLAUDE="claude"
 fi
 
-# Plugins to install from the official marketplace.
-# Update this list to add/remove plugins — any change triggers a re-run.
+# Custom marketplaces to register before installing plugins.
+MARKETPLACES=(
+  "affaan-m/everything-claude-code"
+  "nextlevelbuilder/ui-ux-pro-max-skill"
+  "vercel-labs/agent-browser"
+  "wshobson/agents"
+)
+
+echo "Registering custom marketplaces..."
+for marketplace in "${MARKETPLACES[@]}"; do
+  echo "  → ${marketplace}"
+  "${CLAUDE}" plugin marketplace add "${marketplace}" 2>/dev/null || true
+done
+
+# Plugins to install — any change triggers a re-run.
 PLUGINS=(
   "claude-code-setup@claude-plugins-official"
   "claude-md-management@claude-plugins-official"
@@ -24,6 +37,7 @@ PLUGINS=(
   "code-simplifier@claude-plugins-official"
   "commit-commands@claude-plugins-official"
   "context7@claude-plugins-official"
+  "everything-claude-code@everything-claude-code"
   "feature-dev@claude-plugins-official"
   "frontend-design@claude-plugins-official"
   "pyright-lsp@claude-plugins-official"
@@ -36,6 +50,8 @@ PLUGINS=(
   "superpowers@claude-plugins-official"
   "swift-lsp@claude-plugins-official"
   "typescript-lsp@claude-plugins-official"
+  "ui-ux-pro-max@ui-ux-pro-max-skill"
+  "agent-browser@agent-browser"
 )
 
 echo "Installing Claude Code plugins..."
