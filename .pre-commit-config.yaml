@@ -42,7 +42,7 @@ repos:
       - id: act-lint
         name: GitHub Actions — Lint job (act)
         language: system
-        entry: act push -j lint --container-architecture linux/amd64 -P ubuntu-latest=catthehacker/ubuntu:act-latest
+        entry: bash -c 'export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH" && act push -j lint --container-architecture linux/amd64 -P ubuntu-latest=catthehacker/ubuntu:act-latest'
         pass_filenames: false
         always_run: true
 
