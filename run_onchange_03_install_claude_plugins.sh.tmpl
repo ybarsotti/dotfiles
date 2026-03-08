@@ -20,6 +20,7 @@ MARKETPLACES=(
   "affaan-m/everything-claude-code"
   "nextlevelbuilder/ui-ux-pro-max-skill"
   "vercel-labs/agent-browser"
+  "vercel-labs/skills"
   "wshobson/agents"
 )
 
@@ -52,6 +53,7 @@ PLUGINS=(
   "typescript-lsp@claude-plugins-official"
   "ui-ux-pro-max@ui-ux-pro-max-skill"
   "agent-browser@agent-browser"
+  "find-skills@vercel-labs-skills"
 )
 
 echo "Installing Claude Code plugins..."
@@ -60,4 +62,18 @@ for plugin in "${PLUGINS[@]}"; do
   "${CLAUDE}" plugin install "${plugin}" 2>/dev/null || true
 done
 
-echo "Claude Code plugins installed."
+# Skills installed via skills.sh (npx skills) — symlinked to ~/.claude/skills/
+SKILLS=(
+  "https://github.com/coreyhaines31/marketingskills --skill seo-audit"
+  "https://github.com/anthropics/skills --skill frontend-design"
+)
+
+if command -v npx &>/dev/null; then
+  echo "Installing skills.sh skills..."
+  for skill in "${SKILLS[@]}"; do
+    echo "  → ${skill}"
+    npx -y skills add ${skill} --yes --global 2>/dev/null || true
+  done
+fi
+
+echo "Claude Code plugins and skills installed."
