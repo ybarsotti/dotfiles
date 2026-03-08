@@ -201,7 +201,6 @@ fi
 if command -v npm &>/dev/null; then
     # Package list
     npm_packages=(
-        "@anthropic-ai/claude-code"
         "@fission-ai/openspec"
         "@openai/codex"
         "bmad-method"
@@ -215,6 +214,7 @@ if command -v npm &>/dev/null; then
     # Personal-only npm packages
     npm_packages+=(
         "@tobilu/qmd"
+        "@ankimcp/anki-mcp-server"
     )
 {{- end }}
 
