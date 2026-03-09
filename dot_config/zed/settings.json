@@ -1,0 +1,95 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "icon_theme": "Catppuccin Mocha",
+  "agent": {
+    "favorite_models": [],
+    "play_sound_when_agent_done": true,
+    "model_parameters": []
+  },
+  "calls": {
+    "mute_on_join": true
+  },
+  "git": {
+    "inline_blame": {
+      "show_commit_summary": true
+    },
+    "gutter_debounce": 1
+  },
+  "project_panel": {
+    "dock": "right"
+  },
+  "document_symbols": "on",
+  "document_folding_ranges": "on",
+  "semantic_tokens": "combined",
+  "ui_font_family": "JetBrainsMono Nerd Font",
+  "buffer_line_height": "standard",
+  "buffer_font_family": "FiraCode Nerd Font",
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  },
+  "session": {
+    "trust_all_worktrees": true
+  },
+  "base_keymap": "Cursor",
+  "vim_mode": true,
+  "ui_font_size": 15.0,
+  "buffer_font_size": 14.0,
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "Catppuccin Mocha"
+  },
+  // Extensions to auto-install on new machines.
+  // After adding an extension here, Zed will install it automatically on next launch.
+  "auto_install_extensions": {
+    "catppuccin": true,
+    "catppuccin-icons": true,
+    "discord-presence": true,
+    "dockerfile": true,
+    "git-firefly": true,
+    "html": true,
+    "latex": true,
+    "markdown-oxide": true,
+    "mermaid": true,
+    "proto": true,
+    "terraform": true,
+    "toml": true
+  },
+  "lsp": {
+    "discord_presence": {
+      "initialization_options": {
+        "state": "Working on {filename}",
+        "details": "In {workspace}",
+        "idle": {
+          "timeout": 300,
+          "action": "change_activity",
+          "state": "Idling",
+          "details": "In Zed",
+          "large_image": "{base_icons_url}/zed.png",
+          "large_text": "Zed",
+          "small_image": "{base_icons_url}/idle.png",
+          "small_text": "Idle"
+        },
+        "rules": {
+          "mode": "blacklist",
+          "paths": []
+        },
+        "git_integration": true,
+        "languages": {
+          "rust": {
+            "state": "Hacking on {filename}",
+            "details": "Rustacean at work"
+          }
+        }
+      }
+    }
+  }
+}
