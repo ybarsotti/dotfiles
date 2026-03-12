@@ -8,9 +8,7 @@ encryption = "gpg"
   args = [
     "--quiet",
   ]
-  # TODO: Replace with actual GPG key fingerprint for encryption
-  # Get your key fingerprint with: gpg --list-keys --keyid-format LONG
-  recipient = "{{ .chezmoi.username }}@{{ .chezmoi.hostname }}"
+  recipient = "{{ $machineEmail }}"
   suffix = ".asc"
 
 ################################################

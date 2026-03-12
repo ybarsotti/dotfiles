@@ -232,6 +232,15 @@ This dotfiles setup includes several development tools that are automatically in
 - **`grpcurl`** - curl for gRPC services
   - Usage: `grpcurl localhost:9090 list`, `grpcurl -d '{"name":"test"}' localhost:9090 Service/Method`
 
+### SSH Management (Personal only)
+- **`sshs`** - TUI for SSH connections that reads from `~/.ssh/config`
+  - Usage: `sshs` — navigate hosts with arrow keys, connect with Enter
+  - Docs: https://github.com/quantumsheep/sshs
+- **`mosh`** - Resilient SSH sessions that auto-reconnect on unstable connections
+  - Usage: `mosh user@host` (drop-in replacement for `ssh`)
+  - Works great on mobile/unstable networks, low-latency typing
+  - Docs: https://mosh.org
+
 ### AI & Agent Tools
 - **`ollama`** - Run large language models locally (personal machines only)
   - Usage: `ollama run llama3.2`, `ollama list`, `ollama pull mistral`
