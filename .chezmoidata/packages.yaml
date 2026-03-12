@@ -210,5 +210,9 @@ packages:
 
     # Personal-only packages (installed only on personal machines)
     personal_brews:
+      ssh_tools:
+        - sshs               # TUI for SSH connections (reads from ~/.ssh/config)
+        - mosh               # Resilient SSH sessions (auto-reconnects on unstable connections)
+
       ai_ml:
         - ollama              # Local LLM runner
