@@ -1,0 +1,11 @@
+# Serena configuration for Docker usage
+# Docs: https://oraios.github.io/serena/02-usage/050_configuration.html
+
+# Disable GUI log window (not supported in Docker)
+gui_log_window: false
+
+# Dashboard accessible from outside the container
+web_dashboard_listen_address: "0.0.0.0"
+
+# Don't try to open browser from inside container
+web_dashboard_open_on_launch: false
