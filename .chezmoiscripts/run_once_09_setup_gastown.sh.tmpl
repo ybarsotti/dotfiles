@@ -1,0 +1,38 @@
+{{- if and (eq .chezmoi.os "darwin") (eq .machine.purpose "personal") -}}
+#!/bin/bash
+
+# run_once_09_setup_gastown.sh.tmpl
+#
+# Initializes the Gas Town HQ workspace at ~/gt.
+# Gas Town is a multi-agent orchestration system for Claude Code.
+# Rigs (projects) and crews are added separately per-project via:
+#   gt rig add <name> <repo-url>
+#   gt crew add <yourname> --rig <name>
+#   gt mayor attach
+
+{{ template "error_handling" }}
+
+{{ template "homebrew_path_setup" . }}
+
+GT_HOME="$HOME/gt"
+
+if [[ -d "$GT_HOME" ]]; then
+    echo "Gas Town HQ already exists at $GT_HOME, skipping."
+    exit 0
+fi
+
+if ! command -v gt &>/dev/null; then
+    echo "⚠️  gt not found. Install with: brew install gastown"
+    exit 1
+fi
+
+echo "Initializing Gas Town HQ at $GT_HOME..."
+gt install "$GT_HOME" --git
+
+echo "✓ Gas Town HQ initialized at $GT_HOME"
+echo ""
+echo "Next steps (run manually per project):"
+echo "  gt rig add <name> <repo-url>      # add a project"
+echo "  gt crew add <yourname> --rig <name>  # create your workspace"
+echo "  gt mayor attach                   # start the Mayor"
+{{- end }}

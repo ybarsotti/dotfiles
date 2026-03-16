@@ -144,6 +144,11 @@ eval "$(direnv hook zsh)"
 
 # Development Environment Setup
 
+{{- if eq .machine.purpose "personal" }}
+## Gas Town - Multi-agent orchestration
+export GT_TOWN_ROOT="$HOME/gt"
+{{- end }}
+
 ## Java
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH=$PATH:$ANDROID_HOME/emulator
