@@ -130,6 +130,12 @@
 {{- $first := true -}}
 {{- range $name, $config := $all }}
 {{- if $first }}{{- $first = false }}{{- else }},{{- end }}
+{{- if hasKey $config "url" }}
+    "{{ $name }}": {
+      "type": "sse",
+      "url": "{{ $config.url }}"
+    }
+{{- else }}
     "{{ $name }}": {
       "type": "stdio",
       "command": "{{ $config.command }}",
@@ -138,6 +144,7 @@
       "env": {{ $config.env | toJson }}
 {{- end }}
     }
+{{- end }}
 {{- end }}
   }
 }

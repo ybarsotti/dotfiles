@@ -18,7 +18,17 @@ mcp_servers:
         - -y
         - "@modelcontextprotocol/server-sequential-thinking"
 
+    gitnexus:
+      command: npx
+      args:
+        - -y
+        - gitnexus@latest
+        - mcp
+
   personal:
+    serena:
+      url: http://localhost:9121/sse
+
     ccusage:
       command: npx
       args:
