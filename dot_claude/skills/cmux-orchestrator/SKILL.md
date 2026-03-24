@@ -54,8 +54,13 @@ ORCH_WORKSPACE=$(echo "$ORCH_INFO" | jq -r '.caller.workspace_ref')
 | 3 | api-docs       | Generate OpenAPI spec     | docs/, src/routes/*  | none       |
 ```
 
-5. Ask the user to confirm or adjust before proceeding
+5. Use `AskUserQuestion` with selection options to get approval — never ask the user to type "yes" or "no" freehand. Example:
+   - Header: "Plan"
+   - Options: "Approve (Recommended)" / "Adjust" / "Cancel"
+   - If the user selects "Adjust", ask what to change with another `AskUserQuestion`
 6. Record the working directory — all workers must share the same `cwd`
+
+**Always use `AskUserQuestion` with predefined options for any decision point in this workflow** — plan approval, cleanup confirmation, blocked worker resolution, etc. The user should never have to type free text when a selection suffices.
 
 ## Phase 2 — Setup Run Directory
 
@@ -187,16 +192,19 @@ For each worker in the plan:
 PANE_JSON=$(cmux --json new-pane --direction right)
 SURFACE_REF=$(echo "$PANE_JSON" | jq -r '.surface_ref')
 
-# 2. Name the tab for sidebar visibility
+# 2. Build the system prompt as a string (read from file, pass inline)
+SYSTEM_PROMPT=$(cat "${RUN_DIR}/system-prompt.txt")
+
+# 3. Launch Claude in the pane with --name and inline system prompt
+cmux send --surface "${SURFACE_REF}" -- "cd <cwd> && claude --model sonnet --name '<name>' --dangerously-skip-permissions --append-system-prompt \"\$(cat ${RUN_DIR}/system-prompt.txt)\"\n"
+
+# 4. Wait for Claude to initialize (it needs time to load plugins, LSP, etc.)
+sleep 8
+
+# 5. Rename the tab AFTER Claude initializes (Claude may overwrite the tab title on startup)
 cmux rename-tab --surface "${SURFACE_REF}" "w: <name>"
 
-# 3. Launch Claude in the pane
-cmux send --surface "${SURFACE_REF}" -- "cd <cwd> && claude --model sonnet --name '<name>' --dangerously-skip-permissions --append-system-prompt-file ${RUN_DIR}/system-prompt.txt\n"
-
-# 4. Wait for Claude to initialize
-sleep 5
-
-# 5. Send the task prompt
+# 6. Send the task prompt
 cmux send --surface "${SURFACE_REF}" -- "Read and execute the task described at ${RUN_DIR}/worker-<name>.prompt.md — start immediately.\n"
 ```
 
