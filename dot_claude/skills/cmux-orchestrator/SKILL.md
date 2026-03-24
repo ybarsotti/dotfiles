@@ -14,16 +14,13 @@ This approach gives visible, persistent worker sessions that the user can inspec
 Before anything else, verify the environment:
 
 ```bash
-# Must succeed — confirms we're inside cmux
 cmux identify --json
-
-# Must be available
 which claude
 ```
 
-If either fails, tell the user and stop. Suggest `brew install --cask cmux` or installing Claude CLI as needed.
+If either fails, tell the user and stop.
 
-Save the orchestrator's own identity for later reference:
+Save the orchestrator's identity:
 
 ```bash
 ORCH_INFO=$(cmux identify --json)
@@ -36,13 +33,13 @@ ORCH_WORKSPACE=$(echo "$ORCH_INFO" | jq -r '.caller.workspace_ref')
 **Never create sessions before the plan is approved by the user.**
 
 1. Analyze the user's request and decompose it into independent subtasks
-2. Identify tasks that have dependencies — serialize those, parallelize only independent ones
+2. Identify dependencies — serialize those, parallelize only independent ones
 3. For each subtask determine:
-   - **Worker name**: short, descriptive, kebab-case (used as `--name` flag, e.g. `auth-refactor`, `add-tests`, `api-docs`)
+   - **Worker name**: short, descriptive, kebab-case (e.g. `auth-refactor`, `add-tests`)
    - **Files and directories** it will read or modify
-   - **Context**: documentation paths, architecture notes, relevant background
+   - **Context**: documentation paths, architecture notes
    - **Success criteria**: concrete definition of done
-   - **Dependencies**: which other workers (if any) must finish first — avoid these when possible
+   - **Dependencies**: which other workers must finish first (avoid when possible)
 
 4. Present the plan as a table:
 
@@ -54,13 +51,14 @@ ORCH_WORKSPACE=$(echo "$ORCH_INFO" | jq -r '.caller.workspace_ref')
 | 3 | api-docs       | Generate OpenAPI spec     | docs/, src/routes/*  | none       |
 ```
 
-5. Use `AskUserQuestion` with selection options to get approval — never ask the user to type "yes" or "no" freehand. Example:
+5. Use `AskUserQuestion` with selection options to get approval — never ask the user to type "yes" or "no" freehand:
    - Header: "Plan"
    - Options: "Approve (Recommended)" / "Adjust" / "Cancel"
    - If the user selects "Adjust", ask what to change with another `AskUserQuestion`
+
 6. Record the working directory — all workers must share the same `cwd`
 
-**Always use `AskUserQuestion` with predefined options for any decision point in this workflow** — plan approval, cleanup confirmation, blocked worker resolution, etc. The user should never have to type free text when a selection suffices.
+**Always use `AskUserQuestion` with predefined options for any decision point** — plan approval, cleanup confirmation, blocked worker resolution, etc.
 
 ## Phase 2 — Setup Run Directory
 
@@ -74,7 +72,7 @@ mkdir -p "${RUN_DIR}"
 
 ### 2a. Write the shared system prompt
 
-Write `${RUN_DIR}/system-prompt.txt` — this is appended to every worker's system prompt via `--append-system-prompt-file`:
+Write `${RUN_DIR}/system-prompt.txt` — delivered to workers via `--append-system-prompt-file`:
 
 ```
 You are a worker agent in a cmux parallel orchestration.
@@ -95,7 +93,6 @@ Prefer Serena's semantic tools over text-based grep/sed when available:
 - Use find_symbol and get_symbols_overview for code navigation
 - Use replace_symbol_body for precise, symbol-level edits
 - Use find_referencing_symbols to understand call chains before refactoring
-- Use insert_before_symbol / insert_after_symbol for adding code at the right location
 
 ### GitNexus (code intelligence graph)
 Before modifying any function, class, or method:
@@ -153,6 +150,7 @@ Write `${RUN_DIR}/manifest.json` to track orchestration state:
   "created_at": "<ISO timestamp>",
   "cwd": "<working directory>",
   "orchestrator_surface": "<ORCH_SURFACE>",
+  "worker_pane_ref": null,
   "workers": [
     {
       "name": "<name>",
@@ -168,56 +166,95 @@ Write `${RUN_DIR}/manifest.json` to track orchestration state:
 
 ## Phase 3 — Create Sessions
 
-### Layout strategy
+### Layout: tabbed workers in a single pane below the orchestrator
 
-| Workers | Layout |
-|---------|--------|
-| 2       | Split right from orchestrator pane |
-| 3       | Split right, then split right pane down |
-| 4-6     | New workspace with grid splits |
+**The orchestrator pane stays large.** Workers share a single pane split below the orchestrator, with each worker as a separate tab in that pane. The user clicks tabs to switch between workers. This keeps the orchestrator readable regardless of how many workers exist.
 
-For 4+ workers, create a dedicated workspace so the orchestrator stays uncluttered:
-
-```bash
-WORKER_WS=$(cmux --json new-workspace | jq -r '.workspace_ref')
-cmux rename-workspace --workspace "${WORKER_WS}" "workers: ${RUN_ID}"
+```
+┌─────────────────────────────────────┐
+│                                     │
+│         ORCHESTRATOR (big)          │
+│                                     │
+├─────────────────────────────────────┤
+│ [w: auth] [w: tests] [w: docs]     │  ← tabs
+│         worker pane (smaller)       │
+└─────────────────────────────────────┘
 ```
 
-### Launch each worker
+### Step A — Create worker pane and surfaces (one Bash call)
 
-For each worker in the plan:
+Create ONE pane below the orchestrator, then add extra tabs (surfaces) in that pane for each additional worker:
 
 ```bash
-# 1. Create a new pane (alternate right/down for grid layout)
-PANE_JSON=$(cmux --json new-pane --direction right)
-SURFACE_REF=$(echo "$PANE_JSON" | jq -r '.surface_ref')
+# Create the worker pane (split down from orchestrator)
+WORKER_PANE=$(cmux --json new-pane --direction down)
+WORKER_PANE_REF=$(echo "$WORKER_PANE" | jq -r '.pane_ref')
+W1_SURFACE=$(echo "$WORKER_PANE" | jq -r '.surface_ref')
 
-# 2. Build the system prompt as a string (read from file, pass inline)
-SYSTEM_PROMPT=$(cat "${RUN_DIR}/system-prompt.txt")
-
-# 3. Launch Claude in the pane with --name and inline system prompt
-cmux send --surface "${SURFACE_REF}" -- "cd <cwd> && claude --model sonnet --name '<name>' --dangerously-skip-permissions --append-system-prompt \"\$(cat ${RUN_DIR}/system-prompt.txt)\"\n"
-
-# 4. Wait for Claude to initialize (it needs time to load plugins, LSP, etc.)
-sleep 8
-
-# 5. Rename the tab AFTER Claude initializes (Claude may overwrite the tab title on startup)
-cmux rename-tab --surface "${SURFACE_REF}" "w: <name>"
-
-# 6. Send the task prompt
-cmux send --surface "${SURFACE_REF}" -- "Read and execute the task described at ${RUN_DIR}/worker-<name>.prompt.md — start immediately.\n"
+# For each ADDITIONAL worker, add a new tab (surface) in the same pane
+W2_SURFACE=$(cmux --json new-surface --pane "${WORKER_PANE_REF}" | jq -r '.surface_ref')
+W3_SURFACE=$(cmux --json new-surface --pane "${WORKER_PANE_REF}" | jq -r '.surface_ref')
+# ... repeat for more workers
 ```
 
-After launching each worker:
-- Update `manifest.json` with the worker's `surface_ref` and set status to `"running"`
-- Set sidebar status: `cmux set-status "orchestrator" "<N> workers running" --icon sparkle`
-- Set initial progress: `cmux set-progress 0.0 --label "0/${TOTAL} workers done"`
+### Step B — Launch Claude in each worker tab (one Bash call)
 
-**Important**: launch ALL workers before starting to monitor. Do not wait for one to finish before launching the next.
+Send the claude launch command to each surface. Use `\n` at the end to press Enter. Use `--append-system-prompt-file` for the system prompt — never try to inline it with `$(cat ...)` inside `cmux send`.
+
+```bash
+CWD="/path/to/project"
+RUN_DIR="/tmp/cmux-orchestrator/cmux-20260324-150000"
+
+cmux send --surface "${W1_SURFACE}" -- "cd ${CWD} && claude --model sonnet --name 'auth-refactor' --dangerously-skip-permissions --append-system-prompt-file ${RUN_DIR}/system-prompt.txt\n"
+cmux send --surface "${W2_SURFACE}" -- "cd ${CWD} && claude --model sonnet --name 'add-tests' --dangerously-skip-permissions --append-system-prompt-file ${RUN_DIR}/system-prompt.txt\n"
+cmux send --surface "${W3_SURFACE}" -- "cd ${CWD} && claude --model sonnet --name 'api-docs' --dangerously-skip-permissions --append-system-prompt-file ${RUN_DIR}/system-prompt.txt\n"
+```
+
+### Step C — Wait for Claude to initialize (one Bash call)
+
+```bash
+sleep 10
+```
+
+Claude needs time to load plugins, LSP, MCP servers. 10 seconds is safe.
+
+### Step D — Rename tabs and send task prompts (one Bash call)
+
+Rename AFTER Claude initializes (Claude overwrites tab titles on startup). Send task prompts as SEPARATE `cmux send` calls — never concatenate with the claude launch command.
+
+```bash
+RUN_DIR="/tmp/cmux-orchestrator/cmux-20260324-150000"
+
+cmux rename-tab --surface "${W1_SURFACE}" "w: auth-refactor"
+cmux send --surface "${W1_SURFACE}" -- "Read and execute the task described at ${RUN_DIR}/worker-auth-refactor.prompt.md — start immediately.\n"
+
+cmux rename-tab --surface "${W2_SURFACE}" "w: add-tests"
+cmux send --surface "${W2_SURFACE}" -- "Read and execute the task described at ${RUN_DIR}/worker-add-tests.prompt.md — start immediately.\n"
+
+cmux rename-tab --surface "${W3_SURFACE}" "w: api-docs"
+cmux send --surface "${W3_SURFACE}" -- "Read and execute the task described at ${RUN_DIR}/worker-api-docs.prompt.md — start immediately.\n"
+```
+
+### After launching all workers
+
+- Update `manifest.json` with each worker's `surface_ref`, `worker_pane_ref`, and set status to `"running"`
+- Set sidebar status: `cmux set-status "orchestrator" "N workers running" --icon sparkle --color "#ff9500"`
+- Set initial progress: `cmux set-progress 0.0 --label "0/N workers done"`
+- Log the event: `cmux log "Orchestration started: N workers in pane WORKER_PANE_REF"`
+
+### Common mistakes to avoid
+
+| Mistake | Why it breaks | Correct approach |
+|---------|--------------|------------------|
+| Concatenating claude launch + task prompt in one `cmux send` | Shell escaping breaks, command pastes as text | Two separate `cmux send` calls with `sleep 10` between |
+| Using `--append-system-prompt "$(cat file)"` in `cmux send` | Quotes and shell expansion break inside cmux send | Use `--append-system-prompt-file path/to/file` instead |
+| Creating multiple panes (splits) for workers | Each split makes orchestrator smaller | Use `new-surface` (tabs) in one worker pane |
+| Sending task before Claude initializes | Prompt lands in shell, not in Claude | Wait 10 seconds after launching Claude |
+| Renaming tab before Claude starts | Claude overwrites tab title on startup | Rename AFTER the sleep |
 
 ## Phase 4 — Monitor
 
-Poll worker completion by checking done marker files. Between polls, give the user brief status updates.
+Switch back to the orchestrator workspace and poll worker completion by checking done marker files.
 
 ```bash
 # Check all done markers in one pass
@@ -240,20 +277,14 @@ echo "${DONE_COUNT}/${TOTAL} complete"
 - **Poll interval**: every 30-60 seconds
 - **Status updates**: after each poll, tell the user which workers are done and which are still running — keep it to one line
 - **Progress bar**: `cmux set-progress $(echo "scale=2; ${DONE_COUNT}/${TOTAL}" | bc) --label "${DONE_COUNT}/${TOTAL} workers done"`
-- **Blocked workers**: if a done marker contains `blocked: <reason>`, notify the user immediately and ask how to proceed
-- **Peeking**: use `cmux capture-pane --surface <ref> --lines 5` to check what a worker is currently doing if the user asks
+- **Blocked workers**: if a done marker contains `blocked: <reason>`, notify the user immediately with `AskUserQuestion` offering options to resolve
+- **Peeking**: use `cmux capture-pane --surface <ref> --lines 5` to check what a worker is doing if the user asks
 - **Crash detection**: if `cmux capture-pane --surface <ref>` fails, the worker pane likely closed — mark as crashed in manifest, notify user
 - **Completion notification**: when all workers are done, run `cmux notify --title "Orchestration Complete" --body "All ${TOTAL} workers finished"`
 
 ### Recovery
 
-If the orchestrator loses context (e.g., after context compaction), re-read `manifest.json`:
-
-```bash
-cat ${RUN_DIR}/manifest.json
-```
-
-This has all surface refs and file paths needed to resume monitoring.
+If the orchestrator loses context (e.g., after context compaction), re-read `manifest.json` to recover all surface refs and file paths.
 
 ## Phase 5 — Synthesize
 
@@ -292,19 +323,21 @@ Once ALL done markers exist and contain "done" (or "blocked"):
 
 **Never clean up automatically.** Workers stay alive until the user explicitly says to close them.
 
-When the user is ready, provide cleanup commands:
+When the user is ready (use `AskUserQuestion` to confirm), provide cleanup:
 
 ```bash
-# Close all worker panes
+# Close all worker surfaces (tabs) in the worker pane
 for surface in <surface-refs-from-manifest>; do
   cmux close-surface --surface "${surface}"
 done
-
-# Close worker workspace if one was created
-cmux close-workspace --workspace "${WORKER_WS}"
+# The worker pane auto-closes when its last surface is closed
 
 # Remove run directory
 rm -rf "${RUN_DIR}"
+
+# Clear sidebar
+cmux set-status "orchestrator" "idle" --icon sparkle
+cmux set-progress 0.0 --label ""
 ```
 
 ## Error Handling
@@ -313,8 +346,8 @@ rm -rf "${RUN_DIR}"
 |----------|--------|
 | Not inside cmux | Abort with clear message — suggest opening cmux |
 | `claude` CLI not found | Abort — suggest `npm install -g @anthropic-ai/claude-code` |
-| Pane creation fails | Retry once with opposite direction, then abort that worker and notify user |
-| Worker writes "blocked" | Immediately notify user with the reason, ask for guidance |
+| Pane creation fails | Retry once, then abort that worker and notify user |
+| Worker writes "blocked" | Immediately notify user with `AskUserQuestion` offering resolution options |
 | Worker pane disappears | Detect via failed `capture-pane`, mark crashed in manifest, notify user |
 | Orchestrator loses context | Re-read `manifest.json` from `${RUN_DIR}` to recover all state |
 | All workers fail | Summarize all failures, suggest running tasks sequentially as fallback |
@@ -322,22 +355,8 @@ rm -rf "${RUN_DIR}"
 ## Constraints
 
 - **Maximum 6 concurrent workers** — more causes UI clutter and diminishing returns
-- **Workers use `--model sonnet`** by default for cost efficiency. The user can override per-worker or globally.
-- **Orchestrator uses whatever model the user chose** — it handles planning, which benefits from deeper reasoning
-- **Workers run `--dangerously-skip-permissions`** — only appropriate in trusted project directories
-- **Never parallelize dependent tasks** — if worker B needs worker A's output, serialize them (run A first, then B)
-- **Workers must not exit** until the user says so — they stay in interactive mode for follow-up questions
-
-## Example
-
-**User**: "Parallelize this: refactor the auth module, add missing tests for UserService, and update the README"
-
-**Orchestrator**:
-1. Presents plan with 3 workers: `auth-refactor`, `user-tests`, `readme-update`
-2. User approves
-3. Creates `/tmp/cmux-orchestrator/cmux-20260324-150000/`
-4. Writes system prompt, 3 task files, manifest
-5. Creates 3 cmux panes, launches Claude Sonnet in each
-6. Monitors every 30s: "auth-refactor: running, user-tests: done, readme-update: running"
-7. All 3 finish → reads results → presents unified summary
-8. Workers stay alive for follow-up until user says to clean up
+- **Workers use `--model sonnet`** by default for cost efficiency. The user can override.
+- **Orchestrator uses whatever model the user chose** — it handles planning
+- **Workers run `--dangerously-skip-permissions`** — only in trusted project directories
+- **Never parallelize dependent tasks** — serialize them instead
+- **Workers must not exit** until the user says so — they stay in interactive mode
