@@ -164,11 +164,11 @@ Write `${RUN_DIR}/manifest.json` to track orchestration state:
 }
 ```
 
-## Phase 3 — Create Sessions
+## Phase 3 — Create Sessions (use the helper script)
 
-### Layout: tabbed workers in a single pane below the orchestrator
+**ALWAYS use the `launch-workers.sh` script** to create sessions. Do NOT manually run `cmux send`, `cmux new-pane`, or `cmux new-surface` — the script handles all of that correctly.
 
-**The orchestrator pane stays large.** Workers share a single pane split below the orchestrator, with each worker as a separate tab in that pane. The user clicks tabs to switch between workers. This keeps the orchestrator readable regardless of how many workers exist.
+The script creates this layout:
 
 ```
 ┌─────────────────────────────────────┐
@@ -181,76 +181,53 @@ Write `${RUN_DIR}/manifest.json` to track orchestration state:
 └─────────────────────────────────────┘
 ```
 
-### Step A — Create worker pane and surfaces (one Bash call)
+Workers share one pane below the orchestrator as tabs. The user clicks tabs to switch between workers.
 
-Create ONE pane below the orchestrator, then add extra tabs (surfaces) in that pane for each additional worker:
+### Running the script
 
-```bash
-# Create the worker pane (split down from orchestrator)
-WORKER_PANE=$(cmux --json new-pane --direction down)
-WORKER_PANE_REF=$(echo "$WORKER_PANE" | jq -r '.pane_ref')
-W1_SURFACE=$(echo "$WORKER_PANE" | jq -r '.surface_ref')
-
-# For each ADDITIONAL worker, add a new tab (surface) in the same pane
-W2_SURFACE=$(cmux --json new-surface --pane "${WORKER_PANE_REF}" | jq -r '.surface_ref')
-W3_SURFACE=$(cmux --json new-surface --pane "${WORKER_PANE_REF}" | jq -r '.surface_ref')
-# ... repeat for more workers
-```
-
-### Step B — Launch Claude in each worker tab (one Bash call)
-
-Send the claude launch command to each surface. Use `\n` at the end to press Enter. Use `--append-system-prompt-file` for the system prompt — never try to inline it with `$(cat ...)` inside `cmux send`.
+The script is at `~/.claude/skills/cmux-orchestrator/scripts/launch-workers.sh`.
 
 ```bash
-CWD="/path/to/project"
-RUN_DIR="/tmp/cmux-orchestrator/cmux-20260324-150000"
-
-cmux send --surface "${W1_SURFACE}" -- "cd ${CWD} && claude --model sonnet --name 'auth-refactor' --dangerously-skip-permissions --append-system-prompt-file ${RUN_DIR}/system-prompt.txt\n"
-cmux send --surface "${W2_SURFACE}" -- "cd ${CWD} && claude --model sonnet --name 'add-tests' --dangerously-skip-permissions --append-system-prompt-file ${RUN_DIR}/system-prompt.txt\n"
-cmux send --surface "${W3_SURFACE}" -- "cd ${CWD} && claude --model sonnet --name 'api-docs' --dangerously-skip-permissions --append-system-prompt-file ${RUN_DIR}/system-prompt.txt\n"
+~/.claude/skills/cmux-orchestrator/scripts/launch-workers.sh <RUN_DIR> <CWD> <worker1> <worker2> [worker3] ...
 ```
 
-### Step C — Wait for Claude to initialize (one Bash call)
+**Example:**
 
 ```bash
-sleep 10
+~/.claude/skills/cmux-orchestrator/scripts/launch-workers.sh \
+  /tmp/cmux-orchestrator/cmux-20260324-150000 \
+  /Users/me/project \
+  auth-refactor add-tests api-docs
 ```
 
-Claude needs time to load plugins, LSP, MCP servers. 10 seconds is safe.
+The script:
+1. Creates ONE worker pane (split down from orchestrator)
+2. Adds a tab (`new-surface`) per additional worker in that pane
+3. Launches `claude --model sonnet --name '<name>' --dangerously-skip-permissions --append-system-prompt-file <run_dir>/system-prompt.txt` in each tab
+4. Waits 12 seconds for Claude to initialize
+5. Renames tabs to `w: <name>` (after Claude starts, so it doesn't overwrite)
+6. Sends the task prompt to each worker
+7. Outputs JSON with `pane_ref` and worker `surface_ref` values
 
-### Step D — Rename tabs and send task prompts (one Bash call)
+**Output JSON (use to update manifest.json):**
 
-Rename AFTER Claude initializes (Claude overwrites tab titles on startup). Send task prompts as SEPARATE `cmux send` calls — never concatenate with the claude launch command.
-
-```bash
-RUN_DIR="/tmp/cmux-orchestrator/cmux-20260324-150000"
-
-cmux rename-tab --surface "${W1_SURFACE}" "w: auth-refactor"
-cmux send --surface "${W1_SURFACE}" -- "Read and execute the task described at ${RUN_DIR}/worker-auth-refactor.prompt.md — start immediately.\n"
-
-cmux rename-tab --surface "${W2_SURFACE}" "w: add-tests"
-cmux send --surface "${W2_SURFACE}" -- "Read and execute the task described at ${RUN_DIR}/worker-add-tests.prompt.md — start immediately.\n"
-
-cmux rename-tab --surface "${W3_SURFACE}" "w: api-docs"
-cmux send --surface "${W3_SURFACE}" -- "Read and execute the task described at ${RUN_DIR}/worker-api-docs.prompt.md — start immediately.\n"
+```json
+{
+  "pane_ref": "pane:5",
+  "workers": [
+    {"name": "auth-refactor", "surface_ref": "surface:10"},
+    {"name": "add-tests", "surface_ref": "surface:11"},
+    {"name": "api-docs", "surface_ref": "surface:12"}
+  ]
+}
 ```
 
-### After launching all workers
+### After the script completes
 
-- Update `manifest.json` with each worker's `surface_ref`, `worker_pane_ref`, and set status to `"running"`
-- Set sidebar status: `cmux set-status "orchestrator" "N workers running" --icon sparkle --color "#ff9500"`
-- Set initial progress: `cmux set-progress 0.0 --label "0/N workers done"`
-- Log the event: `cmux log "Orchestration started: N workers in pane WORKER_PANE_REF"`
-
-### Common mistakes to avoid
-
-| Mistake | Why it breaks | Correct approach |
-|---------|--------------|------------------|
-| Concatenating claude launch + task prompt in one `cmux send` | Shell escaping breaks, command pastes as text | Two separate `cmux send` calls with `sleep 10` between |
-| Using `--append-system-prompt "$(cat file)"` in `cmux send` | Quotes and shell expansion break inside cmux send | Use `--append-system-prompt-file path/to/file` instead |
-| Creating multiple panes (splits) for workers | Each split makes orchestrator smaller | Use `new-surface` (tabs) in one worker pane |
-| Sending task before Claude initializes | Prompt lands in shell, not in Claude | Wait 10 seconds after launching Claude |
-| Renaming tab before Claude starts | Claude overwrites tab title on startup | Rename AFTER the sleep |
+1. Parse the JSON output and update `manifest.json` with surface refs and set all statuses to `"running"`
+2. Set sidebar status: `cmux set-status "orchestrator" "N workers running" --icon sparkle --color "#ff9500"`
+3. Set initial progress: `cmux set-progress 0.0 --label "0/N workers done"`
+4. Log the event: `cmux log "Orchestration started: N workers"`
 
 ## Phase 4 — Monitor
 
