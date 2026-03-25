@@ -171,14 +171,12 @@ Write `${RUN_DIR}/manifest.json` to track orchestration state:
 The script creates this layout:
 
 ```
-┌─────────────────────────────────────┐
-│                                     │
-│         ORCHESTRATOR (big)          │
-│                                     │
-├─────────────────────────────────────┤
-│ [w: auth] [w: tests] [w: docs]     │  ← tabs
-│         worker pane (smaller)       │
-└─────────────────────────────────────┘
+┌───────────────────────┬─────────────────────┐
+│                       │ [w:auth][w:test][w:d]│ ← tabs
+│   ORCHESTRATOR (big)  │                     │
+│                       │   worker pane       │
+│                       │   (smaller)         │
+└───────────────────────┴─────────────────────┘
 ```
 
 Workers share one pane below the orchestrator as tabs. The user clicks tabs to switch between workers.
@@ -201,7 +199,7 @@ The script is at `~/.claude/skills/cmux-orchestrator/scripts/launch-workers.sh`.
 ```
 
 The script:
-1. Creates ONE worker pane (split down from orchestrator)
+1. Creates ONE worker pane (split right from orchestrator)
 2. Adds a tab (`new-surface`) per additional worker in that pane
 3. Launches `claude --model sonnet --name '<name>' --dangerously-skip-permissions --append-system-prompt-file <run_dir>/system-prompt.txt` in each tab
 4. Waits 12 seconds for Claude to initialize
