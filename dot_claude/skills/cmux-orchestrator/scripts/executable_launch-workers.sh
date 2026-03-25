@@ -46,7 +46,7 @@ fi
 echo "Creating worker pane..." >&2
 
 # Step 1: Create ONE worker pane (split down from orchestrator)
-WORKER_PANE_JSON=$(cmux --json new-pane --direction down)
+WORKER_PANE_JSON=$(cmux --json new-pane --direction right)
 WORKER_PANE_REF=$(echo "$WORKER_PANE_JSON" | jq -r '.pane_ref')
 FIRST_SURFACE=$(echo "$WORKER_PANE_JSON" | jq -r '.surface_ref')
 
