@@ -294,6 +294,20 @@ Once ALL done markers exist and contain "done" (or "blocked"):
 
 **Only present the final summary when ALL workers have reported.** Small per-poll status updates are fine, but the comprehensive synthesis waits until everyone is done.
 
+## Reusing Idle Workers
+
+After a worker completes its task, its pane stays alive and idle. **Reuse idle panes** for new tasks instead of creating new ones. Use the `send-task.sh` script — it automatically appends `\n` so the prompt auto-submits:
+
+```bash
+# Send a text prompt to an idle worker (auto-submits with Enter)
+~/.claude/skills/cmux-orchestrator/scripts/send-task.sh <surface_ref> "Your task prompt here"
+
+# Send a prompt file to an idle worker
+~/.claude/skills/cmux-orchestrator/scripts/send-task.sh <surface_ref> --file /tmp/cmux-orchestrator/run-123/worker-fix.prompt.md
+```
+
+**NEVER use raw `cmux send` directly** — the script handles the `\n` (Enter key) automatically. Without it, text is pasted but not submitted and the user must press Enter manually.
+
 ## Cleanup
 
 **Never clean up automatically.** Workers stay alive until the user explicitly says to close them.
