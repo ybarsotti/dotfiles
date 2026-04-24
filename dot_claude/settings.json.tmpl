@@ -3,7 +3,8 @@
   "includeCoAuthoredBy": false,
   "statusLine": {
     "type": "command",
-    "command": "npx -y @owloops/claude-powerline@latest --style=powerline --theme=tokyo-night --segments=directory,git,model,context,metrics,session,block,today --context-style=bar"
+    "command": "npx -y ccstatusline@latest",
+    "padding": 0
   },
   "hooks": {
     "Stop": [
@@ -75,7 +76,8 @@
     "everything-claude-code@everything-claude-code": true,
     "ui-ux-pro-max@ui-ux-pro-max-skill": true,
     "agent-browser@agent-browser": true,
-    "find-skills@vercel-labs-skills": true
+    "find-skills@vercel-labs-skills": true,
+    "gopls-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "prompts.chat": {
@@ -146,5 +148,6 @@
     }
 {{- end }}
 {{- end }}
-  }
+  },
+  "effortLevel": "high"
 }
