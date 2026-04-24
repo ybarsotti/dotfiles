@@ -1,0 +1,106 @@
+{
+  "version": 3,
+  "lines": [
+    [
+      {
+        "id": "688585a6-bc8f-4db6-94f6-7acc031553cc",
+        "type": "model",
+        "backgroundColor": "bgBrightWhite"
+      },
+      {
+        "id": "85d3332a-c1ca-4558-809e-f6628c56cb84",
+        "type": "thinking-effort",
+        "backgroundColor": "bgBlue"
+      },
+      {
+        "id": "27c05d19-8675-4dd4-8964-a1260326d7e4",
+        "type": "version",
+        "backgroundColor": "bgBrightRed"
+      },
+      {
+        "id": "080510ff-26a6-4c67-9621-905135c425ae",
+        "type": "vim-mode",
+        "backgroundColor": "bgCyan"
+      }
+    ],
+    [
+      {
+        "id": "29d488ad-53df-4aae-aaf8-23ae3a31234b",
+        "type": "session-clock",
+        "backgroundColor": "bgYellow",
+        "rawValue": false
+      },
+      {
+        "id": "7c7a0d6f-26fc-4615-82eb-191dac36650e",
+        "type": "context-bar",
+        "backgroundColor": "bgRed",
+        "rawValue": true
+      },
+      {
+        "id": "22443333-983b-4e37-b3b2-c371b9ac518f",
+        "type": "reset-timer",
+        "backgroundColor": "bgBrightRed"
+      },
+      {
+        "id": "30fd46fe-50ce-4059-bd23-d6de8b2a8dcd",
+        "type": "weekly-reset-timer",
+        "backgroundColor": "bgYellow"
+      }
+    ],
+    [
+      {
+        "id": "5",
+        "type": "git-branch",
+        "color": "magenta"
+      },
+      {
+        "id": "7fcdab67-0a0a-4cfb-96cf-5940b699fd44",
+        "type": "git-worktree",
+        "backgroundColor": "bgMagenta"
+      },
+      {
+        "id": "6594fe69-ae38-42ea-bc4e-a8d602d027b0",
+        "type": "git-pr",
+        "backgroundColor": "bgWhite"
+      },
+      {
+        "id": "c8517e8e-6c1c-4407-b7eb-512867b86120",
+        "type": "git-changes",
+        "backgroundColor": "bgCyan"
+      }
+    ]
+  ],
+  "flexMode": "full",
+  "compactThreshold": 60,
+  "colorLevel": 3,
+  "inheritSeparatorColors": false,
+  "globalBold": false,
+  "minimalistMode": false,
+  "powerline": {
+    "enabled": true,
+    "separators": [
+      "",
+      "",
+      ""
+    ],
+    "separatorInvertBackground": [
+      false,
+      false,
+      false
+    ],
+    "startCaps": [
+      "",
+      "",
+      ""
+    ],
+    "endCaps": [
+      "",
+      "",
+      ""
+    ],
+    "autoAlign": true,
+    "continueThemeAcrossLines": true,
+    "theme": "tokyonight"
+  },
+  "defaultPadding": " "
+}
