@@ -14,27 +14,14 @@
         "backgroundColor": "bgBlue"
       },
       {
-        "id": "27c05d19-8675-4dd4-8964-a1260326d7e4",
-        "type": "version",
-        "backgroundColor": "bgBrightRed"
-      },
-      {
         "id": "246e4228-e430-4bd0-bf6a-78b9c9dbd975",
         "type": "session-name",
         "backgroundColor": "bgBrightYellow"
       },
       {
-        "id": "ed7fb5e4-98da-485b-aaac-69a231dc5145",
-        "type": "claude-account-email",
-        "backgroundColor": "bgCyan"
-      },
-      {
-        "id": "080510ff-26a6-4c67-9621-905135c425ae",
-        "type": "vim-mode",
-        "backgroundColor": "bgCyan",
-        "metadata": {
-          "format": "icon"
-        }
+        "id": "27c05d19-8675-4dd4-8964-a1260326d7e4",
+        "type": "version",
+        "backgroundColor": "bgBrightRed"
       }
     ],
     [
@@ -48,6 +35,15 @@
         }
       },
       {
+        "id": "732d6066-a240-4fb4-8ae9-5e4803b9ccb4",
+        "type": "session-usage",
+        "backgroundColor": "bgGreen",
+        "metadata": {
+          "display": "progress-short"
+        },
+        "merge": true
+      },
+      {
         "id": "22443333-983b-4e37-b3b2-c371b9ac518f",
         "type": "reset-timer",
         "backgroundColor": "bgBrightRed",
@@ -57,21 +53,13 @@
         }
       },
       {
-        "id": "732d6066-a240-4fb4-8ae9-5e4803b9ccb4",
-        "type": "session-usage",
-        "backgroundColor": "bgGreen",
-        "metadata": {
-          "display": "progress-short"
-        }
-      },
-      {
         "id": "35e320f5-3f8d-4aa5-9580-e6768bc94805",
         "type": "weekly-usage",
         "backgroundColor": "bgBrightBlue",
+        "merge": true,
         "metadata": {
-          "display": "time"
-        },
-        "merge": true
+          "display": "progress-short"
+        }
       },
       {
         "id": "30fd46fe-50ce-4059-bd23-d6de8b2a8dcd",
@@ -87,10 +75,10 @@
         "id": "5",
         "type": "git-branch",
         "color": "magenta",
+        "merge": true,
         "metadata": {
           "linkToGitHub": "false"
-        },
-        "merge": true
+        }
       },
       {
         "id": "7fcdab67-0a0a-4cfb-96cf-5940b699fd44",
@@ -117,10 +105,20 @@
     ],
     [
       {
+        "id": "92239659-13b6-42b4-802d-365e35f2bade",
+        "type": "vim-mode",
+        "backgroundColor": "bgBlue"
+      },
+      {
         "id": "4521de4a-2bb4-489d-ad94-0b1ca3bf30d0",
         "type": "custom-text",
         "backgroundColor": "bgYellow",
         "customText": "Barsotti"
+      },
+      {
+        "id": "911ed965-2b85-4279-ba66-af22984936cb",
+        "type": "claude-account-email",
+        "backgroundColor": "bgBrightWhite"
       }
     ]
   ],
