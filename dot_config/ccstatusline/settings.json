@@ -5,7 +5,8 @@
       {
         "id": "688585a6-bc8f-4db6-94f6-7acc031553cc",
         "type": "model",
-        "backgroundColor": "bgBrightWhite"
+        "backgroundColor": "bgBrightWhite",
+        "merge": true
       },
       {
         "id": "85d3332a-c1ca-4558-809e-f6628c56cb84",
@@ -18,64 +19,118 @@
         "backgroundColor": "bgBrightRed"
       },
       {
+        "id": "246e4228-e430-4bd0-bf6a-78b9c9dbd975",
+        "type": "session-name",
+        "backgroundColor": "bgBrightYellow"
+      },
+      {
+        "id": "ed7fb5e4-98da-485b-aaac-69a231dc5145",
+        "type": "claude-account-email",
+        "backgroundColor": "bgCyan"
+      },
+      {
         "id": "080510ff-26a6-4c67-9621-905135c425ae",
         "type": "vim-mode",
-        "backgroundColor": "bgCyan"
+        "backgroundColor": "bgCyan",
+        "metadata": {
+          "format": "icon"
+        }
       }
     ],
     [
       {
-        "id": "29d488ad-53df-4aae-aaf8-23ae3a31234b",
-        "type": "session-clock",
-        "backgroundColor": "bgYellow",
-        "rawValue": false
-      },
-      {
         "id": "7c7a0d6f-26fc-4615-82eb-191dac36650e",
         "type": "context-bar",
         "backgroundColor": "bgRed",
-        "rawValue": true
+        "rawValue": true,
+        "metadata": {
+          "display": "progress-short"
+        }
       },
       {
         "id": "22443333-983b-4e37-b3b2-c371b9ac518f",
         "type": "reset-timer",
-        "backgroundColor": "bgBrightRed"
+        "backgroundColor": "bgBrightRed",
+        "metadata": {
+          "display": "time",
+          "compact": "false"
+        }
+      },
+      {
+        "id": "732d6066-a240-4fb4-8ae9-5e4803b9ccb4",
+        "type": "session-usage",
+        "backgroundColor": "bgGreen",
+        "metadata": {
+          "display": "progress-short"
+        }
+      },
+      {
+        "id": "35e320f5-3f8d-4aa5-9580-e6768bc94805",
+        "type": "weekly-usage",
+        "backgroundColor": "bgBrightBlue",
+        "metadata": {
+          "display": "time"
+        },
+        "merge": true
       },
       {
         "id": "30fd46fe-50ce-4059-bd23-d6de8b2a8dcd",
         "type": "weekly-reset-timer",
-        "backgroundColor": "bgYellow"
+        "backgroundColor": "bgYellow",
+        "metadata": {
+          "display": "time"
+        }
       }
     ],
     [
       {
         "id": "5",
         "type": "git-branch",
-        "color": "magenta"
+        "color": "magenta",
+        "metadata": {
+          "linkToGitHub": "false"
+        },
+        "merge": true
       },
       {
         "id": "7fcdab67-0a0a-4cfb-96cf-5940b699fd44",
         "type": "git-worktree",
-        "backgroundColor": "bgMagenta"
+        "backgroundColor": "bgMagenta",
+        "metadata": {
+          "hideNoGit": "false"
+        }
       },
       {
         "id": "6594fe69-ae38-42ea-bc4e-a8d602d027b0",
         "type": "git-pr",
-        "backgroundColor": "bgWhite"
+        "backgroundColor": "bgWhite",
+        "metadata": {
+          "hideStatus": "true",
+          "hideTitle": "false"
+        }
       },
       {
         "id": "c8517e8e-6c1c-4407-b7eb-512867b86120",
         "type": "git-changes",
         "backgroundColor": "bgCyan"
       }
+    ],
+    [
+      {
+        "id": "4521de4a-2bb4-489d-ad94-0b1ca3bf30d0",
+        "type": "custom-text",
+        "backgroundColor": "bgYellow",
+        "customText": "Barsotti"
+      }
     ]
   ],
   "flexMode": "full",
   "compactThreshold": 60,
   "colorLevel": 3,
+  "defaultPadding": " ",
   "inheritSeparatorColors": false,
-  "globalBold": false,
-  "minimalistMode": false,
+  "globalBold": true,
+  "minimalistMode": true,
   "powerline": {
     "enabled": true,
     "separators": [
@@ -98,9 +153,8 @@
       "",
       ""
     ],
+    "theme": "gruvbox",
     "autoAlign": true,
-    "continueThemeAcrossLines": true,
-    "theme": "tokyonight"
-  },
-  "defaultPadding": " "
+    "continueThemeAcrossLines": true
+  }
 }
