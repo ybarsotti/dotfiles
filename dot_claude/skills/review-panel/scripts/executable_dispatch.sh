@@ -84,9 +84,49 @@ log "variant=${VARIANT} reviewers=${REVIEWERS} ratio=${N_CLAUDE}c:${N_CODEX}x sc
 PERSONA_COUNT=$(yq '.personas | length' "$VARIANT_FILE")
 [ "$PERSONA_COUNT" -ge 1 ] || err "variant has no personas"
 
+# --- MCP / CLI availability check for `requires_mcp` field ---
+SETTINGS_FILE="${HOME}/.claude/settings.json"
+
+# Map MCP name → fallback CLI binary (when the MCP isn't configured but the CLI
+# can still feed task data into context.md). Keep this list small and explicit.
+declare -A MCP_CLI_FALLBACK=(
+  [linear]=lineark
+)
+
+mcp_or_cli_available() {
+  # Returns 0 if the named MCP is configured in settings.json OR its CLI
+  # fallback exists in PATH. Returns 1 otherwise.
+  local name="$1"
+  if [ -f "$SETTINGS_FILE" ] && jq -e --arg k "$name" '.mcpServers[$k] // empty' "$SETTINGS_FILE" >/dev/null 2>&1; then
+    return 0
+  fi
+  local cli="${MCP_CLI_FALLBACK[$name]:-}"
+  if [ -n "$cli" ] && command -v "$cli" >/dev/null 2>&1; then
+    return 0
+  fi
+  return 1
+}
+
+persona_requires_satisfied() {
+  # Returns 0 if persona at index $1 has no requires_mcp OR at least one of its
+  # required MCPs/CLIs is available. Returns 1 (skip) otherwise.
+  local idx="$1"
+  local reqs
+  reqs=$(yq -r ".personas[$idx].requires_mcp // [] | .[]" "$VARIANT_FILE" 2>/dev/null)
+  [ -z "$reqs" ] && return 0  # no requirements → always available
+  while IFS= read -r req; do
+    [ -z "$req" ] && continue
+    if mcp_or_cli_available "$req"; then return 0; fi
+  done <<< "$reqs"
+  return 1
+}
+
 # Pick personas: cycle if we need more reviewers than personas defined.
-declare -a PERSONAS
-declare -a RUNNERS
+# Personas with unmet `requires_mcp` go into SKIPPED instead of PERSONAS.
+PERSONAS=()
+RUNNERS=()
+SKIPPED=()
+SKIPPED_REASON=()
 slots_claude=$N_CLAUDE
 slots_codex=$N_CODEX
 
@@ -94,6 +134,18 @@ for ((i=0; i<REVIEWERS; i++)); do
   pid=$(( i % PERSONA_COUNT ))
   persona_id=$(yq ".personas[$pid].id" "$VARIANT_FILE")
   persona_runner=$(yq ".personas[$pid].runner" "$VARIANT_FILE")
+
+  # Skip personas whose required MCPs/CLIs aren't available
+  if ! persona_requires_satisfied "$pid"; then
+    base="$persona_id"
+    suffix=$(( i / PERSONA_COUNT ))
+    [ "$suffix" -gt 0 ] && persona_id="${base}-${suffix}"
+    reqs=$(yq -r ".personas[$pid].requires_mcp | join(\", \")" "$VARIANT_FILE")
+    SKIPPED+=("$persona_id")
+    SKIPPED_REASON+=("requires one of: ${reqs} (no MCP configured, no CLI fallback)")
+    log "  [${persona_id}] SKIPPED — requires one of: ${reqs}"
+    continue
+  fi
 
   # Resolve runner per ratio
   case "$persona_runner" in
@@ -115,6 +167,8 @@ for ((i=0; i<REVIEWERS; i++)); do
   RUNNERS+=("$runner")
 done
 
+[ "${#PERSONAS[@]}" -gt 0 ] || err "no eligible personas after filtering by --requires_mcp; check your MCP config"
+
 # --- Dry run: print plan and exit ---
 if [ "$DRY_RUN" = 1 ]; then
   log "DRY RUN — no reviewers will be spawned"
@@ -130,11 +184,26 @@ if [ "$DRY_RUN" = 1 ]; then
   for ((i=0; i<${#PERSONAS[@]}; i++)); do
     printf '  %2d. %-30s → %s\n' $((i+1)) "${PERSONAS[$i]}" "${RUNNERS[$i]}"
   done
+  if [ "${#SKIPPED[@]}" -gt 0 ]; then
+    printf '\nSkipped (unmet requirements):\n'
+    for ((i=0; i<${#SKIPPED[@]}; i++)); do
+      printf '  -  %-30s %s\n' "${SKIPPED[$i]}" "${SKIPPED_REASON[$i]}"
+    done
+  fi
   echo
   printf 'Estimated cost: ~%dk tokens (rough: 5k input + 2k output per reviewer + 10k aggregator)\n' \
-    $(( REVIEWERS * 7 + 10 ))
+    $(( ${#PERSONAS[@]} * 7 + 10 ))
   exit 0
 fi
+
+# --- Synthetic results for skipped personas (so aggregator surfaces them) ---
+for ((i=0; i<${#SKIPPED[@]}; i++)); do
+  pname="${SKIPPED[$i]}"
+  preason="${SKIPPED_REASON[$i]}"
+  # shellcheck disable=SC2016  # %s are printf format specifiers, not shell expansions
+  printf '```yaml\nverdict: APPROVE\nfindings: []\nnotes: |\n  Persona %s skipped — %s.\n```\n' \
+    "$pname" "$preason" > "${RUN_DIR}/results/${pname}.md"
+done
 
 # --- Phase 1: Collect context ---
 log "collecting context (scope=${SCOPE})..."
