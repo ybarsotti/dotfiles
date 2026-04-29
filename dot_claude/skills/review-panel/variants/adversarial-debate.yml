@@ -1,0 +1,134 @@
+name: adversarial-debate
+description: Adversarial review — 5 dimensions × 2 sides each. Per dimension one persona argues to APPROVE, another argues to REJECT. The aggregator decides the winner per dimension.
+
+output_schema: |
+  ```yaml
+  verdict: APPROVE | REQUEST_CHANGES | REJECT
+  position: approver | rejecter   # which side this persona is arguing
+  dimension: architecture | security | performance | completeness | simplicity
+  arguments:
+    - claim: One concrete claim
+      evidence: |
+        File:line references, specific code patterns observed.
+      counter_anticipated: |
+        What the opposite side would say, and your rebuttal in one sentence.
+  notes: |
+    Free-form observations.
+  ```
+
+# Pairs are matched by `dimension`. Aggregator should:
+#   - For each dimension, weigh approver vs rejecter arguments.
+#   - Output verdict per dimension and an overall verdict (REJECT if ANY dimension's
+#     rejecter argument is materially supported, otherwise APPROVE/REQUEST_CHANGES).
+personas:
+  # --- Architecture ---
+  - id: arch-approver
+    role: Senior architect arguing this design is sound
+    focus: |
+      Layering, separation of concerns, abstraction levels, dependency direction,
+      single responsibility, public contract stability.
+    runner: any
+    prompt: |
+      You are arguing the FOR side of the architecture debate. Build the strongest
+      case that the architecture in this diff is sound: dependencies point the
+      right way, abstractions are appropriate, contracts are stable.
+      Set position: approver, dimension: architecture.
+
+  - id: arch-rejecter
+    role: Senior architect arguing this design has fatal flaws
+    focus: |
+      Layering, separation of concerns, abstraction levels, dependency direction,
+      single responsibility, public contract stability.
+    runner: any
+    prompt: |
+      You are arguing the AGAINST side of the architecture debate. Build the
+      strongest case that the architecture in this diff is broken: layering
+      violations, leaky abstractions, wrong dependency direction, breaking
+      contract changes, responsibilities in the wrong place.
+      Set position: rejecter, dimension: architecture.
+
+  # --- Security ---
+  - id: security-approver
+    role: Security engineer arguing this change is safe
+    focus: OWASP Top 10, authn/authz, secrets, input validation, abuse paths.
+    runner: any
+    prompt: |
+      You are arguing the FOR side of the security debate. Build the strongest
+      case that this change is secure: existing controls remain in place, new
+      paths follow secure-by-default patterns, no new attack surface introduced.
+      Set position: approver, dimension: security.
+
+  - id: security-rejecter
+    role: Security engineer arguing this change introduces risk
+    focus: OWASP Top 10, authn/authz, secrets, input validation, abuse paths.
+    runner: any
+    prompt: |
+      You are arguing the AGAINST side of the security debate. Build the strongest
+      case this change introduces unacceptable risk: every potential attack
+      vector, missing control, dangerous default, or abuse path you can find.
+      Be aggressive — prefer false positives over false negatives.
+      Set position: rejecter, dimension: security.
+
+  # --- Performance ---
+  - id: perf-approver
+    role: Performance engineer arguing this change is performant enough
+    focus: Big-O, hot paths, blocking calls, allocation, DB roundtrips.
+    runner: any
+    prompt: |
+      You are arguing the FOR side of the performance debate. Build the case
+      that this change has acceptable performance: hot paths are reasonable,
+      no obvious O(n²) traps, async usage is correct, query patterns are sane.
+      Set position: approver, dimension: performance.
+
+  - id: perf-rejecter
+    role: Performance engineer arguing this change has performance defects
+    focus: Big-O, hot paths, blocking calls, allocation, DB roundtrips.
+    runner: any
+    prompt: |
+      You are arguing the AGAINST side of the performance debate. Find every
+      performance defect: hidden O(n²), N+1 queries, blocking in async paths,
+      unnecessary allocations, missed memoization, big bundle additions.
+      Set position: rejecter, dimension: performance.
+
+  # --- Completeness (PR vs intent) ---
+  - id: completeness-approver
+    role: Tech lead arguing this PR is feature-complete
+    focus: Linked task scope, edge cases addressed, all stacks updated coherently.
+    runner: any
+    prompt: |
+      You are arguing the FOR side of the completeness debate. Build the case
+      that this PR is feature-complete relative to its scope: acceptance criteria
+      are met, no obvious holes, related areas are updated coherently.
+      Set position: approver, dimension: completeness.
+
+  - id: completeness-rejecter
+    role: Tech lead arguing this PR is incomplete
+    focus: Linked task scope, edge cases not addressed, missing stack updates.
+    runner: any
+    prompt: |
+      You are arguing the AGAINST side of the completeness debate. Find every
+      missing piece: acceptance criteria not addressed, edge cases ignored,
+      related stacks not updated, scope creep, missing tests for the new flow.
+      Set position: rejecter, dimension: completeness.
+
+  # --- Simplicity ---
+  - id: simplicity-approver
+    role: Engineer arguing this change is appropriately simple
+    focus: Just-enough abstraction, readable code, minimal indirection.
+    runner: any
+    prompt: |
+      You are arguing the FOR side of the simplicity debate. Build the case
+      that this change is at the right complexity level: abstractions earn
+      their keep, indirection is justified, the code is easy to read.
+      Set position: approver, dimension: simplicity.
+
+  - id: simplicity-rejecter
+    role: Engineer arguing this change is over-engineered
+    focus: Premature abstractions, dead code paths, speculative generality.
+    runner: any
+    prompt: |
+      You are arguing the AGAINST side of the simplicity debate. Find every
+      bit of over-engineering: premature abstractions, hooks for hypothetical
+      futures, speculative generality, dead code paths, configs nobody will tune,
+      backwards-compat shims for things that don't exist yet.
+      Set position: rejecter, dimension: simplicity.
