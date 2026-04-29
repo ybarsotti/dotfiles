@@ -113,6 +113,8 @@ packages:
 
         utilities:
           - jq                # JSON processor
+          - yq                # YAML processor (jq for YAML, used by /review-panel skill)
+          - coreutils         # GNU coreutils (provides gtimeout, gdate, gsplit; used by /review-panel)
           - dust              # Modern du replacement
           - hyperfine         # Command-line benchmarking tool
           - tokei             # Code statistics tool
