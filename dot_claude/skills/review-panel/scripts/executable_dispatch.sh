@@ -15,9 +15,12 @@ VARIANTS_DIR="${SKILL_DIR}/variants"
 RUNS_ROOT="${HOME}/.claude/review-panel-runs"
 
 # --- Defaults ---
+# 20 reviewers / 10:10 means every persona in a 10-persona variant runs once on
+# Claude and once on Codex (cycling) — full cross-model coverage. Override with
+# --reviewers / --ratio for a cheaper pass.
 VARIANT="default"
-REVIEWERS=10
-RATIO="5:5"
+REVIEWERS=20
+RATIO="10:10"
 SCOPE="main...HEAD"
 TASK=""
 TIMEOUT=600
