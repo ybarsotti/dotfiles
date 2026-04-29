@@ -9,9 +9,10 @@ Multi-agent peer review skill. Dispatches N reviewer personas (mix of Claude and
 cd ~/your-project
 
 # 2. Run the slash command from Claude Code
-/review-panel                              # default: 10 reviewers, 5 Claude + 5 Codex, branch vs main
+/review-panel                              # default: 20 reviewers (each persona × both models), branch vs main
 /review-panel --dry-run                    # preview the plan without spending tokens
-/review-panel --reviewers 4 --ratio 2:2    # quick pass with 4 reviewers
+/review-panel --reviewers 10 --ratio 5:5   # cheaper: each persona once on one model
+/review-panel --reviewers 4  --ratio 2:2   # quick pass with 4 reviewers
 
 # 3. Pick a different lens
 /review-panel security-focused             # all 10 personas wear security hats
@@ -83,11 +84,16 @@ personas:
 
 ## Cost guardrails
 
-Each reviewer is roughly **3-8k input + 1-3k output tokens**. Default 10 reviewers + 1 aggregator run is **~50-100k tokens** total.
+Each reviewer is roughly **3-8k input + 1-3k output tokens**. Default 20 reviewers + 1 aggregator run is **~120-200k tokens** total.
 
-Use `--dry-run` to preview the plan and estimated cost before paying for it. Use `--reviewers 4` for a quick pass during iteration.
+The default doubles up — each of the 10 personas runs once on Claude AND once on Codex — so you get cross-model agreement/disagreement on every angle. The aggregator surfaces disagreements explicitly.
 
-The reviewers default to Claude Haiku (cheap). The aggregator uses Sonnet (because synthesis quality matters most). Override by editing `scripts/reviewer.sh` and `scripts/aggregate.sh`.
+For lighter passes:
+- `--reviewers 10 --ratio 5:5` — each persona once, half cost (no cross-model)
+- `--reviewers 4 --ratio 2:2` — quick triage during iteration
+- `--dry-run` — preview the plan and estimated cost before paying
+
+The reviewers default to Claude Haiku for the Claude side (cheap); Codex uses whatever model is configured in `~/.codex/config.toml`. The aggregator uses Sonnet because synthesis quality matters most. Override by editing `scripts/reviewer.sh` and `scripts/aggregate.sh`.
 
 ## Linked task awareness
 
