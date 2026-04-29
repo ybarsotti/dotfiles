@@ -70,7 +70,12 @@ command -v yq      >/dev/null 2>&1 || err "yq not installed (brew install yq)"
 command -v git     >/dev/null 2>&1 || err "git not installed"
 [ "$N_CLAUDE" -gt 0 ] && { command -v claude >/dev/null 2>&1 || err "claude CLI not installed"; }
 [ "$N_CODEX" -gt 0 ]  && { command -v codex  >/dev/null 2>&1 || err "codex CLI not installed (npm i -g @openai/codex)"; }
-[[ "$SCOPE" == PR-* ]] && { command -v gh >/dev/null 2>&1 || err "gh CLI required for --scope PR-*"; }
+if [[ "$SCOPE" == PR-* ]]; then
+  command -v gh >/dev/null 2>&1 || err "gh CLI required for --scope PR-*"
+  # Pre-flight: confirm a GitHub remote is reachable from this repo.
+  gh repo view --json name >/dev/null 2>&1 \
+    || err "gh cannot resolve a GitHub remote from this repo (cd into a clone with origin set, or run 'gh repo set-default')"
+fi
 
 # --- Run dir ---
 RUN_ID="run-$(date +%Y%m%d-%H%M%S)-$(openssl rand -hex 2)"
@@ -83,6 +88,19 @@ log "variant=${VARIANT} reviewers=${REVIEWERS} ratio=${N_CLAUDE}c:${N_CODEX}x sc
 # --- Read personas from variant ---
 PERSONA_COUNT=$(yq '.personas | length' "$VARIANT_FILE")
 [ "$PERSONA_COUNT" -ge 1 ] || err "variant has no personas"
+
+# --- Validate ratio vs pinned runners ---
+# If a variant has personas pinned to a runner (runner: claude|codex), the requested
+# --ratio must allocate at least one slot to that side. Otherwise pinned personas
+# would silently overrun the ratio.
+PINNED_CLAUDE=$(yq '[.personas[] | select(.runner == "claude")] | length' "$VARIANT_FILE")
+PINNED_CODEX=$(yq '[.personas[] | select(.runner == "codex")] | length' "$VARIANT_FILE")
+if [ "$PINNED_CLAUDE" -gt 0 ] && [ "$N_CLAUDE" -eq 0 ]; then
+  err "variant '$VARIANT' has $PINNED_CLAUDE persona(s) pinned to claude, but --ratio gives 0 claude slots"
+fi
+if [ "$PINNED_CODEX" -gt 0 ] && [ "$N_CODEX" -eq 0 ]; then
+  err "variant '$VARIANT' has $PINNED_CODEX persona(s) pinned to codex, but --ratio gives 0 codex slots"
+fi
 
 # --- MCP / CLI availability check for `requires_mcp` field ---
 SETTINGS_FILE="${HOME}/.claude/settings.json"
@@ -246,7 +264,7 @@ EOF
 done
 
 # --- Phase 3: Fan out reviewers in background ---
-log "starting ${REVIEWERS} reviewers (timeout=${TIMEOUT}s each)..."
+log "starting ${#PERSONAS[@]} reviewer(s) (timeout=${TIMEOUT}s each, ${#SKIPPED[@]} skipped)..."
 declare -a PIDS
 declare -a START_TS
 
@@ -290,7 +308,7 @@ log "reviewers done: ${SUCCEEDED} ok, ${FAILED} failed"
 
 # --- Phase 5: Aggregate ---
 log "aggregating findings..."
-"${SCRIPT_DIR}/aggregate.sh" "$RUN_DIR"
+"${SCRIPT_DIR}/aggregate.sh" "$RUN_DIR" "$VARIANT"
 
 # --- Phase 6: Persist report and optionally clean up ---
 PERSIST_DIR="${RUNS_ROOT}/${RUN_ID}"
