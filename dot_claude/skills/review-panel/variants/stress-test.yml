@@ -1,0 +1,162 @@
+name: stress-test
+description: Adversarial "what could break this" review — 10 personas each simulating different failure modes (races, partial failures, network chaos, time bugs, abuse). Use when you have a hunch something is fragile or before shipping anything that touches concurrency, money, or external systems.
+
+output_schema: |
+  ```yaml
+  verdict: APPROVE | REQUEST_CHANGES | REJECT
+  findings:
+    - severity: CRITICAL | HIGH | MEDIUM | LOW
+      file: path/to/file.ext
+      line: 42
+      title: Short title
+      scenario: |
+        Concrete failure scenario — the exact sequence of events that triggers the bug.
+        Be specific: "Request A starts at T0, request B starts at T1, both read X=5, both write X=6 — lost update."
+      description: |
+        Why the current code fails this scenario.
+      suggestion: |
+        Concrete fix or pattern.
+  notes: |
+    Free-form observations, including "this whole module needs a rethink" type comments.
+  ```
+
+# Each persona is a paranoid simulator. Their job is to imagine specific failure
+# scenarios, not to lint code. Findings should always include a `scenario:` field
+# describing the concrete sequence of events that breaks things.
+personas:
+  - id: race-conditions
+    role: Race-condition simulator
+    focus: |
+      TOCTOU sequences, missing locks, async ordering assumptions, double-firing
+      of side effects from concurrent invocations, lost updates, deadlocks from
+      inconsistent lock ordering, queue-consumption races.
+    runner: any
+    prompt: |
+      Simulate two requests hitting this code at exactly the same moment. What
+      breaks? List specific T0/T1/T2 timelines where state corruption happens.
+      Don't just say "race possible" — give the exact interleaving.
+
+  - id: input-fuzzer
+    role: Input-fuzzing simulator
+    focus: |
+      Empty/null/zero/negative, max-int / overflow, very long strings, unicode
+      (RTL, combining chars, surrogates), control characters, embedded nulls,
+      malformed JSON/YAML/proto, oversized payloads (1MB? 1GB?), nested objects
+      to stack-overflow depth, leading/trailing whitespace, locale-dependent parsing.
+    runner: any
+    prompt: |
+      Imagine you're feeding adversarial inputs to every parameter. For each
+      input field, list the 3 most damaging values (e.g., empty string, 1MB
+      blob, embedded null). What happens to the code? What about sanitization
+      ordering — is it sanitized BEFORE validation or AFTER?
+
+  - id: partial-failure
+    role: Partial-failure simulator
+    focus: |
+      Multi-step operations that fail at step N of M, distributed transactions
+      without saga compensation, reads after partial writes, callers seeing
+      inconsistent state from a half-completed operation, missing rollback,
+      external call succeeds but local commit fails.
+    runner: any
+    prompt: |
+      For every multi-step operation, ask: what if step 2 of 5 fails? Step 4?
+      Does the system recover or leave inconsistent state? Are there rollbacks
+      or compensating actions? Can a caller observe partial state?
+
+  - id: network-chaos
+    role: Network-chaos simulator
+    focus: |
+      Timeouts (connect, read, write), connection drops mid-request, slow
+      responses (ConnectTimeout vs ReadTimeout vs RequestTimeout), partitions
+      between services, DNS failures, TCP retransmits, redirects, certificates
+      expiring mid-request, content-length mismatches.
+    runner: any
+    prompt: |
+      Simulate the network failing in every plausible way against this code:
+      timeout at each phase, partition mid-write, connection dropping after
+      bytes are sent but before response. Where does the code hang? Where does
+      it leak resources? Where does it return success when the operation didn't?
+
+  - id: replay-idempotency
+    role: Replay & idempotency simulator
+    focus: |
+      Duplicate requests (network retries, user double-click, queue redelivery),
+      replay attacks, missing idempotency keys, double-charge in payment paths,
+      duplicate event processing, exactly-once semantics violations.
+    runner: any
+    prompt: |
+      What if this request runs twice? Three times? With identical body, with
+      slightly different timestamps? Are side effects (charges, emails, DB
+      writes) idempotent? Is there a request-ID dedup mechanism, or can a retry
+      cause a double-charge?
+
+  - id: cache-coherence
+    role: Cache-coherence simulator
+    focus: |
+      Stale reads after writes, cache stampede / thundering herd, missing
+      invalidation, TTL set wrong, write-through vs write-behind inconsistency,
+      cache poisoning via crafted inputs, race between cache-set and DB-write.
+    runner: any
+    prompt: |
+      Imagine 1000 cache-miss requests landing simultaneously. What happens?
+      Imagine an update hitting the DB but the cache invalidation failing —
+      how long until the next reader sees stale data? Is the invalidation
+      atomic with the write? Can an attacker poison the cache with crafted input?
+
+  - id: resource-exhaustion
+    role: Resource-exhaustion simulator
+    focus: |
+      OOM from unbounded allocations (read entire file into memory? unbounded
+      list growth?), file descriptor leaks (loops opening files without close),
+      connection pool exhaustion, disk-full scenarios, thread/goroutine leaks,
+      runaway recursion, accidentally O(n²) in inputs that grow.
+    runner: any
+    prompt: |
+      For every loop, allocation, file open, connection acquire — what happens
+      under sustained load? What's the maximum input size before OOM? Are
+      resources released on every error path? Are connection pools bounded?
+
+  - id: clock-and-time
+    role: Clock-and-time simulator
+    focus: |
+      DST transitions (and the once-per-year repeated hour), leap seconds,
+      timezone bugs (server in UTC, user in not-UTC), monotonic vs wall clock,
+      clock skew between services, time travel via NTP correction, expired
+      certificates / tokens at boundary, midnight-rollover bugs.
+    runner: any
+    prompt: |
+      Simulate the clock doing weird things: DST transition at 2am tomorrow,
+      NTP yanking the wall clock backward 30 seconds, server in UTC processing
+      user data in São Paulo timezone, token expiring during the request.
+      Where does the code break or compute wrong durations?
+
+  - id: state-corruption
+    role: State-corruption simulator
+    focus: |
+      Concurrent writes to the same row without optimistic locking, mid-transaction
+      reads from another connection, schema drift between read and write, stale
+      reads from replicas, ENUM values added but not handled, NULL where the
+      schema says NOT NULL (after migration), JSON/YAML field renamed but old
+      data still in storage.
+    runner: any
+    prompt: |
+      What if two writers update the same row at once? What if a reader catches
+      a row mid-update from another transaction? What if the schema has been
+      migrated but old data exists? What if an ENUM value the code doesn't
+      know about appears in the DB?
+
+  - id: adversarial-user
+    role: Adversarial-user simulator
+    focus: |
+      Parameter tampering (changing IDs in URL, modifying hidden fields), rate-
+      limit bypass (rotating IPs, bypassing the gate), session/token replay,
+      authorization bypass via verb tampering (POST→PUT), enumeration via
+      response timing or messages, abuse of generous defaults (free trials,
+      promo codes), race conditions in claim/redemption flows.
+    runner: any
+    prompt: |
+      Pretend to be a malicious user. Every parameter is yours to manipulate.
+      Can you access another user's resources by changing the ID? Bypass the
+      rate limiter by spreading requests? Replay a captured token? Trigger
+      double-redemption of a promo? Enumerate accounts via response timing?
+      List concrete abuse paths with exact steps.
