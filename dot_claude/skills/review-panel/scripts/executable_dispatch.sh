@@ -15,12 +15,12 @@ VARIANTS_DIR="${SKILL_DIR}/variants"
 RUNS_ROOT="${HOME}/.claude/review-panel-runs"
 
 # --- Defaults ---
-# 20 reviewers / 10:10 means every persona in a 10-persona variant runs once on
-# Claude and once on Codex (cycling) — full cross-model coverage. Override with
+# REVIEWERS and RATIO default to "derived from variant" — each persona runs once
+# on Claude and once on Codex for full cross-model coverage. Override with
 # --reviewers / --ratio for a cheaper pass.
 VARIANT="default"
-REVIEWERS=20
-RATIO="10:10"
+REVIEWERS=""   # empty → derive from persona_count after variant is loaded
+RATIO=""       # empty → derive (N:N where N = persona_count)
 SCOPE="main...HEAD"
 TASK=""
 TIMEOUT=600
@@ -56,6 +56,29 @@ VARIANT_FILE="${VARIANTS_DIR}/${VARIANT}.yml"
   err "variant '$VARIANT' not found at $VARIANT_FILE. Available: $AVAILABLE"
 }
 
+command -v yq  >/dev/null 2>&1 || err "yq not installed (brew install yq)"
+command -v git >/dev/null 2>&1 || err "git not installed"
+if [[ "$SCOPE" == PR-* ]]; then
+  command -v gh >/dev/null 2>&1 || err "gh CLI required for --scope PR-*"
+  gh repo view --json name >/dev/null 2>&1 \
+    || err "gh cannot resolve a GitHub remote from this repo (cd into a clone with origin set, or run 'gh repo set-default')"
+fi
+
+# --- Read personas from variant ---
+PERSONA_COUNT=$(yq '.personas | length' "$VARIANT_FILE")
+[ "$PERSONA_COUNT" -ge 1 ] || err "variant has no personas"
+
+# --- Derive REVIEWERS / RATIO from persona_count when not user-provided ---
+if [ -z "$REVIEWERS" ]; then
+  REVIEWERS=$((PERSONA_COUNT * 2))
+fi
+if [ -z "$RATIO" ]; then
+  HALF=$((REVIEWERS / 2))
+  REM=$((REVIEWERS - HALF))
+  RATIO="${HALF}:${REM}"
+fi
+
+# --- Validate REVIEWERS / RATIO ---
 if ! [[ "$REVIEWERS" =~ ^[0-9]+$ ]] || [ "$REVIEWERS" -le 0 ]; then
   err "--reviewers must be positive integer (got: $REVIEWERS)"
 fi
@@ -65,20 +88,11 @@ RATIO_X="${BASH_REMATCH[2]}"
 RATIO_SUM=$((RATIO_C + RATIO_X))
 [ "$RATIO_SUM" -gt 0 ] || err "--ratio cannot be 0:0"
 
-# Rebalance ratio to total --reviewers (proportional)
 N_CLAUDE=$(( REVIEWERS * RATIO_C / RATIO_SUM ))
 N_CODEX=$(( REVIEWERS - N_CLAUDE ))
 
-command -v yq      >/dev/null 2>&1 || err "yq not installed (brew install yq)"
-command -v git     >/dev/null 2>&1 || err "git not installed"
 [ "$N_CLAUDE" -gt 0 ] && { command -v claude >/dev/null 2>&1 || err "claude CLI not installed"; }
 [ "$N_CODEX" -gt 0 ]  && { command -v codex  >/dev/null 2>&1 || err "codex CLI not installed (npm i -g @openai/codex)"; }
-if [[ "$SCOPE" == PR-* ]]; then
-  command -v gh >/dev/null 2>&1 || err "gh CLI required for --scope PR-*"
-  # Pre-flight: confirm a GitHub remote is reachable from this repo.
-  gh repo view --json name >/dev/null 2>&1 \
-    || err "gh cannot resolve a GitHub remote from this repo (cd into a clone with origin set, or run 'gh repo set-default')"
-fi
 
 # --- Run dir ---
 RUN_ID="run-$(date +%Y%m%d-%H%M%S)-$(openssl rand -hex 2)"
@@ -86,11 +100,7 @@ RUN_DIR="/tmp/review-panel/${RUN_ID}"
 mkdir -p "${RUN_DIR}/reviewers" "${RUN_DIR}/results" "${RUN_DIR}/logs"
 
 log "run-id=${RUN_ID}"
-log "variant=${VARIANT} reviewers=${REVIEWERS} ratio=${N_CLAUDE}c:${N_CODEX}x scope=${SCOPE}"
-
-# --- Read personas from variant ---
-PERSONA_COUNT=$(yq '.personas | length' "$VARIANT_FILE")
-[ "$PERSONA_COUNT" -ge 1 ] || err "variant has no personas"
+log "variant=${VARIANT} personas=${PERSONA_COUNT} reviewers=${REVIEWERS} ratio=${N_CLAUDE}c:${N_CODEX}x scope=${SCOPE}"
 
 # --- Validate ratio vs pinned runners ---
 # If a variant has personas pinned to a runner (runner: claude|codex), the requested

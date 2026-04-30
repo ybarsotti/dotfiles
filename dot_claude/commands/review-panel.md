@@ -14,13 +14,15 @@ Run a configurable panel of reviewer agents in parallel against the current bran
 /review-panel [variant] [flags]
 
 VARIANT (positional, optional, default: "default")
-  default             multi-perspective (10 distinct personas)
+  default             multi-perspective (11 distinct personas, includes concurrency-races)
   security-focused    every persona reviews through an OWASP/security lens
   adversarial-debate  approver-vs-rejecter pairs across 5 dimensions
+  stress-test         10 paranoid personas simulating concrete failure scenarios
+                      (races, partial failures, network chaos, time bugs, abuse)
 
 FLAGS
-  --reviewers N       total reviewers (default: 20 — cycles each persona through Claude AND Codex for cross-model coverage)
-  --ratio C:X         Claude:Codex split (default: 10:10)
+  --reviewers N       total reviewers (default: 2 × persona_count, so each persona runs once on Claude + once on Codex)
+  --ratio C:X         Claude:Codex split (default: N:N where N = persona_count)
   --scope <ref>       git range (default: main...HEAD), or "PR-1234", or "file:path"
   --task <id>         force a Jira/Linear task ID (default: auto-detect from branch/commit)
   --timeout <secs>    per-reviewer timeout (default: 600)
@@ -44,9 +46,10 @@ The skill lives at `~/.claude/skills/review-panel/SKILL.md` and its scripts at `
 ### Quick examples
 
 ```bash
-/review-panel                                    # default variant, 20 reviewers (each persona × both models), current branch
-/review-panel security-focused                   # security lens
-/review-panel default --reviewers 10 --ratio 5:5 # cheaper pass: each persona once on one model
+/review-panel                                    # default variant, ~22 reviewers (each persona × both models), current branch
+/review-panel security-focused                   # security lens (~20 reviewers)
+/review-panel stress-test                        # paranoid mode — every persona simulates failure scenarios
+/review-panel default --reviewers 11 --ratio 11:0 # cheaper pass: each persona once on Claude only
 /review-panel default --reviewers 6 --ratio 3:3  # quick pass: 3 personas × both models
 /review-panel --scope PR-1234                    # review a GitHub PR
 /review-panel --dry-run                          # preview without executing
