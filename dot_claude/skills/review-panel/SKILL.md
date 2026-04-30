@@ -18,8 +18,8 @@ The user typed `/review-panel [args]`, OR the user asked for a multi-agent peer 
 Read `$ARGUMENTS` and extract:
 
 - **variant** (positional, default `"default"`): one of `default`, `security-focused`, `adversarial-debate`, or any name matching a `variants/<name>.yml` file
-- **--reviewers N** (default `20` — gives each persona one Claude pass + one Codex pass for cross-model coverage)
-- **--ratio C:X** (default `10:10`)
+- **--reviewers N** (default: `2 × persona_count` — gives each persona one Claude pass + one Codex pass for cross-model coverage)
+- **--ratio C:X** (default: `N:N` where N = persona_count)
 - **--scope ref** (default `"main...HEAD"`)
 - **--task id** (default: auto-detect)
 - **--timeout secs** (default `600`)

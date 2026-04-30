@@ -47,9 +47,10 @@ All reviewers run **headless in background** (no cmux panes, no UI clutter). Def
 
 | Variant | When to use |
 |---------|-------------|
-| `default` | General PR review with 10 distinct lenses |
+| `default` | General PR review with 11 distinct lenses (incl. concurrency-races) |
 | `security-focused` | Anything touching auth, payments, secrets, or external input |
 | `adversarial-debate` | When you want strong arguments both ways before merging a contentious change |
+| `stress-test` | Paranoid mode — 10 personas simulating concrete failure scenarios (races, partial failures, network chaos, time bugs, abuse, etc). Use before shipping anything fragile. |
 
 Variant files are plain YAML at `~/.claude/skills/review-panel/variants/*.yml`. Add your own — the dispatcher picks them up automatically by filename.
 
