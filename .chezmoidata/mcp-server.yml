@@ -25,6 +25,12 @@ mcp_servers:
         - gitnexus@latest
         - mcp
 
+    caveman-shrink:
+      command: npx
+      args:
+        - -y
+        - caveman-shrink
+
   personal:
     serena:
       url: http://localhost:9121/sse
