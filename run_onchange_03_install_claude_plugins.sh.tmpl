@@ -23,6 +23,7 @@ MARKETPLACES=(
   "vercel-labs/skills"
   "wshobson/agents"
   "backnotprop/plannotator"
+  "JuliusBrussee/caveman"
 )
 
 echo "Registering custom marketplaces..."
@@ -56,6 +57,7 @@ PLUGINS=(
   "agent-browser@agent-browser"
   "find-skills@vercel-labs-skills"
   "plannotator@plannotator"
+  "caveman@caveman"
 )
 
 echo "Installing Claude Code plugins..."
@@ -76,6 +78,14 @@ if command -v npx &>/dev/null; then
     echo "  → ${skill}"
     npx -y skills add ${skill} --yes --global 2>/dev/null || true
   done
+fi
+
+# Caveman standalone hooks (SessionStart + UserPromptSubmit + statusline badge).
+# Settings entries live in dot_claude/settings.json.tmpl; this just downloads
+# the hook scripts into ~/.claude/hooks/. Idempotent.
+if [ ! -f "${HOME}/.claude/hooks/caveman-activate.js" ]; then
+  echo "Installing caveman standalone hooks..."
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/hooks/install.sh)" 2>/dev/null || true
 fi
 
 echo "Claude Code plugins and skills installed."
