@@ -235,6 +235,26 @@ compinit
 eval "$(gibo completion zsh 2>/dev/null)"
 {{- end }}
 
+# Code Intelligence Bootstrap (gitnexus + graphify)
+# Run once per new repo to build all knowledge graphs.
+# Serena auto-activates via its own .serena/project.yml.
+codeintel-init() {
+    local repo
+    repo="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "✗ not a git repo"; return 1; }
+    cd "$repo" || return 1
+    echo "→ codeintel-init in $repo"
+    if command -v npx &>/dev/null; then
+        echo "  • gitnexus analyze..."
+        npx gitnexus analyze || echo "  ✗ gitnexus failed"
+    fi
+    if command -v graphify &>/dev/null; then
+        echo "  • graphify ..."
+        graphify . || echo "  ✗ graphify failed"
+    fi
+    [ ! -d .serena ] && echo "  • serena: no .serena/project.yml — activate via MCP tool when needed"
+    echo "✓ done"
+}
+
 # Prompt Setup (Must be last)
 if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
     # Use custom theme from XDG config directory

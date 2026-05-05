@@ -31,10 +31,10 @@ mcp_servers:
         - -y
         - caveman-shrink
 
-  personal:
     serena:
       url: http://localhost:9121/sse
 
+  personal:
     ccusage:
       command: npx
       args:
