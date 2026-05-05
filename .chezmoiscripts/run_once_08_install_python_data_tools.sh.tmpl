@@ -39,6 +39,9 @@ python_tools=(
 
     # CLI Tools
     "polars-cli"
+
+    # AI Coding Assistant Tools
+    "graphifyy"        # Knowledge graph builder for AI coding assistants (CLI: graphify)
 )
 
 {{- if eq .machine.purpose "personal" }}
@@ -63,12 +66,22 @@ for tool in "${python_tools[@]}"; do
 done
 
 echo ""
+# Post-install: register Graphify Claude Code skill + auto-use config
+if command -v graphify &>/dev/null; then
+    echo "Configuring Graphify for Claude Code..."
+    graphify install &>/dev/null || echo "✗ graphify install failed (continuing...)"
+    graphify claude install &>/dev/null || echo "✗ graphify claude install failed (continuing...)"
+    echo "✓ Graphify skill + auto-use config registered"
+fi
+
+echo ""
 echo "Python data science tools installation complete!"
 echo ""
 echo "Installed tools:"
 echo "  📊 Jupyter: jupyterlab, jupytext, nbconvert, nbdime, ipython"
 echo "  🤖 MLOps: dvc, mlflow, great-expectations"
 echo "  ⚡ CLI: polars-cli"
+echo "  🧠 AI: graphifyy (run: graphify . to build knowledge graph)"
 {{ if eq .machine.purpose "personal" -}}
 echo "  🌐 AI: open-webui (run: open-webui serve)"
 {{- end }}
