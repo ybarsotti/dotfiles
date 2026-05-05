@@ -265,6 +265,10 @@ This dotfiles setup includes several development tools that are automatically in
 - **`gitnexus`** - Codebase knowledge graph engine for AI agents
   - Usage: `npx gitnexus analyze`, `npx gitnexus setup`
   - MCP server: `claude mcp add gitnexus -- npx -y gitnexus@latest mcp`
+- **`graphifyy`** (CLI: `graphify`) - Multi-modal knowledge graph for AI coding assistants
+  - Usage: `graphify .` (build graph), `/graphify query "..."`, `graphify hook install`
+  - Install (auto via chezmoi): `pipx install graphifyy && graphify install && graphify claude install`
+  - Outputs `graphify-out/GRAPH_REPORT.md` — Claude Code skill auto-reads it
 - **`bmad-method`** - AI-driven agile development framework with 34+ workflows
   - Usage: `npx bmad-method install` (per-project)
 
