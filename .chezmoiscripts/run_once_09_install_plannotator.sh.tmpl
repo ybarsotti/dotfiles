@@ -1,0 +1,28 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# run_once_09_install_plannotator.sh.tmpl
+#
+# Installs Plannotator standalone binary via official install script.
+# Plugin (Claude Code) is installed separately by run_onchange_03_install_claude_plugins.sh.
+
+set -eufo pipefail
+
+export PATH="$HOME/.local/bin:$PATH"
+
+if command -v plannotator >/dev/null 2>&1; then
+    echo "✅ Plannotator already installed: $(which plannotator)"
+    exit 0
+fi
+
+echo "📥 Installing Plannotator..."
+curl -fsSL https://plannotator.ai/install.sh | bash
+
+if command -v plannotator >/dev/null 2>&1; then
+    echo "✅ Plannotator installed: $(which plannotator)"
+else
+    echo "⚠️  Plannotator install ran but binary not found in PATH"
+    exit 1
+fi
+
+{{ end -}}
