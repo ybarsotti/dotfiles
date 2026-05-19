@@ -1,4 +1,5 @@
 {{- $shared := .mcp_servers.shared -}}
 {{- $typed := index .mcp_servers .machine.purpose -}}
-{{- $all := merge $shared $typed -}}
+{{- $peon := dict "peon-ping" (dict "command" "node" "args" (list (printf "%s/.claude/hooks/peon-ping/mcp/peon-mcp.js" .chezmoi.homeDir))) -}}
+{{- $all := merge $shared $typed $peon -}}
 {{ dict "mcpServers" $all | toPrettyJson }}
