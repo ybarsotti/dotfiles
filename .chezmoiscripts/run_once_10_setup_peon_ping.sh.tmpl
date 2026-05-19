@@ -1,0 +1,52 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# run_once_10_setup_peon_ping.sh.tmpl
+#
+# Runs peon-ping-setup to register IDE hooks, install default packs, and
+# build helpers (peon-play, meeting-detect). Then applies preferred config:
+#   - meeting_detect: auto-mute when mic in use
+#   - headphones_only: silence built-in speakers
+#   - pack rotation (round-robin) across 5 installed packs
+#   - ide_rules: claude -> peon, codex -> peasant (Warcraft III Human)
+#   - notification_title_script: show git branch or cwd basename
+#
+# Idempotent: jq edits overwrite same keys; ide-bind/rotation add are safe to re-run.
+
+set -eufo pipefail
+
+{{ template "homebrew_path_setup" . }}
+
+if ! command -v peon-ping-setup >/dev/null 2>&1; then
+    echo "⚠️  peon-ping-setup not found (brew install PeonPing/tap/peon-ping pending?)"
+    exit 0
+fi
+
+CONFIG="$HOME/.claude/hooks/peon-ping/config.json"
+
+if [ ! -f "$CONFIG" ]; then
+    echo "📥 Running peon-ping-setup..."
+    peon-ping-setup
+fi
+
+if [ ! -f "$CONFIG" ]; then
+    echo "⚠️  peon-ping config not generated; skipping config tweaks"
+    exit 0
+fi
+
+echo "🔧 Applying peon-ping config preferences..."
+
+peon packs ide-bind claude peon >/dev/null
+peon packs ide-bind codex peasant >/dev/null
+peon rotation round-robin >/dev/null
+peon packs rotation add peon,peasant,sc_kerrigan,sc_battlecruiser,glados >/dev/null 2>&1 || true
+
+TMP=$(mktemp)
+jq '.meeting_detect = true
+    | .headphones_only = true
+    | .notification_title_script = "git -C \"$PWD\" symbolic-ref --short HEAD 2>/dev/null || basename \"$PWD\""' \
+    "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
+
+echo "✅ peon-ping configured"
+
+{{ end -}}
