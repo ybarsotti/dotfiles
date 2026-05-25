@@ -73,6 +73,18 @@ else
   record "edges-≥4" "fail" "only $EDGE_BULLETS edges (need ≥4)"
 fi
 
+# 4.4. Code-intel bootstrapped (marker file from bootstrap-codeintel.sh)
+if [ "$MODE" = "root" ]; then
+  MARKER="${PLAN_DIR}/codeintel-status.json"
+  if [ -f "$MARKER" ] && jq -e '.timestamp' "$MARKER" >/dev/null 2>&1; then
+    GN=$(jq -r '.gitnexus' "$MARKER")
+    GR=$(jq -r '.graphify' "$MARKER")
+    record "code-intel-bootstrapped" "pass" "gitnexus=${GN} graphify=${GR}"
+  else
+    record "code-intel-bootstrapped" "fail" "missing $MARKER (run bootstrap-codeintel.sh)"
+  fi
+fi
+
 # 4.5. Clarifying questions asked (≥1 Q/A pair OR explicit `_no ambiguity_` marker)
 # Reject template placeholder lines like `### Q: <question text>` / `### A: <user answer>`.
 CLARIFY_BODY=$(section_body "Clarifying questions")

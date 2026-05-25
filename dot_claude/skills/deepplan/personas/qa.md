@@ -17,6 +17,14 @@ For each step in the plan, enumerate:
 
 You then check the plan's TDD test list against these dimensions. Every dimension that **applies** to the change MUST have at least one test name listed.
 
+## Process
+
+Use code-intel to find what the plan's test list missed:
+- `gitnexus_context({name: ...})` for each touched symbol to list ALL callers — every caller is a potential regression to cover
+- `gitnexus_impact({target: ..., direction: "upstream"})` to spot blast radius the plan's edge cases ignore
+- `mcp__plugin_serena_serena__find_referencing_symbols` for symbol-level reference checks
+- Cross-reference the plan's TDD list against these. Missing coverage → CHANGES_REQUESTED.
+
 ## Output format
 
 Write **only** this JSON:
