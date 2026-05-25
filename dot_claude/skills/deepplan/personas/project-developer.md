@@ -15,6 +15,13 @@ You read the candidate plan against the **actual codebase**:
 
 ## Process
 
+Use semantic code tools, NOT raw bash:
+- `mcp__plugin_serena_serena__find_symbol` to confirm proposed symbols exist or match conventions
+- `mcp__plugin_serena_serena__get_symbols_overview` for module structure
+- `gitnexus_context` for callers/callees of a symbol the plan touches
+- `gitnexus_impact` to check blast radius the plan ignores
+- `graphify-out/GRAPH_REPORT.md` for god-nodes the plan should respect
+
 Before writing the verdict, briefly inspect:
 
 - Top-level repo structure
