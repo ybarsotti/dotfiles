@@ -73,6 +73,21 @@ else
   record "edges-≥4" "fail" "only $EDGE_BULLETS edges (need ≥4)"
 fi
 
+# 4.5. Clarifying questions asked (≥1 Q/A pair OR explicit `_no ambiguity_` marker)
+# Reject template placeholder lines like `### Q: <question text>` / `### A: <user answer>`.
+CLARIFY_BODY=$(section_body "Clarifying questions")
+QPAIRS=$(echo "$CLARIFY_BODY" | grep -cE '^### Q: [^<]' || true)
+APAIRS=$(echo "$CLARIFY_BODY" | grep -cE '^### A: [^<]' || true)
+NO_AMBIG=0
+echo "$CLARIFY_BODY" | grep -qE '^_no ambiguity_$' && NO_AMBIG=1
+if [ "$NO_AMBIG" -eq 1 ]; then
+  record "clarifying-questions-asked" "pass" "marked _no ambiguity_"
+elif [ "$QPAIRS" -ge 1 ] && [ "$APAIRS" -ge 1 ] && [ "$QPAIRS" -eq "$APAIRS" ]; then
+  record "clarifying-questions-asked" "pass" "$QPAIRS Q/A pair(s)"
+else
+  record "clarifying-questions-asked" "fail" "Q=$QPAIRS A=$APAIRS (need ≥1 matched non-placeholder pair or '_no ambiguity_')"
+fi
+
 # 5. No TBD/placeholders
 if grep -qE '(TBD|TODO|<placeholder>|<TBD>|XXX-)' "$PLAN"; then
   HITS=$(grep -nE '(TBD|TODO|<placeholder>|<TBD>|XXX-)' "$PLAN" | head -3 | tr '\n' ';')

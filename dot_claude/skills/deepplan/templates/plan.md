@@ -9,6 +9,16 @@
 ## Non-goals
 - <what this change explicitly does NOT do>
 
+## Clarifying questions
+<!--
+Every question the AI asked the user before drafting + the answer received.
+Use `### Q:` / `### A:` headers. If the task was truly unambiguous, write
+exactly the marker `_no ambiguity_` and nothing else in this section.
+-->
+
+### Q: <question text>
+### A: <user answer>
+
 ## Flow diagram
 ```mermaid
 sequenceDiagram
@@ -60,6 +70,7 @@ sequenceDiagram
 - [ ] verification-before-completion — <when>
 
 ## Checklist (machine-validated; do NOT hand-edit — call tick-checklist.sh)
+- [ ] clarifying-questions-asked
 - [ ] mermaid-present
 - [ ] mermaid-has-entry-and-exit
 - [ ] tdd-list-≥3
