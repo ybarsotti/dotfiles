@@ -28,6 +28,22 @@ Verify binaries: `git`, `gh`, `claude`, `jq`. Verify `codex` if codex paths are 
 
 If `--dry-run`: print the list of phases below with the spawned-agent counts and exit. Do not spawn anything.
 
+## Phase 0.5 — Clarifying questions (mandatory)
+
+Before any brainstorm or draft, surface every ambiguity in the task description to the user. Use `AskUserQuestion` with focused options (no open-ended prose questions when a multiple-choice will do).
+
+Examples of things to clarify:
+- Scope boundaries (does this include X? does it touch Y?)
+- Personas/targets (which user role? which env?)
+- Trade-off preferences (speed vs correctness, minimal-diff vs refactor)
+- Acceptance criteria (what counts as done?)
+
+Record every Q/A pair in `## Clarifying questions` using `### Q:` / `### A:` headers. The validator requires ≥1 matched pair.
+
+If — and only if — the task is genuinely unambiguous after a careful re-read, write exactly `_no ambiguity_` in the section and skip questions. This must be rare; the default is to ask.
+
+If user passes `--no-clarify` (accept but warn), still write `_no ambiguity_` so the checklist passes.
+
 ## Phase 1 — Brainstorm intake (superpowers:brainstorming)
 
 Before any draft, invoke `superpowers:brainstorming` via the Skill tool against the task description. The brainstorming output (intent, alternatives, key constraints) becomes the seed for the `Context` section of the plan and is passed verbatim to both planners in Phase 1.5.
