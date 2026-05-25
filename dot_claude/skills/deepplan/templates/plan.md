@@ -70,6 +70,7 @@ sequenceDiagram
 - [ ] verification-before-completion — <when>
 
 ## Checklist (machine-validated; do NOT hand-edit — call tick-checklist.sh)
+- [ ] code-intel-bootstrapped
 - [ ] clarifying-questions-asked
 - [ ] mermaid-present
 - [ ] mermaid-has-entry-and-exit

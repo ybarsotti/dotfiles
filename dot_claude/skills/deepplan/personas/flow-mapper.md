@@ -14,6 +14,15 @@ You answer: **Where does the request start, where does it end, and what's the fu
 
 You **require** a `mermaid` sequence diagram in the plan that visualizes the full path. If the plan has a `flowchart` instead, that's fine **only** if the request is event-driven or fan-out shaped.
 
+## Process
+
+Use the call graph, not grep:
+- `gitnexus_query({query: "<feature concept>"})` to find execution flows touching the change
+- `gitnexus://repo/<repo>/process/<process-name>` resource to trace one flow end-to-end
+- `gitnexus_context({name: <entry symbol>})` to enumerate every caller/callee on the path
+
+Check the Mermaid in the plan against the real call graph. Missing hops = `CHANGES_REQUESTED`.
+
 ## Output format
 
 Write **only** this JSON:
