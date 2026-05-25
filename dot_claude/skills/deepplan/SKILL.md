@@ -28,7 +28,24 @@ Verify binaries: `git`, `gh`, `claude`, `jq`. Verify `codex` if codex paths are 
 
 If `--dry-run`: print the list of phases below with the spawned-agent counts and exit. Do not spawn anything.
 
-## Phase 1 — Two-track planner drafting
+## Phase 1 — Brainstorm intake (superpowers:brainstorming)
+
+Before any draft, invoke `superpowers:brainstorming` via the Skill tool against the task description. The brainstorming output (intent, alternatives, key constraints) becomes the seed for the `Context` section of the plan and is passed verbatim to both planners in Phase 1.5.
+
+After it returns, run:
+```
+~/.claude/skills/deepplan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" brainstorming
+```
+to record the invocation in the `## Superpowers invoked` section.
+
+If the user explicitly opts out (`--skip-brainstorm` — accept it though not in the default arg grammar), still record `brainstorming` as `[ ]` so validation flags it.
+
+## Phase 1.5 — Two-track planner drafting (superpowers:writing-plans)
+
+Both planners are told to follow `superpowers:writing-plans` conventions (bite-sized tasks, TDD focus, no implementation in the plan itself). Record the invocation:
+```
+~/.claude/skills/deepplan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" writing-plans
+```
 
 Run `~/.claude/skills/deepplan/scripts/dispatch-planners.sh "$RUN_DIR" "$TASK_DESC"`. It spawns in parallel:
 
@@ -66,7 +83,48 @@ Loop, starting at iteration 1:
 
 4. If ITER > `--max-plan-iter`: stop the loop. Use `AskUserQuestion` to present the **remaining disagreements** (per persona) and ask the user to tiebreak each one. Apply user decisions to `plan.md`. Treat as approved.
 
-## Phase 3 — Present plan
+## Phase 2.5 — Subplan fan-out
+
+After root plan reviewer-approved, split it into chapters:
+
+```
+~/.claude/skills/deepplan/scripts/subplan-fanout.sh "$RUN_DIR" --max-chapters 5
+```
+
+This groups `## Affected files` by top-level directory, emits `$RUN_DIR/subplans/<chapter>.md` for each group (cap 5 — overflow goes into a `misc` chapter), and updates the `## Subplans` section in `plan.md` with links.
+
+For each generated subplan: run a **reduced** review loop:
+- 2 personas only: `project-developer` (Opus) + `qa` (Codex; or Opus if `--no-codex`)
+- 2 iterations max
+- Use the same dispatch-reviewers.sh but with the subplan path as the input plan
+
+Failed subplan (still CHANGES_REQUESTED after iter 2) → mark the link in the root plan with a trailing `[CHANGES_REQUESTED]`, continue with the remaining chapters; surface as a warning in Phase 3 so the user can decide whether to proceed.
+
+## Phase 3 — Validate gate & present plan
+
+Before showing the plan to the user, **gate** on `validate-plan.sh`:
+
+```
+~/.claude/skills/deepplan/scripts/validate-plan.sh "$RUN_DIR/plan.md" --root
+for sub in "$RUN_DIR"/subplans/*.md; do
+  ~/.claude/skills/deepplan/scripts/validate-plan.sh "$sub" --subplan
+done
+```
+
+If anything fails:
+- **Auto-recovery (up to 3 retries)**: collect the failed items, spawn an Opus planner with the explicit list of missing items + the current plan and ask it to fix. Re-validate. After 3 retries, fall through to `AskUserQuestion` for tiebreak.
+
+Once `validate-plan.sh` returns 0 on root and every subplan, run:
+```
+~/.claude/skills/deepplan/scripts/tick-checklist.sh "$RUN_DIR/plan.md" --root
+for sub in "$RUN_DIR"/subplans/*.md; do
+  ~/.claude/skills/deepplan/scripts/tick-checklist.sh "$sub" --subplan
+done
+```
+
+The LLM **never** edits `[ ]`/`[x]` directly. The checklist must show all `[x]` before proceeding.
+
+Print the final `plan.md` to the user (and a list of subplan links). Call `ExitPlanMode`.
 
 Print the final `plan.md` to the user. Confirm it includes:
 
@@ -78,9 +136,7 @@ Print the final `plan.md` to the user. Confirm it includes:
 
 If any are missing, loop back one more time into Phase 2 with a synthetic CHANGES_REQUESTED verdict naming the missing artifact.
 
-Call `ExitPlanMode` once the user is satisfied.
-
-## Phase 4 — Build via agent-teams
+## Phase 4 — Build via agent-teams (superpowers:test-driven-development)
 
 After `ExitPlanMode` returns approved:
 
@@ -91,9 +147,19 @@ After `ExitPlanMode` returns approved:
 
 3. If `--no-team` is set OR `claude --version` is below 2.1.32, fall back to `cmux-orchestrator` (see `~/.claude/skills/cmux-orchestrator/SKILL.md`) for visible parallel workers; if cmux is unavailable, fall back to plain `Agent` subagents (general-purpose, max 3 in parallel).
 
-4. Supervise: poll the team's task list, redirect stuck teammates, do not implement directly. Use the existing `superpowers:test-driven-development` skill as the per-task contract.
+4. Supervise: poll the team's task list, redirect stuck teammates, do not implement directly. Use the existing `superpowers:test-driven-development` skill as the per-task contract. Record:
+   ```
+   ~/.claude/skills/deepplan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" test-driven-development
+   ```
 
 5. When all team tasks are completed and tests are green locally, ask the lead to clean up the team (per docs).
+
+## Phase 4.5 — Verification gate (superpowers:verification-before-completion)
+
+Before any PR work, invoke `superpowers:verification-before-completion` via Skill tool. Run its prescribed verification commands (build, test, lint, type-check). Do not proceed to /review-panel until verification passes. Record:
+```
+~/.claude/skills/deepplan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" verification-before-completion
+```
 
 ## Phase 5 — /review-panel passes
 
