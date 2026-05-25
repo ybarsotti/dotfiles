@@ -1,7 +1,7 @@
 # <title>
 
 ## Context
-<2-4 sentences: why this change is needed, what prompted it, intended outcome>
+<2-4 sentences: why this change is needed, what prompted it, intended outcome. Include brainstorming insights.>
 
 ## Goals
 - <verb> <object> — succinct, testable
@@ -38,16 +38,36 @@ sequenceDiagram
 ## TDD test list
 - `<test name>` — <intent only; no implementation>
 - `<test name>` — <intent>
+- `<test name>` — <intent>
 
 ## Edge cases & failure modes
 - Empty / null / zero inputs
 - Boundary values (max int, very long strings, unicode/emoji)
 - Network/IO failure
 - Race condition / concurrent writers
-- Time/timezone bugs
-- Permission/authz bugs
-- Retry / idempotency
 
 ## Verification
 - <command or sequence to validate end-to-end>
 - <how to confirm metrics / logs / UX>
+
+## Subplans
+<populated by subplan-fanout.sh — one bullet per chapter>
+
+## Superpowers invoked
+- [ ] brainstorming — <when>
+- [ ] writing-plans — <when>
+- [ ] test-driven-development — <when>
+- [ ] verification-before-completion — <when>
+
+## Checklist (machine-validated; do NOT hand-edit — call tick-checklist.sh)
+- [ ] mermaid-present
+- [ ] mermaid-has-entry-and-exit
+- [ ] tdd-list-≥3
+- [ ] adapter-decision-log-≥1-row
+- [ ] edges-≥4
+- [ ] affected-files-paths-exist
+- [ ] subplans-section-non-empty
+- [ ] each-subplan-file-exists
+- [ ] each-subplan-has-flow-and-tdd
+- [ ] no-tbd-placeholders
+- [ ] superpowers-all-invoked
