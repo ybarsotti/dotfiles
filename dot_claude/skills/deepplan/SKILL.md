@@ -70,6 +70,26 @@ If — and only if — the task is genuinely unambiguous after a careful re-read
 
 If user passes `--no-clarify` (accept but warn), still write `_no ambiguity_` so the checklist passes.
 
+## Phase 0.7 — Grill-me deep interview (mandatory unless `--skip-grill`)
+
+After multiple-choice clarifications resolve the obvious gaps, drill harder.
+
+**Step 1 — invoke the skill via Skill tool:**
+```
+Skill(skill="grill-me")
+```
+
+The skill runs an interview loop that interrogates the user about each branch of the decision tree until shared understanding is reached. Where `Phase 0.5` is a fast multiple-choice sweep, `grill-me` is open-ended stress-testing.
+
+**Step 2 — record the transcript** in the plan under `## Grill-me transcript` using `### Q:` / `### A:` headers (same format as clarifying questions, so the validator counts them too).
+
+**Step 3 — mark invocation:**
+```
+~/.claude/skills/deepplan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" grill-me
+```
+
+If the user passes `--skip-grill`, still record `grill-me` in the Superpowers section as `[ ]` so the checklist surfaces the skip.
+
 ## Phase 1 — Brainstorm intake (superpowers:brainstorming)
 
 Before any draft, invoke `superpowers:brainstorming` via the Skill tool against the task description. The brainstorming output (intent, alternatives, key constraints) becomes the seed for the `Context` section of the plan and is passed verbatim to both planners in Phase 1.5.
