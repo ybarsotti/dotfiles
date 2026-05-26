@@ -63,11 +63,21 @@ sequenceDiagram
 ## Subplans
 <populated by subplan-fanout.sh — one bullet per chapter>
 
+## Grill-me transcript
+<!--
+Open-ended Q/A from the `/grill-me` interview. Use `### Q:` / `### A:`
+headers. If `--skip-grill` was passed, write exactly `_skipped_` here.
+-->
+
+### Q: <interviewer prompt>
+### A: <user response>
+
 ## Superpowers invoked
 - [ ] brainstorming — <when>
 - [ ] writing-plans — <when>
 - [ ] test-driven-development — <when>
 - [ ] verification-before-completion — <when>
+- [ ] grill-me — <when>
 
 ## Checklist (machine-validated; do NOT hand-edit — call tick-checklist.sh)
 - [ ] code-intel-bootstrapped
