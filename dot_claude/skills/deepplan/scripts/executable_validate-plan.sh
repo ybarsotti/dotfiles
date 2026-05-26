@@ -169,7 +169,7 @@ if [ "$MODE" = "root" ]; then
   fi
 
   # 10. Superpowers all invoked (4 required)
-  REQUIRED_SP=("brainstorming" "writing-plans" "test-driven-development" "verification-before-completion")
+  REQUIRED_SP=("brainstorming" "writing-plans" "test-driven-development" "verification-before-completion" "grill-me")
   SP_BODY=$(section_body "Superpowers invoked")
   MISSING_SP=()
   for sp in "${REQUIRED_SP[@]}"; do
