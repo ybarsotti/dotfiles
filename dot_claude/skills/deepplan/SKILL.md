@@ -84,12 +84,25 @@ If the user explicitly opts out (`--skip-brainstorm` — accept it though not in
 
 ## Phase 1.5 — Two-track planner drafting (superpowers:writing-plans)
 
-Both planners are told to follow `superpowers:writing-plans` conventions (bite-sized tasks, TDD focus, no implementation in the plan itself). Record the invocation:
+**Step 1 — invoke the skill yourself via the Skill tool:**
+```
+Skill(skill="superpowers:writing-plans")
+```
+Read the returned guidance carefully. It defines the structure the planners MUST follow (bite-sized tasks, explicit TDD, no implementation prose, etc.).
+
+**Step 2 — record the invocation:**
 ```
 ~/.claude/skills/deepplan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" writing-plans
 ```
 
-Run `~/.claude/skills/deepplan/scripts/dispatch-planners.sh "$RUN_DIR" "$TASK_DESC"`. It spawns in parallel:
+**Step 3 — propagate to subagents:** save the skill body to `$RUN_DIR/writing-plans-guidance.md` (write it to disk). `dispatch-planners.sh` reads this file when present and prepends it to both planner prompts so the Opus and Codex drafts inherit the same conventions.
+
+**Step 4 — dispatch:**
+```
+~/.claude/skills/deepplan/scripts/dispatch-planners.sh "$RUN_DIR" "$TASK_DESC"
+```
+
+The dispatcher spawns in parallel:
 
 - `claude -p` (Opus) loaded with `personas/planner-opus.md`
 - `codex exec` (latest) loaded with `personas/planner-codex.md` *(skipped if `--no-codex`)*
