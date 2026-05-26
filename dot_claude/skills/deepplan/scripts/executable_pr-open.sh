@@ -32,8 +32,28 @@ command -v gh >/dev/null 2>&1 || { echo "pr-open.sh: gh CLI not installed" >&2; 
 
 # Title from plan's first goal bullet, trimmed to 70 chars.
 TITLE=$(awk '/^## Goals/{flag=1; next} /^## /{flag=0} flag && /^- /{sub(/^- /, ""); print; exit}' "$PLAN" \
-        | cut -c1-70)
-[ -z "$TITLE" ] && TITLE=$(head -1 "$PLAN" | sed 's/^#\+ //' | cut -c1-70)
+        | cut -c1-65)
+[ -z "$TITLE" ] && TITLE=$(head -1 "$PLAN" | sed 's/^#\+ //' | cut -c1-65)
+
+# Infer conventional-commit type from changed paths and recent commits.
+CHANGED=$(git diff --name-only main...HEAD 2>/dev/null || git diff --name-only HEAD~5..HEAD 2>/dev/null)
+RECENT_COMMITS=$(git log --pretty=%s main..HEAD 2>/dev/null || git log -5 --pretty=%s)
+infer_type() {
+  if   echo "$RECENT_COMMITS" | grep -qiE '^fix(\(|:)';      then echo "fix"
+  elif echo "$RECENT_COMMITS" | grep -qiE '^feat(\(|:)';     then echo "feat"
+  elif echo "$RECENT_COMMITS" | grep -qiE '^refactor(\(|:)'; then echo "refactor"
+  elif echo "$RECENT_COMMITS" | grep -qiE '^docs(\(|:)';     then echo "docs"
+  elif echo "$RECENT_COMMITS" | grep -qiE '^chore(\(|:)';    then echo "chore"
+  elif echo "$CHANGED" | grep -qE '\.(md|txt|rst)$';         then echo "docs"
+  elif echo "$CHANGED" | grep -qiE '(test|spec)';            then echo "test"
+  else echo "feat"
+  fi
+}
+PR_TYPE=$(infer_type)
+case "$TITLE" in
+  feat:*|fix:*|refactor:*|docs:*|chore:*|test:*) ;;  # already prefixed
+  *) TITLE="${PR_TYPE}: ${TITLE}" ;;
+esac
 
 # Auto-detect ticket if not provided.
 if [ -z "$TICKET" ]; then
@@ -70,11 +90,43 @@ awk -v ctx="$CONTEXT" -v mer="$MERMAID" -v aff="$AFFECTED" -v tst="$TESTS" -v ed
 }' "$BODY.tmp" > "$BODY"
 rm -f "$BODY.tmp"
 
-# Open the PR.
-URL=$(gh pr create $DRAFT_FLAG --title "$TITLE" --body-file "$BODY" 2>&1) || {
-  echo "pr-open.sh: gh pr create failed:" >&2
-  echo "$URL" >&2
-  exit 1
+# Compute auto-reviewers from CODEOWNERS for the changed paths.
+REVIEWER_FLAGS=()
+CODEOWNERS=""
+for cand in .github/CODEOWNERS CODEOWNERS docs/CODEOWNERS; do
+  [ -f "$cand" ] && { CODEOWNERS="$cand"; break; }
+done
+if [ -n "$CODEOWNERS" ] && [ -n "$CHANGED" ]; then
+  OWNERS=$(
+    while IFS= read -r f; do
+      [ -z "$f" ] && continue
+      # First matching glob wins; CODEOWNERS resolves last-match-wins so
+      # iterate in reverse for that semantic.
+      tac "$CODEOWNERS" 2>/dev/null | awk -v path="$f" '
+        /^[[:space:]]*#/ || NF < 2 {next}
+        {
+          pat=$1; for (i=2; i<=NF; i++) { print $i; }
+          exit
+        }
+      '
+    done <<< "$CHANGED" | sort -u | grep -oE '@[A-Za-z0-9_/-]+' | sed 's/^@//'
+  )
+  for o in $OWNERS; do
+    REVIEWER_FLAGS+=("--reviewer" "$o")
+  done
+fi
+
+# Open the PR (always as draft when --draft was passed; otherwise ready).
+LABEL_FLAGS=("--label" "$PR_TYPE")
+URL=$(gh pr create $DRAFT_FLAG --title "$TITLE" --body-file "$BODY" \
+        "${LABEL_FLAGS[@]}" "${REVIEWER_FLAGS[@]+"${REVIEWER_FLAGS[@]}"}" 2>&1) || {
+  # Retry without labels/reviewers if the repo lacks them (gh errors hard).
+  echo "pr-open.sh: retrying without labels/reviewers (likely missing on remote)" >&2
+  URL=$(gh pr create $DRAFT_FLAG --title "$TITLE" --body-file "$BODY" 2>&1) || {
+    echo "pr-open.sh: gh pr create failed:" >&2
+    echo "$URL" >&2
+    exit 1
+  }
 }
 
 echo "$URL" | grep -oE 'https://github.com/[^ ]+' | head -1
