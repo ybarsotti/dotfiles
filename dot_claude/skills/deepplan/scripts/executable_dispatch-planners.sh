@@ -17,12 +17,17 @@ NO_CODEX="${3:-}"
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATE="${SKILL_DIR}/templates/plan.md"
 RUNNER="${SKILL_DIR}/scripts/runner.sh"
+WP_GUIDANCE="${RUN_DIR}/writing-plans-guidance.md"
 
 mkdir -p "${RUN_DIR}/logs"
 
 build_prompt() {
   local persona_file="$1"
   cat "$persona_file"
+  if [ -f "$WP_GUIDANCE" ]; then
+    printf '\n\n---\n\n## superpowers:writing-plans guidance (follow strictly)\n\n'
+    cat "$WP_GUIDANCE"
+  fi
   printf '\n\n---\n\n## Task\n%s\n\n---\n\n## Target skeleton\n\n' "$TASK_DESC"
   cat "$TEMPLATE"
   printf '\n\n---\n\nWrite the full plan now. Output Markdown only. No commentary.\n'
