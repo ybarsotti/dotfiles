@@ -211,16 +211,26 @@ Print the final `plan.md` to the user. Confirm it includes:
 
 If any are missing, loop back one more time into Phase 2 with a synthetic CHANGES_REQUESTED verdict naming the missing artifact.
 
+## Phase 3.5 — Feature branch
+
+After `ExitPlanMode` is approved, ensure work doesn't land on main:
+
+```
+~/.claude/skills/deepplan/scripts/feature-branch.sh "$TASK_DESC" [--ticket KEY-123]
+```
+
+Creates `feat/<ticket-or-slug>` from current main if you're on main; no-op if you're already on a feature branch. Refuses to checkout over uncommitted changes.
+
 ## Phase 4 — Build via agent-teams (superpowers:test-driven-development)
 
-After `ExitPlanMode` returns approved:
+After Phase 3.5:
 
 1. Run `~/.claude/skills/deepplan/scripts/team-launch.sh`. It verifies `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is set in the live session (it is, per global `settings.json`) and `claude --version` ≥ 2.1.32. It prints the **natural-language team-spawn prompt** you must issue (agent-teams are created by prompting, not by a CLI flag — per https://code.claude.com/docs/en/agent-teams).
 
 2. Issue the spawn prompt verbatim. Typical shape:
    > Create an agent team with 3 Sonnet teammates to execute the plan at `$RUN_DIR/plan.md`. Split the work along the file-ownership boundaries listed in the plan's "Affected files" section. Each teammate runs strict red-green-refactor TDD per `superpowers:test-driven-development`. Use the project's CLAUDE.md conventions. If a parallelizable slice exists (e.g., scaffolding fixtures or generating test data), spawn one additional teammate using the `codex` model.
 
-3. If `--no-team` is set OR `claude --version` is below 2.1.32, fall back to `cmux-orchestrator` (see `~/.claude/skills/cmux-orchestrator/SKILL.md`) for visible parallel workers; if cmux is unavailable, fall back to plain `Agent` subagents (general-purpose, max 3 in parallel).
+3. If `--no-team` is set OR `claude --version` is below 2.1.32, invoke `Skill(skill="superpowers:subagent-driven-development")` for the fan-out protocol, then fall back to `cmux-orchestrator` for visible parallel workers; if cmux is unavailable, fall back to plain `Agent` subagents (general-purpose, max 3 in parallel).
 
 4. Supervise: poll the team's task list, redirect stuck teammates, do not implement directly. Use the existing `superpowers:test-driven-development` skill as the per-task contract. Record:
    ```
@@ -228,6 +238,24 @@ After `ExitPlanMode` returns approved:
    ```
 
 5. When all team tasks are completed and tests are green locally, ask the lead to clean up the team (per docs).
+
+## Phase 4.4 — Simplify pass (×2)
+
+After build, run `/simplify` twice via the Skill tool to collapse early-implementation noise:
+```
+Skill(skill="simplify")
+# review the changes; address findings as small commits
+Skill(skill="simplify")
+```
+Cap: 2 invocations. Stop earlier if the second pass finds nothing.
+
+## Phase 4.45 — Auto-format / lint
+
+Run project-specific formatters before the verification gate:
+```
+~/.claude/skills/deepplan/scripts/auto-format.sh
+```
+Detects: `just format`, `pnpm format`, `npm run format`, `make format`, `cargo fmt`, `gofmt -w .`, `ruff format .`, falling through to the first one that exists. Commits the formatting changes as `chore: auto-format` if anything changed.
 
 ## Phase 4.5 — Verification gate (superpowers:verification-before-completion)
 
@@ -246,14 +274,25 @@ Unless `--skip-review-panel`:
 
 3. Hard cap: **2 total iterations** across both passes. If reviewers still flag CRITICAL issues after iter 2, stop and surface them to the user.
 
+## Phase 5.5 — Findings handler
+
+```
+~/.claude/skills/deepplan/scripts/handle-findings.sh <run-dir-of-review-panel>
+```
+
+Parses `report.md` from the latest review-panel run, classifies each finding by severity (CRITICAL / HIGH / MEDIUM / LOW), emits a JSON list, and for each CRITICAL/HIGH item prints the suggested TDD cycle to run (failing test name + target file + expected commit message). The orchestrator addresses each in order. After all CRITICAL/HIGH are resolved, re-run Phase 5 once (counts against the 2-iter cap).
+
 ## Phase 6 — Open PR
 
 Unless `--skip-pr`:
 
-1. Run `~/.claude/skills/deepplan/scripts/pr-open.sh "$RUN_DIR"`. It:
-   - Builds title from plan's "Goals" line (`<verb> <object>` shape, ≤ 70 chars).
+1. Run `~/.claude/skills/deepplan/scripts/pr-open.sh "$RUN_DIR" --draft`. It:
+   - Builds title from plan's "Goals" line (`<verb> <object>` shape, ≤ 70 chars). Prefixes with conventional-commit type (feat/fix/refactor/chore/docs) inferred from the diff.
    - Builds body from `templates/pr-body.md` populated with: what-it-solves, ticket link, Mermaid diagram pulled from `plan.md`, file list, "start review here" pointer (the first file/function in the plan's call-flow), test plan, risk notes.
-   - Calls `gh pr create --title ... --body ...` using HEREDOC.
+   - Auto-labels: passes `--label <type>` for the conventional-commit type.
+   - Auto-reviewers: reads `.github/CODEOWNERS` (or `CODEOWNERS`) and adds matching owners for the changed paths via `--reviewer`.
+   - Opens as draft by default (`--draft`); user marks ready when CI green + findings resolved.
+   - Calls `gh pr create` with all flags using HEREDOC body.
    - Returns PR URL.
 
 2. Print the PR URL to the user.
