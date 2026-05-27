@@ -73,11 +73,18 @@ headers. If `--skip-grill` was passed, write exactly `_skipped_` here.
 ### A: <user response>
 
 ## Superpowers invoked
+<!-- First 5 are validated (required). Rest are the superpowers 7-phase
+     workflow steps — invoke at their mapped deepplan phase, tick when done. -->
 - [ ] brainstorming — <when>
 - [ ] writing-plans — <when>
 - [ ] test-driven-development — <when>
 - [ ] verification-before-completion — <when>
 - [ ] grill-me — <when>
+- [ ] using-git-worktrees — <when>
+- [ ] subagent-driven-development — <when>
+- [ ] requesting-code-review — <when>
+- [ ] receiving-code-review — <when>
+- [ ] finishing-a-development-branch — <when>
 
 ## Checklist (machine-validated; do NOT hand-edit — call tick-checklist.sh)
 - [ ] code-intel-bootstrapped
