@@ -7,6 +7,22 @@ description: Multi-agent plan-then-build pipeline. Use when invoked via /deeppla
 
 You are the **orchestrator** of a multi-agent plan-then-build pipeline. Your job is to coordinate planning, review, execution, and shipping — you do **not** draft the plan yourself, you do **not** write the implementation yourself. You parse args, dispatch agents, aggregate verdicts, present checkpoints, and steer the team.
 
+## Superpowers workflow mapping
+
+This pipeline implements the canonical [obra/superpowers](https://github.com/obra/superpowers) 7-phase workflow. Each superpowers skill maps to a deepplan phase — invoke them via the Skill tool at the mapped phase. **Mandatory workflows, not suggestions.**
+
+| # | superpowers skill | deepplan phase |
+|---|-------------------|----------------|
+| 1 | `brainstorming` | Phase 1 |
+| 2 | `using-git-worktrees` | Phase 3.5 |
+| 3 | `writing-plans` | Phase 1.5 |
+| 4 | `subagent-driven-development` / `executing-plans` | Phase 4 |
+| 5 | `test-driven-development` | Phase 4 (per-task contract) |
+| 6 | `requesting-code-review` + `receiving-code-review` | Phase 5 |
+| 7 | `finishing-a-development-branch` | Phase 8 |
+
+Plus deepplan adds: `verification-before-completion` (Phase 4.5), `grill-me` (Phase 0.7), multi-model planner/reviewer fan-out, `/review-panel`, code-intel bootstrap, and the machine-validated checklist gate.
+
 ## Phase 0 — Parse args & sanity checks
 
 Read `$ARGUMENTS`. Extract:
@@ -211,15 +227,20 @@ Print the final `plan.md` to the user. Confirm it includes:
 
 If any are missing, loop back one more time into Phase 2 with a synthetic CHANGES_REQUESTED verdict naming the missing artifact.
 
-## Phase 3.5 — Feature branch
+## Phase 3.5 — Isolated workspace (superpowers:using-git-worktrees)
 
-After `ExitPlanMode` is approved, ensure work doesn't land on main:
+After `ExitPlanMode` is approved, isolate the work.
 
-```
-~/.claude/skills/deepplan/scripts/feature-branch.sh "$TASK_DESC" [--ticket KEY-123]
-```
+1. Invoke `Skill(skill="superpowers:using-git-worktrees")` and follow it to create a worktree on a fresh branch + verify a clean test baseline. Record:
+   ```
+   ~/.claude/skills/deepplan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" using-git-worktrees
+   ```
 
-Creates `feat/<ticket-or-slug>` from current main if you're on main; no-op if you're already on a feature branch. Refuses to checkout over uncommitted changes.
+2. If worktrees are not wanted (`--no-worktree`) or unavailable, fall back to a plain feature branch:
+   ```
+   ~/.claude/skills/deepplan/scripts/feature-branch.sh "$TASK_DESC" [--ticket KEY-123]
+   ```
+   Creates `feat/<ticket-or-slug>` from main if on main; no-op on a feature branch; refuses to checkout over uncommitted changes.
 
 ## Phase 4 — Build via agent-teams (superpowers:test-driven-development)
 
@@ -264,15 +285,25 @@ Before any PR work, invoke `superpowers:verification-before-completion` via Skil
 ~/.claude/skills/deepplan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" verification-before-completion
 ```
 
-## Phase 5 — /review-panel passes
+## Phase 5 — Code review (superpowers + /review-panel)
 
 Unless `--skip-review-panel`:
+
+0. Invoke `Skill(skill="superpowers:requesting-code-review")` to frame the review against the plan (severity-ranked, critical blocks progress). Record:
+   ```
+   ~/.claude/skills/deepplan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" requesting-code-review
+   ```
 
 1. Full review: `/review-panel default --scope main...HEAD`. Address all CRITICAL/HIGH findings. If new commits are needed, run a quick TDD cycle per finding.
 
 2. Plan-aware review: `/review-panel default --reviewers 4 --ratio 2:2`. Inject the plan path into reviewer context by prepending `--scope` with a temporary annotation file: copy `plan.md` to the run dir and pass its content as additional reviewer context.
 
 3. Hard cap: **2 total iterations** across both passes. If reviewers still flag CRITICAL issues after iter 2, stop and surface them to the user.
+
+4. Before acting on findings, invoke `Skill(skill="superpowers:receiving-code-review")` — verify each suggestion technically rather than blindly applying; push back on questionable ones. Record:
+   ```
+   ~/.claude/skills/deepplan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" receiving-code-review
+   ```
 
 ## Phase 5.5 — Findings handler
 
@@ -308,6 +339,13 @@ Run `~/.claude/skills/deepplan/scripts/ci-and-copilot-watch.sh "$PR_URL"`. It:
 For each actionable failure or Copilot suggestion: run a small TDD cycle (red → green → commit → push). Re-poll. Cap: 5 iterations before bailing to user.
 
 When all checks are green and no unresolved Copilot threads remain: print "✅ ship-ready" with the PR URL.
+
+## Phase 8 — Finish the branch (superpowers:finishing-a-development-branch)
+
+Once ship-ready, invoke `Skill(skill="superpowers:finishing-a-development-branch")`. It verifies tests pass, then presents merge / PR / keep / discard options and cleans up the worktree created in Phase 3.5. Do NOT merge or discard without the user's choice. Record:
+```
+~/.claude/skills/deepplan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" finishing-a-development-branch
+```
 
 ## Reuse
 

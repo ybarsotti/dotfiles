@@ -178,7 +178,7 @@ if [ "$MODE" = "root" ]; then
     fi
   done
   if [ ${#MISSING_SP[@]} -eq 0 ]; then
-    record "superpowers-all-invoked" "pass" "all 4 superpowers checked"
+    record "superpowers-all-invoked" "pass" "all ${#REQUIRED_SP[@]} required superpowers checked"
   else
     record "superpowers-all-invoked" "fail" "missing: ${MISSING_SP[*]}"
   fi
