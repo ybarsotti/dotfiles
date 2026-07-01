@@ -1,5 +1,9 @@
 {
   "agents": {
+    "plan": {
+      "model": "anthropic/claude-opus-4-8",
+      "variant": "high"
+    },
     "oracle": {
       "model": "anthropic/claude-opus-4-8",
       "variant": "high"
