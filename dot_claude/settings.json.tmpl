@@ -1,6 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "includeCoAuthoredBy": false,
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"{{ if env "CLAUDE_CODE_OAUTH_TOKEN" }},
     "CLAUDE_CODE_OAUTH_TOKEN": "{{ env "CLAUDE_CODE_OAUTH_TOKEN" }}"{{ end }}
@@ -177,7 +180,6 @@
       }
     }
   },
-  "permissionMode": "bypassPermissions",
   "skipDangerousModePermissionPrompt": true,
   "skipAutoPermissionPrompt": true,
   "mcpServers": {
