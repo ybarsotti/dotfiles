@@ -1,3 +1,17 @@
+{{/* Machine-specific prompts (only during init) */}}
+{{- $machinePurpose := "personal" }}
+{{- $machineEmail := "yuribarsotti@gmail.com" }}
+{{- $machineGitUser := "ybarsotti" }}
+
+{{- if stdinIsATTY }}
+{{-   $purposePrompt := promptStringOnce . "machine.purpose" "Machine purpose" "personal" }}
+{{-   if eq $purposePrompt "work" }}
+{{-     $machinePurpose = "work" }}
+{{-     $machineEmail = promptStringOnce . "machine.email" "Work email" "yuri.mendes@company.com" }}
+{{-     $machineGitUser = promptStringOnce . "machine.gitUser" "Work git username" "yuri.mendes" }}
+{{-   end }}
+{{- end }}
+
 encryption = "gpg"
 
 ################################################
@@ -16,20 +30,6 @@ encryption = "gpg"
 ################################################
 
 {{- includeTemplate "system_info" . }}
-
-{{/* Machine-specific prompts (only during init) */}}
-{{- $machinePurpose := "personal" }}
-{{- $machineEmail := "yuribarsotti@gmail.com" }}
-{{- $machineGitUser := "ybarsotti" }}
-
-{{- if stdinIsATTY }}
-{{-   $purposePrompt := promptStringOnce . "machine.purpose" "Machine purpose" "personal" }}
-{{-   if eq $purposePrompt "work" }}
-{{-     $machinePurpose = "work" }}
-{{-     $machineEmail = promptStringOnce . "machine.email" "Work email" "yuri.mendes@company.com" }}
-{{-     $machineGitUser = promptStringOnce . "machine.gitUser" "Work git username" "yuri.mendes" }}
-{{-   end }}
-{{- end }}
 
 [data.machine]
   purpose = {{ $machinePurpose | quote }}
