@@ -32,7 +32,15 @@ mcp_servers:
         - caveman-shrink
 
     serena:
-      url: http://localhost:9121/sse
+      command: uvx
+      args:
+        - --from
+        - git+https://github.com/oraios/serena
+        - serena
+        - start-mcp-server
+        - --context
+        - claude-code
+        - --project-from-cwd
 
   personal:
     ccusage:

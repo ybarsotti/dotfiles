@@ -6,5 +6,13 @@
 {{- $existingJson := $rawExisting | fromJson -}}
 {{- $existing := $existingJson.mcpServers | default dict -}}
 {{- $managed := mergeOverwrite (dict) $shared $typed $peon -}}
-{{- $all := mergeOverwrite (dict) $existing $managed -}}
+{{- $all := dict -}}
+{{- range $name, $config := $existing -}}
+{{- if not (hasKey $managed $name) -}}
+{{- $_ := set $all $name $config -}}
+{{- end -}}
+{{- end -}}
+{{- range $name, $config := $managed -}}
+{{- $_ := set $all $name $config -}}
+{{- end -}}
 {{ dict "mcpServers" $all | toPrettyJson }}
