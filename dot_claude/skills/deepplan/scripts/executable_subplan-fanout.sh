@@ -36,7 +36,8 @@ trap 'rm -rf "$SCRATCH"' EXIT
 
 # Extract affected file paths.
 PATHS=$(awk '/^## Affected files/{flag=1; next} /^## /{flag=0} flag' "$PLAN" \
-        | grep -oE '`[^`]+`' | tr -d '`' | sort -u)
+        | awk -F'`' 'NF >= 3 { for (i = 2; i <= NF; i += 2) print $i }' \
+        | sort -u)
 
 if [ -z "$PATHS" ]; then
   echo "subplan-fanout.sh: no affected file paths found in plan" >&2

@@ -123,7 +123,7 @@ if [ "$MODE" = "root" ]; then
   fi
 
   # 7. Affected files: at least one path exists (or under existing dir)
-  PATHS=$(section_body "Affected files" | grep -oE '`[^`]+`' | tr -d '`' | head -20)
+  PATHS=$(section_body "Affected files" | awk -F'`' 'NF >= 3 { for (i = 2; i <= NF; i += 2) print $i }' | head -20)
   PATHS_OK=0
   for p in $PATHS; do
     if [ -e "$p" ] || [ -d "$(dirname "$p")" ]; then
