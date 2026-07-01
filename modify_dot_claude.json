@@ -2,5 +2,7 @@
 {{- $json := .chezmoi.stdin | default "{}" | fromJson -}}
 {{- $shared := .mcp_servers.shared -}}
 {{- $typed := index .mcp_servers .machine.purpose -}}
-{{- $all := merge $shared $typed -}}
+{{- $managed := mergeOverwrite (dict) $shared $typed -}}
+{{- $existing := $json.mcpServers | default dict -}}
+{{- $all := mergeOverwrite (dict) $existing $managed -}}
 {{ $json | setValueAtPath "mcpServers" $all | toPrettyJson }}
