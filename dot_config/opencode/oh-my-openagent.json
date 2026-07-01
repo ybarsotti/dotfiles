@@ -1,10 +1,118 @@
 {
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json",
   "agents": {
-    "plan": {
-      "model": "anthropic/claude-opus-4-8",
-      "variant": "high"
+    "sisyphus": {
+      "model": "openai/gpt-5.5",
+      "variant": "max",
+      "fallback_models": [
+        {
+          "model": "openai/gpt-5.5",
+          "variant": "medium"
+        }
+      ],
+      "reasoningEffort": "high"
+    },
+    "hephaestus": {
+      "model": "openai/gpt-5.5",
+      "variant": "medium"
     },
     "oracle": {
+      "model": "anthropic/claude-opus-4-8",
+      "variant": "high",
+      "fallback_models": [
+        {
+          "model": "anthropic/claude-opus-4-8",
+          "variant": "max"
+        }
+      ]
+    },
+    "librarian": {
+      "model": "openai/gpt-5.4-mini",
+      "fallback_models": [
+        {
+          "model": "anthropic/claude-haiku-4-5"
+        },
+        {
+          "model": "openai/gpt-5.4-nano"
+        }
+      ],
+      "reasoningEffort": "medium"
+    },
+    "explore": {
+      "model": "openai/gpt-5.4-mini",
+      "fallback_models": [
+        {
+          "model": "anthropic/claude-haiku-4-5"
+        },
+        {
+          "model": "openai/gpt-5.4-nano"
+        }
+      ],
+      "reasoningEffort": "minimal"
+    },
+    "multimodal-looker": {
+      "model": "anthropic/claude-haiku-4-5",
+      "variant": "medium",
+      "fallback_models": [
+        {
+          "model": "openai/gpt-5-nano"
+        }
+      ]
+    },
+    "prometheus": {
+      "model": "anthropic/claude-opus-4-8",
+      "variant": "high",
+      "fallback_models": [
+        {
+          "model": "openai/gpt-5.5",
+          "variant": "high"
+        }
+      ]
+    },
+    "metis": {
+      "model": "anthropic/claude-opus-4-8",
+      "fallback_models": [
+        {
+          "model": "anthropic/claude-opus-4-8",
+          "variant": "max"
+        },
+        {
+          "model": "openai/gpt-5.5",
+          "variant": "high"
+        }
+      ],
+      "variant": "high"
+    },
+    "momus": {
+      "model": "anthropic/claude-sonnet-5",
+      "variant": "xhigh",
+      "fallback_models": [
+        {
+          "model": "anthropic/claude-opus-4-8",
+          "variant": "max"
+        }
+      ]
+    },
+    "atlas": {
+      "model": "openai/gpt-5.5",
+      "fallback_models": [
+        {
+          "model": "openai/gpt-5.5",
+          "variant": "medium"
+        }
+      ],
+      "reasoningEffort": "high"
+    },
+    "sisyphus-junior": {
+      "model": "anthropic/claude-sonnet-5",
+      "fallback_models": [
+        {
+          "model": "openai/gpt-5.5",
+          "variant": "medium"
+        }
+      ]
+    },
+    "plan": {
       "model": "anthropic/claude-opus-4-8",
       "variant": "high"
     },
@@ -14,70 +122,83 @@
     },
     "document-writer": {
       "model": "anthropic/claude-sonnet-5"
-    },
-    "multimodal-looker": {
-      "model": "anthropic/claude-haiku-4-5"
-    },
-    "sisyphus": {
-      "model": "openai/gpt-5.5",
-      "reasoningEffort": "high"
-    },
-    "librarian": {
-      "model": "openai/gpt-5.4-mini",
-      "reasoningEffort": "medium"
-    },
-    "explore": {
-      "model": "openai/gpt-5.4-mini",
-      "reasoningEffort": "minimal"
-    },
-    "prometheus": {
-      "model": "anthropic/claude-opus-4-8",
-      "variant": "high"
-    },
-    "metis": {
-      "model": "anthropic/claude-opus-4-8",
-      "variant": "high"
-    },
-    "momus": {
-      "model": "anthropic/claude-sonnet-5"
-    },
-    "atlas": {
-      "model": "openai/gpt-5.5",
-      "reasoningEffort": "high"
     }
   },
-  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json",
+  "categories": {
+    "visual-engineering": {
+      "model": "openai/gpt-5.5",
+      "variant": "max",
+      "reasoningEffort": "high"
+    },
+    "ultrabrain": {
+      "model": "anthropic/claude-opus-4-8",
+      "variant": "max",
+      "fallback_models": [
+        {
+          "model": "anthropic/claude-opus-4-8",
+          "variant": "max"
+        }
+      ]
+    },
+    "deep": {
+      "model": "openai/gpt-5.5",
+      "variant": "medium",
+      "fallback_models": [
+        {
+          "model": "anthropic/claude-opus-4-8",
+          "variant": "max"
+        }
+      ]
+    },
+    "artistry": {
+      "model": "anthropic/claude-opus-4-8",
+      "variant": "max",
+      "fallback_models": [
+        {
+          "model": "openai/gpt-5.5"
+        }
+      ]
+    },
+    "quick": {
+      "model": "openai/gpt-5.4-mini",
+      "fallback_models": [
+        {
+          "model": "anthropic/claude-haiku-4-5"
+        }
+      ],
+      "reasoningEffort": "minimal"
+    },
+    "unspecified-low": {
+      "model": "openai/gpt-5.4-mini",
+      "fallback_models": [
+        {
+          "model": "openai/gpt-5.5",
+          "variant": "medium"
+        }
+      ],
+      "reasoningEffort": "medium"
+    },
+    "unspecified-high": {
+      "model": "anthropic/claude-sonnet-5",
+      "fallback_models": [
+        {
+          "model": "openai/gpt-5.5",
+          "variant": "medium"
+        }
+      ]
+    },
+    "writing": {
+      "model": "anthropic/claude-sonnet-5"
+    }
+  },
   "git_master": {
     "commit_footer": true,
     "include_co_authored_by": true,
     "git_env_prefix": "GIT_MASTER=1"
   },
-  "categories": {
-    "visual-engineering": {
-      "model": "openai/gpt-5.5",
-      "reasoningEffort": "high"
-    },
-    "ultrabrain": {
-      "model": "anthropic/claude-opus-4-8",
-      "variant": "max"
-    },
-    "artistry": {
-      "model": "anthropic/claude-opus-4-8",
-      "variant": "max"
-    },
-    "quick": {
-      "model": "openai/gpt-5.4-mini",
-      "reasoningEffort": "minimal"
-    },
-    "unspecified-low": {
-      "model": "openai/gpt-5.4-mini",
-      "reasoningEffort": "medium"
-    },
-    "unspecified-high": {
-      "model": "anthropic/claude-sonnet-5"
-    },
-    "writing": {
-      "model": "anthropic/claude-sonnet-5"
-    }
+  "team_mode": {
+    "enabled": true,
+    "max_parallel_members": 4,
+    "tmux_visualization": true
   }
 }
