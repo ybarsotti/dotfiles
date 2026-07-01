@@ -31,6 +31,9 @@ trust_level = "trusted"
 [projects."/Users/barsotti/.config/opencode"]
 trust_level = "trusted"
 
+[projects."/Users/barsotti/Developer/Work/FilterBuy/airfilterbuy-business"]
+trust_level = "trusted"
+
 [notice.model_migrations]
 "gpt-5.2-codex" = "gpt-5.3-codex"
 
@@ -99,7 +102,8 @@ enabled = true
 enabled = false
 
 [mcp_servers.serena]
-url = "http://localhost:9121/sse"
+command = "uvx"
+args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--project-from-cwd"]
 
 [hooks.state."omo@sisyphuslabs:hooks/session-start-loading-project-rules.json:session_start:0:0"]
 trusted_hash = "sha256:7110bdc6b474f491ba130385898460a217f517315c8a159e4a26c1861597e4b9"
