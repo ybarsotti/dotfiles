@@ -1,0 +1,21 @@
+project_name: "dotfiles"
+
+languages:
+- bash
+- json
+- markdown
+- toml
+- yaml
+
+encoding: "utf-8"
+ignore_all_files_in_gitignore: true
+ignored_paths:
+- graphify-out/**
+- .gitnexus/**
+- .codex/**
+- .claude/**
+
+read_only: false
+excluded_tools: []
+included_optional_tools: []
+initial_prompt: "Dotfiles managed by chezmoi. Prefer editing source files in the chezmoi source tree, then apply with chezmoi when needed."

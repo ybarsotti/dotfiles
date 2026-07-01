@@ -1,0 +1,205 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "keys.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/keys.lua",
+      "source_location": "L1",
+      "id": "dot_config_wezterm_keys_lua",
+      "community": 0,
+      "norm_label": "keys.lua"
+    },
+    {
+      "label": "M.setup()",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/keys.lua",
+      "source_location": "L19",
+      "id": "wezterm_keys_m_setup",
+      "community": 0,
+      "norm_label": "m.setup()"
+    },
+    {
+      "label": "wezterm.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/wezterm.lua",
+      "source_location": "L1",
+      "id": "dot_config_wezterm_wezterm_lua",
+      "community": 5,
+      "norm_label": "wezterm.lua"
+    },
+    {
+      "label": "fonts.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/fonts.lua",
+      "source_location": "L1",
+      "id": "dot_config_wezterm_fonts_lua",
+      "community": 1,
+      "norm_label": "fonts.lua"
+    },
+    {
+      "label": "M.setup()",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/fonts.lua",
+      "source_location": "L5",
+      "id": "wezterm_fonts_m_setup",
+      "community": 1,
+      "norm_label": "m.setup()"
+    },
+    {
+      "label": "zen-mode-vim.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/plugins/zen-mode-vim.lua",
+      "source_location": "L1",
+      "id": "dot_config_wezterm_plugins_zen_mode_vim_lua",
+      "community": 6,
+      "norm_label": "zen-mode-vim.lua"
+    },
+    {
+      "label": "workspace-switcher.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
+      "source_location": "L1",
+      "id": "dot_config_wezterm_plugins_workspace_switcher_lua",
+      "community": 2,
+      "norm_label": "workspace-switcher.lua"
+    },
+    {
+      "label": "M.setup()",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
+      "source_location": "L7",
+      "id": "plugins_workspace_switcher_m_setup",
+      "community": 2,
+      "norm_label": "m.setup()"
+    },
+    {
+      "label": "move_workspace.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
+      "source_location": "L1",
+      "id": "dot_config_wezterm_plugins_move_workspace_lua",
+      "community": 3,
+      "norm_label": "move_workspace.lua"
+    },
+    {
+      "label": "M.setup()",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
+      "source_location": "L5",
+      "id": "plugins_move_workspace_m_setup",
+      "community": 3,
+      "norm_label": "m.setup()"
+    },
+    {
+      "label": "bar.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/plugins/bar.lua",
+      "source_location": "L1",
+      "id": "dot_config_wezterm_plugins_bar_lua",
+      "community": 4,
+      "norm_label": "bar.lua"
+    },
+    {
+      "label": "M.setup()",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/plugins/bar.lua",
+      "source_location": "L5",
+      "id": "plugins_bar_m_setup",
+      "community": 4,
+      "norm_label": "m.setup()"
+    },
+    {
+      "label": "melange_dark.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/themes/melange_dark.lua",
+      "source_location": "L1",
+      "id": "dot_config_wezterm_themes_melange_dark_lua",
+      "community": 7,
+      "norm_label": "melange_dark.lua"
+    },
+    {
+      "label": "kanagawa-dragon.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/themes/kanagawa-dragon.lua",
+      "source_location": "L1",
+      "id": "dot_config_wezterm_themes_kanagawa_dragon_lua",
+      "community": 8,
+      "norm_label": "kanagawa-dragon.lua"
+    },
+    {
+      "label": "cyberdream.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/themes/cyberdream.lua",
+      "source_location": "L1",
+      "id": "dot_config_wezterm_themes_cyberdream_lua",
+      "community": 9,
+      "norm_label": "cyberdream.lua"
+    },
+    {
+      "label": "init.lua",
+      "file_type": "code",
+      "source_file": "dot_config/yazi/plugins/smart-tab.yazi/init.lua",
+      "source_location": "L1",
+      "id": "dot_config_yazi_plugins_smart_tab_yazi_init_lua",
+      "community": 10,
+      "norm_label": "init.lua"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/wezterm/keys.lua",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "dot_config_wezterm_keys_lua",
+      "target": "wezterm_keys_m_setup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/wezterm/fonts.lua",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "dot_config_wezterm_fonts_lua",
+      "target": "wezterm_fonts_m_setup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "dot_config_wezterm_plugins_workspace_switcher_lua",
+      "target": "plugins_workspace_switcher_m_setup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "dot_config_wezterm_plugins_move_workspace_lua",
+      "target": "plugins_move_workspace_m_setup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/wezterm/plugins/bar.lua",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "dot_config_wezterm_plugins_bar_lua",
+      "target": "plugins_bar_m_setup",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "cb9b5a8325432aa9f9dc8629931cf87aa8e8eba2"
+}
