@@ -1,0 +1,59 @@
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
+approval_policy = "never"
+default_permissions = ":danger-full-access"
+web_search = "live"
+[projects."/Users/barsotti"]
+trust_level = "trusted"
+
+[projects."/Users/barsotti/Developer/Work/Resume"]
+trust_level = "trusted"
+
+[projects."/Users/barsotti/.local/share/chezmoi"]
+trust_level = "trusted"
+
+[projects."/Users/barsotti/Developer/Open-Source/zorch"]
+trust_level = "trusted"
+
+[projects."/Users/barsotti/Developer/Lab/paperclip-sandbox"]
+trust_level = "trusted"
+
+[projects."/Users/barsotti/Developer/Work/AppImobiliária/minha-morada"]
+trust_level = "trusted"
+
+[projects."/Users/barsotti/Developer/Learning/Courses/Anthropic Academy"]
+trust_level = "trusted"
+
+[projects."/Users/barsotti/.config/opencode"]
+trust_level = "trusted"
+
+[notice.model_migrations]
+"gpt-5.2-codex" = "gpt-5.3-codex"
+
+[marketplaces.openai-bundled]
+last_updated = "2026-05-27T02:53:42Z"
+source_type = "local"
+source = "/Users/barsotti/.codex/.tmp/bundled-marketplaces/openai-bundled"
+
+[marketplaces.openai-primary-runtime]
+last_updated = "2026-05-27T04:02:58Z"
+source_type = "local"
+source = "/Users/barsotti/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[tui.model_availability_nux]
+"gpt-5.5" = 3
+
+[features]
+hooks = true
