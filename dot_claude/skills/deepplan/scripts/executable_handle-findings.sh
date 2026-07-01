@@ -13,7 +13,13 @@ set -uo pipefail
 RUN_DIR="${1:-}"
 if [ -z "$RUN_DIR" ]; then
   # Default: latest review-panel run dir.
-  RUN_DIR=$(ls -1dt "$HOME/.claude/review-panel-runs/"*/ 2>/dev/null | head -1 | sed 's:/$::')
+  RUN_DIR=$(
+    find "$HOME/.claude/review-panel-runs" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null \
+      | xargs -0 stat -f '%m %N' 2>/dev/null \
+      | sort -rn \
+      | head -1 \
+      | cut -d' ' -f2-
+  )
   [ -z "$RUN_DIR" ] && { echo "handle-findings.sh: no review-panel runs found" >&2; echo "[]"; exit 0; }
 fi
 
@@ -33,7 +39,7 @@ while IFS= read -r line; do
   sev=$(echo "$line" | grep -oiE '(CRITICAL|HIGH|MEDIUM|LOW)' | head -1 | tr '[:lower:]' '[:upper:]')
   [ -z "$sev" ] && continue
   msg=$(echo "$line" | sed -E 's/^[-*[:space:]]*(\*\*)?\[?(CRITICAL|HIGH|MEDIUM|LOW)\]?(\*\*)?[:[:space:]—-]*//I' | sed 's/^[[:space:]]*//')
-  file=$(echo "$msg" | grep -oE '`[^`]+\.[a-zA-Z]+`' | head -1 | tr -d '`')
+  file=$(echo "$msg" | awk -F'`' 'NF >= 3 && $2 ~ /\.[[:alpha:]]+$/ { print $2; exit }')
   FINDINGS+=("$(jq -n --arg s "$sev" --arg m "$msg" --arg f "$file" \
     '{severity:$s, message:$m, file:$f}')")
 done < <(grep -iE '(CRITICAL|HIGH|MEDIUM|LOW)' "$REPORT")
