@@ -1,0 +1,8 @@
+{
+  "debug": false,
+  "basePaths": [
+    "~/.agents/skills"
+  ],
+  "promptRenderer": "xml",
+  "modelRenderers": {}
+}
