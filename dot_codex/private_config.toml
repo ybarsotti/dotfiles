@@ -3,6 +3,7 @@ model_reasoning_effort = "medium"
 approval_policy = "never"
 default_permissions = ":danger-full-access"
 web_search = "live"
+approvals_reviewer = "user"
 [projects."/Users/barsotti"]
 trust_level = "trusted"
 
