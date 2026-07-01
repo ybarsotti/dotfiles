@@ -8,7 +8,7 @@
   "teammateMode": "auto",
   "statusLine": {
     "type": "command",
-    "command": "npx -y ccstatusline@latest",
+    "command": "command -v ccstatusline >/dev/null 2>&1 && ccstatusline || npx -y ccstatusline@latest",
     "padding": 0
   },
   "hooks": {
