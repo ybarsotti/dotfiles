@@ -86,6 +86,12 @@
             "command": "node \"{{ .chezmoi.homeDir }}/.claude/hooks/caveman-activate.js\"",
             "timeout": 5,
             "statusMessage": "Loading caveman mode..."
+          },
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/codeintel-context.sh",
+            "timeout": 5,
+            "statusMessage": "Loading code intelligence context..."
           }
         ]
       }
