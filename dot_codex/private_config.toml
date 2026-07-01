@@ -98,6 +98,9 @@ enabled = true
 [plugins."omo@sisyphuslabs".mcp_servers.git_bash]
 enabled = false
 
+[mcp_servers.serena]
+url = "http://localhost:9121/sse"
+
 [hooks.state."omo@sisyphuslabs:hooks/session-start-loading-project-rules.json:session_start:0:0"]
 trusted_hash = "sha256:7110bdc6b474f491ba130385898460a217f517315c8a159e4a26c1861597e4b9"
 
