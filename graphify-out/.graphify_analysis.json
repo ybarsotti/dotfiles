@@ -1,0 +1,64 @@
+{
+  "communities": {
+    "0": [
+      "dot_config_wezterm_keys_lua",
+      "wezterm_keys_m_setup"
+    ],
+    "1": [
+      "dot_config_wezterm_fonts_lua",
+      "wezterm_fonts_m_setup"
+    ],
+    "2": [
+      "dot_config_wezterm_plugins_workspace_switcher_lua",
+      "plugins_workspace_switcher_m_setup"
+    ],
+    "3": [
+      "dot_config_wezterm_plugins_move_workspace_lua",
+      "plugins_move_workspace_m_setup"
+    ],
+    "4": [
+      "dot_config_wezterm_plugins_bar_lua",
+      "plugins_bar_m_setup"
+    ],
+    "5": [
+      "dot_config_wezterm_wezterm_lua"
+    ],
+    "6": [
+      "dot_config_wezterm_plugins_zen_mode_vim_lua"
+    ],
+    "7": [
+      "dot_config_wezterm_themes_melange_dark_lua"
+    ],
+    "8": [
+      "dot_config_wezterm_themes_kanagawa_dragon_lua"
+    ],
+    "9": [
+      "dot_config_wezterm_themes_cyberdream_lua"
+    ],
+    "10": [
+      "dot_config_yazi_plugins_smart_tab_yazi_init_lua"
+    ]
+  },
+  "cohesion": {
+    "0": 1.0,
+    "1": 1.0,
+    "2": 1.0,
+    "3": 1.0,
+    "4": 1.0,
+    "5": 1.0,
+    "6": 1.0,
+    "7": 1.0,
+    "8": 1.0,
+    "9": 1.0,
+    "10": 1.0
+  },
+  "gods": [],
+  "surprises": [],
+  "questions": [
+    {
+      "type": "no_signal",
+      "question": null,
+      "why": "Not enough signal to generate questions. This usually means the corpus has no AMBIGUOUS edges, no bridge nodes, no INFERRED relationships, and all communities are tightly cohesive. Add more files or run with --mode deep to extract richer edges."
+    }
+  ]
+}
