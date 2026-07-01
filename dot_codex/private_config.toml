@@ -4,6 +4,9 @@ approval_policy = "never"
 default_permissions = ":danger-full-access"
 web_search = "live"
 approvals_reviewer = "user"
+sandbox_mode = "danger-full-access"
+network_access = "enabled"
+
 [projects."/Users/barsotti"]
 trust_level = "trusted"
 
@@ -57,4 +60,133 @@ enabled = true
 "gpt-5.5" = 3
 
 [features]
+goals = true
+unified_exec = true
+multi_agent = true
+plugin_hooks = true
+plugins = true
 hooks = true
+
+[agents]
+max_threads = 1000
+
+# Managed by LazyCodex: multi_agent_v2 is re-disabled on every Codex session start
+# because enabling it fails every turn with HTTP 400 (openai/codex#26753).
+# Opt out: LAZYCODEX_CONFIG_MIGRATION_DISABLED=1 (or OMO_CODEX_CONFIG_MIGRATION_DISABLED=1).
+[features.multi_agent_v2]
+enabled = false
+max_concurrent_threads_per_session = 1000
+
+[notice]
+hide_world_writable_warning = true
+hide_full_access_warning = true
+
+[marketplaces.sisyphuslabs]
+last_updated = "2026-07-01T01:13:41Z"
+source_type = "local"
+source = "/Users/barsotti/.codex/plugins/cache/sisyphuslabs"
+
+[plugins."omo@sisyphuslabs"]
+enabled = true
+
+[plugins."omo@sisyphuslabs".mcp_servers.context7]
+enabled = true
+
+[plugins."omo@sisyphuslabs".mcp_servers.codegraph]
+enabled = true
+
+[plugins."omo@sisyphuslabs".mcp_servers.git_bash]
+enabled = false
+
+[hooks.state."omo@sisyphuslabs:hooks/session-start-loading-project-rules.json:session_start:0:0"]
+trusted_hash = "sha256:7110bdc6b474f491ba130385898460a217f517315c8a159e4a26c1861597e4b9"
+
+[hooks.state."omo@sisyphuslabs:hooks/session-start-recording-session-telemetry.json:session_start:0:0"]
+trusted_hash = "sha256:eacc3ea33b71622e32229cb989b7d93d8ba5c778d3c62e75ae871262329c1f4b"
+
+[hooks.state."omo@sisyphuslabs:hooks/session-start-checking-auto-update.json:session_start:0:0"]
+trusted_hash = "sha256:616d0acb19db0d28d70cff601d129af2cc368680ca0a32b1babcd58bcb5c9ea7"
+
+[hooks.state."omo@sisyphuslabs:hooks/session-start-checking-bootstrap-provisioning.json:session_start:0:0"]
+trusted_hash = "sha256:42a423b9880b025dced3437aa6759a2dc3a3f172e1165d9e04648f8de50bfdc5"
+
+[hooks.state."omo@sisyphuslabs:hooks/session-start-checking-codegraph-bootstrap.json:session_start:0:0"]
+trusted_hash = "sha256:23d0c8acb39b7880df5f50c12b1de558ff3f103b442eae5e6750d8badb33c976"
+
+[hooks.state."omo@sisyphuslabs:hooks/user-prompt-submit-loading-project-rules.json:user_prompt_submit:0:0"]
+trusted_hash = "sha256:2ee8b950ca1bee4c461261ef3f25e3d030febd43e85386b5064e95f0f95fe1f7"
+
+[hooks.state."omo@sisyphuslabs:hooks/user-prompt-submit-checking-ultrawork-trigger.json:user_prompt_submit:0:0"]
+trusted_hash = "sha256:29e9b6dd670e6f19a8eb108dc241d0a800c797c735efeb566b2e6b4e9d3f8c3e"
+
+[hooks.state."omo@sisyphuslabs:hooks/user-prompt-submit-checking-ulw-loop-steering.json:user_prompt_submit:0:0"]
+trusted_hash = "sha256:9f2f078ef712bf486a348bc7d90fc7876c7bb0fbac77ec4d5afd4f5fc166f9eb"
+
+[hooks.state."omo@sisyphuslabs:hooks/pre-tool-use-recommending-git-bash-mcp.json:pre_tool_use:0:0"]
+trusted_hash = "sha256:f492779c719d7b494e8ddb14a27e010c3797a405b104e99b5b3eba63ebf274eb"
+
+[hooks.state."omo@sisyphuslabs:hooks/pre-tool-use-enforcing-unlimited-goal-budget.json:pre_tool_use:0:0"]
+trusted_hash = "sha256:7e416e30199b490002f5f713c53d9e9374e4bf8cd1befd0eab3496454711f142"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-tool-use-checking-comments.json:post_tool_use:0:0"]
+trusted_hash = "sha256:47b24d26f8c5af5023bd7fe4bba494ff0997eb7b4db3db6af371cefeabe0e385"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-tool-use-checking-lsp-diagnostics.json:post_tool_use:0:0"]
+trusted_hash = "sha256:f67abe2d347c302da1d554fe3942ca63f1d589dbcb7e902fd900a3cb3b5ce3f1"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-tool-use-checking-codegraph-init-guidance.json:post_tool_use:0:0"]
+trusted_hash = "sha256:afa4ca216e809dee87b0f408ca99dc8ece2ec6a79be319b8ff7dbb27bf6eb490"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-tool-use-matching-project-rules.json:post_tool_use:0:0"]
+trusted_hash = "sha256:608e5095034a3215f264b04b49372b5dcceb8e66448185212ec1f87045ff99ca"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-tool-use-checking-thread-title-hygiene.json:post_tool_use:0:0"]
+trusted_hash = "sha256:b7b21b7775c030fe5a84747cdb9918b6a375df5bba0718e7895b8c03f3d24791"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-compact-resetting-git-bash-mcp-reminder.json:post_compact:0:0"]
+trusted_hash = "sha256:2327bf921895fd4265178e917d8a6dc84384bbae6d567ba62431a271c849e6c9"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-compact-resetting-project-rule-cache.json:post_compact:0:0"]
+trusted_hash = "sha256:d2784acbfcab46f57aa80187c9cbc25ea75bfc4d46d9d6a8b735fa975974f256"
+
+[hooks.state."omo@sisyphuslabs:hooks/post-compact-resetting-lsp-diagnostics-cache.json:post_compact:0:0"]
+trusted_hash = "sha256:34afb4a874210a8b95f1cbb58b6f44487471d18d030098269f882412fdc19daf"
+
+[hooks.state."omo@sisyphuslabs:hooks/stop-checking-start-work-continuation.json:stop:0:0"]
+trusted_hash = "sha256:9370f893a95f79e88fb55d85e4eeef6d70dec4b9e75ef3319ec8f16a34371220"
+
+[hooks.state."omo@sisyphuslabs:hooks/subagent-stop-checking-start-work-continuation.json:subagent_stop:0:0"]
+trusted_hash = "sha256:d25665d4877f31916ad5752d422c561357b17694741af04d15cdea7b830eaa5e"
+
+[hooks.state."omo@sisyphuslabs:hooks/subagent-stop-verifying-lazycodex-executor-evidence.json:subagent_stop:0:0"]
+trusted_hash = "sha256:0efa9dc687c3691ac972947d3ec800a643fb4d77f96a86e83c7199f6749deba8"
+
+[agents.explorer]
+config_file = "./agents/explorer.toml"
+
+[agents.lazycodex-clone-fidelity-reviewer]
+config_file = "./agents/lazycodex-clone-fidelity-reviewer.toml"
+
+[agents.lazycodex-code-reviewer]
+config_file = "./agents/lazycodex-code-reviewer.toml"
+
+[agents.lazycodex-executor]
+config_file = "./agents/lazycodex-executor.toml"
+
+[agents.lazycodex-gate-reviewer]
+config_file = "./agents/lazycodex-gate-reviewer.toml"
+
+[agents.lazycodex-qa-executor]
+config_file = "./agents/lazycodex-qa-executor.toml"
+
+[agents.librarian]
+config_file = "./agents/librarian.toml"
+
+[agents.metis]
+config_file = "./agents/metis.toml"
+
+[agents.momus]
+config_file = "./agents/momus.toml"
+
+[agents.plan]
+config_file = "./agents/plan.toml"
