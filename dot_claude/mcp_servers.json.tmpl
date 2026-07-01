@@ -1,5 +1,10 @@
 {{- $shared := .mcp_servers.shared -}}
 {{- $typed := index .mcp_servers .machine.purpose -}}
 {{- $peon := dict "peon-ping" (dict "command" "node" "args" (list (printf "%s/.claude/hooks/peon-ping/mcp/peon-mcp.js" .chezmoi.homeDir))) -}}
-{{- $all := merge $shared $typed $peon -}}
+{{- $path := printf "%s/.claude/mcp_servers.json" .chezmoi.homeDir -}}
+{{- $rawExisting := output "sh" "-c" (printf "test -f %q && cat %q || printf '{}'" $path $path) -}}
+{{- $existingJson := $rawExisting | fromJson -}}
+{{- $existing := $existingJson.mcpServers | default dict -}}
+{{- $managed := mergeOverwrite (dict) $shared $typed $peon -}}
+{{- $all := mergeOverwrite (dict) $existing $managed -}}
 {{ dict "mcpServers" $all | toPrettyJson }}
