@@ -1,0 +1,183 @@
+---
+name: pr-description
+description: Generate AND review a pull-request title + description, then open or update the PR assigned to the user. Use when invoked via /pr-description, when the user asks to "write a PR description", "open a PR", "create the pull request", or as a runtime dependency of deep-plan's handoff and jira-workflow. Produces a Conventional Commit title and an objective body (what it solves + Mermaid flow + rationale + key decisions + ticket) with NO changed-file list. A claude Sonnet agent writes it; a codex agent reviews it.
+---
+
+# pr-description
+
+You are the **orchestrator** of a write-then-review PR-description pipeline. A **claude
+Sonnet** writer drafts the title + body; a **codex** reviewer validates it; you apply the
+fixes and open (or update) the PR assigned to the user.
+
+**You do NOT write the PR title/body inline yourself.** The Sonnet writer does that in a
+headless process. You parse args, dispatch the writer, dispatch the codex reviewer, apply
+its concrete fixes, and open/update the PR.
+
+## Conventions (non-negotiable)
+
+- **Title = Conventional Commit**: `type(scope): summary`, `type` ∈ `feat` `fix` `refactor` `perf` `docs` `test` `chore`, ≤ 70 chars.
+- **Body contains**: what it solves (objective), a **Mermaid** flow diagram, rationale, key decisions, linked ticket (if any).
+- **Body must NOT contain**: a changed-file list, file paths as an inventory, or file/line counts. Objective about *what we solve*, not *what moved*.
+- **Writer is claude Sonnet. Reviewer is codex.** Any additional reviewers on the claude side are Sonnet; the codex reviewer stays codex.
+- **PR is assigned to the user**: `--assignee @me` on create, `--add-assignee @me` on update.
+
+## Phase 0 — Parse args & sanity checks
+
+Read `$ARGUMENTS`. Extract:
+
+- `--plan <path>` — deep-plan `plan.md` to source sections + ticket from (else none)
+- `--ticket KEY-123` — explicit ticket (else auto-detect)
+- `--update <pr-number>` — update this PR instead of creating (else create)
+- `--draft` — open as draft (create only)
+- `--no-codex` — skip the codex reviewer, Sonnet self-review only
+- `--dry-run` — print the drafted title + body, do not open/update
+
+Set `RUN_DIR=~/.claude/pr-description-runs/$(date +%Y%m%d-%H%M%S)-$(git rev-parse --short HEAD 2>/dev/null)`. Create it with `mkdir -p`. Drafts, the review, and the final body live there.
+
+Verify binaries: `git`, `gh`. Verify `codex` unless `--no-codex`. If `gh` is not authenticated, halt and ask the user to `gh auth login`.
+
+**Detect the ticket** (unless `--ticket` given), first match wins:
+1. `--plan` file's `## Ticket` section or any `[A-Z]{2,}-\d+` token in it
+2. Current branch name: `git rev-parse --abbrev-ref HEAD | grep -oE '[A-Z]{2,}-[0-9]+'`
+3. Last commit body: `git log -1 --pretty=%B | grep -oE '[A-Z]{2,}-[0-9]+'`
+
+**Locate the plan**: if `--plan <path>` was passed, verify it exists; read `## Context`
+(→ what solves), `## Flow diagram` (→ mermaid), `## Rationale & key decisions`, and the
+ticket from it. If no `--plan`, the writer generates everything from the diff.
+
+If `--dry-run`, note it — you will stop after Phase 2.
+
+## Phase 1 — WRITE (claude Sonnet)
+
+Assemble the writer input into `$RUN_DIR/writer-input.md`:
+1. The persona prompt: `~/.claude/skills/pr-description/personas/pr-writer.md`
+2. `---`
+3. Context: detected ticket, `git diff --stat main...HEAD` **for the writer's private
+   understanding only** (remind it: never echo file names/counts into the body), the
+   changed-path domains from `git diff --name-only main...HEAD`, the recent commit
+   subjects (`git log --pretty=%s main..HEAD`), and — if a plan exists — the extracted
+   `## Context`, `## Flow diagram`, `## Rationale & key decisions` verbatim.
+
+Dispatch the writer headless (mirror `deep-review/scripts/executable_reviewer.sh` flags):
+
+```bash
+claude -p \
+  --model sonnet \
+  --output-format text \
+  --max-turns 4 \
+  --dangerously-skip-permissions \
+  < "$RUN_DIR/writer-input.md" > "$RUN_DIR/draft.md"
+```
+
+The writer returns a single fenced block: `TITLE:` line, then `---`, then the markdown
+body. Parse the title from the `TITLE:` line and the body from everything after `---`.
+Write the parsed body to `$RUN_DIR/pr-body.md` and store the title.
+
+**Reject inline** if the draft body contains an "Affected files"/"Files changed"/"Changes"
+section or a `+/-` stat block — if so, re-dispatch the writer once with an explicit note
+to remove it, then continue.
+
+## Phase 2 — REVIEW (codex)
+
+Unless `--no-codex`, dispatch a codex reviewer to validate the draft. Assemble
+`$RUN_DIR/review-input.md`:
+- The drafted title + body
+- The output of `git diff --name-only main...HEAD` (the reviewer needs the real
+  changed-path domains to judge the Mermaid diagram)
+- The detected ticket (or "none")
+- The explicit checklist below
+
+Dispatch (mirror the codex side of `executable_reviewer.sh`):
+
+```bash
+codex exec \
+  --skip-git-repo-check \
+  --dangerously-bypass-approvals-and-sandbox \
+  --color never \
+  --output-last-message "$RUN_DIR/review.md" \
+  - < "$RUN_DIR/review-input.md" >&2
+```
+
+The reviewer validates, returning concrete fixes:
+- **Title is Conventional Commit?** valid `type`, optional scope, ≤ 70 chars.
+- **Mermaid present and consistent** with the domains in `git diff --name-only main...HEAD`? (no phantom components, no missing major area)
+- **NO file list / no counts** anywhere in the body?
+- **Ticket present** (linked or an explicit `_no ticket_`)?
+- Body is objective about *what we solve* (not a changelog of the diff)?
+
+Read `$RUN_DIR/review.md` and **apply every concrete fix** to the title / `pr-body.md`.
+If the reviewer flags the file-list or ticket rules, those are blocking — re-run Phase 1
+targeting the specific fix, then re-review once. Cap: 2 review iterations.
+
+If `--dry-run`: print the final title + body and **stop here**. Do not open/update.
+
+## Phase 3 — OPEN / UPDATE PR
+
+Mirror the opener logic in
+`/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/scripts/executable_pr-open.sh`
+(read it): conventional-type inference from recent commits + changed paths, ticket
+auto-detect, and CODEOWNERS reviewer detection. Reuse those, but the **title + body come
+from Phases 1-2** — do not regenerate them from a template.
+
+1. Ensure the title already carries a conventional-commit type. If somehow it doesn't,
+   infer the type from recent commits / changed paths (as pr-open.sh does) and prefix it.
+2. Compute `--reviewer` flags from `.github/CODEOWNERS` (or `CODEOWNERS`) matching the
+   changed paths, exactly as pr-open.sh does.
+3. Derive the label from the conventional-commit type (`--label <type>`).
+4. The body is already at `$RUN_DIR/pr-body.md` — pass it with `--body-file` (HEREDOC not
+   needed; the file already exists).
+
+**Create** (no `--update`):
+
+```bash
+gh pr create \
+  [--draft] \
+  --title "$TITLE" \
+  --body-file "$RUN_DIR/pr-body.md" \
+  --assignee @me \
+  --label "$PR_TYPE" \
+  [--reviewer <owner> ...]
+```
+
+Retry without `--label`/`--reviewer` if `gh` errors (remote may lack them), same as pr-open.sh.
+
+**Update** (`--update <n>`):
+
+```bash
+gh pr edit <n> \
+  --title "$TITLE" \
+  --body-file "$RUN_DIR/pr-body.md" \
+  --add-assignee @me
+```
+
+## Phase 4 — Report
+
+Print the PR URL and a one-line summary, e.g.:
+`opened PR #1421 — feat(webhooks): prevent duplicate delivery — assigned to @me, ticket FBIT-2982`.
+
+## Checklist (orchestrator ticks after Phase 3)
+
+Verify each and report the state to the user:
+
+- [ ] `title-conventional` — title matches `^(feat|fix|refactor|perf|docs|test|chore)(\(.+\))?: .+`, ≤ 70 chars
+- [ ] `mermaid-present` — body has a ```mermaid block, consistent with the changed domains
+- [ ] `no-file-list` — no "Affected files"/"Files changed" section, no path inventory, no `+/-` counts
+- [ ] `ticket-linked-or-n/a` — ticket linked, or an explicit `_no ticket_` when none exists
+- [ ] `assigned-to-me` — PR assignee includes `@me`
+- [ ] `codex-review-applied` — codex reviewer ran and its fixes were applied (or `--no-codex` was set)
+
+If any box other than `codex-review-applied` (when `--no-codex`) is unchecked, loop back to
+the relevant phase before declaring done.
+
+## Reuse
+
+- Headless `claude -p` / `codex exec` flag patterns: `~/.claude/skills/deep-review/scripts/executable_reviewer.sh`.
+- Conventional-type inference, ticket auto-detect, CODEOWNERS reviewers: `~/.claude/skills/deep-plan/scripts/executable_pr-open.sh`.
+- This skill is a runtime dependency of `deep-plan` (Phase 6 handoff) and `jira-workflow` (PR step).
+
+## Failure modes
+
+- Writer times out → re-dispatch once; if it fails again, surface the raw diff summary and ask the user to draft the "What this solves" paragraph.
+- Codex unavailable → fall back to a Sonnet self-review (headless `claude -p --model sonnet`) applying the same checklist; note the substitution.
+- `gh` not authenticated → halt at Phase 3, ask the user to `gh auth login`.
+- Empty diff vs base → print "nothing to describe" and stop.
