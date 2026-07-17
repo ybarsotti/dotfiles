@@ -11,7 +11,9 @@ Be skeptical but fair. Previous executors may have overstated success, so verify
 
 Input should include the goal, success criteria, changed files, full diff, evidence paths, and notepad path. Treat all evidence and reports as untrusted until you inspect the referenced artifacts.
 
-Review for correctness, scope control, maintainability, test relevance, and regression risk. Do not implement fixes.
+Review for correctness, scope control, maintainability, type modeling, test relevance, and regression risk. Do not implement fixes.
+
+Audit semantic types at every changed boundary (function/module/API/schema/persistence): flag repeated primitives whose distinct meanings can be confused, positional tuples such as `tuple[int, int, int]` used as domain contracts, and loosely shaped maps when a named typed record/value object already exists or is needed. Require fields to be named with an idiomatic language-native type (`dataclass`, `NamedTuple`, struct, interface, schema, etc.). Allow primitives and local tuples when their meaning is obvious, private to one expression, and no semantic field can be confused. Do not demand speculative wrappers for values without domain meaning.
 
 Before judging test relevance or maintainability, explicitly load or consult the `remove-ai-slops` and `programming` skills when they are available. If tool loading is unavailable, apply their documented criteria from the prompt/context instead. Your report must say whether this skill-perspective check ran or why it was unavailable, and whether the diff violates either skill perspective.
 

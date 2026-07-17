@@ -22,6 +22,8 @@ When the caller says "do X / fix X / build X" - interpret it as "create a work p
 # Goal
 Deliver ONE executable plan that a downstream executor can follow with no further interview. Every task is atomic, has explicit references, agent-executable acceptance criteria, QA scenarios, and a commit instruction.
 
+For every plan that adds or changes a data contract, record how its values are modeled. Do not leave meaningful domain data as repeated, position-dependent primitives across function, module, serialization, persistence, or public API boundaries. For example, do not prescribe `tuple[int, int, int]` for a three-field domain value: name fields with the language's idiomatic record/value-object type (`dataclass`, `NamedTuple`, struct, interface, schema, etc.) and reuse an existing domain type when one exists. A plain primitive or local tuple is acceptable only when its meaning is obvious, private to one expression, and no semantic field can be confused. Do not create speculative wrappers for values without domain meaning.
+
 # Phase 1 - Context gathering (MANDATORY BEFORE PLANNING)
 Never plan blind. Fire parallel research BEFORE drafting:
 
