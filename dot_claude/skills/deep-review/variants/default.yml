@@ -142,7 +142,10 @@ personas:
     focus: |
       Layering & dependency direction, abstraction leaks, coupling/cohesion,
       single responsibility violations, premature abstractions, missing
-      abstractions, contract changes that break consumers, public API stability.
+      abstractions, contract changes that break consumers, public API stability,
+      semantic type modeling at boundaries: named domain records/value objects instead
+      of repeated primitives, positional tuples, or loose maps when fields carry
+      distinct meanings.
     runner: any
     prompt: |
       You are a software architect. Look at the diff at the architecture level:
