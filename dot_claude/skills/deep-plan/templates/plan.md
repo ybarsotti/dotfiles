@@ -146,7 +146,13 @@ docs). Use `### Q:` / `### A:` headers. If `--skip-grill` was passed, write exac
 
 ## Superpowers invoked
 <!-- Planning-phase skills are validated (required). The execution-phase skills run AFTER
-     the plan is approved (during the handoff), so they are tracked but not required here. -->
+     the plan is approved (during the handoff), so they are tracked but not required here.
+     Never hand-edit a `[ ]`/`[x]` — call `scripts/superpowers-invoke.sh "$RUN_DIR" <skill>`,
+     which records a receipt and ticks the box together.
+     To decline a required (planning-phase) skill instead of running it, annotate the line
+     with the words `not invoked` — exact wording after that is free-form, e.g.:
+     `- [ ] grill-with-docs — not invoked; --skip-grill was passed`
+     `- [ ] plannotator-annotate — not invoked as a skill; plannotator CLI unavailable, printed inline` -->
 - [ ] grill-with-docs — <when>
 - [ ] brainstorming — <when>
 - [ ] writing-plans — <when>

@@ -26,6 +26,8 @@ done
 command -v jq >/dev/null 2>&1 || { echo "validate-plan.sh: jq required" >&2; exit 2; }
 
 PLAN_DIR=$(dirname "$PLAN")
+SCRATCH=$(mktemp -d)
+trap 'rm -rf "$SCRATCH"' EXIT
 RESULTS=()
 
 record() {
@@ -34,8 +36,19 @@ record() {
     '{item:$i, status:$s, detail:$d}')")
 }
 
+# section_body HEADING — the body of a `## HEADING` section, up to the next
+# `## `. Fence-aware: a fenced illustrative example elsewhere in the plan
+# (e.g. showing another section's exact format) that happens to contain a
+# line matching `## HEADING` must never be mistaken for the real section
+# boundary, and content while inside any fence is never collected as body.
 section_body() {
-  awk -v h="$1" 'BEGIN{flag=0} $0 ~ "^## " h "$" {flag=1; next} /^## / {flag=0} flag' "$PLAN"
+  awk -v h="$1" '
+    /^```/ { infence = !infence; next }
+    infence { next }
+    $0 ~ "^## " h "$" { flag=1; next }
+    /^## / { flag=0 }
+    flag
+  ' "$PLAN"
 }
 
 # ─── Universal checks (both root and subplan) ─────────────────────────────
@@ -102,8 +115,15 @@ fi
 
 # 4.6. superpowers:writing-plans task format — `### Task N:` blocks with Files/Interfaces
 # and bite-sized checkbox steps. Placeholder task titles (`### Task 1: <Component Name>`)
-# don't count: an unedited template must fail.
-TASK_TITLES=$(grep -cE '^### Task [0-9]+: [^<]' "$PLAN")
+# don't count: an unedited template must fail. Fence-aware: a task's own body may show an
+# illustrative `### Task N:` example inside a ``` block (as Task 3's own real-plan body
+# does) — that must never be counted as a real task title.
+TASK_TITLES=$(awk '
+  /^```/ { infence = !infence; next }
+  infence { next }
+  /^### Task [0-9]+: [^<]/ { c++ }
+  END { print c + 0 }
+' "$PLAN")
 if [ "$TASK_TITLES" -ge 1 ]; then
   record "tasks-≥1" "pass" "$TASK_TITLES task block(s)"
 else
@@ -112,7 +132,11 @@ fi
 
 # Every task block must declare Files + Interfaces, and carry ≥4 checkbox steps
 # (failing test → run it → implement → run it again; commit makes 5).
+# Fence-aware for the same reason as TASK_TITLES above — an illustrative fenced
+# example inside a task's own steps must never contribute to that task's counts.
 TASK_ISSUES=$(awk '
+  /^```/ { infence = !infence; next }
+  infence { next }
   /^### Task [0-9]+:/ {
     if (title != "") check()
     title = $0; files = 0; ifaces = 0; steps = 0; next
@@ -270,17 +294,33 @@ if [ "$MODE" = "root" ]; then
     record "qa-flag-set" "fail" "'## QA / test-execution' must answer yes/no (changes flows or adds screens?)"
   fi
 
-  # 10. Superpowers all invoked — every `- [ ]` line under `## Superpowers
-  # invoked` (including its nested `### Handoff` subsection) must be either a
-  # receipted `[x]` tick or an explicit declination of the form
-  # `- [ ] <skill> — not invoked; <reason>`; a bare, unannotated `[ ]` fails.
+  # 10. Superpowers all invoked — every `- [ ]` line under the REQUIRED
+  # (planning-phase) part of `## Superpowers invoked` must be either a
+  # receipted `[x]` tick or an explicit declination containing the words
+  # `not invoked` (e.g. `- [ ] <skill> — not invoked; <reason>` or
+  # `- [ ] <skill> — not invoked as a skill; <reason>` — both real forms seen
+  # in practice; no semicolon or exact phrasing is required beyond those two
+  # words). The template's own `### Handoff` subsection is explicitly NOT
+  # required here — its skills run during execution, after plan approval —
+  # so the body used for this check stops at the first `## ` OR `### `
+  # heading, unlike `superpowers-ticks-have-receipts` below, which must keep
+  # seeing ticks anywhere in the section (Handoff included) so a forged tick
+  # there still gets caught. Fence-aware: an illustrative fenced example
+  # elsewhere in the plan must never be mistaken for this section's body.
   # A tick with no receipt is a separate failure, caught below by
   # `superpowers-ticks-have-receipts`.
-  UNRESOLVED_SP=$(sed -n '/^## Superpowers invoked/,/^## /p' "$PLAN" |
-    sed -n 's/^- \[ \] \([a-z0-9-]*\)\([^\n]*\)/\1\t\2/p' |
-    awk -F'\t' '$2 !~ /not invoked;/ {print $1}')
+  SP_REQUIRED_BODY=$(awk '
+    /^```/ { infence = !infence; next }
+    infence { next }
+    /^## Superpowers invoked/ { inside=1; next }
+    inside && (/^## / || /^### /) { inside=0 }
+    inside
+  ' "$PLAN")
+  UNRESOLVED_SP=$(printf '%s\n' "$SP_REQUIRED_BODY" |
+    sed -n 's/^- \[ \] \([a-z0-9-]*\)\(.*\)/\1\t\2/p' |
+    awk -F'\t' '$2 !~ /(^|[^A-Za-z])not invoked([^A-Za-z]|$)/ {print $1}')
   if [ -z "$UNRESOLVED_SP" ]; then
-    record "superpowers-all-invoked" "pass" "every skill ticked-with-receipt or explicitly declined"
+    record "superpowers-all-invoked" "pass" "every required (planning-phase) skill ticked-with-receipt or explicitly declined"
   else
     record "superpowers-all-invoked" "fail" "unresolved (bare, unannotated): $(echo "$UNRESOLVED_SP" | tr '\n' ',' | sed 's/,$//')"
   fi
@@ -290,54 +330,10 @@ if [ "$MODE" = "root" ]; then
   # plan-to-json.sh is the sole source of lanes, contract, affected paths,
   # and task-to-lane tags — never re-derive any of this by hand here.
 
-  # owns_match PATH PATTERN — exact-path or `/**`-prefix ownership match.
-  # The `**` in both case arms is quoted so it matches the literal two
-  # characters, not a glob wildcard — unquoted, `*/**` matches ANY string
-  # containing a `/` (since `**` degrades to `*` under glob rules), which
-  # silently misclassifies every ordinary exact path with a directory
-  # separator (i.e. almost all real repo paths) as a `/**`-prefix pattern.
-  owns_match() {
-    local path="$1" pattern="$2" prefix
-    case "$pattern" in
-      */'**')
-        prefix=${pattern%/'**'}
-        case "$path" in "$prefix" | "$prefix"/*) return 0 ;; esac
-        ;;
-      *) [ "$path" = "$pattern" ] && return 0 ;;
-    esac
-    return 1
-  }
-
-  # valid_owns_pattern PATTERN — repo-relative exact path, or a directory
-  # prefix ending in the literal `/**`; no other wildcard, no absolute path,
-  # no `..` traversal.
-  valid_owns_pattern() {
-    local p="$1"
-    case "$p" in
-      /*) return 1 ;;
-      *..*) return 1 ;;
-      *'*'*)
-        case "$p" in
-          */'**') return 0 ;;
-          *) return 1 ;;
-        esac
-        ;;
-      *) return 0 ;;
-    esac
-  }
-
-  # owns_overlap A B — true when two ownership patterns are equal, or one is
-  # a `/**`-prefix covering the other (nested prefix, and an exact path under
-  # the other's prefix, both count as overlap).
-  owns_overlap() {
-    local a="$1" b="$2" pa pb
-    [ "$a" = "$b" ] && return 0
-    case "$a" in */'**') pa=${a%/'**'} ;; *) pa="$a" ;; esac
-    case "$b" in */'**') pb=${b%/'**'} ;; *) pb="$b" ;; esac
-    owns_match "$pa" "$b" && return 0
-    owns_match "$pb" "$a" && return 0
-    return 1
-  }
+  # owns_match / valid_owns_pattern / owns_overlap — shared with
+  # subplan-fanout.sh via owns-lib.sh (see that file for behavior notes).
+  # shellcheck source=./owns-lib.sh
+  . "$(dirname "$0")/owns-lib.sh"
 
   PARSER="$(dirname "$0")/plan-to-json.sh"
   [ -f "$PARSER" ] || PARSER="$(dirname "$0")/executable_plan-to-json.sh"
@@ -735,21 +731,110 @@ if [ "$MODE" = "root" ]; then
 
   # 21. superpowers-ticks-have-receipts — always runs for real, in every
   # mode (parallel, serial, or malformed), since it guards plan integrity
-  # rather than execution shape.
+  # rather than execution shape. Sees ticks ANYWHERE in the section,
+  # including the `### Handoff` subsection that item 10 above exempts from
+  # being required — a forged tick on a Handoff item must still fail here.
+  #
+  # This is tamper-EVIDENT, not tamper-proof. It verifies three things about
+  # each line of RUN_DIR/superpowers-receipts.log (format documented in
+  # superpowers-invoke.sh's header):
+  #   (a) the hash chain recomputes end-to-end — the first line whose
+  #       recorded hash doesn't match sha256(previous-chain-hash + this
+  #       line's tab-joined payload) fails loudly, naming that line;
+  #   (b) every recorded repo-head-sha that isn't the literal `no-git` names
+  #       a real commit that is an ancestor of the checkable repo's current
+  #       HEAD;
+  #   (c) every `[x]` tick in the plan has a matching line that passed both
+  #       (a) and (b).
+  # Anyone who can compute sha256 and has read this algorithm can still
+  # forge a self-consistent chain; anyone who can rewrite local git history
+  # can mint a commit for a fake receipt to point at. This mechanism raises
+  # the cost of forging a receipt — it does not make forgery impossible. The
+  # 0444 chmod superpowers-invoke.sh applies to the log is a cheap speed
+  # bump against casual editing, not protection against either attack.
   RECEIPTS="${PLAN_DIR}/superpowers-receipts.log"
+
+  if command -v sha256sum >/dev/null 2>&1; then
+    SHA_CMD=(sha256sum)
+  else
+    SHA_CMD=(shasum -a 256)
+  fi
+
+  # Resolve a repo to verify repo-head-shas against, the same way
+  # superpowers-invoke.sh resolves one to record them: prefer the plan's own
+  # location, fall back to this process's cwd.
+  REPO_FOR_CHECK=""
+  if RG=$(git -C "$PLAN_DIR" rev-parse --show-toplevel 2>/dev/null); then
+    REPO_FOR_CHECK="$RG"
+  elif RG=$(git rev-parse --show-toplevel 2>/dev/null); then
+    REPO_FOR_CHECK="$RG"
+  fi
+
+  CHAIN_ISSUE=""
+  SHA_ISSUE=""
+  : >"${SCRATCH}/valid-receipt-skills"
+
+  if [ -f "$RECEIPTS" ]; then
+    PREV_HASH=""
+    LINE_NO=0
+    while IFS=$'\t' read -r r_ts r_skill r_sha r_hash; do
+      LINE_NO=$((LINE_NO + 1))
+      { [ -z "$r_ts" ] && [ -z "$r_skill" ]; } && continue
+      LINE_OK=1
+
+      if [ -z "$r_hash" ]; then
+        # Old-format line (3 fields, pre-dates repo-sha anchoring) — never
+        # valid under the current contract.
+        [ -z "$CHAIN_ISSUE" ] && CHAIN_ISSUE="line ${LINE_NO} (skill=${r_skill:-?}): old-format receipt (missing repo-sha/hash fields)"
+        LINE_OK=0
+      else
+        PAYLOAD=$(printf '%s\t%s\t%s' "$r_ts" "$r_skill" "$r_sha")
+        EXPECT_HASH=$(printf '%s%s' "$PREV_HASH" "$PAYLOAD" | "${SHA_CMD[@]}" | awk '{print $1}')
+        if [ "$EXPECT_HASH" != "$r_hash" ]; then
+          [ -z "$CHAIN_ISSUE" ] && CHAIN_ISSUE="line ${LINE_NO} (skill=${r_skill}): hash chain broken"
+          LINE_OK=0
+        fi
+
+        if [ "$r_sha" != "no-git" ]; then
+          if [ -z "$REPO_FOR_CHECK" ]; then
+            SHA_ISSUE="${SHA_ISSUE}${SHA_ISSUE:+, }line ${LINE_NO}:${r_sha}(no git repo to verify against)"
+            LINE_OK=0
+          elif ! git -C "$REPO_FOR_CHECK" cat-file -e "${r_sha}^{commit}" 2>/dev/null; then
+            SHA_ISSUE="${SHA_ISSUE}${SHA_ISSUE:+, }line ${LINE_NO}:${r_sha}(not-a-commit)"
+            LINE_OK=0
+          elif ! git -C "$REPO_FOR_CHECK" merge-base --is-ancestor "$r_sha" HEAD 2>/dev/null; then
+            SHA_ISSUE="${SHA_ISSUE}${SHA_ISSUE:+, }line ${LINE_NO}:${r_sha}(not-ancestor-of-HEAD)"
+            LINE_OK=0
+          fi
+        fi
+      fi
+
+      [ "$LINE_OK" -eq 1 ] && echo "$r_skill" >>"${SCRATCH}/valid-receipt-skills"
+      PREV_HASH="$r_hash"
+    done <"$RECEIPTS"
+  fi
+
   MISSING=""
   while IFS= read -r skill; do
-    if [ ! -f "$RECEIPTS" ] || ! awk -F'\t' -v s="$skill" '$2 == s {found=1} END {exit !found}' \
-      "$RECEIPTS"; then
+    [ -z "$skill" ] && continue
+    grep -qxF "$skill" "${SCRATCH}/valid-receipt-skills" 2>/dev/null ||
       MISSING="${MISSING}${MISSING:+, }${skill}"
-    fi
-  done < <(sed -n '/^## Superpowers invoked/,/^## /p' "$PLAN" |
-    sed -n 's/^- \[x\] \([a-z0-9-]*\).*/\1/p')
+  done < <(awk '
+    /^```/ { infence = !infence; next }
+    infence { next }
+    /^## Superpowers invoked/ { inside=1; next }
+    inside && /^## / { inside=0 }
+    inside
+  ' "$PLAN" | sed -n 's/^- \[x\] \([a-z0-9-]*\).*/\1/p')
 
-  if [ -n "$MISSING" ]; then
-    record "superpowers-ticks-have-receipts" "fail" "ticked without a receipt: ${MISSING}"
+  if [ -n "$CHAIN_ISSUE" ]; then
+    record "superpowers-ticks-have-receipts" "fail" "$CHAIN_ISSUE"
+  elif [ -n "$SHA_ISSUE" ]; then
+    record "superpowers-ticks-have-receipts" "fail" "invalid repo-sha: ${SHA_ISSUE}"
+  elif [ -n "$MISSING" ]; then
+    record "superpowers-ticks-have-receipts" "fail" "ticked without a valid receipt: ${MISSING}"
   else
-    record "superpowers-ticks-have-receipts" "pass" "every ticked skill has a receipt"
+    record "superpowers-ticks-have-receipts" "pass" "every ticked skill has a chain-valid, ancestor-verified receipt"
   fi
 fi
 

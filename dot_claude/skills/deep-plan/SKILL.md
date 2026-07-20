@@ -235,7 +235,7 @@ for sub in "$RUN_DIR"/subplans/*.md; do
   ~/.claude/skills/deep-plan/scripts/tick-checklist.sh "$sub" --subplan
 done
 ```
-The LLM **never** edits `[ ]`/`[x]` directly. The checklist must show all `[x]` before proceeding. The same rule covers `## Superpowers invoked`: never hand-edit its boxes; call `scripts/superpowers-invoke.sh "$RUN_DIR" <skill>` instead, which records a receipt and ticks the box together — `validate-plan.sh`'s `superpowers-ticks-have-receipts` check fails any tick that has no matching receipt.
+The LLM **never** edits `[ ]`/`[x]` directly. The checklist must show all `[x]` before proceeding. The same rule covers `## Superpowers invoked`: never hand-edit its boxes; call `scripts/superpowers-invoke.sh "$RUN_DIR" <skill>` instead, which records a receipt (chained by hash, anchored to the project repo's HEAD commit) and ticks the box together — `validate-plan.sh`'s `superpowers-ticks-have-receipts` check fails any tick that lacks a chain-valid, ancestor-verified receipt. This is tamper-evident, not tamper-proof — see the header comment in `scripts/superpowers-invoke.sh` for what it does and doesn't guarantee.
 
 Confirm the plan includes, at minimum:
 - The **`superpowers:writing-plans` document header** + an **`## Implementation tasks`** section in that skill's exact task format (`### Task N:` + Files + Interfaces + bite-sized checkbox steps with real code).

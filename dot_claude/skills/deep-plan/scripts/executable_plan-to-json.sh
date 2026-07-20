@@ -17,9 +17,11 @@
 # contract to distinguish "nothing declared" from "parsing failed"):
 #   0 — ok, including the graceful-degradation cases above
 #   1 — malformed content: a `|`-delimited table row that doesn't split
-#       into its declared column count (see stderr for which row), or a
+#       into its declared column count (see stderr for which row), a
 #       raw `\001` byte in the plan file (reserved as the internal
-#       pipe-escape sentinel, see SENTINEL below)
+#       pipe-escape sentinel, see SENTINEL below), or a heading that looks
+#       like `## Execution shape` but doesn't match it exactly (typo, wrong
+#       heading level, trailing whitespace — see the near-miss guard below)
 #   2 — missing plan file, or jq not installed
 
 set -eufo pipefail
@@ -54,9 +56,56 @@ TASKS_NDJSON="${SCRATCH}/tasks.ndjson"
 : >"$LANES_NDJSON"
 : >"$TASKS_NDJSON"
 
+# section_body HEADING — the body of an exact `## HEADING` line, up to the
+# next `## `. Fence-aware: a fenced illustrative example elsewhere in the
+# plan (e.g. this pipeline's own docs, showing another section's format)
+# that happens to contain a line matching `## HEADING` must never be
+# mistaken for the real section boundary, and content while inside any
+# fence is never collected as body.
 section_body() {
-  awk -v h="$1" '$0 == "## " h {inside=1; next} /^## / {inside=0} inside' "$PLAN"
+  awk -v h="$1" '
+    /^```/ { infence = !infence; next }
+    infence { next }
+    $0 == "## " h { inside=1; next }
+    /^## / { inside=0 }
+    inside
+  ' "$PLAN"
 }
+
+# Guard: a heading that clearly MEANS "## Execution shape" — same text,
+# case-insensitively, once de-hashed and trimmed — but isn't written exactly
+# that way (a typo, the wrong heading level like `### Execution shape`, or
+# trailing whitespace) must fail loudly rather than silently degrade to
+# serial/legacy behavior, because the plan clearly intended to declare an
+# execution shape. A heading that is genuinely absent (no near-miss at all)
+# is a legitimate serial-plan signal and must still degrade quietly — that
+# path is handled below by section_body simply returning nothing.
+# Fence-aware for the same reason section_body is: an illustrative fenced
+# example must never trigger this guard.
+NEAR_MISS_HEADING=$(awk -v canon="Execution shape" '
+  /^```/ { infence = !infence; next }
+  infence { next }
+  {
+    raw = $0
+    line = raw
+    sub(/^[ \t]+/, "", line)
+    if (line ~ /^#+[ \t]/) {
+      rest = line
+      sub(/^#+[ \t]+/, "", rest)
+      sub(/[ \t]+$/, "", rest)
+      if (tolower(rest) == tolower(canon) && raw != ("## " canon)) {
+        print NR"\t"raw
+      }
+    }
+  }
+' "$PLAN")
+if [ -n "$NEAR_MISS_HEADING" ]; then
+  echo "plan-to-json.sh: heading looks like '## Execution shape' but does not match it exactly (typo, wrong heading level, or trailing whitespace) — fix it to read exactly '## Execution shape', or remove it if no shape is meant:" >&2
+  printf '%s\n' "$NEAR_MISS_HEADING" | while IFS=$'\t' read -r n l; do
+    printf '  line %s: %s\n' "$n" "$l" >&2
+  done
+  exit 1
+fi
 
 # strip_cell: trims whitespace, strips backticks, turns <br> into newlines,
 # and restores the `\|` sentinel to a literal `|` — the cleanup every
