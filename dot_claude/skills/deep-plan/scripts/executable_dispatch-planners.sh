@@ -17,16 +17,29 @@ NO_CODEX="${3:-}"
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATE="${SKILL_DIR}/templates/plan.md"
 RUNNER="${SKILL_DIR}/scripts/runner.sh"
-WP_GUIDANCE="${RUN_DIR}/writing-plans-guidance.md"
-
 mkdir -p "${RUN_DIR}/logs"
 
+# The planners must LOAD superpowers:writing-plans themselves — we never paste its body
+# into the prompt. Claude planners invoke the Skill tool; codex reads the skill file, so
+# resolve its path here (newest install wins) and hand over the path only.
+WP_SKILL_PATH=$(find "${HOME}/.claude/plugins" "${HOME}/.claude/skills" \
+  -path '*writing-plans/SKILL.md' -not -path '*temp_git_*' 2>/dev/null | sort | tail -1)
+
+# shellcheck disable=SC2016  # backticks below are Markdown, not command substitution
 build_prompt() {
-  local persona_file="$1"
+  local persona_file="$1" runner="$2"
   cat "$persona_file"
-  if [ -f "$WP_GUIDANCE" ]; then
-    printf '\n\n---\n\n## superpowers:writing-plans guidance (follow strictly)\n\n'
-    cat "$WP_GUIDANCE"
+  printf '\n\n---\n\n## Required skill (load it, do not improvise)\n\n'
+  if [ "$runner" = "claude" ]; then
+    printf 'Before writing anything, invoke: Skill(skill="superpowers:writing-plans").\n'
+    printf 'Follow it verbatim for the plan header, File Structure and `### Task N:` blocks.\n'
+  else
+    if [ -n "$WP_SKILL_PATH" ]; then
+      printf 'Before writing anything, read the writing-plans skill at:\n  %s\n' "$WP_SKILL_PATH"
+    else
+      printf 'Before writing anything, load your `writing-plans` skill.\n'
+    fi
+    printf 'Follow it verbatim for the plan header, File Structure and `### Task N:` blocks.\n'
   fi
   printf '\n\n---\n\n## Task\n%s\n\n---\n\n## Target skeleton\n\n' "$TASK_DESC"
   cat "$TEMPLATE"
@@ -35,7 +48,7 @@ build_prompt() {
 
 # Opus planner
 OPUS_PROMPT=$(mktemp)
-build_prompt "${SKILL_DIR}/personas/planner-opus.md" > "$OPUS_PROMPT"
+build_prompt "${SKILL_DIR}/personas/planner-opus.md" claude > "$OPUS_PROMPT"
 "$RUNNER" claude opus "$OPUS_PROMPT" 900 \
   > "${RUN_DIR}/draft-opus.md" \
   2> "${RUN_DIR}/logs/planner-opus.log" &
@@ -45,7 +58,7 @@ OPUS_PID=$!
 CODEX_PID=""
 if [ "$NO_CODEX" != "--no-codex" ]; then
   CODEX_PROMPT=$(mktemp)
-  build_prompt "${SKILL_DIR}/personas/planner-codex.md" > "$CODEX_PROMPT"
+  build_prompt "${SKILL_DIR}/personas/planner-codex.md" codex > "$CODEX_PROMPT"
   "$RUNNER" codex "" "$CODEX_PROMPT" 900 \
     > "${RUN_DIR}/draft-codex.md" \
     2> "${RUN_DIR}/logs/planner-codex.log" &

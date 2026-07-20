@@ -100,6 +100,54 @@ else
   record "clarifying-questions-asked" "fail" "Q=$QPAIRS A=$APAIRS (need ≥1 matched non-placeholder pair or '_no ambiguity_')"
 fi
 
+# 4.6. superpowers:writing-plans task format — `### Task N:` blocks with Files/Interfaces
+# and bite-sized checkbox steps. Placeholder task titles (`### Task 1: <Component Name>`)
+# don't count: an unedited template must fail.
+TASK_TITLES=$(grep -cE '^### Task [0-9]+: [^<]' "$PLAN")
+if [ "$TASK_TITLES" -ge 1 ]; then
+  record "tasks-≥1" "pass" "$TASK_TITLES task block(s)"
+else
+  record "tasks-≥1" "fail" "no '### Task N: <name>' blocks (superpowers:writing-plans format required)"
+fi
+
+# Every task block must declare Files + Interfaces, and carry ≥4 checkbox steps
+# (failing test → run it → implement → run it again; commit makes 5).
+TASK_ISSUES=$(awk '
+  /^### Task [0-9]+:/ {
+    if (title != "") check()
+    title = $0; files = 0; ifaces = 0; steps = 0; next
+  }
+  /^## / && title != "" { check(); title = "" }
+  title != "" && /^\*\*Files:\*\*/      { files = 1 }
+  title != "" && /^\*\*Interfaces:\*\*/ { ifaces = 1 }
+  title != "" && /^- \[[ x]\] \*\*Step/ { steps++ }
+  END { if (title != "") check() }
+  function check(   miss) {
+    miss = ""
+    if (!files)  miss = miss " no-Files-block"
+    if (!ifaces) miss = miss " no-Interfaces-block"
+    if (steps < 4) miss = miss " only-" steps "-steps"
+    if (miss != "") { gsub(/^### /, "", title); print title ":" miss }
+  }
+' "$PLAN")
+if [ -z "$TASK_ISSUES" ] && [ "$TASK_TITLES" -ge 1 ]; then
+  record "tasks-have-files-and-interfaces" "pass" "all tasks declare Files + Interfaces"
+  record "tasks-have-tdd-steps" "pass" "all tasks have ≥4 bite-sized steps"
+else
+  DETAIL=$(echo "$TASK_ISSUES" | tr '\n' ';' | cut -c1-300)
+  [ "$TASK_TITLES" -lt 1 ] && DETAIL="no task blocks"
+  if echo "$TASK_ISSUES" | grep -q 'no-Files-block\|no-Interfaces-block' || [ "$TASK_TITLES" -lt 1 ]; then
+    record "tasks-have-files-and-interfaces" "fail" "$DETAIL"
+  else
+    record "tasks-have-files-and-interfaces" "pass" "all tasks declare Files + Interfaces"
+  fi
+  if echo "$TASK_ISSUES" | grep -q 'only-' || [ "$TASK_TITLES" -lt 1 ]; then
+    record "tasks-have-tdd-steps" "fail" "$DETAIL (need ≥4 '- [ ] **Step N:' per task)"
+  else
+    record "tasks-have-tdd-steps" "pass" "all tasks have ≥4 bite-sized steps"
+  fi
+fi
+
 # 5. No TBD/placeholders
 if grep -qE '(TBD|TODO|<placeholder>|<TBD>|XXX-)' "$PLAN"; then
   HITS=$(grep -nE '(TBD|TODO|<placeholder>|<TBD>|XXX-)' "$PLAN" | head -3 | tr '\n' ';')
@@ -111,6 +159,27 @@ fi
 # ─── Root-only checks ─────────────────────────────────────────────────────
 
 if [ "$MODE" = "root" ]; then
+  # 5.5 superpowers:writing-plans document header (title + worker sub-skill line + Goal/Architecture/Tech Stack)
+  HEADER_MISS=()
+  grep -qE '^# .+ Implementation Plan$' "$PLAN" || HEADER_MISS+=("title-not-'# X Implementation Plan'")
+  grep -qE 'REQUIRED SUB-SKILL' "$PLAN"          || HEADER_MISS+=("no-agentic-worker-line")
+  grep -qE '^\*\*Goal:\*\* *[^<[:space:]]' "$PLAN"         || HEADER_MISS+=("no-Goal")
+  grep -qE '^\*\*Architecture:\*\* *[^<[:space:]]' "$PLAN" || HEADER_MISS+=("no-Architecture")
+  grep -qE '^\*\*Tech Stack:\*\* *[^<[:space:]]' "$PLAN"   || HEADER_MISS+=("no-Tech-Stack")
+  if [ ${#HEADER_MISS[@]} -eq 0 ]; then
+    record "writing-plans-header" "pass" "header matches superpowers:writing-plans"
+  else
+    record "writing-plans-header" "fail" "missing: ${HEADER_MISS[*]}"
+  fi
+
+  # 5.6 Global Constraints section filled (writing-plans: every task inherits it)
+  GC_LINES=$(section_body "Global Constraints" | grep -cE '^- [^<]')
+  if [ "$GC_LINES" -ge 1 ]; then
+    record "global-constraints-present" "pass" "$GC_LINES constraint(s)"
+  else
+    record "global-constraints-present" "fail" "'## Global Constraints' has no filled bullets (write the spec's project-wide rules verbatim)"
+  fi
+
   # 6. Adapter decision log ≥1 row
   ROWS=$(section_body "Abstractions decision log" | grep -cE '^\|.+\|.+\|')
   # Subtract header + separator rows (2)

@@ -21,6 +21,7 @@ execution half. Invoke each planning-phase skill via the Skill tool at its mappe
 
 | # | superpowers / skill | deep-plan phase | run by |
 |---|---------------------|----------------|--------|
+| ✳ | `EnterPlanMode` (plan mode on) | Phase 0.1 | deep-plan |
 | 0 | `grill-with-docs` | Phase 0.7 | deep-plan |
 | 1 | `brainstorming` | Phase 1 | deep-plan |
 | 2 | `writing-plans` | Phase 1.5 | deep-plan |
@@ -57,6 +58,22 @@ Set `RUN_DIR=~/.claude/deep-plan-runs/$(date +%Y%m%d-%H%M%S)-$(echo "$ARGUMENTS"
 Verify binaries: `git`, `claude`, `jq`. Verify `codex` if codex paths are enabled.
 
 If `--dry-run`: print the list of phases below with the spawned-agent counts and exit. Do not spawn anything.
+
+## Phase 0.1 — Enter plan mode (mandatory)
+
+**Before any exploration, bootstrap, question, or draft**, switch the session into plan mode:
+
+```
+EnterPlanMode()
+```
+
+Everything from Phase 0.2 through Phase 3 runs **inside plan mode** — deep-plan reads, indexes,
+interviews and writes plan artifacts under `$RUN_DIR`, and touches **no project file**. Plan
+mode is also what makes the Plannotator `ExitPlanMode` hook fire at Phase 3, so the user
+approves the plan in the Plannotator UI instead of a terminal wall of text.
+
+If the session is already in plan mode, skip the call. Never leave plan mode before the Phase 3
+`ExitPlanMode` — if a phase seems to need a project edit, it belongs in the plan, not in this run.
 
 ## Phase 0.2 — Bootstrap code intelligence (mandatory)
 
@@ -123,20 +140,24 @@ After it returns, run:
 
 ## Phase 1.5 — Two-track planner drafting (superpowers:writing-plans)
 
-**Step 1 — invoke the skill yourself via the Skill tool:**
+`superpowers:writing-plans` is the **single source of truth** for the plan's shape — the
+document header, the File Structure step, task right-sizing, the `### Task N:` blocks with
+their bite-sized checkbox steps, and the no-placeholder rules. deep-plan never restates or
+paraphrases those rules: it **invokes the skill** and follows what it returns, on every run.
+`templates/plan.md` only adds deep-plan's extra sections (clarifying Qs, flow diagram,
+rationale, QA flag, checklist) around it.
+
+**Step 1 — invoke the skill via the Skill tool:**
 ```
 Skill(skill="superpowers:writing-plans")
 ```
-Read the returned guidance carefully. It defines the structure the planners MUST follow (bite-sized tasks, explicit TDD, no implementation prose, etc.).
 
 **Step 2 — record the invocation:**
 ```
 ~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" writing-plans
 ```
 
-**Step 3 — propagate to subagents:** save the skill body to `$RUN_DIR/writing-plans-guidance.md`. `dispatch-planners.sh` reads this file when present and prepends it to both planner prompts so the Opus and Codex drafts inherit the same conventions.
-
-**Step 4 — dispatch:**
+**Step 3 — dispatch:**
 ```
 ~/.claude/skills/deep-plan/scripts/dispatch-planners.sh "$RUN_DIR" "$TASK_DESC"
 ```
@@ -145,7 +166,10 @@ The dispatcher spawns in parallel:
 - `claude -p` (Opus) loaded with `personas/planner-opus.md`
 - `codex exec` (latest) loaded with `personas/planner-codex.md` *(skipped if `--no-codex`)*
 
-Both receive the task description + `templates/plan.md` as their skeleton. Each writes its draft to `$RUN_DIR/draft-opus.md` and `$RUN_DIR/draft-codex.md`.
+Both are told to **load `writing-plans` themselves** before drafting (the Claude planner via
+the Skill tool, the codex planner by reading the resolved skill path) — the dispatcher passes
+a pointer, never a copy of the skill body. Both receive the task description +
+`templates/plan.md` as their skeleton. Each writes its draft to `$RUN_DIR/draft-opus.md` and `$RUN_DIR/draft-codex.md`.
 
 When both return, synthesize **one** merged candidate plan into `$RUN_DIR/plan.md` using the template. Prefer the Opus draft's architecture framing, the Codex draft's codebase-grounded specifics. Resolve disagreements by keeping the stricter requirement.
 
@@ -159,7 +183,9 @@ Loop, starting at iteration 1:
    - Claude **Sonnet** reviewers: `personas/architect.md`, `personas/project-developer.md`, `personas/ticket-matcher.md`
    - Codex reviewers: `personas/flow-mapper.md`, `personas/qa.md` *(use Claude/Sonnet when `--no-codex`)*
 
-   Reviewers are always **Sonnet** on the Claude side; the Codex side stays Codex. Each persona gets `plan.md`, the project's `CLAUDE.md`, the ticket body (when a ticket is set), and a short context snapshot. Each writes a verdict JSON to `$RUN_DIR/verdict-<persona>-iter<N>.json`:
+   Reviewers are always **Sonnet** on the Claude side; the Codex side runs `gpt-5.6-sol` at
+   `model_reasoning_effort=high` (pinned in `scripts/runner.sh`, overridable with
+   `DEEP_PLAN_CODEX_MODEL` / `DEEP_PLAN_CODEX_EFFORT`). Each persona gets `plan.md`, the project's `CLAUDE.md`, the ticket body (when a ticket is set), and a short context snapshot. Each writes a verdict JSON to `$RUN_DIR/verdict-<persona>-iter<N>.json`:
 
    ```json
    {
@@ -212,6 +238,7 @@ done
 The LLM **never** edits `[ ]`/`[x]` directly. The checklist must show all `[x]` before proceeding.
 
 Confirm the plan includes, at minimum:
+- The **`superpowers:writing-plans` document header** + an **`## Implementation tasks`** section in that skill's exact task format (`### Task N:` + Files + Interfaces + bite-sized checkbox steps with real code).
 - A **Mermaid flow diagram** (sequence or flowchart) — required.
 - A **Rationale & key decisions** section (fed by grill-with-docs + brainstorming).
 - A **TDD test list** with the outer-boundary-only mocking policy stated.
@@ -235,16 +262,36 @@ altitude (goal, approach, key decisions + why, risks, sequence) and render the b
 ```
 If `humanizing-plans` is unavailable, print a short human-altitude distillation inline instead.
 
-**Annotate with plannotator:**
-```
-Skill(skill="plannotator-annotate")
-```
-Run it on `$RUN_DIR/plan.md`. Address every annotation the user leaves (edit the plan, re-validate, re-tick). Then record:
-```
-~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" plannotator-annotate
-```
+**Present the plan through Plannotator (mandatory — never a terminal wall of text):**
 
-Print the final `plan.md` (and subplan links) to the user, then call `ExitPlanMode`.
+The plan is always reviewed in the Plannotator UI, in two passes:
+
+1. **Annotate the full worker plan.** Invoke the skill (it runs the command itself):
+   ```
+   Skill(skill="plannotator-annotate")
+   ```
+   Target `$RUN_DIR/plan.md` and gate on the result:
+   ```
+   plannotator annotate "$RUN_DIR/plan.md" --gate
+   ```
+   `--gate` blocks until the user approves or returns annotations. Address **every**
+   annotation: edit `plan.md`, re-run `validate-plan.sh`, re-run `tick-checklist.sh`, then
+   re-open Plannotator on the updated file. Loop until the user approves with no annotations.
+   Record it:
+   ```
+   ~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" plannotator-annotate
+   ```
+
+2. **Approve the plan-mode summary.** Call `ExitPlanMode` with the humanized distillation
+   (goal, approach, key decisions, risks, sequence, link to `$RUN_DIR/plan.md`). With the
+   `plannotator` plugin enabled, its `PermissionRequest` hook intercepts `ExitPlanMode` and
+   opens the same UI for the final approve / request-changes; on request-changes the
+   annotations come back — apply them and call `ExitPlanMode` again (Plannotator shows the
+   plan diff between submissions). If the plugin is not installed, `ExitPlanMode` just
+   behaves normally and pass 1 was the annotation gate.
+
+Do **not** paste the full `plan.md` into the chat — the file path plus the humanized summary
+is what the user reads; Plannotator carries the detail.
 
 ## Phase 4 — Handoff (deep-plan stops here)
 
@@ -276,7 +323,9 @@ checklist verbatim (adapt paths):
 
 - A spawned agent times out → mark its verdict CHANGES_REQUESTED with note "timeout", continue.
 - Plan iter cap reached with disagreements → `AskUserQuestion` tiebreak; never silently force-approve.
-- `plannotator` unavailable → print the plan inline, note the tool was skipped, and proceed to ExitPlanMode.
+- `plannotator` CLI missing → say so, print the humanized summary inline (never the whole `plan.md`), point at the file path, and proceed to `ExitPlanMode`. Install: `curl -fsSL https://plannotator.ai/install.sh | bash`.
+- `plannotator annotate --gate` exits without feedback → treat as approved, note it, continue.
+- Not in plan mode at Phase 3 (session started outside it) → still run the `annotate --gate` pass; skip `ExitPlanMode`.
 
 ## Continuity ledger (long / multi-day planning)
 
