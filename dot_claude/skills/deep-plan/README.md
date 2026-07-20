@@ -26,8 +26,9 @@ Every deterministic, fixed command sequence lives in a script — SKILL.md's pro
 only (what to ask, how to resolve disagreements, when to loop). The two Task 6 additions:
 
 - **`scripts/parse-args.sh "$ARGUMENTS"`** — Phase 0's flag grammar (`--ticket`,
-  `--max-plan-iter` [default `3`], `--no-codex`, `--skip-grill`, `--dry-run`) → one JSON object.
-  Unknown flag → exit 2.
+  `--max-plan-iter` [default `3`, must be `1`-`20`], `--no-codex`, `--skip-grill`, `--dry-run`)
+  → one JSON object. Unknown flag, or `--max-plan-iter` outside `1`-`20`, → exit 2. A flag
+  passed more than once is last-occurrence-wins (no error).
 - **`scripts/finalize-plan.sh RUN_DIR`** — Phase 3's validate → auto-format → repair → tick
   sequence over the root plan and every `subplans/*.md`. Up to **3 repair rounds** (budget)
   through an Opus planner before giving up; writes `RUN_DIR/finalize-failures.json`
