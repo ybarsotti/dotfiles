@@ -36,16 +36,22 @@ section_body() {
   awk -v h="$1" '$0 == "## " h {inside=1; next} /^## / {inside=0} inside' "$PLAN"
 }
 
+# Sentinel byte for round-tripping an escaped pipe (`\|`) through a
+# `|`-delimited table split: swapped in for `\|` before the split (so it
+# can never be mistaken for a column boundary), swapped back to a literal
+# `|` by strip_cell once the row is safely split into fields.
+SENTINEL=$(printf '\001')
+
 # strip_cell: trims whitespace, strips backticks, turns <br> into newlines,
-# and unescapes \| — the cleanup every table/bullet cell needs before it
-# becomes a JSON string or a jq -Rsc split.
+# and restores the `\|` sentinel to a literal `|` — the cleanup every
+# table/bullet cell needs before it becomes a JSON string or a jq -Rsc split.
 strip_cell() {
-  printf '%s' "$1" | awk '
+  printf '%s' "$1" | awk -v sentinel="$SENTINEL" '
     {
       gsub(/^[[:space:]]+|[[:space:]]+$/, "")
       gsub(/`/, "")
       gsub(/<br>/, "\n")
-      gsub(/\\\|/, "|")
+      gsub(sentinel, "|")
       print
     }'
 }
@@ -75,10 +81,21 @@ MODE_JSON=null
 ORCHESTRATOR_LANE_JSON=null
 [ -n "$ORCHESTRATOR_LANE" ] && ORCHESTRATOR_LANE_JSON=$(cell_string "$ORCHESTRATOR_LANE")
 
-LANES=$(printf '%s\n' "$EXEC_BODY" | awk -F'|' '
+# Substitute `\|` for the sentinel BEFORE the `|` split (via gsub on $0,
+# which forces awk to re-split fields against the now-sentinel-bearing
+# record), so an escaped pipe inside a cell can never act as a column
+# delimiter. A row that still doesn't yield exactly 8 columns after that —
+# a genuine unescaped `|`, or a short/malformed row — is rejected loudly
+# rather than silently parsed with shifted or defaulted-to-empty columns.
+LANES=$(printf '%s\n' "$EXEC_BODY" | awk -v sentinel="$SENTINEL" -F'|' '
+  { raw = $0; gsub(/\\\|/, sentinel) }
   /^\|[[:space:]]*lane[[:space:]]*\|/ {table=1; next}
   table && /^\|[-[:space:]]+\|/ {next}
   table && /^\|/ {
+    if (NF != 10) {
+      printf "plan-to-json.sh: malformed lane row (expected 8 columns, got %d): %s\n", NF - 2, raw > "/dev/stderr"
+      exit 1
+    }
     for (i=2; i<=9; i++) gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i)
     printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $2,$3,$4,$5,$6,$7,$8,$9
     next
