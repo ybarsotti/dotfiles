@@ -11,6 +11,9 @@ INVOKE="${ROOT}/dot_claude/skills/deep-plan/scripts/executable_superpowers-invok
 VALIDATE_DRAFT="${ROOT}/dot_claude/skills/deep-plan/scripts/executable_validate-draft.sh"
 DISPATCH="${ROOT}/dot_claude/skills/deep-plan/scripts/executable_dispatch-planners.sh"
 RUNNER="${ROOT}/dot_claude/skills/deep-plan/scripts/executable_runner.sh"
+PARSE_ARGS="${ROOT}/dot_claude/skills/deep-plan/scripts/executable_parse-args.sh"
+FINALIZE="${ROOT}/dot_claude/skills/deep-plan/scripts/executable_finalize-plan.sh"
+SKILL_MD="${ROOT}/dot_claude/skills/deep-plan/SKILL.md"
 VALID_DRAFT_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/draft-valid-minimal.md"
 UNBALANCED_FENCES_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/draft-unbalanced-fences.md"
 FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/valid-parallel-plan.md"
@@ -860,5 +863,304 @@ assert_eq "$([ -f "${NO_CODEX_RUN}/draft-codex.md" ] && echo yes || echo no)" no
 rm -rf "$NO_CODEX_RUN"
 
 rm -rf "$STUB_DIR"
+
+# ─── Task 6: parse-args.sh — Phase 0's fixed argument grammar ──────────────
+
+PARSE_SAMPLE=$("$PARSE_ARGS" "--ticket FBIT-1 --no-codex build X")
+assert_eq "$(jq -r '.ticket' <<<"$PARSE_SAMPLE")" "FBIT-1" "parse-args: --ticket value"
+assert_eq "$(jq -r '.no_codex' <<<"$PARSE_SAMPLE")" "true" "parse-args: --no-codex sets no_codex=true"
+assert_eq "$(jq -r '.max_plan_iter' <<<"$PARSE_SAMPLE")" "3" "parse-args: --max-plan-iter defaults to 3"
+assert_eq "$(jq -r '.task_description' <<<"$PARSE_SAMPLE")" "build X" \
+  "parse-args: positional words after flags become task_description"
+assert_eq "$(jq -r '.skip_grill' <<<"$PARSE_SAMPLE")" "false" "parse-args: --skip-grill defaults false"
+assert_eq "$(jq -r '.dry_run' <<<"$PARSE_SAMPLE")" "false" "parse-args: --dry-run defaults false"
+
+assert_exit 2 "$PARSE_ARGS" "--bogus-flag build X"
+PARSE_UNKNOWN_STDERR=$("$PARSE_ARGS" "--bogus-flag build X" 2>&1 >/dev/null || true)
+assert_contains "$PARSE_UNKNOWN_STDERR" "unknown flag" \
+  "parse-args: unknown flag exits 2 with a diagnostic naming it"
+
+PARSE_EMPTY=$("$PARSE_ARGS" "")
+assert_eq "$(jq -r '.task_description' <<<"$PARSE_EMPTY")" "" "parse-args: empty input -> empty task_description"
+assert_eq "$(jq -r '.ticket' <<<"$PARSE_EMPTY")" "" "parse-args: empty input -> empty ticket"
+assert_eq "$(jq -r '.max_plan_iter' <<<"$PARSE_EMPTY")" "3" "parse-args: empty input still defaults max_plan_iter"
+
+# Quotes and multi-word content inside the task description must survive
+# round-trip literally — $ARGUMENTS is a flat token stream, not shell syntax
+# to re-parse, so embedded quote characters are not stripped.
+PARSE_QUOTED=$("$PARSE_ARGS" 'fix the "foo bar" module now')
+assert_eq "$(jq -r '.task_description' <<<"$PARSE_QUOTED")" 'fix the "foo bar" module now' \
+  "parse-args: quotes/spaces inside the description round-trip literally"
+
+# ─── Task 6: finalize-plan.sh — Phase 3's fixed validate/repair/tick sequence ──
+
+FIN_STUB_DIR=$(mktemp -d)
+cat > "${FIN_STUB_DIR}/claude" <<'STUBEOF'
+#!/usr/bin/env bash
+# No-op repair stub: drains the prompt and exits 0 without touching any
+# file — the repair-loop tests below only assert finalize-plan.sh's own
+# control flow (looping, aggregation, exit code), not that a real agent's
+# edits land.
+cat >/dev/null
+exit 0
+STUBEOF
+chmod +x "${FIN_STUB_DIR}/claude"
+
+FIN_ROOT_ONE_SUB='# Widget Refactor Implementation Plan
+
+REQUIRED SUB-SKILL: superpowers:writing-plans
+
+**Goal:** Ship the widget refactor.
+**Architecture:** Adapter-based.
+**Tech Stack:** bash, jq.
+
+## Clarifying questions
+_no ambiguity_
+
+## Global Constraints
+- Follow existing shellcheck conventions.
+
+## Flow diagram
+```mermaid
+sequenceDiagram
+  participant A as Caller
+  participant B as Callee
+  A->>B: call
+  B-->>A: response
+  A->>B: ack
+```
+
+## Implementation tasks
+
+### Task 1: Do the thing
+**Files:**
+- Modify: `foo.sh`
+
+**Interfaces:**
+- `foo()` does the thing.
+
+- [ ] **Step 1:** write failing test
+- [ ] **Step 2:** run it red
+- [ ] **Step 3:** implement
+- [ ] **Step 4:** run it green
+
+## TDD test list
+- `test one` — checks one
+- `test two` — checks two
+- `test three` — checks three
+- Mock only the outermost boundaries (network, 3rd-party APIs); inner services run real.
+
+## Edge cases & failure modes
+- edge one
+- edge two
+- edge three
+- edge four
+
+## Abstractions decision log
+| Decision | Rationale | Alternative |
+|----------|-----------|-------------|
+| Use adapter | isolates vendor | direct call |
+
+## Affected files
+- `foo.sh`
+
+## Subplans
+- [good](subplans/good.md)
+
+## Rationale & key decisions
+Chose the adapter approach to isolate vendor churn.
+
+## Documentation impact
+none — no docs describe this logic
+
+## QA / test-execution
+no
+
+## Verification
+- run the tests
+
+## Superpowers invoked
+- [ ] grill-with-docs — not invoked; test fixture
+- [ ] brainstorming — not invoked; test fixture
+- [ ] writing-plans — not invoked; test fixture
+
+## Checklist (machine-validated; do NOT hand-edit — call tick-checklist.sh --root)
+- [ ] mermaid-present
+- [ ] mermaid-has-entry-and-exit
+- [ ] tdd-list-≥3
+- [ ] edges-≥4
+- [ ] code-intel-bootstrapped
+- [ ] clarifying-questions-asked
+- [ ] tasks-≥1
+- [ ] tasks-have-files-and-interfaces
+- [ ] tasks-have-tdd-steps
+- [ ] no-tbd-placeholders
+- [ ] writing-plans-header
+- [ ] global-constraints-present
+- [ ] adapter-decision-log-≥1-row
+- [ ] affected-files-paths-exist
+- [ ] subplans-section-non-empty
+- [ ] each-subplan-file-exists
+- [ ] each-subplan-has-flow-and-tdd
+- [ ] rationale-present
+- [ ] mocking-policy-stated
+- [ ] docs-impact-listed
+- [ ] qa-flag-set
+- [ ] superpowers-all-invoked
+'
+
+FIN_GOOD_SUBPLAN='# Subplan: good
+
+**Lane:** `misc`
+
+## Clarifying questions
+_no ambiguity_
+
+## Flow diagram
+```mermaid
+sequenceDiagram
+  participant A as Caller
+  participant B as Callee
+  A->>B: call
+  B-->>A: response
+  A->>B: ack
+```
+
+## Implementation tasks
+
+### Task 1: Do the thing
+**Files:**
+- Modify: `foo.sh`
+
+**Interfaces:**
+- `foo()` does the thing.
+
+- [ ] **Step 1:** write failing test
+- [ ] **Step 2:** run it red
+- [ ] **Step 3:** implement
+- [ ] **Step 4:** run it green
+
+## TDD test list
+- `test one` — checks one
+- `test two` — checks two
+- `test three` — checks three
+
+## Edge cases & failure modes
+- edge one
+- edge two
+- edge three
+- edge four
+
+## Verification
+- run the tests
+
+## Checklist (machine-validated; do NOT hand-edit — call tick-checklist.sh --subplan)
+- [ ] mermaid-present
+- [ ] mermaid-has-entry-and-exit
+- [ ] tasks-≥1
+- [ ] tasks-have-files-and-interfaces
+- [ ] tasks-have-tdd-steps
+- [ ] tdd-list-≥3
+- [ ] edges-≥4
+- [ ] no-tbd-placeholders
+'
+
+# Missing mermaid/TDD/edges/clarifying-questions on purpose: the no-op stub
+# above never fixes it, so this file must still be failing after 3 repairs.
+FIN_BAD_SUBPLAN='# Subplan: bad
+
+**Lane:** `misc`
+
+## Implementation tasks
+
+### Task 1: Do the thing
+**Files:**
+- Modify: `bar.sh`
+
+**Interfaces:**
+- `bar()` does the thing.
+
+- [ ] **Step 1:** write failing test
+- [ ] **Step 2:** run it red
+- [ ] **Step 3:** implement
+- [ ] **Step 4:** run it green
+
+## Verification
+- run the tests
+'
+
+# count_unticked_checklist FILE — `- [ ] ` lines inside `## Checklist` only.
+# The fixtures also carry `- [ ] **Step N:**` TDD boxes and deliberately
+# unticked `## Superpowers invoked` declinations, neither of which
+# tick-checklist.sh ever touches — counting the whole file would flag those
+# as "not ticked" even on a fully passing run.
+count_unticked_checklist() {
+  awk '/^## Checklist/ { flag=1; next } /^## / && flag { flag=0 } flag' "$1" | grep -c '^\- \[ \] '
+}
+
+fin_new_run_dir() {
+  local d
+  d=$(mktemp -d)
+  printf '{"timestamp":"2026-07-20T00:00:00Z","gitnexus":"fresh","graphify":"fresh"}\n' \
+    >"${d}/codeintel-status.json"
+  mkdir -p "${d}/subplans"
+  echo "$d"
+}
+
+# Passing case: root + one already-valid subplan needs zero repairs.
+#
+# finalize-plan.sh's auto-format.sh step formats+commits the *current working
+# directory* (the project the plan targets), not RUN_DIR — invoking it from
+# this repo's own root would run `just format` and auto-commit across the
+# whole dev tree. Run from RUN_DIR itself instead: a bare mktemp -d has no
+# Justfile/package.json/etc. for auto-format.sh to detect, so it's a no-op,
+# and finalize-plan.sh's own control flow (what's under test here) doesn't
+# depend on cwd otherwise.
+FIN_PASS_RUN=$(fin_new_run_dir)
+printf '%s' "$FIN_ROOT_ONE_SUB" >"${FIN_PASS_RUN}/plan.md"
+printf '%s' "$FIN_GOOD_SUBPLAN" >"${FIN_PASS_RUN}/subplans/good.md"
+FIN_PASS_EXIT=0
+(cd "$FIN_PASS_RUN" && PATH="${FIN_STUB_DIR}:${PATH}" "$FINALIZE" "$FIN_PASS_RUN") \
+  >"${FIN_PASS_RUN}/stdout.log" 2>&1 || FIN_PASS_EXIT=$?
+assert_eq "$FIN_PASS_EXIT" 0 "finalize-plan.sh: all-passing run exits 0"
+assert_eq "$(jq -r '.status' "${FIN_PASS_RUN}/finalize-failures.json")" "pass" \
+  "finalize-plan.sh: all-passing run emits status=pass"
+assert_eq "$(jq -r '.attempts' "${FIN_PASS_RUN}/finalize-failures.json")" "0" \
+  "finalize-plan.sh: all-passing run needed zero repair attempts"
+assert_eq "$(count_unticked_checklist "${FIN_PASS_RUN}/plan.md")" "0" \
+  "finalize-plan.sh: passing run ticks every root checklist item (no [ ] left)"
+assert_eq "$(count_unticked_checklist "${FIN_PASS_RUN}/subplans/good.md")" "0" \
+  "finalize-plan.sh: passing run ticks every subplan checklist item (no [ ] left)"
+rm -rf "$FIN_PASS_RUN"
+
+# Failing case: root + one good subplan + one permanently-broken subplan.
+# The root plan's own each-subplan-has-flow-and-tdd check cascades to a
+# root failure too, once the bad subplan is linked in — both must be named.
+FIN_ROOT_TWO_SUB=$(printf '%s' "$FIN_ROOT_ONE_SUB" | sed 's#- \[good\](subplans/good.md)#- [good](subplans/good.md)\n- [bad](subplans/bad.md)#')
+FIN_FAIL_RUN=$(fin_new_run_dir)
+printf '%s' "$FIN_ROOT_TWO_SUB" >"${FIN_FAIL_RUN}/plan.md"
+printf '%s' "$FIN_GOOD_SUBPLAN" >"${FIN_FAIL_RUN}/subplans/good.md"
+printf '%s' "$FIN_BAD_SUBPLAN" >"${FIN_FAIL_RUN}/subplans/bad.md"
+FIN_FAIL_EXIT=0
+(cd "$FIN_FAIL_RUN" && PATH="${FIN_STUB_DIR}:${PATH}" "$FINALIZE" "$FIN_FAIL_RUN") \
+  >"${FIN_FAIL_RUN}/stdout.log" 2>&1 || FIN_FAIL_EXIT=$?
+assert_eq "$FIN_FAIL_EXIT" 1 "finalize-plan.sh: one permanently-broken subplan exits 1"
+assert_eq "$(jq -r '.status' "${FIN_FAIL_RUN}/finalize-failures.json")" "fail" \
+  "finalize-plan.sh: broken-subplan run emits status=fail"
+assert_eq "$(jq -r '.attempts' "${FIN_FAIL_RUN}/finalize-failures.json")" "3" \
+  "finalize-plan.sh: gives up after exactly 3 repair attempts"
+assert_eq "$(jq -c '.failing | sort' "${FIN_FAIL_RUN}/finalize-failures.json")" \
+  '["plan.md","subplans/bad.md"]' \
+  "finalize-plan.sh: failure JSON names both the root and the broken subplan"
+rm -rf "$FIN_FAIL_RUN"
+
+rm -rf "$FIN_STUB_DIR"
+
+# ─── Task 6: SKILL.md was slimmed and the Phase 4 handoff retargeted ───────
+
+assert_eq "$([ "$(wc -l <"$SKILL_MD" | tr -d ' ')" -lt 346 ] && echo yes || echo no)" yes \
+  "SKILL.md: line count is under the pre-slimming baseline of 346"
+assert_contains "$(cat "$SKILL_MD")" "/deep-execute" \
+  "SKILL.md: Phase 4 handoff points at /deep-execute"
 
 assert_summary
