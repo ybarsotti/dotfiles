@@ -148,7 +148,7 @@ lint:
     @echo "Running shellcheck on .sh files..."
     @find . -name "*.sh" -type f -not -path "*/.git/*" -exec shellcheck {} \;
     @echo "Running shellcheck on .sh.tmpl files..."
-    @find . -name "*.sh.tmpl" -type f -not -path "*/.git/*" -exec sh -c 'grep -v "^\s*{{"{{"}}" "$$1" | shellcheck -s bash --severity=error -' _ {} \;
+    @find . -name "*.sh.tmpl" -type f -not -path "*/.git/*" -exec sh -c 'grep -v "^\s*{{"{{"}}" "$1" | shellcheck -s bash --severity=error -' _ {} \;
     @echo "Running yamllint..."
     @yamllint -d relaxed .chezmoidata/packages.yaml
     @echo "Running gitleaks..."
