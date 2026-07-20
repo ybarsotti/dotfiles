@@ -37,8 +37,11 @@ assert_exit() {
   shift
   local label="$*"
   local actual
-  "$@" >/dev/null 2>&1
-  actual=$?
+  if "$@" >/dev/null 2>&1; then
+    actual=0
+  else
+    actual=$?
+  fi
   if [ "$actual" -eq "$expected" ]; then
     ASSERT_PASS=$((ASSERT_PASS + 1))
     echo "ok: ${label}"
