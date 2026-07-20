@@ -1,0 +1,10 @@
+title = "gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Generated caches that are gitignored, not source (see .gitignore)"
+paths = [
+  '''^\.gitnexus/''',
+]
