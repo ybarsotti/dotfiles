@@ -10,6 +10,10 @@ FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/valid-parallel-plan.
 ESCAPED_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/lane-escaped-pipe.md"
 UNESCAPED_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/lane-unescaped-pipe.md"
 SHORT_ROW_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/lane-short-row.md"
+ENDPOINT_ESCAPED_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/endpoint-escaped-pipe.md"
+ENDPOINT_UNESCAPED_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/endpoint-unescaped-pipe.md"
+FANOUT_MALFORMED_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/fanout-malformed-lane.md"
+FANOUT_NO_SHAPE_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/fanout-no-execution-shape.md"
 
 JSON=$("$PARSER" "$FIXTURE")
 assert_eq "$(jq -r '.mode' <<<"$JSON")" parallel "mode"
@@ -63,5 +67,53 @@ FANOUT_FILES=$(ls "${FANOUT_RUN}/subplans" | sort | tr '\n' ',')
 assert_eq "$FANOUT_FILES" "execution.md,orchestrator.md,planning.md,review.md," \
   "subplan-fanout produces one subplan per lane, not directory chapters"
 rm -rf "$FANOUT_RUN"
+
+# ─── Round 2, Finding 1: the API contract endpoint table has the identical ─
+# unescaped-`|` hazard as the lane table — an ordinary TypeScript union in
+# `response_shape` (e.g. `string | number`) must round-trip when escaped,
+# and fail loudly when it isn't.
+
+ENDPOINT_ESCAPED_JSON=$("$PARSER" "$ENDPOINT_ESCAPED_FIXTURE")
+assert_eq "$(jq -r '.contract.endpoints[0].response_shape' <<<"$ENDPOINT_ESCAPED_JSON")" \
+  "string | number" "escaped pipe in an endpoint cell round-trips to a literal |"
+assert_eq "$(jq '.contract.endpoints | length' <<<"$ENDPOINT_ESCAPED_JSON")" 1 \
+  "escaped-pipe endpoint row still parses as one endpoint"
+
+assert_exit 1 "$PARSER" "$ENDPOINT_UNESCAPED_FIXTURE"
+ENDPOINT_UNESCAPED_STDERR=$("$PARSER" "$ENDPOINT_UNESCAPED_FIXTURE" 2>&1 >/dev/null || true)
+assert_contains "$ENDPOINT_UNESCAPED_STDERR" "malformed endpoint row" \
+  "unescaped-pipe endpoint row fails with a diagnostic naming the offending row"
+
+# ─── Round 2, Finding 2: subplan-fanout.sh must propagate a genuine parser ─
+# failure instead of silently degrading to legacy directory grouping — and
+# must keep degrading, with no error, for a plan that legitimately has no
+# `## Execution shape` section at all.
+
+MALFORMED_FANOUT_RUN=$(mktemp -d)
+cp "$FANOUT_MALFORMED_FIXTURE" "${MALFORMED_FANOUT_RUN}/plan.md"
+assert_exit 1 "$FANOUT" "$MALFORMED_FANOUT_RUN"
+MALFORMED_FANOUT_STDERR=$("$FANOUT" "$MALFORMED_FANOUT_RUN" 2>&1 >/dev/null || true)
+assert_contains "$MALFORMED_FANOUT_STDERR" "malformed lane row" \
+  "subplan-fanout.sh surfaces the parser's diagnostic instead of swallowing it"
+rm -rf "$MALFORMED_FANOUT_RUN"
+
+NO_SHAPE_FANOUT_RUN=$(mktemp -d)
+cp "$FANOUT_NO_SHAPE_FIXTURE" "${NO_SHAPE_FANOUT_RUN}/plan.md"
+assert_exit 0 "$FANOUT" "$NO_SHAPE_FANOUT_RUN"
+NO_SHAPE_FANOUT_FILES=$(ls "${NO_SHAPE_FANOUT_RUN}/subplans" | sort | tr '\n' ',')
+assert_eq "$NO_SHAPE_FANOUT_FILES" "docs.md,src.md," \
+  "a plan with no Execution shape section still fans out via legacy directory grouping"
+rm -rf "$NO_SHAPE_FANOUT_RUN"
+
+# ─── Round 2, Finding 3: a raw `\001` byte in the plan file must be ────────
+# rejected, not silently treated as the internal pipe-escape sentinel.
+
+SENTINEL_FIXTURE=$(mktemp)
+printf '# Sentinel byte fixture\n\nRaw byte follows: [\001]\n' >"$SENTINEL_FIXTURE"
+assert_exit 1 "$PARSER" "$SENTINEL_FIXTURE"
+SENTINEL_STDERR=$("$PARSER" "$SENTINEL_FIXTURE" 2>&1 >/dev/null || true)
+assert_contains "$SENTINEL_STDERR" '\001' \
+  "a raw 0x01 byte in the plan is rejected with a clear diagnostic"
+rm -f "$SENTINEL_FIXTURE"
 
 assert_summary

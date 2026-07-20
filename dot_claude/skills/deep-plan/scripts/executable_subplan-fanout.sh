@@ -71,19 +71,35 @@ fi
 slug() { echo "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-|-$//g'; }
 
 # ─── Decide lane mode vs. legacy directory grouping ────────────────────────
-# A plan with no `## Execution shape` (or one whose Mode isn't `parallel`)
-# degrades to the original top-level-directory grouping — older, serial-only
-# plans must keep fanning out exactly as before.
+# A plan with no `## Execution shape` section has nothing to declare — this
+# is the original, serial-only plan shape, and it degrades to legacy
+# top-level-directory grouping with no error. A plan that DOES declare an
+# `## Execution shape` section but fails to parse (malformed lane table,
+# etc. — plan-to-json.sh exits 1) must fail loudly here instead of silently
+# falling back: swallowing that failure would hide a broken lane
+# declaration from the user and fan out as if it never existed.
 
 LANE_MODE=0
 PLAN_JSON="{}"
-if [ -f "$PARSER" ] && command -v jq >/dev/null 2>&1; then
-  if PLAN_JSON=$("$PARSER" "$PLAN" 2>/dev/null); then
-    MODE_VAL=$(jq -r '.mode // "serial"' <<<"$PLAN_JSON" 2>/dev/null || echo serial)
-    LANE_COUNT=$(jq '.lanes | length' <<<"$PLAN_JSON" 2>/dev/null || echo 0)
-    if [ "$MODE_VAL" = "parallel" ] && [ "$LANE_COUNT" -gt 0 ]; then
-      LANE_MODE=1
-    fi
+if grep -q '^## Execution shape$' "$PLAN"; then
+  [ -f "$PARSER" ] || {
+    echo "subplan-fanout.sh: missing parser $PARSER" >&2
+    exit 2
+  }
+  command -v jq >/dev/null 2>&1 || {
+    echo "subplan-fanout.sh: jq required" >&2
+    exit 2
+  }
+  PARSER_STDERR="${SCRATCH}/parser.stderr"
+  if ! PLAN_JSON=$("$PARSER" "$PLAN" 2>"$PARSER_STDERR"); then
+    echo "subplan-fanout.sh: plan declares an Execution shape but failed to parse:" >&2
+    cat "$PARSER_STDERR" >&2
+    exit 1
+  fi
+  MODE_VAL=$(jq -r '.mode // "serial"' <<<"$PLAN_JSON")
+  LANE_COUNT=$(jq '.lanes | length' <<<"$PLAN_JSON")
+  if [ "$MODE_VAL" = "parallel" ] && [ "$LANE_COUNT" -gt 0 ]; then
+    LANE_MODE=1
   fi
 fi
 
