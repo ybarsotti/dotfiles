@@ -171,6 +171,7 @@ validate-ci:
 # Each lane task appends its own test line here as it is created.
 test-deep-pipeline:
     dot_claude/skills/deep-execute/tests/executable_test-pipeline-integration.sh
+    dot_claude/skills/_shared/tests/executable_test-assert.sh
 
 # Full local validation: lint + pre-commit + Docker tests
 validate: lint validate-hooks test-all test-deep-pipeline
