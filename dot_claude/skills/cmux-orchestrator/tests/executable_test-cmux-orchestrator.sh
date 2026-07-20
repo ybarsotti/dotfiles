@@ -8,6 +8,10 @@ ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)
 # shellcheck source=/dev/null
 . "${ROOT}/dot_claude/skills/_shared/executable_assert.sh"
 LAUNCHER="${ROOT}/dot_claude/skills/cmux-orchestrator/scripts/executable_launch-workers.sh"
+PREPARE="${ROOT}/dot_claude/skills/cmux-orchestrator/scripts/executable_prepare-run.sh"
+MONITOR="${ROOT}/dot_claude/skills/cmux-orchestrator/scripts/executable_monitor-workers.sh"
+TEMPLATE="${ROOT}/dot_claude/skills/cmux-orchestrator/templates/system-prompt.txt"
+SKILL_MD="${ROOT}/dot_claude/skills/cmux-orchestrator/SKILL.md"
 
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
@@ -316,5 +320,257 @@ for ((i = 0; i < ${#REPLAY_FIELDS[@]}; i++)); do
 done
 assert_eq "$REPLAY_PWD" "$SPACE_CWD" "cwd with a space round-trips through cmux send"
 assert_eq "$REPLAY_NAME" "solo person" "worker name with a space round-trips through cmux send"
+
+# ─── prepare-run.sh: fixed scaffolding, RUN_DIR CWD ORCH_SURFACE SPEC... ───
+# Reuses launch-workers.sh's parse_spec (same SPEC grammar) rather than a
+# second parser, so a malformed spec fails the same way through both
+# scripts — proven below, not just asserted in a comment.
+
+PREP_WORK=$(mktemp -d)
+PREP_RUN="${PREP_WORK}/run"
+PREP_CWD="${PREP_WORK}/cwd"
+mkdir -p "$PREP_RUN" "$PREP_CWD"
+
+PREP_RC=0
+"$PREPARE" "$PREP_RUN" "$PREP_CWD" "surface:orch" auth-refactor add-tests \
+  >"${PREP_WORK}/prepare.out" 2>"${PREP_WORK}/prepare.err" || PREP_RC=$?
+assert_eq "$PREP_RC" 0 "prepare-run.sh: two specs exits 0"
+
+assert_exit 0 test -f "${PREP_RUN}/system-prompt.txt"
+assert_exit 0 test -f "${PREP_RUN}/worker-auth-refactor.prompt.md"
+assert_exit 0 test -f "${PREP_RUN}/worker-add-tests.prompt.md"
+assert_exit 0 test -f "${PREP_RUN}/worker-auth-refactor.result.md"
+assert_exit 0 test -f "${PREP_RUN}/worker-add-tests.result.md"
+
+MANIFEST_JSON=$(cat "${PREP_RUN}/manifest.json")
+assert_eq "$(jq '.workers | length' <<<"$MANIFEST_JSON")" 2 \
+  "prepare-run.sh: manifest.json has one entry per spec"
+assert_eq "$(jq -r '.worker_pane_ref' <<<"$MANIFEST_JSON")" "null" \
+  "prepare-run.sh: manifest.json worker_pane_ref starts null (not launched yet)"
+assert_eq "$(jq -c '[.workers[].name] | sort' <<<"$MANIFEST_JSON")" \
+  '["add-tests","auth-refactor"]' \
+  "prepare-run.sh: manifest.json worker names match the specs"
+assert_eq "$(jq -r '.workers[0].status' <<<"$MANIFEST_JSON")" "pending" \
+  "prepare-run.sh: a fresh worker's status is pending"
+assert_eq "$(jq -r '.workers[0].prompt_file' <<<"$MANIFEST_JSON")" \
+  "${PREP_RUN}/worker-auth-refactor.prompt.md" \
+  "prepare-run.sh: manifest.json prompt_file is the real path prepare-run.sh wrote"
+assert_eq "$(jq -r '.cwd' <<<"$MANIFEST_JSON")" "$PREP_CWD" \
+  "prepare-run.sh: manifest.json records the cwd argument"
+assert_eq "$(jq -r '.orchestrator_surface' <<<"$MANIFEST_JSON")" "surface:orch" \
+  "prepare-run.sh: manifest.json records the orchestrator surface argument"
+
+PROMPT_TEXT=$(cat "${PREP_RUN}/worker-auth-refactor.prompt.md")
+assert_contains "$PROMPT_TEXT" "Done marker: ${PREP_RUN}/worker-auth-refactor.done" \
+  "prepare-run.sh: prompt file names the real done-marker path, not a placeholder"
+assert_contains "$PROMPT_TEXT" "<Detailed task description" \
+  "prepare-run.sh: prompt file leaves the Task section as a judgement placeholder"
+
+# ─── Idempotence: re-running with the same args leaves every file byte- ───
+# identical — hashed, not just re-checked for exit 0 (exit 0 alone would
+# pass even if manifest.json's created_at silently drifted with `date`).
+HASH_BEFORE=$(find "$PREP_RUN" -type f -exec sha256sum {} \; | sort)
+PREP_RC2=0
+"$PREPARE" "$PREP_RUN" "$PREP_CWD" "surface:orch" auth-refactor add-tests \
+  >/dev/null 2>&1 || PREP_RC2=$?
+assert_eq "$PREP_RC2" 0 "prepare-run.sh: re-run with identical args exits 0"
+HASH_AFTER=$(find "$PREP_RUN" -type f -exec sha256sum {} \; | sort)
+assert_eq "$HASH_AFTER" "$HASH_BEFORE" \
+  "prepare-run.sh: re-run leaves every file byte-identical (hash comparison, not just exit code)"
+
+# ─── Re-running must not clobber a prompt file the orchestrator has since ──
+# hand-edited to replace the placeholder judgement sections with real task
+# content — a second prepare-run.sh call (e.g. adding a worker) has to
+# leave that edit alone.
+{
+  echo "## Task"
+  echo "Refactor the auth middleware to use JWT."
+} >>"${PREP_RUN}/worker-auth-refactor.prompt.md"
+EDITED_HASH=$(sha256sum "${PREP_RUN}/worker-auth-refactor.prompt.md")
+"$PREPARE" "$PREP_RUN" "$PREP_CWD" "surface:orch" auth-refactor add-tests api-docs \
+  >/dev/null 2>&1
+assert_eq "$(sha256sum "${PREP_RUN}/worker-auth-refactor.prompt.md")" "$EDITED_HASH" \
+  "prepare-run.sh: adding a third worker does not touch an already hand-edited prompt file"
+assert_exit 0 test -f "${PREP_RUN}/worker-api-docs.prompt.md"
+
+rm -rf "$PREP_WORK"
+
+# ─── --system-prompt FILE overrides the packaged template verbatim ────────
+PREP_WORK2=$(mktemp -d)
+CUSTOM_PROMPT="${PREP_WORK2}/custom-system-prompt.txt"
+echo "custom system prompt content" >"$CUSTOM_PROMPT"
+"$PREPARE" "${PREP_WORK2}/run" "${PREP_WORK2}/cwd" "surface:1" \
+  --system-prompt "$CUSTOM_PROMPT" solo >/dev/null 2>&1
+assert_eq "$(cat "${PREP_WORK2}/run/system-prompt.txt")" "custom system prompt content" \
+  "prepare-run.sh: --system-prompt FILE overrides the packaged template"
+rm -rf "$PREP_WORK2"
+
+# ─── Malformed specs fail the same way as launch-workers.sh — same parser, ─
+# same failure mode, because prepare-run.sh reuses parse_spec rather than
+# re-implementing the grammar.
+PREP_WORK3=$(mktemp -d)
+mkdir -p "${PREP_WORK3}/run" "${PREP_WORK3}/cwd"
+BAD_RC=0
+"$PREPARE" "${PREP_WORK3}/run" "${PREP_WORK3}/cwd" "surface:1" "name:python:foo" \
+  >/dev/null 2>"${PREP_WORK3}/err" || BAD_RC=$?
+assert_eq "$BAD_RC" 1 "prepare-run.sh: a malformed spec fails (same grammar as launch-workers.sh)"
+assert_contains "$(cat "${PREP_WORK3}/err")" "unknown runner" \
+  "prepare-run.sh: malformed-spec diagnostic comes from the shared parse_spec, not a second parser"
+rm -rf "$PREP_WORK3"
+
+# ─── Usage errors: missing SPEC is a clean exit 2, not a crash mid-script ──
+# (--system-prompt FILE consumes the only extra token, leaving zero SPECs —
+# this exercises the specific "no SPEC" diagnostic, not the coarser
+# too-few-args guard that a bare 3-arg call would hit instead.)
+PREP_WORK4=$(mktemp -d)
+mkdir -p "${PREP_WORK4}/run" "${PREP_WORK4}/cwd"
+echo "prompt" >"${PREP_WORK4}/sp.txt"
+NOSPEC_RC=0
+"$PREPARE" "${PREP_WORK4}/run" "${PREP_WORK4}/cwd" "surface:1" \
+  --system-prompt "${PREP_WORK4}/sp.txt" \
+  >/dev/null 2>"${PREP_WORK4}/err" || NOSPEC_RC=$?
+assert_eq "$NOSPEC_RC" 2 "prepare-run.sh: no worker SPEC given exits 2"
+assert_contains "$(cat "${PREP_WORK4}/err")" "at least one worker SPEC required" \
+  "prepare-run.sh: missing-spec diagnostic names the problem"
+rm -rf "$PREP_WORK4"
+
+# ─── monitor-workers.sh: blocks until done/blocked/crashed/failed, then ───
+# emits exactly one trigger JSON and exits — content-level assertions, not
+# just "it produced output".
+
+MON_WORK=$(mktemp -d)
+mkdir -p "${MON_WORK}/run"
+cat >"${MON_WORK}/run/manifest.json" <<EOF
+{"workers":[{"name":"w1","done_marker":"${MON_WORK}/run/w1.done","surface_ref":"surface:1"}]}
+EOF
+
+echo "done" >"${MON_WORK}/run/w1.done"
+DONE_JSON=$("$MONITOR" "${MON_WORK}/run")
+assert_eq "$(jq -r '.type' <<<"$DONE_JSON")" "done" \
+  "monitor-workers.sh: a done marker produces a done trigger"
+assert_eq "$(jq -r '.worker' <<<"$DONE_JSON")" "w1" \
+  "monitor-workers.sh: done trigger names the worker"
+rm -f "${MON_WORK}/run/w1.done"
+
+echo "blocked: needs human review" >"${MON_WORK}/run/w1.done"
+BLOCKED_JSON=$("$MONITOR" "${MON_WORK}/run")
+assert_eq "$(jq -r '.type' <<<"$BLOCKED_JSON")" "blocked" \
+  "monitor-workers.sh: a 'blocked: ...' marker produces a blocked trigger"
+assert_eq "$(jq -r '.reason' <<<"$BLOCKED_JSON")" "needs human review" \
+  "monitor-workers.sh: blocked trigger's reason strips the 'blocked: ' prefix"
+rm -f "${MON_WORK}/run/w1.done"
+
+# cmux stub for the liveness path: capture-pane always fails (vanished pane)
+MON_BIN_CRASH="${MON_WORK}/bin-crash"
+mkdir -p "$MON_BIN_CRASH"
+cat >"${MON_BIN_CRASH}/cmux" <<'STUB'
+#!/usr/bin/env bash
+exit 1
+STUB
+chmod +x "${MON_BIN_CRASH}/cmux"
+CRASHED_JSON=$(PATH="${MON_BIN_CRASH}:${PATH}" MONITOR_LIVENESS_INTERVAL=0 MONITOR_POLL_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "${MON_WORK}/run")
+assert_eq "$(jq -r '.type' <<<"$CRASHED_JSON")" "crashed" \
+  "monitor-workers.sh: a vanished pane (capture-pane fails) produces a crashed trigger"
+assert_contains "$(jq -r '.reason' <<<"$CRASHED_JSON")" "pane vanished" \
+  "monitor-workers.sh: crashed trigger's reason says the pane vanished"
+
+# cmux stub for the liveness path: capture-pane succeeds but the pane log
+# contains a fatal signature
+MON_BIN_FATAL="${MON_WORK}/bin-fatal"
+mkdir -p "$MON_BIN_FATAL"
+cat >"${MON_BIN_FATAL}/cmux" <<'STUB'
+#!/usr/bin/env bash
+echo "some ordinary output"
+echo "panic: something exploded"
+exit 0
+STUB
+chmod +x "${MON_BIN_FATAL}/cmux"
+FAILED_RC=0
+FAILED_JSON=$(PATH="${MON_BIN_FATAL}:${PATH}" MONITOR_LIVENESS_INTERVAL=0 MONITOR_POLL_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "${MON_WORK}/run") || FAILED_RC=$?
+assert_eq "$(jq -r '.type' <<<"$FAILED_JSON")" "failed" \
+  "monitor-workers.sh: a fatal signature in the pane log produces a failed trigger"
+assert_contains "$(jq -r '.reason' <<<"$FAILED_JSON")" "panic: something exploded" \
+  "monitor-workers.sh: failed trigger's reason quotes the matched fatal-signature line"
+assert_eq "$FAILED_RC" 0 \
+  "monitor-workers.sh: a fatal-signature failed trigger still exits 0 — the monitor did its job of detecting and reporting it"
+
+# ─── Bounded wait: exhausting MAX_WAIT with no marker and no pane to check ─
+# still emits a trigger — the "never hang, never report success by
+# silence" requirement — rather than blocking forever. This is the one
+# case that exits nonzero: the monitor itself found nothing to report.
+mkdir -p "${MON_WORK}/run2"
+cat >"${MON_WORK}/run2/manifest.json" <<EOF
+{"workers":[{"name":"w1","done_marker":"${MON_WORK}/run2/w1.done","surface_ref":""}]}
+EOF
+TIMEOUT_RC=0
+TIMEOUT_JSON=$(MONITOR_MAX_WAIT=0 "$MONITOR" "${MON_WORK}/run2") || TIMEOUT_RC=$?
+assert_eq "$(jq -r '.type' <<<"$TIMEOUT_JSON")" "failed" \
+  "monitor-workers.sh: exhausting the bound with nothing detected still emits a trigger, not a hang"
+assert_contains "$(jq -r '.reason' <<<"$TIMEOUT_JSON")" "timeout" \
+  "monitor-workers.sh: the bound-exceeded trigger's reason says timeout"
+assert_eq "$TIMEOUT_RC" 1 \
+  "monitor-workers.sh: the bound-exceeded trigger is the one case that exits nonzero"
+
+# ─── The fatal-signature regex itself is pinned so a future edit can't ────
+# quietly narrow what counts as fatal without this test noticing.
+MONITOR_TEXT=$(cat "$MONITOR")
+assert_contains "$MONITOR_TEXT" \
+  'panic|fatal|segmentation fault|killed|traceback|unhandled|command not found|permission denied' \
+  "monitor-workers.sh: the fatal-signature regex is the full agreed set, not a narrowed subset"
+
+rm -rf "$MON_WORK"
+
+# ─── SKILL.md: Phase 2 scaffolding and Phase 4 polling loop were replaced ──
+# with prepare-run.sh / monitor-workers.sh calls, and the file is under the
+# 351-line ceiling — a proxy that's easy to satisfy by deleting rules
+# instead of extracting scripts, so the assertions below pin the load-
+# bearing RULES this project has already lost to line-count pressure once
+# (see deep-plan/tests/executable_test-deep-plan.sh, "Task 6" — the two
+# checks above only prove SKILL.md got shorter and mentions the new
+# scripts; every other rule in the file could be deleted and they'd stay
+# green). Extend THIS block, not the line-count check, if a future task
+# slims this file again.
+
+assert_eq "$([ "$(wc -l <"$SKILL_MD" | tr -d ' ')" -lt 351 ] && echo yes || echo no)" yes \
+  "SKILL.md: line count is under the 351-line ceiling"
+SKILL_MD_TEXT=$(cat "$SKILL_MD")
+assert_contains "$SKILL_MD_TEXT" "prepare-run.sh" \
+  "SKILL.md: Phase 2 points at prepare-run.sh for the fixed scaffolding"
+assert_contains "$SKILL_MD_TEXT" "monitor-workers.sh" \
+  "SKILL.md: Phase 4's polling loop points at monitor-workers.sh"
+NOT_CONTAINS_OLD_HEREDOC="yes"
+case "$SKILL_MD_TEXT" in
+  *"You are a worker agent in a cmux parallel orchestration."*) NOT_CONTAINS_OLD_HEREDOC="no" ;;
+esac
+assert_eq "$NOT_CONTAINS_OLD_HEREDOC" "yes" \
+  "SKILL.md: the system-prompt heredoc was moved to templates/system-prompt.txt, not duplicated"
+
+assert_contains "$SKILL_MD_TEXT" "Never create sessions before the plan is approved by the user." \
+  "SKILL.md: must-survive — plan approval gate"
+assert_contains "$SKILL_MD_TEXT" 'ALWAYS use the `launch-workers.sh` script' \
+  "SKILL.md: must-survive — always use launch-workers.sh"
+assert_contains "$SKILL_MD_TEXT" 'Do NOT manually run `cmux send`' \
+  "SKILL.md: must-survive — do not manually run cmux send (Phase 3)"
+assert_contains "$SKILL_MD_TEXT" 'NEVER use raw `cmux send` directly' \
+  "SKILL.md: must-survive — never use raw cmux send (idle worker reuse)"
+assert_contains "$SKILL_MD_TEXT" "Never clean up automatically." \
+  "SKILL.md: must-survive — no automatic cleanup"
+assert_contains "$SKILL_MD_TEXT" "Maximum 6 concurrent workers" \
+  "SKILL.md: must-survive — worker concurrency cap"
+assert_contains "$SKILL_MD_TEXT" "Never parallelize dependent tasks" \
+  "SKILL.md: must-survive — serialize dependent tasks"
+assert_contains "$SKILL_MD_TEXT" "Workers must not exit" \
+  "SKILL.md: must-survive — workers stay in interactive mode"
+
+# ─── templates/system-prompt.txt: verbatim wording pins — this is what ────
+# every worker is told; a silent edit changes every future worker's
+# behavior. A full-file diff against the original heredoc is done by hand
+# at commit time; these pin the opening and closing lines so an automated
+# regression is caught here too.
+TEMPLATE_TEXT=$(cat "$TEMPLATE")
+assert_contains "$TEMPLATE_TEXT" "You are a worker agent in a cmux parallel orchestration." \
+  "templates/system-prompt.txt: opening line survived the extraction verbatim"
+assert_contains "$TEMPLATE_TEXT" "Handle errors explicitly at every level" \
+  "templates/system-prompt.txt: closing line survived the extraction verbatim"
 
 assert_summary
