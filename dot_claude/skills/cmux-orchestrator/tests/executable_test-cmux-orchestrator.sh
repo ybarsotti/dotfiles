@@ -144,6 +144,7 @@ assert_contains "$LOG_TEXT" 'claude --model sonnet' "bare spec"
 assert_contains "$LOG_TEXT" 'claude --model opus' "claude triple"
 assert_contains "$LOG_TEXT" 'codex --model gpt-5.6-terra' "codex triple"
 assert_contains "$LOG_TEXT" 'model_reasoning_effort="high"' "codex effort"
+assert_contains "$LOG_TEXT" '--effort high' "claude effort: --effort flag is present when effort is set"
 
 # ─── Backward compatibility: bare names still mean claude+sonnet, and the ──
 # emitted JSON keeps pane_ref + a per-worker surface_ref (shape unchanged,
@@ -155,6 +156,27 @@ assert_eq "$(jq -r '.workers[0].name' <<<"$OUT_JSON")" "legacy" "bare spec's par
 assert_eq "$(jq -r '.workers[0].runner' <<<"$OUT_JSON")" "claude" "bare spec's runner defaults to claude"
 assert_eq "$(jq '[.workers[].surface_ref] | all(type == "string" and length > 0)' <<<"$OUT_JSON")" \
   "true" "every worker keeps a non-empty surface_ref"
+
+# ─── Content-level check: the no-effort grammar (`name:runner:model`, no ──
+# `@effort`) must omit the effort flag entirely for BOTH runners, not emit
+# it empty. Regression test for a codex-branch bug where
+# `-c model_reasoning_effort="${effort}"` was always appended even when
+# effort was unset, producing `model_reasoning_effort=""` — an empty
+# string spliced into an enum-typed override that a real codex CLI would
+# likely reject. The claude branch already guarded this with
+# `if [ -n "$effort" ]`; the codex branch did not.
+NOEFFORT_RC=0
+run_launcher "$BIN_ALL" "$RUN_DIR" "$CWD" w-codex:codex:gpt-5 w-claude:claude:opus || NOEFFORT_RC=$?
+assert_eq "$NOEFFORT_RC" 0 "no-effort multi-runner run exits 0"
+NOEFFORT_LOG=$(cat "$LOG")
+assert_contains "$NOEFFORT_LOG" 'codex --model gpt-5' "codex no-effort: command still launches with the right model"
+HAS_REASONING_EFFORT="no"
+case "$NOEFFORT_LOG" in *model_reasoning_effort*) HAS_REASONING_EFFORT="yes" ;; esac
+assert_eq "$HAS_REASONING_EFFORT" "no" "codex no-effort: model_reasoning_effort flag is omitted, not emitted empty"
+assert_contains "$NOEFFORT_LOG" 'claude --model opus' "claude no-effort: command still launches with the right model"
+HAS_CLAUDE_EFFORT="no"
+case "$NOEFFORT_LOG" in *'--effort'*) HAS_CLAUDE_EFFORT="yes" ;; esac
+assert_eq "$HAS_CLAUDE_EFFORT" "no" "claude no-effort: --effort flag is omitted"
 
 # ─── parse_spec is unit-testable via LAUNCH_WORKERS_LIB_ONLY, no cmux ──────
 # needed at all.
