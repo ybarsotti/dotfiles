@@ -625,6 +625,118 @@ for item in draft-non-empty draft-header-complete draft-tasks-complete \
   expect_draft_item "$item" "pass" "$VALID_DRAFT_FIXTURE"
 done
 
+# ─── Task 5 review fix: draft-tail-complete against a shape, not a vocabulary ──
+#
+# A reviewer built three adversarial drafts — each a real header + real task
+# block + a well-formed checklist truncated one character/word/sentence into
+# its final item name — and ran the SHIPPED validate-draft.sh against them.
+# All three passed with exit 0: the old "well-formed last line" regex
+# (`^- \[[ xX]\] [a-z][a-z0-9-]*([[:space:]].*)?$`) only required the line to
+# START like a checklist item, so `- [ ] lane-cont` satisfied it just as well
+# as a genuine, complete item name. draft-tail-complete now checks the last
+# line's item name against CHECKLIST_VOCAB (read from the templates), a
+# closed set a shape regex cannot consult.
+TAIL_BASE='# Sample Feature Implementation Plan
+
+**Goal:** Ship the sample feature end to end.
+
+**Architecture:** A single service change behind an existing adapter boundary.
+
+**Tech Stack:** Bash, jq.
+
+## Implementation tasks
+
+### Task 1: Do the thing
+
+**Files:**
+
+- Create: `src/thing.sh`
+
+**Interfaces:**
+
+- `thing.sh ARG` — does the thing.
+
+- [ ] **Step 1: Write the failing test**
+- [ ] **Step 2: Run it and watch it fail**
+- [ ] **Step 3: Implement**
+- [ ] **Step 4: Run it and watch it pass**
+
+## Checklist (machine-validated; do NOT hand-edit — call tick-checklist.sh)
+- [ ] mermaid-present
+- [ ] tasks-≥1
+- [ ] no-tbd-placeholders
+- [ ] superpowers-all-invoked
+'
+
+# Truncated one character into an item name after the canary.
+printf '%s%s\n' "$TAIL_BASE" '- [ ] l' > "$TMP/adv-onechar.md"
+# Truncated mid-word.
+printf '%s%s\n' "$TAIL_BASE" '- [ ] lane-cont' > "$TMP/adv-midword.md"
+# Truncated mid-sentence in trailing text.
+printf '%s%s\n' "$TAIL_BASE" \
+  '- [ ] lane-contract-present and this sentence trails off mid way through beca' \
+  > "$TMP/adv-midsentence.md"
+expect_draft_item "draft-tail-complete" "fail" "$TMP/adv-onechar.md"
+expect_draft_item "draft-tail-complete" "fail" "$TMP/adv-midword.md"
+expect_draft_item "draft-tail-complete" "fail" "$TMP/adv-midsentence.md"
+
+# A last line ending on a complete, known item name still passes.
+printf '%s%s\n' "$TAIL_BASE" '- [ ] no-tbd-placeholders' > "$TMP/adv-known-tail.md"
+expect_draft_item "draft-tail-complete" "pass" "$TMP/adv-known-tail.md"
+
+# A last line ending on a complete but UNKNOWN item name still fails — this
+# is what pins the check to the templates' vocabulary rather than merely
+# "any word after the canary."
+printf '%s%s\n' "$TAIL_BASE" '- [ ] totally-made-up-item' > "$TMP/adv-unknown-tail.md"
+expect_draft_item "draft-tail-complete" "fail" "$TMP/adv-unknown-tail.md"
+
+# ─── Task 5 review fix: draft-tasks-complete requires task BODIES, not just
+# bare `### Task N:` headings ────────────────────────────────────────────────
+#
+# A draft with three bare task headings, zero Files/Interfaces/Steps content,
+# and a well-formed Checklist used to pass all five checks — a planner that
+# ran dry after emitting an outline of task titles was accepted as complete.
+# draft-tasks-complete now reuses validate-plan.sh's task_body_issues (shared
+# via task-body-lib.sh) so a bare heading fails the same way it already does
+# in validate-plan.sh's tasks-have-files-and-interfaces / tasks-have-tdd-steps.
+cat > "$TMP/bare-headings.md" <<'HEREDOC'
+# Sample Feature Implementation Plan
+
+**Goal:** Ship the sample feature end to end.
+
+**Architecture:** A single service change behind an existing adapter boundary.
+
+**Tech Stack:** Bash, jq.
+
+## Implementation tasks
+
+### Task 1: Do the thing
+
+### Task 2: Do another thing
+
+### Task 3: Do a third thing
+
+## Checklist (machine-validated; do NOT hand-edit — call tick-checklist.sh)
+- [ ] mermaid-present
+- [ ] tasks-≥1
+- [ ] no-tbd-placeholders
+- [ ] superpowers-all-invoked
+HEREDOC
+expect_draft_item "draft-tasks-complete" "fail" "$TMP/bare-headings.md"
+
+# The three real session drafts (this run's own planner outputs) must still
+# pass every item — including draft-opus.md's embedded NUL byte, which
+# requires the existing `grep -a` handling to stay intact.
+REAL_DRAFTS_DIR="${HOME}/.claude/deep-plan-runs/20260720-142952-a8257c"
+if [ -d "$REAL_DRAFTS_DIR" ]; then
+  for real in draft-opus.md draft-codex.md plan.md; do
+    for item in draft-non-empty draft-header-complete draft-tasks-complete \
+      draft-tail-complete draft-fences-balanced; do
+      expect_draft_item "$item" "pass" "${REAL_DRAFTS_DIR}/${real}"
+    done
+  done
+fi
+
 # ─── PATH stubs for `claude` and `codex` ───────────────────────────────────
 # dispatch-planners.sh/runner.sh must never invoke the real CLIs from this
 # test suite. Both stubs drain stdin (the real CLIs read the prompt from

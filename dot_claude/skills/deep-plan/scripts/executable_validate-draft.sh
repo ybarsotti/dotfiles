@@ -30,6 +30,38 @@ done
 [ -n "$DRAFT" ] || { echo "validate-draft.sh: missing <draft.md> argument" >&2; exit 2; }
 command -v jq >/dev/null 2>&1 || { echo "validate-draft.sh: jq required" >&2; exit 2; }
 
+# task_title_count / task_body_issues — shared with validate-plan.sh via
+# task-body-lib.sh (see that file for why).
+# shellcheck source=./task-body-lib.sh
+. "$(dirname "$0")/task-body-lib.sh"
+
+# The canonical checklist item vocabulary — read from the templates rather
+# than hardcoded here a second time, so `draft-tail-complete` (below) can
+# never quietly drift from what superpowers:writing-plans actually emits.
+# Both templates matter: a subplan's `## Checklist` is a strict subset of a
+# root plan's, but reading only one would still be a second copy of the
+# other's item names in spirit.
+SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+TEMPLATE_PLAN="${SKILL_DIR}/templates/plan.md"
+TEMPLATE_SUBPLAN="${SKILL_DIR}/templates/subplan.md"
+[ -f "$TEMPLATE_PLAN" ] || { echo "validate-draft.sh: missing $TEMPLATE_PLAN (checklist vocabulary source)" >&2; exit 2; }
+[ -f "$TEMPLATE_SUBPLAN" ] || { echo "validate-draft.sh: missing $TEMPLATE_SUBPLAN (checklist vocabulary source)" >&2; exit 2; }
+
+# checklist_vocab_from FILE — every item name declared under FILE's
+# `## Checklist` section, one per line. Fence-aware for consistency with
+# every other section-body scan in this skill, though the templates
+# themselves carry no fenced examples inside that section today.
+checklist_vocab_from() {
+  awk '
+    /^```/ { infence = !infence; next }
+    infence { next }
+    /^## Checklist/ { inside = 1; next }
+    inside && /^## / { inside = 0 }
+    inside
+  ' "$1" | sed -n 's/^- \[ \] \([^[:space:]]*\)[[:space:]]*$/\1/p'
+}
+CHECKLIST_VOCAB=$( { checklist_vocab_from "$TEMPLATE_PLAN"; checklist_vocab_from "$TEMPLATE_SUBPLAN"; } | sort -u)
+
 RESULTS=()
 
 record() {
@@ -81,29 +113,33 @@ else
   record "draft-header-complete" "fail" "missing: $HEADER_MISS"
 fi
 
-# 3. Implementation tasks complete — the section header exists AND at least
-# one real `### Task N: <name>` block is inside it. Fence-aware and rejects
-# a placeholder title (`### Task 1: <Component Name>`) the same way
-# validate-plan.sh's tasks-≥1 check does — a truncated stream that stops
-# right after printing the bare section heading (this script's own red-state
-# fixture) must not pass just because the heading is there.
-TASK_TITLES=$(awk '
-  /^```/ { infence = !infence; next }
-  infence { next }
-  /^### Task [0-9]+: [^<]/ { c++ }
-  END { print c + 0 }
-' "$DRAFT")
+# 3. Implementation tasks complete — the section header exists, at least one
+# real `### Task N: <name>` block is inside it, AND every task block found
+# has a body (Files + Interfaces + ≥4 checkbox steps) — not just a bare
+# heading. Fence-aware and rejects a placeholder title
+# (`### Task 1: <Component Name>`) the same way validate-plan.sh's tasks-≥1
+# check does. A planner that ran dry after emitting an outline of task
+# titles (three bare `### Task N:` headings, zero content) used to pass this
+# check on title count alone — task_body_issues (shared with validate-plan.sh
+# via task-body-lib.sh) closes that gap the same way validate-plan.sh's
+# tasks-have-files-and-interfaces / tasks-have-tdd-steps checks already do.
+TASK_TITLES=$(task_title_count "$DRAFT")
+TASK_ISSUES=$(task_body_issues "$DRAFT")
 if grep -aqE '^## Implementation tasks' "$DRAFT"; then
   HAS_TASKS_SECTION=1
 else
   HAS_TASKS_SECTION=0
 fi
-if [ "$HAS_TASKS_SECTION" -eq 1 ] && [ "$TASK_TITLES" -ge 1 ]; then
-  record "draft-tasks-complete" "pass" "$TASK_TITLES task block(s)"
+if [ "$HAS_TASKS_SECTION" -eq 1 ] && [ "$TASK_TITLES" -ge 1 ] && [ -z "$TASK_ISSUES" ]; then
+  record "draft-tasks-complete" "pass" "$TASK_TITLES task block(s), all with Files+Interfaces+≥4 steps"
 else
   MISS=""
   [ "$HAS_TASKS_SECTION" -eq 0 ] && MISS="no '## Implementation tasks' section"
   [ "$TASK_TITLES" -lt 1 ] && MISS="${MISS:+$MISS; }no '### Task N: <name>' block"
+  if [ -n "$TASK_ISSUES" ]; then
+    ISSUE_DETAIL=$(echo "$TASK_ISSUES" | tr '\n' ';' | cut -c1-200)
+    MISS="${MISS:+$MISS; }incomplete task body: $ISSUE_DETAIL"
+  fi
   record "draft-tasks-complete" "fail" "$MISS"
 fi
 
@@ -116,9 +152,18 @@ fi
 # literal last line. Instead it requires two independent, content-level
 # signals: the canary item is present as a real checkbox INSIDE the
 # Checklist section (proves generation reached that far), and the file's
-# very last non-blank line is itself a well-formed checklist checkbox
-# (proves the stream ended cleanly on an item boundary, not mid-word/
-# mid-line — the shape a hard truncation actually leaves behind).
+# very last non-blank line's item name is a COMPLETE, KNOWN name drawn from
+# CHECKLIST_VOCAB (the templates' own `## Checklist` lists, computed above).
+#
+# An earlier version of this check accepted any line "shaped like" a
+# checklist item (`- [ ] <word>` with anything after it) as proof the stream
+# ended on an item boundary. It doesn't: `- [ ] lane-cont` and
+# `- [ ] lane-contract-present and this sentence trails off mid way through`
+# both match that shape while being exactly the mid-word/mid-sentence
+# truncations this check exists to catch. A shape regex cannot tell
+# `lane-cont` from `lane-contract-present`; checklist item names are a
+# closed, enumerable set, so checking the last line's item name against that
+# set can, and does.
 # The heading itself always carries trailing text ("## Checklist
 # (machine-validated; ...)"), so this is a prefix match on `## Checklist`,
 # not section_body's exact-line match used for plain headings elsewhere.
@@ -140,18 +185,29 @@ else
   HAS_CANARY=0
 fi
 LAST_LINE=$(awk 'NF { last = $0 } END { print last }' "$DRAFT")
-if printf '%s' "$LAST_LINE" | grep -qE '^- \[[ xX]\] [a-z][a-z0-9-]*([[:space:]].*)?$'; then
+# Only a line that is EXACTLY `- [ ] <item>` (optional trailing whitespace,
+# nothing else) yields a LAST_ITEM at all — a truncation mid-word or
+# mid-sentence never matches this pattern end-to-end, so it falls through
+# with LAST_ITEM empty and fails below regardless of vocabulary.
+LAST_ITEM=$(printf '%s' "$LAST_LINE" | sed -n 's/^- \[[ xX]\] \([^[:space:]]*\)[[:space:]]*$/\1/p')
+if [ -n "$LAST_ITEM" ] && printf '%s\n' "$CHECKLIST_VOCAB" | grep -qxF "$LAST_ITEM"; then
   LAST_WELLFORMED=1
 else
   LAST_WELLFORMED=0
 fi
 if [ "$HAS_CHECKLIST" -eq 1 ] && [ "$HAS_CANARY" -eq 1 ] && [ "$LAST_WELLFORMED" -eq 1 ]; then
-  record "draft-tail-complete" "pass" "checklist reaches 'superpowers-all-invoked' and ends cleanly"
+  record "draft-tail-complete" "pass" "checklist reaches 'superpowers-all-invoked' and ends on known item '$LAST_ITEM'"
 else
   MISS=""
   [ "$HAS_CHECKLIST" -eq 0 ] && MISS="no '## Checklist' section"
   [ "$HAS_CANARY" -eq 0 ] && MISS="${MISS:+$MISS; }checklist never reaches 'superpowers-all-invoked'"
-  [ "$LAST_WELLFORMED" -eq 0 ] && MISS="${MISS:+$MISS; }last line is not a well-formed checklist item: '$(printf '%s' "$LAST_LINE" | cut -c1-80)'"
+  if [ "$LAST_WELLFORMED" -eq 0 ]; then
+    if [ -n "$LAST_ITEM" ]; then
+      MISS="${MISS:+$MISS; }last line's item '$LAST_ITEM' is not a known checklist item"
+    else
+      MISS="${MISS:+$MISS; }last line is not a complete checklist item: '$(printf '%s' "$LAST_LINE" | cut -c1-80)'"
+    fi
+  fi
   record "draft-tail-complete" "fail" "$MISS"
 fi
 
