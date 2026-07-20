@@ -15,10 +15,9 @@ Before anything else, verify the environment:
 
 ```bash
 cmux identify --json
-which claude
 ```
 
-If either fails, tell the user and stop.
+If it fails, tell the user and stop. `claude`/`codex` availability is checked per-runner by `launch-workers.sh` at launch time — don't hard-require `claude` here for a codex-only run.
 
 Save the orchestrator's identity:
 
@@ -60,109 +59,28 @@ ORCH_WORKSPACE=$(echo "$ORCH_INFO" | jq -r '.caller.workspace_ref')
 
 **Always use `AskUserQuestion` with predefined options for any decision point** — plan approval, cleanup confirmation, blocked worker resolution, etc.
 
-## Phase 2 — Setup Run Directory
+## Phase 2 — Prepare the Run
 
-Create a unique run directory and all coordination files:
+Create a unique run directory, then let `prepare-run.sh` write all the fixed scaffolding — the shared system prompt, each worker's prompt/result files, and `manifest.json`. It launches nothing and is idempotent (safe to re-run, e.g. after adding a worker — it won't overwrite prompt/result files that already exist).
 
 ```bash
 RUN_ID="cmux-$(date +%Y%m%d-%H%M%S)"
 RUN_DIR="/tmp/cmux-orchestrator/${RUN_ID}"
 mkdir -p "${RUN_DIR}"
+
+~/.claude/skills/cmux-orchestrator/scripts/prepare-run.sh \
+  "${RUN_DIR}" "$(pwd)" "${ORCH_SURFACE}" \
+  auth-refactor add-tests api-docs
 ```
 
-### 2a. Write the shared system prompt
+The script is at `~/.claude/skills/cmux-orchestrator/scripts/prepare-run.sh`. Worker specs use the same `name` / `name:runner:model` / `name:runner:model@effort` grammar as `launch-workers.sh` (Phase 3) — pass the identical specs to both.
 
-Write `${RUN_DIR}/system-prompt.txt` — delivered to workers via `--append-system-prompt-file`:
+It writes:
+- `${RUN_DIR}/system-prompt.txt` — from `templates/system-prompt.txt`, or a custom file via `--system-prompt FILE`
+- `${RUN_DIR}/worker-<name>.prompt.md` and `.result.md` per worker
+- `${RUN_DIR}/manifest.json` — `worker_pane_ref` plus one entry per worker (`name`, `surface_ref`, `status`, `prompt_file`, `result_file`, `done_marker`)
 
-```
-You are a worker agent in a cmux parallel orchestration.
-
-## Protocol
-
-1. Your first action: read the task file path given in your initial message.
-2. Execute the task completely and thoroughly.
-3. When finished, write a markdown summary of everything you did to your result file (path is in the task file).
-4. Then write exactly "done" to your done marker file (path is in the task file).
-5. If you hit a blocking issue you cannot resolve, write "blocked: <reason>" to the done marker instead.
-6. Stay available for follow-up — do NOT exit or close the session.
-
-## Tool Integration
-
-### Serena (semantic code tools)
-Prefer Serena's semantic tools over text-based grep/sed when available:
-- Use find_symbol and get_symbols_overview for code navigation
-- Use replace_symbol_body for precise, symbol-level edits
-- Use find_referencing_symbols to understand call chains before refactoring
-
-### GitNexus (code intelligence graph)
-Before modifying any function, class, or method:
-- Run gitnexus_impact to check blast radius — if HIGH or CRITICAL, write "blocked: high-impact change on <symbol>, needs orchestrator review" to your done marker
-- Run gitnexus_detect_changes before writing your done marker to verify changes match expected scope
-- Use gitnexus_query to find related code by concept instead of grepping
-
-### General
-- Read CLAUDE.md in the project root for project-specific conventions
-- Follow existing code patterns and style
-- Prefer immutable patterns — create new objects, never mutate existing ones
-- Handle errors explicitly at every level
-```
-
-### 2b. Write per-worker task files
-
-For each worker, write `${RUN_DIR}/worker-<name>.prompt.md`:
-
-```markdown
-# Task: <Worker Name>
-
-## Orchestration Info
-- Run ID: <RUN_ID>
-- Run directory: <RUN_DIR>
-- Orchestrator surface: <ORCH_SURFACE>
-- Result file: <RUN_DIR>/worker-<name>.result.md
-- Done marker: <RUN_DIR>/worker-<name>.done
-
-## Task
-<Detailed task description — be specific about what to do, not vague>
-
-## Files to Work With
-<Explicit list of files and directories, with brief notes on what's relevant in each>
-
-## Context
-<Architecture notes, related documentation paths, design decisions the worker needs to know>
-
-## Success Criteria
-<Concrete, verifiable definition of done>
-
-## When Finished
-1. Write a markdown summary of all changes you made to: <RUN_DIR>/worker-<name>.result.md
-2. Include a list of every file you created or modified
-3. Write "done" (just that word) to: <RUN_DIR>/worker-<name>.done
-4. Stay available — do not exit
-```
-
-### 2c. Write manifest
-
-Write `${RUN_DIR}/manifest.json` to track orchestration state:
-
-```json
-{
-  "run_id": "<RUN_ID>",
-  "created_at": "<ISO timestamp>",
-  "cwd": "<working directory>",
-  "orchestrator_surface": "<ORCH_SURFACE>",
-  "worker_pane_ref": null,
-  "workers": [
-    {
-      "name": "<name>",
-      "surface_ref": null,
-      "status": "pending",
-      "prompt_file": "<RUN_DIR>/worker-<name>.prompt.md",
-      "result_file": "<RUN_DIR>/worker-<name>.result.md",
-      "done_marker": "<RUN_DIR>/worker-<name>.done"
-    }
-  ]
-}
-```
+**Before launching**, open every `worker-<name>.prompt.md` and replace the `<placeholder>` Task / Files to Work With / Context / Success Criteria sections with the real, subtask-specific content decided in Phase 1 — `prepare-run.sh` only writes the fixed scaffolding, never the judgement.
 
 ## Phase 3 — Create Sessions (use the helper script)
 
@@ -229,33 +147,20 @@ The script:
 
 ## Phase 4 — Monitor
 
-Switch back to the orchestrator workspace and poll worker completion by checking done marker files.
+Switch back to the orchestrator workspace. Call `monitor-workers.sh "${RUN_DIR}"` — it blocks until one worker's state changes, prints exactly one trigger as JSON, and exits. Keep calling it in a loop until every worker has reached a terminal state.
 
 ```bash
-# Check all done markers in one pass
-DONE_COUNT=0
-TOTAL=<number of workers>
-for worker in <worker-names>; do
-  if [ -f "${RUN_DIR}/worker-${worker}.done" ]; then
-    STATUS=$(cat "${RUN_DIR}/worker-${worker}.done")
-    DONE_COUNT=$((DONE_COUNT + 1))
-    echo "${worker}: ${STATUS}"
-  else
-    echo "${worker}: running"
-  fi
-done
-echo "${DONE_COUNT}/${TOTAL} complete"
+~/.claude/skills/cmux-orchestrator/scripts/monitor-workers.sh "${RUN_DIR}"
 ```
 
-### Monitoring rules
+Trigger `type` is one of `done`, `blocked`, `crashed` (pane vanished), or `failed` (fatal signature in the pane log, or the script's own bounded wait ran out without any of the above). Use the Monitor tool to run this loop in the background instead of blocking on it turn by turn.
 
-- **Poll interval**: every 30-60 seconds
-- **Status updates**: after each poll, tell the user which workers are done and which are still running — keep it to one line
-- **Progress bar**: `cmux set-progress $(echo "scale=2; ${DONE_COUNT}/${TOTAL}" | bc) --label "${DONE_COUNT}/${TOTAL} workers done"`
-- **Blocked workers**: if a done marker contains `blocked: <reason>`, notify the user immediately with `AskUserQuestion` offering options to resolve
-- **Peeking**: use `cmux capture-pane --surface <ref> --lines 5` to check what a worker is doing if the user asks
-- **Crash detection**: if `cmux capture-pane --surface <ref>` fails, the worker pane likely closed — mark as crashed in manifest, notify user
-- **Completion notification**: when all workers are done, run `cmux notify --title "Orchestration Complete" --body "All ${TOTAL} workers finished"`
+### On each trigger
+
+- **`done`**: update `manifest.json` status, tell the user in one line, keep polling
+- **`blocked`**: immediately notify the user with `AskUserQuestion` offering resolution options
+- **`crashed`**: mark crashed in `manifest.json`, notify the user
+- **`failed`**: notify the user with the reason from the trigger JSON
 
 ### Recovery
 
