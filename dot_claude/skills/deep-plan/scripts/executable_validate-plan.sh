@@ -30,6 +30,11 @@ SCRATCH=$(mktemp -d)
 trap 'rm -rf "$SCRATCH"' EXIT
 RESULTS=()
 
+# task_title_count / task_body_issues — shared with validate-draft.sh via
+# task-body-lib.sh (see that file for why).
+# shellcheck source=./task-body-lib.sh
+. "$(dirname "$0")/task-body-lib.sh"
+
 record() {
   local item="$1" status="$2" detail="$3"
   RESULTS+=("$(jq -n --arg i "$item" --arg s "$status" --arg d "$detail" \
@@ -118,12 +123,9 @@ fi
 # don't count: an unedited template must fail. Fence-aware: a task's own body may show an
 # illustrative `### Task N:` example inside a ``` block (as Task 3's own real-plan body
 # does) — that must never be counted as a real task title.
-TASK_TITLES=$(awk '
-  /^```/ { infence = !infence; next }
-  infence { next }
-  /^### Task [0-9]+: [^<]/ { c++ }
-  END { print c + 0 }
-' "$PLAN")
+# Shared with validate-draft.sh's `draft-tasks-complete` via task-body-lib.sh (see that
+# file for why) so the two scripts can't quietly diverge on what "complete" means.
+TASK_TITLES=$(task_title_count "$PLAN")
 if [ "$TASK_TITLES" -ge 1 ]; then
   record "tasks-≥1" "pass" "$TASK_TITLES task block(s)"
 else
@@ -132,28 +134,7 @@ fi
 
 # Every task block must declare Files + Interfaces, and carry ≥4 checkbox steps
 # (failing test → run it → implement → run it again; commit makes 5).
-# Fence-aware for the same reason as TASK_TITLES above — an illustrative fenced
-# example inside a task's own steps must never contribute to that task's counts.
-TASK_ISSUES=$(awk '
-  /^```/ { infence = !infence; next }
-  infence { next }
-  /^### Task [0-9]+:/ {
-    if (title != "") check()
-    title = $0; files = 0; ifaces = 0; steps = 0; next
-  }
-  /^## / && title != "" { check(); title = "" }
-  title != "" && /^\*\*Files:\*\*/      { files = 1 }
-  title != "" && /^\*\*Interfaces:\*\*/ { ifaces = 1 }
-  title != "" && /^- \[[ x]\] \*\*Step/ { steps++ }
-  END { if (title != "") check() }
-  function check(   miss) {
-    miss = ""
-    if (!files)  miss = miss " no-Files-block"
-    if (!ifaces) miss = miss " no-Interfaces-block"
-    if (steps < 4) miss = miss " only-" steps "-steps"
-    if (miss != "") { gsub(/^### /, "", title); print title ":" miss }
-  }
-' "$PLAN")
+TASK_ISSUES=$(task_body_issues "$PLAN")
 if [ -z "$TASK_ISSUES" ] && [ "$TASK_TITLES" -ge 1 ]; then
   record "tasks-have-files-and-interfaces" "pass" "all tasks declare Files + Interfaces"
   record "tasks-have-tdd-steps" "pass" "all tasks have ≥4 bite-sized steps"
