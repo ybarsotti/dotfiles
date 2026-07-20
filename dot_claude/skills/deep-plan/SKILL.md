@@ -44,8 +44,9 @@ code-intel bootstrap, and the machine-validated checklist gate.
 Run `~/.claude/skills/deep-plan/scripts/parse-args.sh "$ARGUMENTS"` and follow the returned
 fields: `task_description`, `ticket` (from `--ticket KEY-123`, else auto-detect: branch name,
 last commit body, current Jira/Linear context), `max_plan_iter` (from `--max-plan-iter N`,
-default 3), `no_codex` (`--no-codex`), `skip_grill` (`--skip-grill`), `dry_run` (`--dry-run`).
-An unknown `--flag` exits 2 with a message — surface it to the user verbatim.
+default 3, must be 1-20), `no_codex` (`--no-codex`), `skip_grill` (`--skip-grill`), `dry_run`
+(`--dry-run`). An unknown `--flag`, or `--max-plan-iter` outside 1-20, exits 2 with a message —
+surface it to the user verbatim.
 
 Refuse to proceed when the task is trivially small (typo, single one-line change, rename of a single symbol). Tell the user to just do it inline.
 

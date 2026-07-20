@@ -12,6 +12,15 @@
 #   {"task_description":"...", "ticket":"...", "max_plan_iter":3,
 #    "no_codex":false, "skip_grill":false, "dry_run":false}
 # An unrecognized `--flag` exits 2 with a message on stderr, nothing on stdout.
+#
+# --max-plan-iter N must satisfy 1 <= N <= 20 (exits 2 otherwise): 0 would
+# silently disable the entire Phase 2 review loop (SKILL.md's loop condition
+# is `ITER > --max-plan-iter`), and the ceiling keeps an arbitrarily large
+# value from reaching `jq --argjson` un-clamped — 20 iterations already
+# means 100 reviewer-persona invocations.
+#
+# A flag passed more than once is last-occurrence-wins (no error) — same as
+# a normal shell `getopts`-style loop re-assigning the same variable.
 
 set -eufo pipefail
 
@@ -25,6 +34,7 @@ set -- $RAW
 
 TICKET=""
 MAX_PLAN_ITER=3
+MAX_PLAN_ITER_CEILING=20
 NO_CODEX=false
 SKIP_GRILL=false
 DRY_RUN=false
@@ -54,7 +64,33 @@ while [ $# -gt 0 ]; do
           exit 2
           ;;
       esac
-      MAX_PLAN_ITER="$1"
+      # Reject on digit count before ever evaluating the value as arithmetic
+      # — a value long enough to overflow bash's 64-bit integers must not
+      # wrap around into something that slips under the ceiling below.
+      # MAX_PLAN_ITER_CEILING's digit count (2) is comfortably inside 15.
+      if [ "${#1}" -gt 15 ]; then
+        echo "parse-args.sh: --max-plan-iter must be between 1 and ${MAX_PLAN_ITER_CEILING}, got '$1'" >&2
+        exit 2
+      fi
+      # Force base-10 (`10#`) so a leading-zero value like "010" isn't
+      # misread as octal by bash arithmetic, and so the stored value is
+      # always canonical decimal — plain JSON, safe for `jq --argjson`.
+      MAX_PLAN_ITER_N=$((10#$1))
+      if [ "$MAX_PLAN_ITER_N" -lt 1 ]; then
+        # 0 is well-formed input but a destructive value: Phase 2's loop
+        # condition is `ITER > --max-plan-iter`, so 0 trips on the very
+        # first iteration and silently skips the entire reviewer loop.
+        echo "parse-args.sh: --max-plan-iter must be >= 1 (0 disables the whole Phase 2 review loop), got '$1'" >&2
+        exit 2
+      fi
+      if [ "$MAX_PLAN_ITER_N" -gt "$MAX_PLAN_ITER_CEILING" ]; then
+        # Ceiling of 20: each iteration fans out 5 reviewer personas, so 20
+        # iterations is already 100 agent invocations — an unclamped value
+        # here was passing straight through to `jq --argjson`.
+        echo "parse-args.sh: --max-plan-iter must be <= ${MAX_PLAN_ITER_CEILING}, got '$1'" >&2
+        exit 2
+      fi
+      MAX_PLAN_ITER="$MAX_PLAN_ITER_N"
       ;;
     --no-codex)   NO_CODEX=true ;;
     --skip-grill) SKIP_GRILL=true ;;
