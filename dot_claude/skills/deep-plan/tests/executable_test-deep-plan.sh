@@ -16,6 +16,10 @@ ENDPOINT_ESCAPED_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/end
 ENDPOINT_UNESCAPED_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/endpoint-unescaped-pipe.md"
 FANOUT_MALFORMED_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/fanout-malformed-lane.md"
 FANOUT_NO_SHAPE_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/fanout-no-execution-shape.md"
+TYPO_HEADING_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/execution-shape-typo-heading.md"
+ABSENT_SHAPE_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/execution-shape-absent.md"
+FENCED_SHAPE_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/execution-shape-fenced-example.md"
+OWNS_LIB="${ROOT}/dot_claude/skills/deep-plan/scripts/owns-lib.sh"
 
 JSON=$("$PARSER" "$FIXTURE")
 assert_eq "$(jq -r '.mode' <<<"$JSON")" parallel "mode"
@@ -327,5 +331,187 @@ cp "$FIXTURE" "${UNKNOWN_RUN}/plan.md"
 assert_exit 2 "$INVOKE" "$UNKNOWN_RUN" not-a-real-skill
 assert_exit 1 test -f "${UNKNOWN_RUN}/superpowers-receipts.log"
 rm -rf "$UNKNOWN_RUN"
+
+# ─── C2: owns_match / owns_overlap direct regression coverage ─────────────
+# A reviewer once reverted the `*/'**'` quoting fix in BOTH (then-duplicate)
+# copies of owns_match and the full suite still reported 100 passed, 0
+# failed — nothing pinned the behavior. These pin it directly against the
+# shared library both validate-plan.sh and subplan-fanout.sh now source, so
+# there is exactly one copy left to protect (not two that can drift apart).
+# shellcheck source=/dev/null
+. "$OWNS_LIB"
+
+# Exact path containing a slash must NOT match an unrelated owner (the bug:
+# unquoted `*/**` degrades to two glob `*`s, matching ANY string containing
+# a `/`, which is nearly every real repo path).
+assert_exit 1 owns_match "src/shared/contract.schema.json" "src/planning/**"
+# `dir/**` matches dir itself and anything nested under it.
+assert_exit 0 owns_match "src/planning" "src/planning/**"
+assert_exit 0 owns_match "src/planning/anything/deep" "src/planning/**"
+# A path that merely shares a string prefix must NOT match: `a/bc` is not
+# owned by `a/b` — this is exactly the shape the unquoted-glob bug would
+# have falsely matched (both contain a `/`).
+assert_exit 1 owns_match "a/bc" "a/b"
+# Pattern with no slash at all — exact match only.
+assert_exit 0 owns_match "justfile" "justfile"
+assert_exit 1 owns_match "justfile" "other-file"
+
+# owns_overlap: equal patterns, a prefix covering an exact path under it, and
+# genuinely disjoint patterns/paths.
+assert_exit 0 owns_overlap "src/planning/**" "src/planning/**"
+assert_exit 0 owns_overlap "src/planning/**" "src/planning/sub/file.sh"
+assert_exit 1 owns_overlap "src/planning/**" "src/execution/**"
+assert_exit 1 owns_overlap "a/b" "a/bc"
+
+# The two former copies are now one: neither script defines its own
+# `owns_match()` anymore, both source owns-lib.sh. This pins the
+# deduplication decision so a future edit can't silently reintroduce a
+# second, driftable copy.
+assert_eq "$(grep -c 'owns_match()' "${ROOT}/dot_claude/skills/deep-plan/scripts/executable_validate-plan.sh")" 0 \
+  "validate-plan.sh no longer defines its own owns_match (sources owns-lib.sh)"
+assert_eq "$(grep -c 'owns_match()' "${ROOT}/dot_claude/skills/deep-plan/scripts/executable_subplan-fanout.sh")" 0 \
+  "subplan-fanout.sh no longer defines its own owns_match (sources owns-lib.sh)"
+
+# ─── C1: receipt hash chain anchored to a git commit SHA ───────────────────
+# compute_receipt_hash PREV_HASH TS SKILL SHA — mirrors superpowers-invoke.sh's
+# own algorithm exactly, so tests can mint receipts with a genuinely valid
+# chain hash but a deliberately bad repo-sha (to isolate the SHA check from
+# the chain check).
+compute_receipt_hash() {
+  local prev="$1" ts="$2" skill="$3" sha="$4" payload
+  payload=$(printf '%s\t%s\t%s' "$ts" "$skill" "$sha")
+  if command -v sha256sum >/dev/null 2>&1; then
+    printf '%s%s' "$prev" "$payload" | sha256sum | awk '{print $1}'
+  else
+    printf '%s%s' "$prev" "$payload" | shasum -a 256 | awk '{print $1}'
+  fi
+}
+
+# A hand-forged receipt (hand-appended line, hash not derived from the chain)
+# must fail — this is the exact forgery the CRITICAL finding demonstrated:
+# `printf '...\tbrainstorming\tdeadbeef...\n' >> superpowers-receipts.log`
+# then hand-tick the box used to report `pass`.
+FORGE_RUN=$(mktemp -d)
+cp "$FIXTURE" "${FORGE_RUN}/plan.md"
+printf '2026-07-20T00:00:00Z\tgrill-with-docs\tno-git\tdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef\n' \
+  >>"${FORGE_RUN}/superpowers-receipts.log"
+sed 's/- \[ \] grill-with-docs/- [x] grill-with-docs/' "${FORGE_RUN}/plan.md" >"${FORGE_RUN}/plan.md.new"
+mv "${FORGE_RUN}/plan.md.new" "${FORGE_RUN}/plan.md"
+FORGE_JSON=$("$VALIDATE" "${FORGE_RUN}/plan.md" --root --json) || true
+assert_eq "$(jq -r '.[] | select(.item=="superpowers-ticks-have-receipts") | .status' <<<"$FORGE_JSON")" fail \
+  "hand-forged receipt (hash not derived from the chain) fails validation"
+assert_contains "$(jq -r '.[] | select(.item=="superpowers-ticks-have-receipts") | .detail' <<<"$FORGE_JSON")" \
+  "hash chain broken" "forged receipt: detail names the broken chain"
+rm -rf "$FORGE_RUN"
+
+# A chain-valid receipt naming a repo-sha that isn't a real commit fails.
+BADSHA_RUN=$(mktemp -d)
+cp "$FIXTURE" "${BADSHA_RUN}/plan.md"
+TS1="2026-07-20T00:00:00Z"
+FAKE_SHA="deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+HASH1=$(compute_receipt_hash "" "$TS1" "grill-with-docs" "$FAKE_SHA")
+printf '%s\t%s\t%s\t%s\n' "$TS1" "grill-with-docs" "$FAKE_SHA" "$HASH1" >>"${BADSHA_RUN}/superpowers-receipts.log"
+sed 's/- \[ \] grill-with-docs/- [x] grill-with-docs/' "${BADSHA_RUN}/plan.md" >"${BADSHA_RUN}/plan.md.new"
+mv "${BADSHA_RUN}/plan.md.new" "${BADSHA_RUN}/plan.md"
+BADSHA_JSON=$("$VALIDATE" "${BADSHA_RUN}/plan.md" --root --json) || true
+assert_eq "$(jq -r '.[] | select(.item=="superpowers-ticks-have-receipts") | .status' <<<"$BADSHA_JSON")" fail \
+  "a chain-valid receipt naming a non-existent commit fails"
+assert_contains "$(jq -r '.[] | select(.item=="superpowers-ticks-have-receipts") | .detail' <<<"$BADSHA_JSON")" \
+  "not-a-commit" "detail names the invalid sha as not-a-commit"
+rm -rf "$BADSHA_RUN"
+
+# A chain-valid receipt naming a REAL commit that is NOT an ancestor of
+# current HEAD also fails. `git commit-tree` mints a genuine, harmless
+# dangling commit object (HEAD as its parent, so it's a descendant, not an
+# ancestor, of HEAD) without touching any branch or the working tree.
+NONANCESTOR_RUN=$(mktemp -d)
+cp "$FIXTURE" "${NONANCESTOR_RUN}/plan.md"
+CHILD_SHA=$(git -C "$ROOT" commit-tree -p HEAD -m "scratch: non-ancestor receipt test (dangling, safe to gc)" "HEAD^{tree}")
+TS2="2026-07-20T00:00:01Z"
+HASH2=$(compute_receipt_hash "" "$TS2" "grill-with-docs" "$CHILD_SHA")
+printf '%s\t%s\t%s\t%s\n' "$TS2" "grill-with-docs" "$CHILD_SHA" "$HASH2" >>"${NONANCESTOR_RUN}/superpowers-receipts.log"
+sed 's/- \[ \] grill-with-docs/- [x] grill-with-docs/' "${NONANCESTOR_RUN}/plan.md" >"${NONANCESTOR_RUN}/plan.md.new"
+mv "${NONANCESTOR_RUN}/plan.md.new" "${NONANCESTOR_RUN}/plan.md"
+NONANCESTOR_JSON=$("$VALIDATE" "${NONANCESTOR_RUN}/plan.md" --root --json) || true
+assert_eq "$(jq -r '.[] | select(.item=="superpowers-ticks-have-receipts") | .status' <<<"$NONANCESTOR_JSON")" fail \
+  "a chain-valid receipt naming a real, non-ancestor commit fails"
+assert_contains "$(jq -r '.[] | select(.item=="superpowers-ticks-have-receipts") | .detail' <<<"$NONANCESTOR_JSON")" \
+  "not-ancestor-of-HEAD" "detail names the commit as not-ancestor-of-HEAD"
+rm -rf "$NONANCESTOR_RUN"
+
+# A legitimately superpowers-invoke.sh-written receipt still passes, and now
+# carries the 4-field <ts>\t<skill>\t<repo-sha>\t<chain-hash> format.
+LEGIT_RUN=$(mktemp -d)
+cp "$FIXTURE" "${LEGIT_RUN}/plan.md"
+assert_exit 0 "$INVOKE" "$LEGIT_RUN" grill-with-docs
+LEGIT_JSON=$("$VALIDATE" "${LEGIT_RUN}/plan.md" --root --json) || true
+assert_eq "$(jq -r '.[] | select(.item=="superpowers-ticks-have-receipts") | .status' <<<"$LEGIT_JSON")" pass \
+  "a legitimately superpowers-invoke.sh-written receipt passes"
+LEGIT_FIELDS=$(awk -F'\t' '{print NF}' "${LEGIT_RUN}/superpowers-receipts.log")
+assert_eq "$LEGIT_FIELDS" 4 "receipt line has 4 tab-separated fields (ts, skill, repo-sha, chain-hash)"
+rm -rf "$LEGIT_RUN"
+
+# ─── I1: Handoff items are not required to approve the plan, but a forged ──
+# tick on one still fails superpowers-ticks-have-receipts (ticks are checked
+# everywhere in the section, required-or-not). All 3 REQUIRED items must be
+# resolved first (receipted or declined) so this isolates the Handoff
+# behavior instead of also failing on the fixture's own bare required items.
+
+HANDOFF_RUN=$(mktemp -d)
+cp "$FIXTURE" "${HANDOFF_RUN}/plan.md"
+assert_exit 0 "$INVOKE" "$HANDOFF_RUN" grill-with-docs
+assert_exit 0 "$INVOKE" "$HANDOFF_RUN" brainstorming
+assert_exit 0 "$INVOKE" "$HANDOFF_RUN" writing-plans
+HANDOFF_JSON=$("$VALIDATE" "${HANDOFF_RUN}/plan.md" --root --json) || true
+assert_eq "$(jq -r '.[] | select(.item=="superpowers-all-invoked") | .status' <<<"$HANDOFF_JSON")" pass \
+  "unticked Handoff items do not fail superpowers-all-invoked (once the required items are resolved)"
+
+sed 's/- \[ \] using-git-worktrees/- [x] using-git-worktrees/' "${HANDOFF_RUN}/plan.md" >"${HANDOFF_RUN}/plan.md.new"
+mv "${HANDOFF_RUN}/plan.md.new" "${HANDOFF_RUN}/plan.md"
+HANDOFF_FORGE_JSON=$("$VALIDATE" "${HANDOFF_RUN}/plan.md" --root --json) || true
+assert_eq "$(jq -r '.[] | select(.item=="superpowers-ticks-have-receipts") | .status' <<<"$HANDOFF_FORGE_JSON")" fail \
+  "a forged tick on a Handoff item still fails superpowers-ticks-have-receipts"
+assert_eq "$(jq -r '.[] | select(.item=="superpowers-all-invoked") | .status' <<<"$HANDOFF_FORGE_JSON")" pass \
+  "a forged Handoff tick doesn't affect superpowers-all-invoked (Handoff isn't required)"
+rm -rf "$HANDOFF_RUN"
+
+# ─── I2: the declination annotation is loosened to a word-boundary match ───
+# on "not invoked" — no semicolon required, and the alternate real-world
+# phrasing "— not invoked as a skill; ..." now resolves the item. The other
+# two required items are declined with the standard form so the assertion
+# below isolates the alternate wording rather than also failing on them.
+
+DECLINE_ALT_RUN="$TMP/decline-alt-wording.md"
+sed -e 's/- \[ \] grill-with-docs/- [ ] grill-with-docs — not invoked; --skip-grill was passed/' \
+    -e 's/- \[ \] brainstorming/- [ ] brainstorming — not invoked; trivial change/' \
+    -e 's/- \[ \] writing-plans/- [ ] writing-plans — not invoked as a skill; already covered by prior draft/' \
+    "$FIXTURE" >"$DECLINE_ALT_RUN"
+DECLINE_JSON=$("$VALIDATE" "$DECLINE_ALT_RUN" --root --json) || true
+assert_eq "$(jq -r '.[] | select(.item=="superpowers-all-invoked") | .status' <<<"$DECLINE_JSON")" pass \
+  "'— not invoked as a skill; ...' declination form now resolves the item"
+
+# ─── Q1: a near-miss "## Execution shape" heading (typo/wrong level) fails ──
+# loudly instead of silently degrading to serial/legacy behavior; a
+# genuinely absent heading still degrades quietly.
+
+assert_exit 1 "$PARSER" "$TYPO_HEADING_FIXTURE"
+TYPO_STDERR=$("$PARSER" "$TYPO_HEADING_FIXTURE" 2>&1 >/dev/null || true)
+assert_contains "$TYPO_STDERR" "heading looks like '## Execution shape'" \
+  "a near-miss Execution shape heading fails with a diagnostic naming the offending line"
+
+assert_exit 0 "$PARSER" "$ABSENT_SHAPE_FIXTURE"
+ABSENT_JSON=$("$PARSER" "$ABSENT_SHAPE_FIXTURE")
+assert_eq "$(jq -r 'if .mode == null then "null" else .mode end' <<<"$ABSENT_JSON")" null \
+  "a genuinely absent Execution shape section still degrades quietly (mode: null)"
+
+# ─── Q2: a fenced illustrative "## Execution shape" example is never ──────
+# mistaken for a real declaration (the same fence-unaware-declaration bug
+# class already fixed once for `**Lane:**`, swept here for every other
+# declaration-parsing site named in the finding).
+
+assert_exit 0 "$PARSER" "$FENCED_SHAPE_FIXTURE"
+FENCED_JSON=$("$PARSER" "$FENCED_SHAPE_FIXTURE")
+assert_eq "$(jq -r 'if .mode == null then "null" else .mode end' <<<"$FENCED_JSON")" null \
+  "a fenced illustrative Execution shape example is not treated as a real declaration"
 
 assert_summary

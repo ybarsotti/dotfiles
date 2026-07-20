@@ -45,6 +45,10 @@ sequenceDiagram
 - <how to confirm this chapter works in isolation>
 
 ## Checklist (machine-validated; do NOT hand-edit — call tick-checklist.sh --subplan)
+<!-- validate-plan.sh only records the 21 execution-shape/lane-identity items (including
+     tasks-tagged-with-lane, every-lane-has-1-task, lane-task-files-subset-of-lane-owns) in
+     `--root` mode — a `--subplan` run never emits them, so they can never be ticked here via
+     the sanctioned tick-checklist.sh path. Do not add them to this list. -->
 - [ ] mermaid-present
 - [ ] mermaid-has-entry-and-exit
 - [ ] tasks-≥1
@@ -53,6 +57,3 @@ sequenceDiagram
 - [ ] tdd-list-≥3
 - [ ] edges-≥4
 - [ ] no-tbd-placeholders
-- [ ] tasks-tagged-with-lane
-- [ ] every-lane-has-1-task
-- [ ] lane-task-files-subset-of-lane-owns

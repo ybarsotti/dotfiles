@@ -58,8 +58,16 @@ trap 'rm -rf "$SCRATCH"' EXIT
 
 # Extract affected file paths — only the first backtick span per bullet line
 # (the path); a bullet's trailing description may itself mention other
-# `backticked` terms that are not paths.
-PATHS=$(awk '/^## Affected files/{flag=1; next} /^## /{flag=0} flag' "$PLAN" |
+# `backticked` terms that are not paths. Fence-aware: an illustrative fenced
+# example elsewhere in the plan that happens to contain a `## Affected files`
+# line must never be mistaken for the real section boundary.
+PATHS=$(awk '
+  /^```/ { infence = !infence; next }
+  infence { next }
+  /^## Affected files/ { flag=1; next }
+  /^## / { flag=0 }
+  flag
+' "$PLAN" |
   awk -F'`' '/^- / && NF >= 3 { print $2 }' |
   sort -u)
 
@@ -81,7 +89,12 @@ slug() { echo "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-
 
 LANE_MODE=0
 PLAN_JSON="{}"
-if grep -q '^## Execution shape$' "$PLAN"; then
+if awk '
+  /^```/ { infence = !infence; next }
+  infence { next }
+  /^## Execution shape$/ { found=1 }
+  END { exit !found }
+' "$PLAN"; then
   [ -f "$PARSER" ] || {
     echo "subplan-fanout.sh: missing parser $PARSER" >&2
     exit 2
@@ -103,23 +116,11 @@ if grep -q '^## Execution shape$' "$PLAN"; then
   fi
 fi
 
-# owns_match PATH PATTERN — exact-path or `/**`-prefix ownership match.
-# The `**` in both case arms is quoted so it matches the literal two
-# characters, not a glob wildcard — unquoted, `*/**` matches ANY string
-# containing a `/` (since `**` degrades to `*` under glob rules), which
-# silently misclassifies every ordinary exact path with a directory
-# separator (i.e. almost all real repo paths) as a `/**`-prefix pattern.
-owns_match() {
-  local path="$1" pattern="$2" prefix
-  case "$pattern" in
-  */'**')
-    prefix=${pattern%/'**'}
-    case "$path" in "$prefix" | "$prefix"/*) return 0 ;; esac
-    ;;
-  *) [ "$path" = "$pattern" ] && return 0 ;;
-  esac
-  return 1
-}
+# owns_match — shared with validate-plan.sh via owns-lib.sh (see that file
+# for behavior notes; this used to be a second, textually-identical copy
+# that could — and once did — drift out of sync with the other).
+# shellcheck source=./owns-lib.sh
+. "${SKILL_DIR}/scripts/owns-lib.sh"
 
 generate_subplan() {
   local chapter="$1" paths_file="$2" tasks_file="${4:-}"
