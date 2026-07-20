@@ -176,9 +176,18 @@ build_launch_cmd() {
       LAUNCH_CMD="${LAUNCH_CMD} --name ${name_q} --dangerously-skip-permissions --append-system-prompt-file ${prompt_q}"
       ;;
     codex)
-      # effort is validated against KNOWN_EFFORTS, so it's safe to embed
-      # verbatim inside the quoted -c value.
-      LAUNCH_CMD="cd ${cwd_q} && codex --model ${model_q} -c model_reasoning_effort=\"${effort}\" --dangerously-bypass-approvals-and-sandbox --no-alt-screen"
+      LAUNCH_CMD="cd ${cwd_q} && codex --model ${model_q}"
+      if [ -n "$effort" ]; then
+        # effort is validated against KNOWN_EFFORTS, so it's safe to embed
+        # verbatim inside the quoted -c value. NOT run through %q like the
+        # other dynamic values here: codex's -c parses its value as TOML,
+        # so the literal double quotes must survive into the typed command
+        # (`model_reasoning_effort="high"`) — %q of a plain whitelisted
+        # word like "high" strips them, which would hand codex an
+        # unquoted bareword instead of a TOML string.
+        LAUNCH_CMD="${LAUNCH_CMD} -c model_reasoning_effort=\"${effort}\""
+      fi
+      LAUNCH_CMD="${LAUNCH_CMD} --dangerously-bypass-approvals-and-sandbox --no-alt-screen"
       ;;
   esac
 }
