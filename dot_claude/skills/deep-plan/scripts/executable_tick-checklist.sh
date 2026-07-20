@@ -38,13 +38,19 @@ TMP=$(mktemp)
 trap 'rm -f "$PASS_FILE" "$TMP"' EXIT
 echo "$RESULTS" | jq -r '.[] | select(.status == "pass") | .item' > "$PASS_FILE"
 
-# Edit only lines inside `## Checklist` section.
+# Edit only lines inside `## Checklist` section. Fence-aware: an illustrative
+# fenced example elsewhere in the plan must never be mistaken for the real
+# `## Checklist` heading or one of its items — but every input line is still
+# printed unconditionally so fenced content in the file is never dropped.
 awk -v passfile="$PASS_FILE" '
   BEGIN {
     while ((getline line < passfile) > 0) ok[line] = 1
     close(passfile)
     in_section = 0
+    infence = 0
   }
+  /^```/ { infence = !infence; print; next }
+  infence { print; next }
   /^## Checklist/ { in_section = 1; print; next }
   /^## / && in_section { in_section = 0 }
   in_section && /^- \[ \] / {
