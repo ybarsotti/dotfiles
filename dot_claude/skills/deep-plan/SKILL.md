@@ -124,7 +124,7 @@ Skill(skill="grill-with-docs")
 
 **Step 3 — mark invocation:**
 ```
-~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" grill-with-docs
+~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR" grill-with-docs
 ```
 
 If the user passes `--skip-grill`, still record `grill-with-docs` in the Superpowers section as `[ ]` so the checklist surfaces the skip.
@@ -135,7 +135,7 @@ Before any draft, invoke `superpowers:brainstorming` via the Skill tool against 
 
 After it returns, run:
 ```
-~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" brainstorming
+~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR" brainstorming
 ```
 
 ## Phase 1.5 — Two-track planner drafting (superpowers:writing-plans)
@@ -154,7 +154,7 @@ Skill(skill="superpowers:writing-plans")
 
 **Step 2 — record the invocation:**
 ```
-~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" writing-plans
+~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR" writing-plans
 ```
 
 **Step 3 — dispatch:**
@@ -235,7 +235,7 @@ for sub in "$RUN_DIR"/subplans/*.md; do
   ~/.claude/skills/deep-plan/scripts/tick-checklist.sh "$sub" --subplan
 done
 ```
-The LLM **never** edits `[ ]`/`[x]` directly. The checklist must show all `[x]` before proceeding.
+The LLM **never** edits `[ ]`/`[x]` directly. The checklist must show all `[x]` before proceeding. The same rule covers `## Superpowers invoked`: never hand-edit its boxes; call `scripts/superpowers-invoke.sh "$RUN_DIR" <skill>` instead, which records a receipt and ticks the box together — `validate-plan.sh`'s `superpowers-ticks-have-receipts` check fails any tick that has no matching receipt.
 
 Confirm the plan includes, at minimum:
 - The **`superpowers:writing-plans` document header** + an **`## Implementation tasks`** section in that skill's exact task format (`### Task N:` + Files + Interfaces + bite-sized checkbox steps with real code).
@@ -258,7 +258,7 @@ the human to approve it, run `humanizing-plans` on `$RUN_DIR/plan.md` to distill
 altitude (goal, approach, key decisions + why, risks, sequence) and render the best-fit format
 (text / diagram / HTML). This is the artifact the user actually reads to approve. Record:
 ```
-~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" humanizing-plans
+~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR" humanizing-plans
 ```
 If `humanizing-plans` is unavailable, print a short human-altitude distillation inline instead.
 
@@ -279,7 +279,7 @@ The plan is always reviewed in the Plannotator UI, in two passes:
    re-open Plannotator on the updated file. Loop until the user approves with no annotations.
    Record it:
    ```
-   ~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR/plan.md" plannotator-annotate
+   ~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR" plannotator-annotate
    ```
 
 2. **Approve the plan-mode summary.** Call `ExitPlanMode` with the humanized distillation

@@ -53,3 +53,6 @@ sequenceDiagram
 - [ ] tdd-list-≥3
 - [ ] edges-≥4
 - [ ] no-tbd-placeholders
+- [ ] tasks-tagged-with-lane
+- [ ] every-lane-has-1-task
+- [ ] lane-task-files-subset-of-lane-owns
