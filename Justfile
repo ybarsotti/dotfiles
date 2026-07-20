@@ -148,7 +148,7 @@ lint:
     @echo "Running shellcheck on .sh files..."
     @find . -name "*.sh" -type f -not -path "*/.git/*" -exec shellcheck {} \;
     @echo "Running shellcheck on .sh.tmpl files..."
-    @find . -name "*.sh.tmpl" -type f -not -path "*/.git/*" -exec sh -c 'grep -v "^\s*{{" "$$1" | shellcheck -s bash --severity=error -' _ {} \;
+    @find . -name "*.sh.tmpl" -type f -not -path "*/.git/*" -exec sh -c 'grep -v "^\s*{{"{{"}}" "$$1" | shellcheck -s bash --severity=error -' _ {} \;
     @echo "Running yamllint..."
     @yamllint -d relaxed .chezmoidata/packages.yaml
     @echo "Running gitleaks..."
@@ -167,8 +167,13 @@ validate-ci:
     @echo "Running CI workflow locally with act..."
     act --container-architecture linux/amd64 -P ubuntu-latest=catthehacker/ubuntu:act-latest
 
+# Run deep-* pipeline shell tests
+# Each lane task appends its own test line here as it is created.
+test-deep-pipeline:
+    dot_claude/skills/deep-execute/tests/executable_test-pipeline-integration.sh
+
 # Full local validation: lint + pre-commit + Docker tests
-validate: lint validate-hooks test-all
+validate: lint validate-hooks test-all test-deep-pipeline
     @echo "Full validation passed — safe to push."
 
 # Show system information
