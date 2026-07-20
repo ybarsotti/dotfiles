@@ -892,6 +892,55 @@ PARSE_QUOTED=$("$PARSE_ARGS" 'fix the "foo bar" module now')
 assert_eq "$(jq -r '.task_description' <<<"$PARSE_QUOTED")" 'fix the "foo bar" module now' \
   "parse-args: quotes/spaces inside the description round-trip literally"
 
+# ─── Fix: --max-plan-iter 0 silently disabled the entire Phase 2 review ────
+# loop (loop condition is `ITER > --max-plan-iter`, so 0 trips on the very
+# first iteration) — well-formed JSON, destructive value, exit 0. Reject
+# values < 1 with the same diagnostic style as the existing negative/
+# non-numeric check, and clamp the top end too: arbitrarily large values
+# were passing through un-clamped to `jq --argjson`.
+
+assert_exit 2 "$PARSE_ARGS" "--max-plan-iter 0 build X"
+PARSE_ZERO_STDERR=$("$PARSE_ARGS" "--max-plan-iter 0 build X" 2>&1 >/dev/null || true)
+assert_contains "$PARSE_ZERO_STDERR" "max-plan-iter" \
+  "parse-args: --max-plan-iter 0 exits 2 with a diagnostic naming the flag"
+
+PARSE_ONE=$("$PARSE_ARGS" "--max-plan-iter 1 build X")
+assert_eq "$(jq -r '.max_plan_iter' <<<"$PARSE_ONE")" "1" \
+  "parse-args: --max-plan-iter 1 is accepted (the floor)"
+
+assert_exit 2 "$PARSE_ARGS" "--max-plan-iter 21 build X"
+PARSE_OVER_STDERR=$("$PARSE_ARGS" "--max-plan-iter 21 build X" 2>&1 >/dev/null || true)
+assert_contains "$PARSE_OVER_STDERR" "max-plan-iter" \
+  "parse-args: a value above the ceiling exits 2 with a diagnostic naming the flag"
+
+PARSE_CEIL=$("$PARSE_ARGS" "--max-plan-iter 20 build X")
+assert_eq "$(jq -r '.max_plan_iter' <<<"$PARSE_CEIL")" "20" \
+  "parse-args: --max-plan-iter 20 is accepted (the ceiling)"
+
+# A value long enough to overflow bash's 64-bit arithmetic must not wrap
+# around into an accepted small number — reject on digit count before ever
+# evaluating it as arithmetic.
+assert_exit 2 "$PARSE_ARGS" "--max-plan-iter 99999999999999999999999999 build X"
+
+# A leading zero must not be misread as octal by bash arithmetic (010 is
+# decimal 10, not 8) — the accepted value normalizes to canonical decimal.
+PARSE_LEADING_ZERO=$("$PARSE_ARGS" "--max-plan-iter 010 build X")
+assert_eq "$(jq -r '.max_plan_iter' <<<"$PARSE_LEADING_ZERO")" "10" \
+  "parse-args: a leading-zero value is read as decimal, not octal"
+
+# ─── Fix: repeated flags — last occurrence wins (documented convention) ────
+PARSE_REPEATED=$("$PARSE_ARGS" "--ticket FBIT-1 --ticket FBIT-2 build X")
+assert_eq "$(jq -r '.ticket' <<<"$PARSE_REPEATED")" "FBIT-2" \
+  "parse-args: a repeated flag's last occurrence wins"
+
+# ─── Fix: an embedded newline collapses to a single space in ───────────────
+# task_description, same as any other run of whitespace — $ARGUMENTS is a
+# flat token stream and gets word-split on whitespace (space, tab, newline)
+# before reassembly, not preserved as shell/text syntax.
+PARSE_NEWLINE=$("$PARSE_ARGS" "$(printf 'fix the\nmodule now')")
+assert_eq "$(jq -r '.task_description' <<<"$PARSE_NEWLINE")" "fix the module now" \
+  "parse-args: an embedded newline collapses to a single space in task_description"
+
 # ─── Task 6: finalize-plan.sh — Phase 3's fixed validate/repair/tick sequence ──
 
 FIN_STUB_DIR=$(mktemp -d)
@@ -1162,5 +1211,39 @@ assert_eq "$([ "$(wc -l <"$SKILL_MD" | tr -d ' ')" -lt 346 ] && echo yes || echo
   "SKILL.md: line count is under the pre-slimming baseline of 346"
 assert_contains "$(cat "$SKILL_MD")" "/deep-execute" \
   "SKILL.md: Phase 4 handoff points at /deep-execute"
+
+# ─── Fix: must-survive rules pinned so the line-count metric can't be ──────
+# satisfied by deleting load-bearing prose instead of restating it tighter.
+# The two checks above only assert SKILL.md got *shorter* and still
+# mentions /deep-execute — every other rule in the file could be deleted
+# and this test would stay green (verified by hand: all of it currently
+# survives, but a hand check does not survive the next edit). Each
+# assertion below pins one rule this project has already treated as a
+# recurring defect shape when it silently vanishes: the honest-receipts
+# framing, the hard-gate rule, outer-boundary-only mocking, the sole
+# authority to tick a Superpowers box, and the flag names themselves.
+# When task 8 (cmux-orchestrator) and task 12 (deep-review) apply the same
+# slimming to their own SKILL.md, extend THIS block — not the line-count
+# check — with the equivalent load-bearing phrases from those files.
+
+SKILL_MD_TEXT="$(cat "$SKILL_MD")"
+assert_contains "$SKILL_MD_TEXT" "proves the script ran, not that the skill itself ran" \
+  "SKILL.md: honest-receipts framing survives (tick proves the script ran, not the skill)"
+assert_contains "$SKILL_MD_TEXT" "hard gate" \
+  "SKILL.md: a failing finalize-plan.sh status is still called a hard gate"
+assert_contains "$SKILL_MD_TEXT" "never advance" \
+  "SKILL.md: the hard-gate rule still says never advance on a failing status"
+assert_contains "$SKILL_MD_TEXT" "outermost boundaries" \
+  "SKILL.md: TDD policy still says mocks only the outermost boundaries"
+assert_contains "$SKILL_MD_TEXT" 'scripts/superpowers-invoke.sh "$RUN_DIR" <skill>' \
+  "SKILL.md: superpowers-invoke.sh is still named by its invocation form"
+assert_contains "$SKILL_MD_TEXT" 'is the only thing permitted to tick a `## Superpowers invoked` box' \
+  "SKILL.md: superpowers-invoke.sh is still the only thing permitted to tick that box"
+assert_contains "$SKILL_MD_TEXT" "--no-codex" \
+  "SKILL.md: the --no-codex flag is still documented"
+assert_contains "$SKILL_MD_TEXT" "--skip-grill" \
+  "SKILL.md: the --skip-grill flag is still documented"
+assert_contains "$SKILL_MD_TEXT" "--max-plan-iter" \
+  "SKILL.md: the --max-plan-iter flag is still documented"
 
 assert_summary
