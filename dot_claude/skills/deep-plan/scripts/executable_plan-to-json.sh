@@ -12,6 +12,15 @@
 # gracefully (mode/orchestrator_lane/contract null, lanes/shared_read_only
 # empty, task.lane null) so older, serial-only plans still parse. Only a
 # missing file, or a missing jq, is fatal (exit 2).
+#
+# Exit codes (subplan-fanout.sh, and any other caller, relies on this
+# contract to distinguish "nothing declared" from "parsing failed"):
+#   0 — ok, including the graceful-degradation cases above
+#   1 — malformed content: a `|`-delimited table row that doesn't split
+#       into its declared column count (see stderr for which row), or a
+#       raw `\001` byte in the plan file (reserved as the internal
+#       pipe-escape sentinel, see SENTINEL below)
+#   2 — missing plan file, or jq not installed
 
 set -eufo pipefail
 
@@ -25,6 +34,19 @@ command -v jq >/dev/null 2>&1 || {
   exit 2
 }
 
+# Sentinel byte for round-tripping an escaped pipe (`\|`) through a
+# `|`-delimited table split: swapped in for `\|` before the split (so it
+# can never be mistaken for a column boundary), swapped back to a literal
+# `|` by strip_cell once the row is safely split into fields. Since this
+# reuses a real byte value, a plan that already contains that raw byte
+# would silently collide with the escape mechanism — reject it up front
+# instead of corrupting whatever it touches.
+SENTINEL=$(printf '\001')
+if LC_ALL=C grep -q "$SENTINEL" "$PLAN"; then
+  echo "plan-to-json.sh: plan file contains a raw \\001 byte (reserved internally as the pipe-escape sentinel) — remove it before parsing" >&2
+  exit 1
+fi
+
 SCRATCH=$(mktemp -d)
 trap 'rm -rf "$SCRATCH"' EXIT
 LANES_NDJSON="${SCRATCH}/lanes.ndjson"
@@ -35,12 +57,6 @@ TASKS_NDJSON="${SCRATCH}/tasks.ndjson"
 section_body() {
   awk -v h="$1" '$0 == "## " h {inside=1; next} /^## / {inside=0} inside' "$PLAN"
 }
-
-# Sentinel byte for round-tripping an escaped pipe (`\|`) through a
-# `|`-delimited table split: swapped in for `\|` before the split (so it
-# can never be mistaken for a column boundary), swapped back to a literal
-# `|` by strip_cell once the row is safely split into fields.
-SENTINEL=$(printf '\001')
 
 # strip_cell: trims whitespace, strips backticks, turns <br> into newlines,
 # and restores the `\|` sentinel to a literal `|` — the cleanup every
@@ -138,10 +154,20 @@ CONTRACT_PATH=$(printf '%s\n' "$CONTRACT_BODY" | awk -F'`' '/^- Materialized con
 CONTRACT_KIND=$(printf '%s\n' "$CONTRACT_BODY" | awk -F'`' '/^- Contract kind:/ {print $2; exit}')
 CONTRACT_VALIDATION=$(printf '%s\n' "$CONTRACT_BODY" | awk -F'`' '/^- Contract validation command:/ {print $2; exit}')
 
-ENDPOINT_ROWS=$(printf '%s\n' "$CONTRACT_BODY" | awk -F'|' '
+# Same sentinel treatment as the lane table above: substitute `\|` for the
+# sentinel BEFORE the `|` split, so an escaped pipe inside a cell (e.g. a
+# TypeScript union like `string | number` in response_shape) can never act
+# as a column delimiter. A row that still doesn't yield exactly 8 columns
+# after that is rejected loudly rather than silently truncated.
+ENDPOINT_ROWS=$(printf '%s\n' "$CONTRACT_BODY" | awk -v sentinel="$SENTINEL" -F'|' '
+  { raw = $0; gsub(/\\\|/, sentinel) }
   /^\|[[:space:]]*endpoint[[:space:]]*\|/ {table=1; next}
   table && /^\|[-[:space:]]+\|/ {next}
   table && /^\|/ {
+    if (NF != 8) {
+      printf "plan-to-json.sh: malformed endpoint row (expected 6 columns, got %d): %s\n", NF - 2, raw > "/dev/stderr"
+      exit 1
+    }
     for (i=2; i<=7; i++) gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i)
     printf "%s\t%s\t%s\t%s\t%s\t%s\n", $2,$3,$4,$5,$6,$7
     next
