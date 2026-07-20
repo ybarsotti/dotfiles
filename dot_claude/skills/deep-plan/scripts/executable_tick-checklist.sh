@@ -11,9 +11,16 @@
 
 set -uo pipefail
 
+[ $# -ge 1 ] || { echo "tick-checklist.sh: usage: tick-checklist.sh <plan.md> [--root|--subplan]" >&2; exit 2; }
 PLAN="$1"; shift
+
 MODE_FLAG="--root"
-[ "${1:-}" = "--subplan" ] && MODE_FLAG="--subplan"
+if [ $# -gt 0 ]; then
+  case "$1" in
+    --root|--subplan) MODE_FLAG="$1"; shift ;;
+    *) echo "tick-checklist.sh: unknown flag '$1' (expected --root or --subplan)" >&2; exit 2 ;;
+  esac
+fi
 
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VALIDATE="${SKILL_DIR}/scripts/validate-plan.sh"
