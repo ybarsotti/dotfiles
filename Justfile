@@ -173,6 +173,7 @@ test-deep-pipeline:
     dot_claude/skills/deep-execute/tests/executable_test-pipeline-integration.sh
     dot_claude/skills/_shared/tests/executable_test-assert.sh
     dot_claude/skills/deep-plan/tests/executable_test-deep-plan.sh
+    dot_claude/skills/cmux-orchestrator/tests/executable_test-cmux-orchestrator.sh
 
 # Full local validation: lint + pre-commit + Docker tests
 validate: lint validate-hooks test-all test-deep-pipeline
