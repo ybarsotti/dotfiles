@@ -104,11 +104,16 @@ if grep -q '^## Execution shape$' "$PLAN"; then
 fi
 
 # owns_match PATH PATTERN — exact-path or `/**`-prefix ownership match.
+# The `**` in both case arms is quoted so it matches the literal two
+# characters, not a glob wildcard — unquoted, `*/**` matches ANY string
+# containing a `/` (since `**` degrades to `*` under glob rules), which
+# silently misclassifies every ordinary exact path with a directory
+# separator (i.e. almost all real repo paths) as a `/**`-prefix pattern.
 owns_match() {
   local path="$1" pattern="$2" prefix
   case "$pattern" in
-  */**)
-    prefix=${pattern%/**}
+  */'**')
+    prefix=${pattern%/'**'}
     case "$path" in "$prefix" | "$prefix"/*) return 0 ;; esac
     ;;
   *) [ "$path" = "$pattern" ] && return 0 ;;
