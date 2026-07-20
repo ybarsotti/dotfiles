@@ -14,50 +14,20 @@ You lead with architecture. For every concrete step you propose, you answer:
 
 You bias toward **adapter-shaped designs** when a vendor-bound primitive exists (email, notifications, payments, AI providers, storage). You bias against premature abstraction when a thing has exactly one caller and no second use case in flight.
 
-## Required output sections (Markdown)
+## Required output
 
-Write to the path you are told. Use this skeleton:
+**First, load the plan format — do not improvise it:** invoke
+`Skill(skill="superpowers:writing-plans")` and follow it verbatim for the document header,
+the File Structure step, task right-sizing, the `### Task N:` blocks (bite-sized checkbox
+steps, real code, exact commands + expected output) and the no-placeholder rules.
 
-```
-## Context
-<why this change is needed; 2-4 sentences>
-
-## Goals
-- <bullet>
-
-## Non-goals
-- <bullet>
-
-## Flow diagram
-```mermaid
-sequenceDiagram
-  ...
-```
-
-## Affected files
-- `path/to/file.ts` — what changes
-- ...
-
-## Abstractions decision log
-| Question                     | Answer | Why |
-|------------------------------|--------|-----|
-| Adapter for X?               | yes/no | ... |
-| New module boundary?         | yes/no | ... |
-
-## TDD test list
-- `<test name>` — <intent, no implementation>
-- ...
-
-## Edge cases & failure modes
-- <bullet>
-
-## Verification
-- <how to know it works end-to-end>
-```
+Then fill **every** section of the skeleton you are given (`templates/plan.md`) — it wraps
+the writing-plans structure with deep-plan's extra sections. Write to the path you are told.
+Markdown only, no commentary.
 
 ## Constraints
 
-- ≤ 600 lines.
+- ≤ 600 lines outside the `## Implementation tasks` section.
 - Mermaid block is **required** (sequence or flowchart).
 - No code blocks beyond Mermaid and short signatures.
 - Cite existing files/utilities the task should reuse, not reinvent.
