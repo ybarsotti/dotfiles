@@ -1,23 +1,41 @@
 # deep-plan
 
 A global Claude Code skill + slash command that runs a hardened **deep-planning** pipeline
-for any non-trivial task, then hands off to the superpowers execution workflow. deep-plan
+for any non-trivial task, then hands off to `/deep-execute`. deep-plan
 **stops at the approved plan** — it does not build, review the code, or open the PR.
 
 ## What it does
 
 ```
                   ┌─────────────────────────────────────────────┐
-   /deep-plan ──▶  │ Phase 0.1: EnterPlanMode (plan mode on)      │
+   /deep-plan ──▶  │ Phase 0:   parse-args.sh (flags → JSON)      │
+                  │ Phase 0.1: EnterPlanMode (plan mode on)      │
                   │ Phase 0.7: grill-with-docs (interview+ADRs)  │
                   │ Phase 1:   brainstorming                     │
                   │ Phase 1.5: Draft (Opus + Codex in parallel)  │
                   │ Phase 2:   Review loop (5 personas, ≤ 3 iter)│
                   │ Phase 2.5: Subplan fan-out                   │
-                  │ Phase 3:   Validate + Plannotator gate      │
-                  │ Phase 4:   Handoff → superpowers execution   │
+                  │ Phase 3:   finalize-plan.sh + Plannotator    │
+                  │ Phase 4:   Handoff → /deep-execute           │
                   └─────────────────────────────────────────────┘
 ```
+
+## Scripts (Phase 0 / Phase 3 fixed sequences)
+
+Every deterministic, fixed command sequence lives in a script — SKILL.md's prose is judgement
+only (what to ask, how to resolve disagreements, when to loop). The two Task 6 additions:
+
+- **`scripts/parse-args.sh "$ARGUMENTS"`** — Phase 0's flag grammar (`--ticket`,
+  `--max-plan-iter` [default `3`], `--no-codex`, `--skip-grill`, `--dry-run`) → one JSON object.
+  Unknown flag → exit 2.
+- **`scripts/finalize-plan.sh RUN_DIR`** — Phase 3's validate → auto-format → repair → tick
+  sequence over the root plan and every `subplans/*.md`. Up to **3 repair rounds** (budget)
+  through an Opus planner before giving up; writes `RUN_DIR/finalize-failures.json`
+  (`{"status":"pass","attempts":N}` or a failure listing every still-broken file) and exits
+  0/1 to match. A failing run is a hard gate — read the JSON, fix, rerun the same script.
+
+Both resolve either the deployed name (`parse-args.sh`) or the source-tree name
+(`executable_parse-args.sh`), so they work pre- and post-`chezmoi apply`.
 
 ## Personas
 
@@ -38,8 +56,9 @@ Codex-side agents (planner-codex, flow-mapper, qa) are pinned to **`gpt-5.6-sol`
 default. Override with `DEEP_PLAN_CODEX_MODEL` / `DEEP_PLAN_CODEX_EFFORT`
 (`none|minimal|low|medium|high|xhigh|max`).
 
-## Handoff (execution phase — you run this after approval)
+## Handoff (execution phase — `/deep-execute` runs this after approval)
 
+deep-plan prints `/deep-execute "$RUN_DIR/plan.md"` and stops. `/deep-execute` drives:
 `superpowers:using-git-worktrees` → `subagent-driven-development` (TDD, mock only outer
 boundaries) → `/simplify` ×2 → `/qa-test-plan` (if flows/screens change) → `/deep-review` →
 `verification-before-completion` → `/pr-description` (Conventional-Commit title + Mermaid +
