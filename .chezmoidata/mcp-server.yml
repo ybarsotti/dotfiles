@@ -60,6 +60,17 @@ mcp_servers:
         clientId: "1601185624273.8899143856786"
         callbackPort: 3118
 
+    notetaker:
+      command: /Users/barsotti/.local/bin/uv
+      args:
+        - --directory
+        - /Users/barsotti/Developer/Pers/notetaker
+        - run
+        - notetaker
+        - mcp
+        - --api-url
+        - http://127.0.0.1:8742
+
   # Optional / situational (uncomment and move to the right section):
   #
   # shared:
