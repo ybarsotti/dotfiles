@@ -155,9 +155,9 @@
       "source_file": "dot_config/wezterm/keys.lua",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dot_config_wezterm_keys_lua",
-      "target": "wezterm_keys_m_setup",
-      "confidence_score": 1.0
+      "target": "wezterm_keys_m_setup"
     },
     {
       "relation": "contains",
@@ -165,9 +165,9 @@
       "source_file": "dot_config/wezterm/fonts.lua",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dot_config_wezterm_fonts_lua",
-      "target": "wezterm_fonts_m_setup",
-      "confidence_score": 1.0
+      "target": "wezterm_fonts_m_setup"
     },
     {
       "relation": "contains",
@@ -175,9 +175,9 @@
       "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dot_config_wezterm_plugins_workspace_switcher_lua",
-      "target": "plugins_workspace_switcher_m_setup",
-      "confidence_score": 1.0
+      "target": "plugins_workspace_switcher_m_setup"
     },
     {
       "relation": "contains",
@@ -185,9 +185,9 @@
       "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dot_config_wezterm_plugins_move_workspace_lua",
-      "target": "plugins_move_workspace_m_setup",
-      "confidence_score": 1.0
+      "target": "plugins_move_workspace_m_setup"
     },
     {
       "relation": "contains",
@@ -195,11 +195,11 @@
       "source_file": "dot_config/wezterm/plugins/bar.lua",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dot_config_wezterm_plugins_bar_lua",
-      "target": "plugins_bar_m_setup",
-      "confidence_score": 1.0
+      "target": "plugins_bar_m_setup"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "cb9b5a8325432aa9f9dc8629931cf87aa8e8eba2"
+  "built_at_commit": "d2246e8d888a1c981f84f6c781e40c3107a13a39"
 }
