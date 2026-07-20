@@ -31,7 +31,7 @@ approved plan — deep-plan does NOT build, review, or open the PR itself. It ha
 
 FLAGS
   --ticket KEY-123      explicit ticket key (else auto-detected from branch/commit)
-  --max-plan-iter N     cap plan review iterations (default 3)
+  --max-plan-iter N     cap plan review iterations (default 3, range 1-20)
   --no-codex            skip codex planner + codex reviewers (Claude/Sonnet only)
   --skip-grill          skip the grill-with-docs interview (recorded as skipped)
   --dry-run             print the plan of phases without spawning anything
