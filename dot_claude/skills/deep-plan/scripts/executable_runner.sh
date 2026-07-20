@@ -22,6 +22,13 @@ TIMEOUT="${4:-900}"
 CODEX_MODEL="${DEEP_PLAN_CODEX_MODEL:-gpt-5.6-sol}"
 CODEX_EFFORT="${DEEP_PLAN_CODEX_EFFORT:-high}"
 
+# A planner must invoke the Skill tool, read the writing-plans skill, and
+# then emit a full multi-task plan — 8 turns is not enough budget for that
+# and the old default silently truncated drafts mid-generation (validated
+# now by validate-draft.sh, but the fix is to stop starving the planner in
+# the first place). Override with DEEP_PLAN_CLAUDE_MAX_TURNS.
+CLAUDE_MAX_TURNS="${DEEP_PLAN_CLAUDE_MAX_TURNS:-20}"
+
 if command -v gtimeout >/dev/null 2>&1; then
   run_with_timeout() { gtimeout "$@"; }
 elif command -v timeout >/dev/null 2>&1; then
@@ -42,7 +49,7 @@ case "$RUNNER" in
       claude -p \
         --model "$MODEL" \
         --output-format text \
-        --max-turns 8 \
+        --max-turns "$CLAUDE_MAX_TURNS" \
         --dangerously-skip-permissions \
         < "$PROMPT_FILE"
     EXIT_CODE=$?

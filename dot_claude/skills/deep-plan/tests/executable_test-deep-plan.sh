@@ -8,6 +8,11 @@ PARSER="${ROOT}/dot_claude/skills/deep-plan/scripts/executable_plan-to-json.sh"
 FANOUT="${ROOT}/dot_claude/skills/deep-plan/scripts/executable_subplan-fanout.sh"
 VALIDATE="${ROOT}/dot_claude/skills/deep-plan/scripts/executable_validate-plan.sh"
 INVOKE="${ROOT}/dot_claude/skills/deep-plan/scripts/executable_superpowers-invoke.sh"
+VALIDATE_DRAFT="${ROOT}/dot_claude/skills/deep-plan/scripts/executable_validate-draft.sh"
+DISPATCH="${ROOT}/dot_claude/skills/deep-plan/scripts/executable_dispatch-planners.sh"
+RUNNER="${ROOT}/dot_claude/skills/deep-plan/scripts/executable_runner.sh"
+VALID_DRAFT_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/draft-valid-minimal.md"
+UNBALANCED_FENCES_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/draft-unbalanced-fences.md"
 FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/valid-parallel-plan.md"
 ESCAPED_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/lane-escaped-pipe.md"
 UNESCAPED_FIXTURE="${ROOT}/dot_claude/skills/deep-plan/tests/fixtures/lane-unescaped-pipe.md"
@@ -558,5 +563,190 @@ assert_exit 0 "$PARSER" "$FENCED_SHAPE_FIXTURE"
 FENCED_JSON=$("$PARSER" "$FENCED_SHAPE_FIXTURE")
 assert_eq "$(jq -r 'if .mode == null then "null" else .mode end' <<<"$FENCED_JSON")" null \
   "a fenced illustrative Execution shape example is not treated as a real declaration"
+
+# ─── Task 5: fail loudly on an empty or truncated planner draft ───────────
+#
+# /deep-plan dispatched two planner agents to draft the plan this project is
+# executing. Both produced EMPTY draft files, and dispatch-planners.sh
+# exited 0 — root cause: runner.sh hardcoded `--max-turns 8` and
+# dispatch-planners.sh hardcoded a 900s timeout, not enough headroom for a
+# planner that must invoke the Skill tool, read it, then write a full plan;
+# and the dispatcher only failed when BOTH planners failed, so one silent
+# failure was invisible. This section pins: the raised budgets, a
+# validate-draft.sh that rejects empty AND mid-generation-truncated drafts
+# by content (not just by size), and dispatch-planners.sh now failing
+# whenever any ENABLED planner's draft is invalid.
+
+# The budgets themselves — asserted by source inspection so a future edit
+# that quietly lowers them back down fails a test, not just a live run.
+assert_exit 0 grep -q 'DEEP_PLAN_PLANNER_TIMEOUT:-1800' "$DISPATCH"
+assert_exit 0 grep -q 'DEEP_PLAN_CLAUDE_MAX_TURNS:-20' "$RUNNER"
+
+: > "$TMP/empty.md"
+printf '# Partial Plan\n\n## Implementation tasks\n' > "$TMP/truncated.md"
+assert_exit 1 "$VALIDATE_DRAFT" "$TMP/empty.md" --json
+assert_exit 1 "$VALIDATE_DRAFT" "$TMP/truncated.md" --json
+assert_exit 1 "$VALIDATE_DRAFT" "$UNBALANCED_FENCES_FIXTURE" --json
+assert_exit 0 "$VALIDATE_DRAFT" "$VALID_DRAFT_FIXTURE" --json
+
+# expect_draft_item ITEM STATUS DRAFT — asserts validate-draft.sh --json
+# records ITEM as STATUS for DRAFT. A shape-only check (e.g. "5 items
+# present") would pass a draft that fails for the wrong reason; this pins
+# which specific item fires, mirroring expect_fail_item's role above for
+# validate-plan.sh.
+expect_draft_item() {
+  local item="$1" want="$2" draft="$3" json got
+  json=$("$VALIDATE_DRAFT" "$draft" --json 2>/dev/null) || true
+  got=$(jq -r --arg item "$item" \
+    'map(select(.item == $item)) | if length > 0 then .[0].status else "MISSING" end' \
+    <<<"$json" 2>/dev/null) || got="MISSING"
+  assert_eq "$got" "$want" "$(basename "$draft"): ${item}"
+}
+
+# The truncated fixture stops right after the tasks heading: header and
+# tail never render at all, and no task block exists yet.
+expect_draft_item "draft-non-empty" "pass" "$TMP/truncated.md"
+expect_draft_item "draft-header-complete" "fail" "$TMP/truncated.md"
+expect_draft_item "draft-tasks-complete" "fail" "$TMP/truncated.md"
+expect_draft_item "draft-tail-complete" "fail" "$TMP/truncated.md"
+
+# The unbalanced-fences fixture has a real header and task block before its
+# unclosed ``` — isolating that this specific mutation flips the fence
+# check (collateral fails on other items from the same unclosed block, e.g.
+# the checklist getting swallowed into the "still open" fence, are not
+# asserted here, matching the Task 4 convention above).
+expect_draft_item "draft-header-complete" "pass" "$UNBALANCED_FENCES_FIXTURE"
+expect_draft_item "draft-tasks-complete" "pass" "$UNBALANCED_FENCES_FIXTURE"
+expect_draft_item "draft-fences-balanced" "fail" "$UNBALANCED_FENCES_FIXTURE"
+
+# The valid fixture passes every item, not just the aggregate exit code.
+for item in draft-non-empty draft-header-complete draft-tasks-complete \
+  draft-tail-complete draft-fences-balanced; do
+  expect_draft_item "$item" "pass" "$VALID_DRAFT_FIXTURE"
+done
+
+# ─── PATH stubs for `claude` and `codex` ───────────────────────────────────
+# dispatch-planners.sh/runner.sh must never invoke the real CLIs from this
+# test suite. Both stubs drain stdin (the real CLIs read the prompt from
+# stdin) and are controlled entirely by env vars, so one pair of scripts
+# covers every scenario below. A STUB_ERROR exit (97) is reserved for the
+# stub's own misuse — e.g. codex invoked without --output-last-message —
+# so a broken stub is never mistaken for the dispatch behavior under test.
+STUB_DIR=$(mktemp -d)
+
+cat > "${STUB_DIR}/claude" <<'STUBEOF'
+#!/usr/bin/env bash
+set -uo pipefail
+cat >/dev/null || { echo "STUB_ERROR(claude): failed to drain stdin" >&2; exit 97; }
+if [ -n "${STUB_CLAUDE_OUTPUT:-}" ]; then
+  [ -f "$STUB_CLAUDE_OUTPUT" ] || {
+    echo "STUB_ERROR(claude): STUB_CLAUDE_OUTPUT not found: $STUB_CLAUDE_OUTPUT" >&2
+    exit 97
+  }
+  cat "$STUB_CLAUDE_OUTPUT"
+fi
+exit "${STUB_CLAUDE_EXIT:-0}"
+STUBEOF
+chmod +x "${STUB_DIR}/claude"
+
+cat > "${STUB_DIR}/codex" <<'STUBEOF'
+#!/usr/bin/env bash
+set -uo pipefail
+LAST_MSG=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --output-last-message) LAST_MSG="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+cat >/dev/null || { echo "STUB_ERROR(codex): failed to drain stdin" >&2; exit 97; }
+if [ -z "$LAST_MSG" ]; then
+  echo "STUB_ERROR(codex): no --output-last-message flag seen" >&2
+  exit 97
+fi
+if [ -n "${STUB_CODEX_OUTPUT:-}" ]; then
+  [ -f "$STUB_CODEX_OUTPUT" ] || {
+    echo "STUB_ERROR(codex): STUB_CODEX_OUTPUT not found: $STUB_CODEX_OUTPUT" >&2
+    exit 97
+  }
+  cat "$STUB_CODEX_OUTPUT" > "$LAST_MSG"
+fi
+exit "${STUB_CODEX_EXIT:-0}"
+STUBEOF
+chmod +x "${STUB_DIR}/codex"
+
+# Stub sanity check, isolated from dispatch-planners.sh entirely: proves the
+# stubs themselves behave before anything downstream depends on them, so a
+# broken stub fails here first with its own label, not disguised as a
+# dispatch-level assertion.
+STUB_CLAUDE_STDOUT=$(printf 'stub prompt\n' | STUB_CLAUDE_OUTPUT="$VALID_DRAFT_FIXTURE" "${STUB_DIR}/claude")
+assert_eq "$STUB_CLAUDE_STDOUT" "$(cat "$VALID_DRAFT_FIXTURE")" \
+  "claude stub echoes STUB_CLAUDE_OUTPUT verbatim"
+STUB_LAST_MSG="$TMP/stub-last-msg.md"
+printf 'stub prompt\n' | STUB_CODEX_OUTPUT="$VALID_DRAFT_FIXTURE" \
+  "${STUB_DIR}/codex" --output-last-message "$STUB_LAST_MSG" - >/dev/null
+assert_eq "$(cat "$STUB_LAST_MSG")" "$(cat "$VALID_DRAFT_FIXTURE")" \
+  "codex stub writes STUB_CODEX_OUTPUT to --output-last-message verbatim"
+assert_exit 97 env -u STUB_CODEX_OUTPUT "${STUB_DIR}/codex" < /dev/null
+EMPTY_STUB_FILE="$TMP/empty-stub-draft.md"
+: > "$EMPTY_STUB_FILE"
+
+# ─── dispatch-planners.sh end-to-end, against the stubs ────────────────────
+
+# Baseline: both planners produce a valid draft -> dispatch succeeds. Proves
+# the raised budgets and new per-planner validation didn't break the happy
+# path.
+BOTH_VALID_RUN=$(mktemp -d)
+DISPATCH_EXIT=0
+STUB_CLAUDE_OUTPUT="$VALID_DRAFT_FIXTURE" STUB_CODEX_OUTPUT="$VALID_DRAFT_FIXTURE" \
+  DEEP_PLAN_PLANNER_TIMEOUT=30 PATH="${STUB_DIR}:${PATH}" \
+  "$DISPATCH" "$BOTH_VALID_RUN" "stub task" \
+  >"${BOTH_VALID_RUN}/stdout.log" 2>"${BOTH_VALID_RUN}/stderr.log" || DISPATCH_EXIT=$?
+assert_eq "$DISPATCH_EXIT" 0 "both planners valid: dispatch-planners.sh exits 0"
+rm -rf "$BOTH_VALID_RUN"
+
+# The original incident, reproduced: BOTH planners are enabled, and ONE
+# (codex) writes an empty draft while its process still exits 0 — exactly
+# what a starved-budget `claude`/`codex` CLI call does. Before this task,
+# gating on process exit codes alone meant one valid planner (opus) masked
+# this and dispatch-planners.sh exited 0. It must now exit non-zero.
+ONE_EMPTY_RUN=$(mktemp -d)
+DISPATCH_EXIT=0
+STUB_CLAUDE_OUTPUT="$VALID_DRAFT_FIXTURE" STUB_CODEX_OUTPUT="$EMPTY_STUB_FILE" \
+  DEEP_PLAN_PLANNER_TIMEOUT=30 PATH="${STUB_DIR}:${PATH}" \
+  "$DISPATCH" "$ONE_EMPTY_RUN" "stub task" \
+  >"${ONE_EMPTY_RUN}/stdout.log" 2>"${ONE_EMPTY_RUN}/stderr.log" || DISPATCH_EXIT=$?
+assert_eq "$DISPATCH_EXIT" 1 \
+  "one enabled planner (codex) emits an empty draft: dispatch-planners.sh now exits non-zero (was 0)"
+assert_eq "$(wc -c < "${ONE_EMPTY_RUN}/draft-codex.md" | tr -d '[:space:]')" 0 \
+  "the empty codex draft really is 0 bytes (reproduces the incident's exact symptom)"
+rm -rf "$ONE_EMPTY_RUN"
+
+# The mirror case: opus (never optional, no --no-codex-equivalent flag for
+# it) writes a truncated draft while codex is valid — also fails.
+OPUS_TRUNCATED_RUN=$(mktemp -d)
+DISPATCH_EXIT=0
+STUB_CLAUDE_OUTPUT="$TMP/truncated.md" STUB_CODEX_OUTPUT="$VALID_DRAFT_FIXTURE" \
+  DEEP_PLAN_PLANNER_TIMEOUT=30 PATH="${STUB_DIR}:${PATH}" \
+  "$DISPATCH" "$OPUS_TRUNCATED_RUN" "stub task" \
+  >"${OPUS_TRUNCATED_RUN}/stdout.log" 2>"${OPUS_TRUNCATED_RUN}/stderr.log" || DISPATCH_EXIT=$?
+assert_eq "$DISPATCH_EXIT" 1 "opus draft truncated: dispatch-planners.sh exits non-zero even with a valid codex draft"
+rm -rf "$OPUS_TRUNCATED_RUN"
+
+# --no-codex: codex is never launched and its absence must not fail the
+# dispatch — a disabled planner is not an "enabled planner producing an
+# invalid draft".
+NO_CODEX_RUN=$(mktemp -d)
+DISPATCH_EXIT=0
+STUB_CLAUDE_OUTPUT="$VALID_DRAFT_FIXTURE" \
+  DEEP_PLAN_PLANNER_TIMEOUT=30 PATH="${STUB_DIR}:${PATH}" \
+  "$DISPATCH" "$NO_CODEX_RUN" "stub task" --no-codex \
+  >"${NO_CODEX_RUN}/stdout.log" 2>"${NO_CODEX_RUN}/stderr.log" || DISPATCH_EXIT=$?
+assert_eq "$DISPATCH_EXIT" 0 "--no-codex with a valid opus draft: dispatch-planners.sh exits 0"
+assert_eq "$([ -f "${NO_CODEX_RUN}/draft-codex.md" ] && echo yes || echo no)" no \
+  "--no-codex: codex is never launched, no draft-codex.md is written"
+rm -rf "$NO_CODEX_RUN"
+
+rm -rf "$STUB_DIR"
 
 assert_summary
