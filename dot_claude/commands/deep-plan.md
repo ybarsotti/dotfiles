@@ -1,12 +1,12 @@
 ---
-description: Multi-agent deep-planning pipeline — Opus+Codex draft, 5-persona review loop (incl. ticket-matcher), plannotator, then hands off to the superpowers execution workflow
+description: Multi-agent deep-planning pipeline — Opus+Codex draft, 5-persona review loop (incl. ticket-matcher), plannotator, then hands off to /deep-execute
 ---
 
 # /deep-plan
 
 Drive a non-trivial task through a hardened **deep-planning** pipeline and stop at an
-approved plan — deep-plan does NOT build, review, or open the PR itself. It hands off to the
-superpowers execution workflow (which you run next, or which `jira-workflow` runs for you).
+approved plan — deep-plan does NOT build, review, or open the PR itself. It hands off to
+`/deep-execute` (which you run next, or which `jira-workflow` runs for you).
 
 0. **Plan mode** — `EnterPlanMode` first; every phase up to approval runs inside it, no
    project file is touched.
@@ -17,10 +17,10 @@ superpowers execution workflow (which you run next, or which `jira-workflow` run
    invoked, never paraphrased); two parallel planners (Opus + Codex) → one merged plan.
 4. **Review** — 5 parallel personas (architect, project-developer, ticket-matcher on
    Sonnet; flow-mapper, qa on Codex) until unanimous approval (≤ 3 iterations, then tiebreak).
-5. **Present** — validate gate, then **Plannotator**: `plannotator annotate <plan> --gate`
-   for the full plan, then `ExitPlanMode` (its hook re-opens the UI for final approval).
-6. **Handoff** — suggest the ordered superpowers + command steps to build, review, QA, and
-   open the PR.
+5. **Present** — `finalize-plan.sh` validate/repair/tick gate, then **Plannotator**:
+   `plannotator annotate <plan> --gate` for the full plan, then `ExitPlanMode` (its hook
+   re-opens the UI for final approval).
+6. **Handoff** — print `/deep-execute "$RUN_DIR/plan.md"` and stop.
 
 **Arguments:** `$ARGUMENTS`
 
@@ -45,7 +45,8 @@ The skill lives at `~/.claude/skills/deep-plan/SKILL.md`. Follow its phases exac
 
 ## Handoff (what runs after the plan is approved)
 
-deep-plan prints these as suggested next steps — it does not run them itself:
+deep-plan prints `/deep-execute "$RUN_DIR/plan.md"` and stops — it does not run any of this
+itself. `/deep-execute` drives the full superpowers execution workflow from the approved plan:
 
 1. `superpowers:using-git-worktrees` → isolate.
 2. `superpowers:subagent-driven-development` (or `executing-plans`) → build with strict TDD

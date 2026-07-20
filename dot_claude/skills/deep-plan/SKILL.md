@@ -1,6 +1,6 @@
 ---
 name: deep-plan
-description: Multi-agent deep-planning pipeline. Use when invoked via /deep-plan, or when the user explicitly wants a deeply reviewed plan before any code is written for a non-trivial task (new feature, refactor, architectural change). Drafts a plan with parallel Opus + Codex planners, hardens it with reviewer personas (architect, project-developer, flow-mapper, qa, ticket-matcher) until unanimous approval, presents it via plannotator, then hands off to the superpowers execution workflow. deep-plan STOPS at the approved plan — it does not build, review, or open the PR itself.
+description: Multi-agent deep-planning pipeline. Use when invoked via /deep-plan, or when the user explicitly wants a deeply reviewed plan before any code is written for a non-trivial task (new feature, refactor, architectural change). Drafts a plan with parallel Opus + Codex planners, hardens it with reviewer personas (architect, project-developer, flow-mapper, qa, ticket-matcher) until unanimous approval, presents it via plannotator, then hands off to /deep-execute. deep-plan STOPS at the approved plan — it does not build, review, or open the PR itself.
 ---
 
 # deep-plan
@@ -8,9 +8,8 @@ description: Multi-agent deep-planning pipeline. Use when invoked via /deep-plan
 You are the **orchestrator** of a multi-agent **deep-planning** pipeline. Your job is to
 coordinate planning and review, then present an approved plan and hand off. You do **not**
 draft the plan yourself, and you do **not** build, review the code, or open the PR — those
-happen in the **execution phase** the user runs after approval (via superpowers + the
-`/deep-review`, `/qa-test-plan`, `/pr-description` commands). deep-plan parses args,
-dispatches agents, aggregates verdicts, presents checkpoints, and suggests next steps.
+happen in the **execution phase**, driven by `/deep-execute` after approval. deep-plan parses
+args, dispatches agents, aggregates verdicts, presents checkpoints, and hands off.
 
 ## Superpowers workflow mapping
 
@@ -28,36 +27,33 @@ execution half. Invoke each planning-phase skill via the Skill tool at its mappe
 | 3 | `humanizing-plans` | Phase 3 (present) | deep-plan |
 | 4 | `plannotator-annotate` | Phase 3 (annotate) | deep-plan |
 | ✳ | `continuity-ledger` | any long session (save/resume) | deep-plan |
-| — | — | **handoff** ↓ | **user** |
-| 4 | `using-git-worktrees` | execution | superpowers |
-| 5 | `subagent-driven-development` / `executing-plans` | execution | superpowers |
-| 6 | `test-driven-development` | execution (per task) | superpowers |
-| 6b| `systematic-debugging` | execution (bug/regression tasks) | superpowers |
-| 6c| `dispatching-parallel-agents` | execution (fallback for parallel slices) | superpowers |
-| 7 | `/deep-review` + `receiving-code-review` + `/qa-test-plan` | execution | commands / superpowers |
-| 8 | `/pr-description` + `finishing-a-development-branch` | execution | command / superpowers |
+| — | — | **handoff** ↓ | **`/deep-execute`** |
+| 4 | `using-git-worktrees` | execution | deep-execute |
+| 5 | `subagent-driven-development` / `executing-plans` | execution | deep-execute |
+| 6 | `test-driven-development` | execution (per task) | deep-execute |
+| 6b| `systematic-debugging` | execution (bug/regression tasks) | deep-execute |
+| 6c| `dispatching-parallel-agents` | execution (fallback for parallel slices) | deep-execute |
+| 7 | `/deep-review` + `receiving-code-review` + `/qa-test-plan` | execution | deep-execute |
+| 8 | `/pr-description` + `finishing-a-development-branch` | execution | deep-execute |
 
 Plus deep-plan adds: multi-model planner/reviewer fan-out, the `ticket-matcher` reviewer,
 code-intel bootstrap, and the machine-validated checklist gate.
 
 ## Phase 0 — Parse args & sanity checks
 
-Read `$ARGUMENTS`. Extract:
-
-- **task description or ticket key** (positional, required)
-- `--ticket KEY-123` (else auto-detect: branch name, last commit body, current Jira/Linear context)
-- `--max-plan-iter N` (default 3)
-- `--no-codex` (default off — codex reviewers/planners enabled)
-- `--skip-grill` (default off)
-- `--dry-run` (default off)
+Run `~/.claude/skills/deep-plan/scripts/parse-args.sh "$ARGUMENTS"` and follow the returned
+fields: `task_description`, `ticket` (from `--ticket KEY-123`, else auto-detect: branch name,
+last commit body, current Jira/Linear context), `max_plan_iter` (from `--max-plan-iter N`,
+default 3), `no_codex` (`--no-codex`), `skip_grill` (`--skip-grill`), `dry_run` (`--dry-run`).
+An unknown `--flag` exits 2 with a message — surface it to the user verbatim.
 
 Refuse to proceed when the task is trivially small (typo, single one-line change, rename of a single symbol). Tell the user to just do it inline.
 
 Set `RUN_DIR=~/.claude/deep-plan-runs/$(date +%Y%m%d-%H%M%S)-$(echo "$ARGUMENTS" | sha1sum | cut -c1-6)`. Create it with `mkdir -p`. All artifacts (plan drafts, verdicts, final plan) live there.
 
-Verify binaries: `git`, `claude`, `jq`. Verify `codex` if codex paths are enabled.
+Verify binaries: `git`, `claude`, `jq`. Verify `codex` unless `no_codex` is true.
 
-If `--dry-run`: print the list of phases below with the spawned-agent counts and exit. Do not spawn anything.
+If `dry_run` is true: print the list of phases below with the spawned-agent counts and exit. Do not spawn anything.
 
 ## Phase 0.1 — Enter plan mode (mandatory)
 
@@ -218,24 +214,20 @@ For each subplan: run a **reduced** review loop — `project-developer` (Sonnet)
 
 ## Phase 3 — Validate gate, annotate & present plan
 
-Before showing the plan, **gate** on `validate-plan.sh`:
-```
-~/.claude/skills/deep-plan/scripts/validate-plan.sh "$RUN_DIR/plan.md" --root
-for sub in "$RUN_DIR"/subplans/*.md; do
-  ~/.claude/skills/deep-plan/scripts/validate-plan.sh "$sub" --subplan
-done
-```
+Run `~/.claude/skills/deep-plan/scripts/finalize-plan.sh "$RUN_DIR"`. It gates the root plan
+and every `subplans/*.md` on `validate-plan.sh`, auto-recovers up to 3 repair rounds through an
+Opus planner, and — only once every file fully passes — ticks the checklist via
+`tick-checklist.sh`. **Failing JSON (`RUN_DIR/finalize-failures.json`) is a hard gate: read it,
+fix, rerun `finalize-plan.sh` — never advance on a `status: fail`.** If it still fails after its
+own 3 rounds, fall through to `AskUserQuestion` for tiebreak on the named failures.
 
-If anything fails, **auto-recover (up to 3 retries)**: collect the failed items, spawn an Opus planner with the explicit list + the current plan and ask it to fix; re-validate. After 3 retries, fall through to `AskUserQuestion` for tiebreak.
-
-Once `validate-plan.sh` returns 0 on root and every subplan, tick the checklist:
-```
-~/.claude/skills/deep-plan/scripts/tick-checklist.sh "$RUN_DIR/plan.md" --root
-for sub in "$RUN_DIR"/subplans/*.md; do
-  ~/.claude/skills/deep-plan/scripts/tick-checklist.sh "$sub" --subplan
-done
-```
-The LLM **never** edits `[ ]`/`[x]` directly. The checklist must show all `[x]` before proceeding. The same rule covers `## Superpowers invoked`: never hand-edit its boxes; call `scripts/superpowers-invoke.sh "$RUN_DIR" <skill>` **after** actually invoking the skill via the Skill tool — it records a receipt (chained by hash, anchored to the project repo's HEAD commit) and ticks the box together — `validate-plan.sh`'s `superpowers-ticks-have-receipts` check fails any tick that lacks a chain-valid, ancestor-verified receipt. This is a tamper-evident audit trail, chain-verified by the validator and anchored to a repo commit — not tamper-proof, and it proves the script was invoked, not that the skill itself ran (nothing stops calling the script without calling `Skill()` first; that discipline still depends on following this workflow). See the header comment in `scripts/superpowers-invoke.sh` for the full picture of what it does and doesn't guarantee.
+The checklist and `## Superpowers invoked` boxes are machine-ticked only — `finalize-plan.sh`
+(via `tick-checklist.sh`) is the only thing permitted to tick a `## Checklist` box, and
+`scripts/superpowers-invoke.sh "$RUN_DIR" <skill>` — called **after** actually invoking the
+skill via the Skill tool — is the only thing permitted to tick a `## Superpowers invoked` box.
+**Never hand-edit either.** The tick is a tamper-evident receipt (hash-chained, anchored to the
+repo's HEAD commit): it proves the script ran, not that the skill itself ran — see the header
+of `scripts/superpowers-invoke.sh` for the full guarantee.
 
 Confirm the plan includes, at minimum:
 - The **`superpowers:writing-plans` document header** + an **`## Implementation tasks`** section in that skill's exact task format (`### Task N:` + Files + Interfaces + bite-sized checkbox steps with real code).
@@ -275,7 +267,7 @@ The plan is always reviewed in the Plannotator UI, in two passes:
    plannotator annotate "$RUN_DIR/plan.md" --gate
    ```
    `--gate` blocks until the user approves or returns annotations. Address **every**
-   annotation: edit `plan.md`, re-run `validate-plan.sh`, re-run `tick-checklist.sh`, then
+   annotation: edit `plan.md`, re-run `finalize-plan.sh` (validate + tick together), then
    re-open Plannotator on the updated file. Loop until the user approves with no annotations.
    Record it:
    ```
@@ -295,23 +287,13 @@ is what the user reads; Plannotator carries the detail.
 
 ## Phase 4 — Handoff (deep-plan stops here)
 
-Once the plan is approved, **do not build**. Present the ordered execution handoff and let the
-user drive it. The plan already encodes the requirements each step must honor. Print this
-checklist verbatim (adapt paths):
+Approved-plan handoff: `/deep-execute "$RUN_DIR/plan.md"`. deep-plan stops here — it does not
+build, review the code, or open the PR. `/deep-execute` drives the full superpowers execution
+workflow from the approved plan: isolate (worktree) → build (strict TDD, outer-boundary-only
+mocking) → simplify → QA (if the plan's QA flag is "yes") → review → PR → ship.
 
-**Next steps — superpowers execution workflow:**
-
-1. **Isolate** — `Skill(skill="superpowers:using-git-worktrees")` — fresh worktree/branch, clean test baseline.
-2. **Build** — `Skill(skill="superpowers:subagent-driven-development")` (or `executing-plans` when subagents are unavailable), executing `$RUN_DIR/plan.md`. Strict red-green-refactor per `superpowers:test-driven-development`. **Mock only the outermost boundaries; inner services/repos/domain run real.**
-   - *Bug/regression task?* Drive it through `superpowers:systematic-debugging` (reproduce → minimise → hypothesise → fix → regression-test) before writing the fix.
-   - *Fallback for parallel slices* — if agent-teams/subagent-driven is unavailable, use `superpowers:dispatching-parallel-agents` to fan out the independent build slices, then integrate.
-3. **Simplify** — `/simplify` ×2.
-4. **QA** — **if** the plan's `## QA / test-execution` flag is "yes" (flow change or new screens), run `/qa-test-plan` to produce + execute the manual test plan (records video).
-5. **Review** — `/deep-review` (full panel; reviewers on Sonnet + Codex). Before applying its findings, `Skill(skill="superpowers:receiving-code-review")` — verify each finding technically, push back on the questionable ones, don't blindly apply. Then `superpowers:verification-before-completion`.
-6. **PR** — `/pr-description` — opens the PR with a Conventional-Commit title, a Mermaid diagram, rationale, decisions, ticket link (**no file list / no counts**), assigned to you. It reuses `$RUN_DIR/plan.md`.
-7. **Ship** — watch CI + Copilot (`~/.claude/skills/deep-plan/scripts/ci-and-copilot-watch.sh <PR_URL>`), then `Skill(skill="superpowers:finishing-a-development-branch")`.
-
-> Tip: for a Jira ticket, `/deep-plan` is invoked **inside** the `jira-workflow` skill, which then drives steps 1–7 automatically.
+> Tip: for a Jira ticket, `/deep-plan` is invoked **inside** the `jira-workflow` skill, which
+> then drives `/deep-execute` automatically after approval.
 
 ## Reuse
 

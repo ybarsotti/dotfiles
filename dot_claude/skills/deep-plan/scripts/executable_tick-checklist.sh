@@ -23,7 +23,12 @@ if [ $# -gt 0 ]; then
 fi
 
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Prefer the deployed sibling name; fall back to the source-tree name (the
+# `executable_` prefix is stripped only by `chezmoi apply`), so this resolves
+# both pre-apply (this source tree) and post-apply (a real run dir) — same
+# fallback subplan-fanout.sh and finalize-plan.sh use.
 VALIDATE="${SKILL_DIR}/scripts/validate-plan.sh"
+[ -f "$VALIDATE" ] || VALIDATE="${SKILL_DIR}/scripts/executable_validate-plan.sh"
 
 [ -f "$PLAN" ] || { echo "tick-checklist.sh: missing $PLAN" >&2; exit 2; }
 [ -x "$VALIDATE" ] || { echo "tick-checklist.sh: validate-plan.sh not executable: $VALIDATE" >&2; exit 2; }
