@@ -35,7 +35,11 @@ done
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PLAN="${RUN_DIR}/plan.md"
 SUBPLAN_TEMPLATE="${SKILL_DIR}/templates/subplan.md"
+# Prefer the deployed sibling name; fall back to the source-tree name (the
+# `executable_` prefix is stripped only by `chezmoi apply`), so lane mode
+# works both pre-apply (this source tree) and post-apply (a real run dir).
 PARSER="${SKILL_DIR}/scripts/plan-to-json.sh"
+[ -f "$PARSER" ] || PARSER="${SKILL_DIR}/scripts/executable_plan-to-json.sh"
 
 [ -f "$PLAN" ] || {
   echo "subplan-fanout.sh: missing $PLAN" >&2
