@@ -294,6 +294,51 @@ SERIAL_HAND_TICK="$TMP/serial-hand-tick.md"
 sed 's/- \[ \] grill-with-docs/- [x] grill-with-docs/' "$SERIAL_PLAN" > "$SERIAL_HAND_TICK"
 expect_fail_item "superpowers-ticks-have-receipts" "$SERIAL_HAND_TICK"
 
+# ─── C3: SERIAL must key off actual absence of a lane table (LANE_COUNT==0),
+# not off the `Mode:` value — one deleted `- Mode: `parallel`` line, with the
+# lane table left intact, used to exempt a real 4-lane plan from all 20
+# execution-shape/lane-identity validators (`n/a — serial plan`, reporting
+# `pass` on a plan with e.g. a genuine duplicate lane name). ────────────────
+
+# 1. Lane table present, `Mode:` line deleted → exec-mode-valid FAILS (not
+# n/a) — MODE_VAL is empty, and an empty lane table no longer buys a
+# free pass.
+sed '/^- Mode: `parallel`/d' "$FIXTURE" > "$TMP/no-mode.md"
+NO_MODE_JSON=$("$VALIDATE" "$TMP/no-mode.md" --root --json) || true
+assert_eq "$(jq -r '.[] | select(.item=="exec-mode-valid") | .status' <<<"$NO_MODE_JSON")" fail \
+  "C3: lane table present + no Mode line -> exec-mode-valid fails (not n/a)"
+assert_eq "$(jq -r '.[] | select(.item=="execution-shape-present") | .status' <<<"$NO_MODE_JSON")" pass \
+  "C3: lane table present + no Mode line -> execution-shape-present still passes (lanes ARE present)"
+
+# 2. Same, plus a genuine duplicate lane name -> lane-names-unique FAILS
+# instead of sliding into the n/a serial exemption.
+sed '/^- Mode: `parallel`/d; s/^| review |/| planning |/' "$FIXTURE" > "$TMP/no-mode-dup.md"
+expect_fail_item "lane-names-unique" "$TMP/no-mode-dup.md"
+
+# 3. Genuinely no `## Execution shape` section at all -> all 20 items still
+# record `n/a — serial plan` and validate-plan.sh doesn't fail because of
+# them (the exemption is legitimate here).
+NO_SHAPE_JSON=$("$VALIDATE" "$ABSENT_SHAPE_FIXTURE" --root --json) || true
+for item in execution-shape-present exec-mode-valid "lanes->=2-if-parallel" \
+  lanes-own-paths-disjoint affected-files-covered-by-exactly-one-lane \
+  lane-agent-in-allowlist lane-test-command-present contract-present-if-parallel \
+  contract-endpoints-complete contract-no-placeholders contract-version-present \
+  tasks-tagged-with-lane every-lane-has-1-task lane-task-files-subset-of-lane-owns \
+  lane-names-unique exactly-one-orchestrator-lane lane-name-grammar-safe \
+  depends-on-lanes-known depends-on-no-self depends-on-acyclic; do
+  STATUS=$(jq -r --arg i "$item" '.[] | select(.item == $i) | .status' <<<"$NO_SHAPE_JSON")
+  assert_eq "$STATUS" pass "C3: genuinely absent Execution shape: ${item} still n/a-passes"
+done
+
+# 4. An explicit `- Mode: `serial`` plan with NO lane table stays exempted
+# (this is exactly what SERIAL_PLAN above already is — no lane table
+# survives its construction — so the pre-existing loop above already pins
+# this; assert LANE_COUNT is genuinely 0 for it as a direct pin on the gate
+# condition itself).
+SERIAL_PLAN_JSON=$("$PARSER" "$SERIAL_PLAN")
+assert_eq "$(jq '.lanes | length' <<<"$SERIAL_PLAN_JSON")" 0 \
+  "C3: explicit Mode: serial plan genuinely has zero lanes (the gate's actual condition)"
+
 # ─── Receipt mechanism: both directions ────────────────────────────────────
 
 # A hand-ticked box (no receipt) fails — already covered by mutation 21

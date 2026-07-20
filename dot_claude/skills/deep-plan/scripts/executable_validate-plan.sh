@@ -350,8 +350,39 @@ if [ "$MODE" = "root" ]; then
   LANE_COUNT=$(jq '.lanes | length' <<<"$PLAN_JSON")
   KNOWN_LANES_CSV=$(jq -r '[.lanes[].name] | join(",")' <<<"$PLAN_JSON")
 
+  # SERIAL exempts all 20 execution-shape/lane-identity items with an `n/a —
+  # serial plan` pass. That exemption must key off actual ABSENCE of an
+  # execution shape, not merely off the `Mode:` value on its own: gating on
+  # "MODE_VAL is empty or serial" let one deleted `- Mode: `parallel`` line
+  # (with the lane table left fully intact) silently exempt a real 4-lane
+  # plan from every lane-safety check — lanes-own-paths-disjoint,
+  # lane-names-unique, depends-on-acyclic, all of it — reporting `pass —
+  # n/a` instead of checking anything.
+  #
+  # Gating purely on `LANE_COUNT == 0` fixes that repro but breaks a
+  # different, subtler case: a plan that explicitly declares `Mode:
+  # parallel` with a lane table present, but whose table header row is
+  # itself malformed/missing (so the parser finds zero lanes) would then
+  # ALSO get silently exempted — masking the exact "declares lanes but the
+  # table doesn't parse" failure `execution-shape-present` exists to catch.
+  #
+  # So SERIAL is true iff EITHER of two genuinely-absent-shape signals hold:
+  #   - MODE_VAL is empty (no `- Mode:` line found) AND LANE_COUNT is 0 (no
+  #     lanes parsed either) — this is what a plan with no `## Execution
+  #     shape` section at all looks like, and it's the only way to get here
+  #     without an explicit, parseable Mode declaration;
+  #   - MODE_VAL is explicitly `serial` — an intentional, well-formed serial
+  #     declaration, regardless of what else is in the section.
+  # A plan that declares `Mode: parallel` (or anything else non-empty,
+  # non-serial) is NEVER exempted, even with zero parsed lanes — that's
+  # exactly the "declared but broken" case `execution-shape-present` (and
+  # `exec-mode-valid`) must fail loudly on, not wave through as `n/a`.
   SERIAL=0
-  [ "$PARSE_FAILED" -eq 0 ] && { [ -z "$MODE_VAL" ] || [ "$MODE_VAL" = "serial" ]; } && SERIAL=1
+  if [ "$PARSE_FAILED" -eq 0 ]; then
+    if { [ -z "$MODE_VAL" ] && [ "$LANE_COUNT" -eq 0 ]; } || [ "$MODE_VAL" = "serial" ]; then
+      SERIAL=1
+    fi
+  fi
 
   ITEMS_1_20=(
     execution-shape-present exec-mode-valid "lanes->=2-if-parallel"
@@ -735,8 +766,12 @@ if [ "$MODE" = "root" ]; then
   # including the `### Handoff` subsection that item 10 above exempts from
   # being required — a forged tick on a Handoff item must still fail here.
   #
-  # This is tamper-EVIDENT, not tamper-proof. It verifies three things about
-  # each line of RUN_DIR/superpowers-receipts.log (format documented in
+  # This is a tamper-EVIDENT audit trail, chain-verified here and anchored
+  # to a repo commit — NOT tamper-proof, and it proves only that
+  # superpowers-invoke.sh was run with that skill name, not that the skill
+  # itself ran: nothing stops an agent from calling the script without ever
+  # calling `Skill()` first. It verifies three things about each line of
+  # RUN_DIR/superpowers-receipts.log (format documented in
   # superpowers-invoke.sh's header):
   #   (a) the hash chain recomputes end-to-end — the first line whose
   #       recorded hash doesn't match sha256(previous-chain-hash + this
@@ -749,9 +784,11 @@ if [ "$MODE" = "root" ]; then
   # Anyone who can compute sha256 and has read this algorithm can still
   # forge a self-consistent chain; anyone who can rewrite local git history
   # can mint a commit for a fake receipt to point at. This mechanism raises
-  # the cost of forging a receipt — it does not make forgery impossible. The
-  # 0444 chmod superpowers-invoke.sh applies to the log is a cheap speed
-  # bump against casual editing, not protection against either attack.
+  # the cost of forging a receipt that this script never wrote — it does not
+  # make forgery impossible, and it says nothing about whether the skill
+  # itself was actually invoked. The 0444 chmod superpowers-invoke.sh
+  # applies to the log is a cheap speed bump against casual editing, not
+  # protection against either attack.
   RECEIPTS="${PLAN_DIR}/superpowers-receipts.log"
 
   if command -v sha256sum >/dev/null 2>&1; then
