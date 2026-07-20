@@ -1,5 +1,14 @@
 # Subplan: {{CHAPTER}}
 
+**Lane:** `{{LANE}}`
+**Mode:** `{{MODE}}`
+
+## Contract reference
+<!-- Inherited from the root plan's `## API contract`, when it declares one. Populated by
+     subplan-fanout.sh — workers build against this contract rather than re-deriving it. -->
+- Contract version: `{{CONTRACT_VERSION}}`
+- Materialized contract: `{{CONTRACT_PATH}}`
+
 ## Context
 <why this chapter exists; how it slots into the root plan>
 
@@ -17,7 +26,9 @@ sequenceDiagram
 
 ## Implementation tasks
 <!-- Load `superpowers:writing-plans` and follow its task structure verbatim — same rules
-     as the root plan. Fill with the `### Task N:` blocks that skill defines. -->
+     as the root plan. Populated by subplan-fanout.sh: every `### Task N:` block tagged for
+     this lane, copied verbatim from the root plan. -->
+{{TASKS}}
 
 ## TDD test list
 - `<test name>` — <intent>
