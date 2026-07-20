@@ -26,6 +26,9 @@ jobs:
       - name: Install yamllint
         run: pip install --break-system-packages yamllint || pip install yamllint
 
+      - name: Install just
+        uses: extractions/setup-just@v3
+
       - name: Shellcheck — .sh files
         run: |
           find . -name "*.sh" -type f -not -path "*/.git/*" -print0 \
@@ -38,6 +41,9 @@ jobs:
             # Strip lines that are pure Go template directives and feed the rest to shellcheck
             grep -v '^\s*{{' "$f" | shellcheck -s bash --severity=error -
           done
+
+      - name: Deep pipeline shell tests
+        run: just test-deep-pipeline
 
       - name: yamllint — packages.yaml
         run: yamllint -d relaxed .chezmoidata/packages.yaml
