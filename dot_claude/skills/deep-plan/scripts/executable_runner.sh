@@ -15,6 +15,13 @@ TIMEOUT="${4:-900}"
 
 [ -f "$PROMPT_FILE" ] || { echo "runner.sh: prompt missing: $PROMPT_FILE" >&2; exit 1; }
 
+# Codex agents (planner-codex, flow-mapper, qa) run on a pinned model/effort instead of
+# whatever ~/.codex/config.toml happens to hold, so plan quality doesn't drift with the
+# interactive config. Override with DEEP_PLAN_CODEX_MODEL / DEEP_PLAN_CODEX_EFFORT
+# (efforts: none|minimal|low|medium|high|xhigh|max).
+CODEX_MODEL="${DEEP_PLAN_CODEX_MODEL:-gpt-5.6-sol}"
+CODEX_EFFORT="${DEEP_PLAN_CODEX_EFFORT:-high}"
+
 if command -v gtimeout >/dev/null 2>&1; then
   run_with_timeout() { gtimeout "$@"; }
 elif command -v timeout >/dev/null 2>&1; then
@@ -43,6 +50,8 @@ case "$RUNNER" in
   codex)
     run_with_timeout "$TIMEOUT" \
       codex exec \
+        --model "$CODEX_MODEL" \
+        -c model_reasoning_effort="$CODEX_EFFORT" \
         --skip-git-repo-check \
         --dangerously-bypass-approvals-and-sandbox \
         --color never \

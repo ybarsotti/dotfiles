@@ -94,7 +94,13 @@ For lighter passes:
 - `--reviewers 4 --ratio 2:2` — quick triage during iteration
 - `--dry-run` — preview the plan and estimated cost before paying
 
-The reviewers default to Claude Haiku for the Claude side (cheap); Codex uses whatever model is configured in `~/.codex/config.toml`. The aggregator uses Sonnet because synthesis quality matters most. Override by editing `scripts/reviewer.sh` and `scripts/aggregate.sh`.
+The Claude side runs on Sonnet; the Codex side runs `gpt-5.6-sol` with `model_reasoning_effort=xhigh` (ignores the `~/.codex/config.toml` default, so review depth doesn't drift with your interactive config). Override per run:
+
+```bash
+DEEP_REVIEW_CODEX_MODEL=gpt-5.6-terra DEEP_REVIEW_CODEX_EFFORT=high /deep-review
+```
+
+Valid efforts: `none|minimal|low|medium|high|xhigh|max`. xhigh costs more tokens and time per Codex reviewer — drop to `high` for quick passes. The aggregator uses Sonnet because synthesis quality matters most.
 
 ## Linked task awareness
 
