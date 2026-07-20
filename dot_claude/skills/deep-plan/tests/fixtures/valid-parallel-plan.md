@@ -120,3 +120,6 @@
 - [ ] grill-with-docs
 - [ ] brainstorming
 - [ ] writing-plans
+
+### Handoff (execution phase — run after approval, not required to approve the plan)
+- [ ] using-git-worktrees
