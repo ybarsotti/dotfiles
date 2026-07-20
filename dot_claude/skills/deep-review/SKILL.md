@@ -112,7 +112,10 @@ Skip Phase 5 only when: the run was `--dry-run`, the diff was empty, or the verd
 ## Reviewer model policy
 
 Claude-side reviewers **always** run on Sonnet (`scripts/reviewer.sh`). The aggregator runs
-on Sonnet. Codex-side reviewers run on Codex. Each reviewer's prompt is a **fixed file** at
+on Sonnet. Codex-side reviewers run on **`gpt-5.6-sol` at `model_reasoning_effort=xhigh`**
+(not the `~/.codex/config.toml` default) — override per run with the env vars
+`DEEP_REVIEW_CODEX_MODEL` / `DEEP_REVIEW_CODEX_EFFORT`
+(efforts: `none|minimal|low|medium|high|xhigh|max`). Each reviewer's prompt is a **fixed file** at
 `personas/<id>.md` — the orchestrator never authors reviewer prompts; the dispatcher loads
 them and appends the variant's role/focus + output schema.
 

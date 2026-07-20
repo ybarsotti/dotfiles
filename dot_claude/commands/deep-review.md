@@ -32,6 +32,12 @@ FLAGS
   --timeout <secs>    per-reviewer timeout (default: 600)
   --keep-artifacts    don't delete the run dir after completion
   --dry-run           print the plan without spawning reviewers
+
+MODELS
+  Claude side  sonnet
+  Codex side   gpt-5.6-sol @ model_reasoning_effort=xhigh
+               override: DEEP_REVIEW_CODEX_MODEL / DEEP_REVIEW_CODEX_EFFORT
+               (none|minimal|low|medium|high|xhigh|max)
 ```
 
 ## What you must do

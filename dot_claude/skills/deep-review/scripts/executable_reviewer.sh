@@ -17,6 +17,11 @@ PERSONA="$2"
 RUN_DIR="$3"
 TIMEOUT="${4:-600}"
 
+# Codex reviewers run on the strongest reasoning tier available. Override per-run with
+# DEEP_REVIEW_CODEX_MODEL / DEEP_REVIEW_CODEX_EFFORT (efforts: none|minimal|low|medium|high|xhigh|max).
+CODEX_MODEL="${DEEP_REVIEW_CODEX_MODEL:-gpt-5.6-sol}"
+CODEX_EFFORT="${DEEP_REVIEW_CODEX_EFFORT:-xhigh}"
+
 PROMPT_FILE="${RUN_DIR}/reviewers/${PERSONA}.prompt.md"
 CONTEXT_FILE="${RUN_DIR}/context.md"
 
@@ -70,6 +75,8 @@ case "$RUNNER" in
     # and emit only the final message on our stdout.
     run_with_timeout "$TIMEOUT" \
       codex exec \
+        --model "$CODEX_MODEL" \
+        -c model_reasoning_effort="$CODEX_EFFORT" \
         --skip-git-repo-check \
         --dangerously-bypass-approvals-and-sandbox \
         --color never \

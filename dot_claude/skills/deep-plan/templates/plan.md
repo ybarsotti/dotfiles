@@ -1,4 +1,16 @@
-# <title>
+# <Feature Name> Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** <one sentence describing what this builds>
+
+**Architecture:** <2-3 sentences about the approach>
+
+**Tech Stack:** <key technologies / libraries>
+
+## Global Constraints
+<!-- Per `superpowers:writing-plans` — fill exactly as that skill specifies. -->
+- <constraint>
 
 ## Context
 <2-4 sentences: why this change is needed, what prompted it, intended outcome. Include brainstorming insights.>
@@ -35,8 +47,10 @@ sequenceDiagram
 ```
 
 ## Affected files
-- `path/to/file.ext` — <what changes>
-- `path/to/new_file.ext` — <new; purpose>
+<!-- This is the "File Structure" step of `superpowers:writing-plans` — follow that skill's
+     rules for it. One line per file: path — the single responsibility it owns. -->
+- `path/to/file.ext` — <what changes; what it is responsible for>
+- `path/to/new_file.ext` — <new; single responsibility>
 
 ## Documentation impact
 <!-- Logic often lives in docs/ (business rules, flows, ADRs, API specs, runbooks), not only
@@ -56,6 +70,11 @@ sequenceDiagram
 | Adapter/port for vendor primitive? | yes/no | <reason> |
 | New module boundary? | yes/no | <reason> |
 | Reuse existing utility `X`? | yes/no | <reason> |
+
+## Implementation tasks
+<!-- DO NOT invent a task format here. Load `superpowers:writing-plans` and follow ITS
+     task structure, granularity and no-placeholder rules verbatim — that skill is the
+     single source of truth for this section. Fill it with `### Task N:` blocks it defines. -->
 
 ## TDD test list
 > Mocking policy: mock ONLY the outermost boundaries (network, 3rd-party APIs, clock/random).
@@ -113,6 +132,11 @@ docs). Use `### Q:` / `### A:` headers. If `--skip-grill` was passed, write exac
 - [ ] clarifying-questions-asked
 - [ ] mermaid-present
 - [ ] mermaid-has-entry-and-exit
+- [ ] writing-plans-header
+- [ ] global-constraints-present
+- [ ] tasks-≥1
+- [ ] tasks-have-files-and-interfaces
+- [ ] tasks-have-tdd-steps
 - [ ] tdd-list-≥3
 - [ ] mocking-policy-stated
 - [ ] rationale-present
