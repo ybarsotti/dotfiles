@@ -11,6 +11,8 @@ assert_exit 0 test -f "$SCHEMA"
 assert_exit 0 jq -e '
   .["$schema"] == "https://json-schema.org/draft/2020-12/schema" and
   (.properties.manifest.required | index("baseline_commit")) != null and
-  (.properties.event.properties.type.enum | length) == 7
+  .properties.event.properties.type.enum == [
+    "task_start", "task_done", "progress", "question", "waiting", "blocked", "done"
+  ]
 ' "$SCHEMA"
 assert_summary

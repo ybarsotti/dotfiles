@@ -123,13 +123,13 @@
         "type": {
           "type": "string",
           "enum": [
-            "start",
+            "task_start",
+            "task_done",
             "progress",
+            "question",
             "waiting",
             "blocked",
-            "done",
-            "crashed",
-            "log"
+            "done"
           ]
         },
         "msg": {
