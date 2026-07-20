@@ -1,363 +1,305 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>chezmoi — graphify tree viewer</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f9f9f9;
-      color: #333;
-    }
-    h1 {
-      margin: 20px 0 0 24px;
-      font-size: 2.2rem;
-      font-weight: bold;
-      color: #1e3a56;
-    }
-    .controls {
-      margin: 20px 0 15px 24px;
-    }
-    button {
-      margin-right: 10px;
-      padding: 8px 18px;
-      background: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: background 0.2s ease-in-out;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    button:active {
-      background: #004085;
-    }
-    #tree-container {
-      width: calc(100vw - 48px); /* Adjust for body margin/padding */
-      height: 85vh;
-      overflow: auto;
-      border-radius: 8px;
-      background: #fff;
-      margin-left: 24px;
-      margin-right: 24px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      border: 1px solid #ddd;
-    }
-    svg {
-      background: #fff;
-      border-radius: 8px;
-      display: block; /* Important for D3 */
-    }
-    .node circle {
-      stroke-width: 2.5px;
-    }
-    .node text { /* Base style for the <text> container */
-      font: 13px 'Segoe UI', sans-serif;
-      paint-order: stroke fill; /* Ensures text is readable over lines */
-      stroke: #fff; /* White halo */
-      stroke-width: 3px; /* Halo thickness */
-      stroke-linejoin: round;
-      stroke-opacity: 0.85; /* Halo opacity */
-    }
-    .link {
-      fill: none;
-      stroke-opacity: 0.7;
-      stroke-width: 2px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>graphify - graphify-out/graph.html</title>
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f0f1a; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; height: 100vh; overflow: hidden; }
+  #graph { flex: 1; }
+  #sidebar { width: 280px; background: #1a1a2e; border-left: 1px solid #2a2a4e; display: flex; flex-direction: column; overflow: hidden; }
+  #search-wrap { padding: 12px; border-bottom: 1px solid #2a2a4e; }
+  #search { width: 100%; background: #0f0f1a; border: 1px solid #3a3a5e; color: #e0e0e0; padding: 7px 10px; border-radius: 6px; font-size: 13px; outline: none; }
+  #search:focus { border-color: #4E79A7; }
+  #search-results { max-height: 140px; overflow-y: auto; padding: 4px 12px; border-bottom: 1px solid #2a2a4e; display: none; }
+  .search-item { padding: 4px 6px; cursor: pointer; border-radius: 4px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .search-item:hover { background: #2a2a4e; }
+  #info-panel { padding: 14px; border-bottom: 1px solid #2a2a4e; min-height: 140px; }
+  #info-panel h3 { font-size: 13px; color: #aaa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  #info-content { font-size: 13px; color: #ccc; line-height: 1.6; }
+  #info-content .field { margin-bottom: 5px; }
+  #info-content .field b { color: #e0e0e0; }
+  #info-content .empty { color: #555; font-style: italic; }
+  .neighbor-link { display: block; padding: 2px 6px; margin: 2px 0; border-radius: 3px; cursor: pointer; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid #333; }
+  .neighbor-link:hover { background: #2a2a4e; }
+  #neighbors-list { max-height: 160px; overflow-y: auto; margin-top: 4px; }
+  #legend-wrap { flex: 1; overflow-y: auto; padding: 12px; }
+  #legend-wrap h3 { font-size: 13px; color: #aaa; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .legend-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; border-radius: 4px; font-size: 12px; }
+  .legend-item:hover { background: #2a2a4e; padding-left: 4px; }
+  .legend-item.dimmed { opacity: 0.35; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .legend-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .legend-count { color: #666; font-size: 11px; }
+  #stats { padding: 10px 14px; border-top: 1px solid #2a2a4e; font-size: 11px; color: #555; }
+  #legend-controls { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 4px 0; }
+  #legend-controls label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: #aaa; user-select: none; }
+  #legend-controls label:hover { color: #e0e0e0; }
+  .legend-cb, #select-all-cb { appearance: none; -webkit-appearance: none; width: 14px; height: 14px; border: 1.5px solid #3a3a5e; border-radius: 3px; background: #0f0f1a; cursor: pointer; position: relative; flex-shrink: 0; }
+  .legend-cb:checked, #select-all-cb:checked { background: #4E79A7; border-color: #4E79A7; }
+  .legend-cb:checked::after, #select-all-cb:checked::after { content: ''; position: absolute; left: 3.5px; top: 1px; width: 4px; height: 7px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  #select-all-cb:indeterminate { background: #4E79A7; border-color: #4E79A7; }
+  #select-all-cb:indeterminate::after { content: ''; position: absolute; left: 2px; top: 5px; width: 8px; height: 2px; background: #fff; border: none; transform: none; }
+</style>
 </head>
 <body>
-  <h1>chezmoi — Knowledge Graph</h1>
-  <div class="controls">
-    <button onclick="expandAll()">Expand All</button>
-    <button onclick="collapseAll()">Collapse All</button>
-    <button onclick="resetView()">Reset View</button>
+<div id="graph"></div>
+<div id="sidebar">
+  <div id="search-wrap">
+    <input id="search" type="text" placeholder="Search nodes..." autocomplete="off">
+    <div id="search-results"></div>
   </div>
-  <div id="tree-container">
-    <svg id="tree-svg" width="6000" height="8000"></svg>
+  <div id="info-panel">
+    <h3>Node Info</h3>
+    <div id="info-content"><span class="empty">Click a node to inspect it</span></div>
   </div>
+  <div id="legend-wrap">
+    <h3>Communities</h3>
+    <div id="legend-controls">
+      <label><input type="checkbox" id="select-all-cb" checked onchange="toggleAllCommunities(!this.checked)">Select All</label>
+    </div>
+    <div id="legend"></div>
+  </div>
+  <div id="stats">16 nodes &middot; 5 edges &middot; 11 communities</div>
+</div>
+<script>
+const RAW_NODES = [{"id": "dot_config_wezterm_keys_lua", "label": "keys.lua", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": "keys.lua", "community": 0, "community_name": "Code Structure", "source_file": "dot_config/wezterm/keys.lua", "file_type": "code", "degree": 1}, {"id": "wezterm_keys_m_setup", "label": "M.setup()", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": "M.setup()", "community": 0, "community_name": "Code Structure", "source_file": "dot_config/wezterm/keys.lua", "file_type": "code", "degree": 1}, {"id": "dot_config_wezterm_wezterm_lua", "label": "wezterm.lua", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "wezterm.lua", "community": 5, "community_name": "Code Structure", "source_file": "dot_config/wezterm/wezterm.lua", "file_type": "code", "degree": 0}, {"id": "dot_config_wezterm_fonts_lua", "label": "fonts.lua", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": "fonts.lua", "community": 1, "community_name": "Code Structure", "source_file": "dot_config/wezterm/fonts.lua", "file_type": "code", "degree": 1}, {"id": "wezterm_fonts_m_setup", "label": "M.setup()", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": "M.setup()", "community": 1, "community_name": "Code Structure", "source_file": "dot_config/wezterm/fonts.lua", "file_type": "code", "degree": 1}, {"id": "dot_config_wezterm_plugins_zen_mode_vim_lua", "label": "zen-mode-vim.lua", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "zen-mode-vim.lua", "community": 6, "community_name": "Code Structure", "source_file": "dot_config/wezterm/plugins/zen-mode-vim.lua", "file_type": "code", "degree": 0}, {"id": "dot_config_wezterm_plugins_workspace_switcher_lua", "label": "workspace-switcher.lua", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": "workspace-switcher.lua", "community": 2, "community_name": "Code Structure", "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua", "file_type": "code", "degree": 1}, {"id": "plugins_workspace_switcher_m_setup", "label": "M.setup()", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": "M.setup()", "community": 2, "community_name": "Code Structure", "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua", "file_type": "code", "degree": 1}, {"id": "dot_config_wezterm_plugins_move_workspace_lua", "label": "move_workspace.lua", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": "move_workspace.lua", "community": 3, "community_name": "Code Structure", "source_file": "dot_config/wezterm/plugins/move_workspace.lua", "file_type": "code", "degree": 1}, {"id": "plugins_move_workspace_m_setup", "label": "M.setup()", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": "M.setup()", "community": 3, "community_name": "Code Structure", "source_file": "dot_config/wezterm/plugins/move_workspace.lua", "file_type": "code", "degree": 1}, {"id": "dot_config_wezterm_plugins_bar_lua", "label": "bar.lua", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": "bar.lua", "community": 4, "community_name": "Code Structure", "source_file": "dot_config/wezterm/plugins/bar.lua", "file_type": "code", "degree": 1}, {"id": "plugins_bar_m_setup", "label": "M.setup()", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": "M.setup()", "community": 4, "community_name": "Code Structure", "source_file": "dot_config/wezterm/plugins/bar.lua", "file_type": "code", "degree": 1}, {"id": "dot_config_wezterm_themes_melange_dark_lua", "label": "melange_dark.lua", "color": {"background": "#FF9DA7", "border": "#FF9DA7", "highlight": {"background": "#ffffff", "border": "#FF9DA7"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "melange_dark.lua", "community": 7, "community_name": "Code Structure", "source_file": "dot_config/wezterm/themes/melange_dark.lua", "file_type": "code", "degree": 0}, {"id": "dot_config_wezterm_themes_kanagawa_dragon_lua", "label": "kanagawa-dragon.lua", "color": {"background": "#9C755F", "border": "#9C755F", "highlight": {"background": "#ffffff", "border": "#9C755F"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "kanagawa-dragon.lua", "community": 8, "community_name": "Code Structure", "source_file": "dot_config/wezterm/themes/kanagawa-dragon.lua", "file_type": "code", "degree": 0}, {"id": "dot_config_wezterm_themes_cyberdream_lua", "label": "cyberdream.lua", "color": {"background": "#BAB0AC", "border": "#BAB0AC", "highlight": {"background": "#ffffff", "border": "#BAB0AC"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "cyberdream.lua", "community": 9, "community_name": "Code Structure", "source_file": "dot_config/wezterm/themes/cyberdream.lua", "file_type": "code", "degree": 0}, {"id": "dot_config_yazi_plugins_smart_tab_yazi_init_lua", "label": "init.lua", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "init.lua", "community": 10, "community_name": "Code Structure", "source_file": "dot_config/yazi/plugins/smart-tab.yazi/init.lua", "file_type": "code", "degree": 0}];
+const RAW_EDGES = [{"from": "dot_config_wezterm_keys_lua", "to": "wezterm_keys_m_setup", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "dot_config_wezterm_fonts_lua", "to": "wezterm_fonts_m_setup", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "dot_config_wezterm_plugins_workspace_switcher_lua", "to": "plugins_workspace_switcher_m_setup", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "dot_config_wezterm_plugins_move_workspace_lua", "to": "plugins_move_workspace_m_setup", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "dot_config_wezterm_plugins_bar_lua", "to": "plugins_bar_m_setup", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}];
+const LEGEND = [{"cid": 0, "color": "#4E79A7", "label": "Code Structure", "count": 2}, {"cid": 1, "color": "#F28E2B", "label": "Code Structure", "count": 2}, {"cid": 2, "color": "#E15759", "label": "Code Structure", "count": 2}, {"cid": 3, "color": "#76B7B2", "label": "Code Structure", "count": 2}, {"cid": 4, "color": "#59A14F", "label": "Code Structure", "count": 2}, {"cid": 5, "color": "#EDC948", "label": "Code Structure", "count": 1}, {"cid": 6, "color": "#B07AA1", "label": "Code Structure", "count": 1}, {"cid": 7, "color": "#FF9DA7", "label": "Code Structure", "count": 1}, {"cid": 8, "color": "#9C755F", "label": "Code Structure", "count": 1}, {"cid": 9, "color": "#BAB0AC", "label": "Code Structure", "count": 1}, {"cid": 10, "color": "#4E79A7", "label": "Code Structure", "count": 1}];
 
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script>
-    const initialJsonData = {"name":"chezmoi","total_count":11,"children":[{"name":"bar.lua","total_count":1,"children":[{"name":"M.setup()","total_count":1,"children":[]}]},{"name":"fonts.lua","total_count":1,"children":[{"name":"M.setup()","total_count":1,"children":[]}]},{"name":"keys.lua","total_count":1,"children":[{"name":"M.setup()","total_count":1,"children":[]}]},{"name":"move_workspace.lua","total_count":1,"children":[{"name":"M.setup()","total_count":1,"children":[]}]},{"name":"workspace-switcher.lua","total_count":1,"children":[{"name":"M.setup()","total_count":1,"children":[]}]},{"name":"cyberdream.lua","total_count":1,"children":[]},{"name":"init.lua","total_count":1,"children":[]},{"name":"kanagawa-dragon.lua","total_count":1,"children":[]},{"name":"melange_dark.lua","total_count":1,"children":[]},{"name":"wezterm.lua","total_count":1,"children":[]},{"name":"zen-mode-vim.lua","total_count":1,"children":[]}]};
+// HTML-escape helper — prevents XSS when injecting graph data into innerHTML
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 
-    function transformData(jsonData) {
-        // Helper function to recursively build the children structure
-        function processNode(node, parentL1StageName) {
-            let displayName = node.name;
-            // Append total_count if it exists and is not already in the name
-            if (node.total_count !== undefined) {
-                if (!/\(Total Count: \d+\)$/.test(displayName)) {
-                    displayName += ` (Total Count: ${node.total_count})`;
-                }
-            }
+// Build vis datasets
+const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
+  id: n.id, label: n.label, color: n.color, size: n.size,
+  font: n.font, title: n.title,
+  _community: n.community, _community_name: n.community_name,
+  _source_file: n.source_file, _file_type: n.file_type, _degree: n.degree,
+})));
 
-            const newNode = { name: displayName };
+const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => ({
+  id: i, from: e.from, to: e.to,
+  label: '',
+  title: e.title,
+  dashes: e.dashes,
+  width: e.width,
+  color: e.color,
+  arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+})));
 
-            if (parentL1StageName === "Root") {
-                 newNode.originalStageName = node.name;
-            } else {
-                newNode.originalStageName = parentL1StageName;
-            }
+const container = document.getElementById('graph');
+const network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
+  physics: {
+    enabled: true,
+    solver: 'forceAtlas2Based',
+    forceAtlas2Based: {
+      gravitationalConstant: -60,
+      centralGravity: 0.005,
+      springLength: 120,
+      springConstant: 0.08,
+      damping: 0.4,
+      avoidOverlap: 0.8,
+    },
+    stabilization: { iterations: 200, fit: true },
+  },
+  interaction: {
+    hover: true,
+    tooltipDelay: 100,
+    hideEdgesOnDrag: true,
+    navigationButtons: false,
+    keyboard: false,
+  },
+  nodes: { shape: 'dot', borderWidth: 1.5 },
+  edges: { smooth: { type: 'continuous', roundness: 0.2 }, selectionWidth: 3 },
+});
 
-            if (node.children && node.children.length > 0) {
-                const stageNameToPass = (parentL1StageName === "Root") ? node.name : parentL1StageName;
-                newNode.children = node.children.map(child => processNode(child, stageNameToPass));
-            }
+network.once('stabilizationIterationsDone', () => {
+  network.setOptions({ physics: { enabled: false } });
+});
 
-            return newNode;
-        }
+function showInfo(nodeId) {
+  const n = nodesDS.get(nodeId);
+  if (!n) return;
+  const neighborIds = network.getConnectedNodes(nodeId);
+  const neighborItems = neighborIds.map(nid => {
+    const nb = nodesDS.get(nid);
+    const color = nb ? nb.color.background : '#555';
+    return `<span class="neighbor-link" style="border-left-color:${esc(color)}" onclick="focusNode(${JSON.stringify(nid)})">${esc(nb ? nb.label : nid)}</span>`;
+  }).join('');
+  document.getElementById('info-content').innerHTML = `
+    <div class="field"><b>${esc(n.label)}</b></div>
+    <div class="field">Type: ${esc(n._file_type || 'unknown')}</div>
+    <div class="field">Community: ${esc(n._community_name)}</div>
+    <div class="field">Source: ${esc(n._source_file || '-')}</div>
+    <div class="field">Degree: ${n._degree}</div>
+    ${neighborIds.length ? `<div class="field" style="margin-top:8px;color:#aaa;font-size:11px">Neighbors (${neighborIds.length})</div><div id="neighbors-list">${neighborItems}</div>` : ''}
+  `;
+}
 
-        let rootDisplayName = jsonData.name;
-        if (jsonData.total_count !== undefined && !/\(Total Count: \d+\)$/.test(rootDisplayName)) {
-            rootDisplayName += ` (Total Count: ${jsonData.total_count})`;
-        }
+function focusNode(nodeId) {
+  network.focus(nodeId, { scale: 1.4, animation: true });
+  network.selectNodes([nodeId]);
+  showInfo(nodeId);
+}
 
-        return {
-            name: rootDisplayName,
-            originalStageName: "Root",
-            children: (jsonData.children || []).map(child => processNode(child, "Root"))
-        };
-    }
+// Track hovered node — hover detection is more reliable than click params
+let hoveredNodeId = null;
+network.on('hoverNode', params => {
+  hoveredNodeId = params.node;
+  container.style.cursor = 'pointer';
+});
+network.on('blurNode', () => {
+  hoveredNodeId = null;
+  container.style.cursor = 'default';
+});
+container.addEventListener('click', () => {
+  if (hoveredNodeId !== null) {
+    showInfo(hoveredNodeId);
+    network.selectNodes([hoveredNodeId]);
+  }
+});
+network.on('click', params => {
+  if (params.nodes.length > 0) {
+    showInfo(params.nodes[0]);
+  } else if (hoveredNodeId === null) {
+    document.getElementById('info-content').innerHTML = '<span class="empty">Click a node to inspect it</span>';
+  }
+});
 
-    const treeData = transformData(initialJsonData);
-
-    // Auto-populated phaseColors: every depth-1 child of the root gets
-    // a stable colour from a bigger palette so all top-level dirs are
-    // distinguishable.
-    const PALETTE = [
-      ["#3498DB","#2980B9","#AED6F1"], ["#2ECC71","#27AE60","#A9DFBF"],
-      ["#E74C3C","#C0392B","#F5B7B1"], ["#9B59B6","#8E44AD","#D7BDE2"],
-      ["#F39C12","#D68910","#FAD7A0"], ["#1ABC9C","#117864","#A2D9CE"],
-      ["#34495E","#1B2631","#ABB2B9"], ["#E67E22","#BA4A00","#F5CBA7"],
-      ["#16A085","#0E6655","#A2D9CE"], ["#D35400","#A04000","#EDBB99"],
-      ["#7F8C8D","#566573","#D5DBDB"], ["#C0392B","#7B241C","#F5B7B1"],
-      ["#2E86C1","#1B4F72","#A9CCE3"], ["#28B463","#196F3D","#A9DFBF"],
-      ["#AF7AC5","#6C3483","#D2B4DE"],
-    ];
-    const phaseColors = { "Root": { fill: "#4A4A4A", stroke: "#333333", collapsedFill: "#6C757D" },
-                          "Default": { fill: "#BDC3C7", stroke: "#95A5A6", collapsedFill: "#ECF0F1" } };
-    (initialJsonData.children || []).forEach((c, i) => {
-      const pal = PALETTE[i % PALETTE.length];
-      phaseColors[c.name] = { fill: pal[0], stroke: pal[1], collapsedFill: pal[2] };
-    });
-
-    const levelSpecificPalettes = {
-      0: { fill: "#4A4A4A", stroke: "#333333", collapsedFill: "#6C757D" },
-      2: { fill: "#6ab04c", stroke: "#508a38", collapsedFill: "#a3d391" },
-      3: { fill: "#f0932b", stroke: "#d0730f", collapsedFill: "#f6c07e" },
-      4: { fill: "#be2edd", stroke: "#a01cb3", collapsedFill: "#e08bf2" },
-      5: { fill: "#00a8ff", stroke: "#007ac1", collapsedFill: "#74d2ff" },
-      6: { fill: "#e55039", stroke: "#c23620", collapsedFill: "#f09a8d" },
-      default: { fill: "#747d8c", stroke: "#57606f", collapsedFill: "#a4b0be" }
+const searchInput = document.getElementById('search');
+const searchResults = document.getElementById('search-results');
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.toLowerCase().trim();
+  searchResults.innerHTML = '';
+  if (!q) { searchResults.style.display = 'none'; return; }
+  const matches = RAW_NODES.filter(n => n.label.toLowerCase().includes(q)).slice(0, 20);
+  if (!matches.length) { searchResults.style.display = 'none'; return; }
+  searchResults.style.display = 'block';
+  matches.forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'search-item';
+    el.textContent = n.label;
+    el.style.borderLeft = `3px solid ${n.color.background}`;
+    el.style.paddingLeft = '8px';
+    el.onclick = () => {
+      network.focus(n.id, { scale: 1.5, animation: true });
+      network.selectNodes([n.id]);
+      showInfo(n.id);
+      searchResults.style.display = 'none';
+      searchInput.value = '';
     };
+    searchResults.appendChild(el);
+  });
+});
+document.addEventListener('click', e => {
+  if (!searchResults.contains(e.target) && e.target !== searchInput)
+    searchResults.style.display = 'none';
+});
 
-    const svgElement = d3.select("#tree-svg");
-    const initialSvgWidth = +svgElement.attr("width");
-    const initialSvgHeight = +svgElement.attr("height");
-    const margin = { top: 40, right: 120, bottom: 80, left: 450 };
-    let width = initialSvgWidth - margin.left - margin.right;
-    let height = initialSvgHeight - margin.top - margin.bottom;
-    const duration = 500;
-    let nodeCounter = 0;
-    const g = svgElement.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-    const treemap = d3.tree().nodeSize([40, 0]);
-    let rootNode = d3.hierarchy(treeData, d => d.children);
-    rootNode.x0 = 0;
-    rootNode.y0 = 0;
+const hiddenCommunities = new Set();
 
-    if (rootNode.children) {
-      rootNode.children.forEach(d_child => {
-        if (d_child.children) { collapseBranch(d_child); }
-      });
+const selectAllCb = document.getElementById('select-all-cb');
+
+function updateSelectAllState() {
+  const total = LEGEND.length;
+  const hidden = hiddenCommunities.size;
+  selectAllCb.checked = hidden === 0;
+  selectAllCb.indeterminate = hidden > 0 && hidden < total;
+}
+
+function toggleAllCommunities(hide) {
+  document.querySelectorAll('.legend-item').forEach(item => {
+    hide ? item.classList.add('dimmed') : item.classList.remove('dimmed');
+  });
+  document.querySelectorAll('.legend-cb').forEach(cb => {
+    cb.checked = !hide;
+  });
+  LEGEND.forEach(c => {
+    if (hide) hiddenCommunities.add(c.cid); else hiddenCommunities.delete(c.cid);
+  });
+  const updates = RAW_NODES.map(n => ({ id: n.id, hidden: hide }));
+  nodesDS.update(updates);
+  updateSelectAllState();
+}
+
+const legendEl = document.getElementById('legend');
+LEGEND.forEach(c => {
+  const item = document.createElement('div');
+  item.className = 'legend-item';
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.className = 'legend-cb';
+  cb.checked = true;
+  cb.addEventListener('change', (e) => {
+    e.stopPropagation();
+    if (cb.checked) {
+      hiddenCommunities.delete(c.cid);
+      item.classList.remove('dimmed');
+    } else {
+      hiddenCommunities.add(c.cid);
+      item.classList.add('dimmed');
     }
-    updateTree(rootNode);
-
-    function collapseBranch(d) { if (d.children) { d._children = d.children; d._children.forEach(collapseBranch); d.children = null; } }
-    function expandBranch(d) { if (d._children) { d.children = d._children; d._children = null; } if (d.children) { d.children.forEach(expandBranch); } }
-    window.expandAll = () => { expandBranch(rootNode); updateTree(rootNode); };
-    window.collapseAll = () => { if (rootNode.children) { rootNode.children.forEach(collapseBranch); } updateTree(rootNode); };
-    window.resetView = () => { if (rootNode.children) { rootNode.children.forEach(d_child => { if (d_child.children || d_child._children) { collapseBranch(d_child); } }); } if (rootNode._children && !rootNode.children) { rootNode.children = rootNode._children; rootNode._children = null; } updateTree(rootNode); };
-
-    function updateTree(source) {
-      const treeLayoutData = treemap(rootNode);
-      let nodes = treeLayoutData.descendants();
-      let links = treeLayoutData.descendants().slice(1);
-
-      let minX = 0;
-      let maxX = 0;
-      if (nodes.length > 0) {
-        minX = d3.min(nodes, d => d.x);
-        maxX = d3.max(nodes, d => d.x);
-      }
-
-      let neededHeight = Math.max(initialSvgHeight, maxX - minX + margin.top + margin.bottom + 100);
-      svgElement.transition().duration(duration / 2).attr("height", neededHeight);
-      g.transition().duration(duration / 2).attr("transform", `translate(${margin.left},${margin.top - minX + 40})`);
-
-      nodes.forEach(d => { d.y = d.depth * 400; }); // Adjust horizontal separation if needed
-
-      const node = g.selectAll('g.node').data(nodes, d => d.id || (d.id = ++nodeCounter));
-      const nodeEnter = node.enter().append('g')
-        .attr('class', d => "node" + (d.children || d._children ? " node--internal" : " node--leaf") + (d._children ? " _children" : ""))
-        .attr('transform', d => `translate(${source.y0},${source.x0})`)
-        .on('click', (event, d) => { if (d.children) { d._children = d.children; d.children = null; } else if (d._children) { d.children = d._children; d._children = null; } updateTree(d); })
-        .style('cursor', d => (d.children || d._children) ? 'pointer' : 'default');
-
-      nodeEnter.append('circle').attr('r', 1e-6);
-
-      nodeEnter.append('text')
-        .attr('dy', '.35em')
-        .attr('x', d => d.children || d._children ? -14 : 14)
-        .attr('text-anchor', d => d.children || d._children ? 'end' : 'start')
-        .style("fill-opacity", 1e-6)
-        .call(wrapText, 380);
-
-      const nodeUpdate = nodeEnter.merge(node);
-      nodeUpdate.transition().duration(duration)
-        .attr('transform', d => `translate(${d.y},${d.x})`)
-        .attr('class', d => "node" + (d.children ? " node--internal" : " node--leaf") + (d._children ? " node--internal _children" : ""));
-
-      nodeUpdate.select('circle').attr('r', 8.5)
-        .style('fill', d => {
-            let palette;
-            if (d.depth === 0) {
-                palette = levelSpecificPalettes[0];
-            } else if (d.depth === 1) {
-                palette = phaseColors[d.data.originalStageName] || phaseColors.Default;
-            } else {
-                palette = levelSpecificPalettes[d.depth] || levelSpecificPalettes.default;
-            }
-            if (d._children) return palette.collapsedFill;
-            if (d.children) return palette.fill;
-            return "#fff";
-        })
-        .style('stroke', d => {
-            let palette;
-            if (d.depth === 0) {
-                palette = levelSpecificPalettes[0];
-            } else if (d.depth === 1) {
-                palette = phaseColors[d.data.originalStageName] || phaseColors.Default;
-            } else {
-                palette = levelSpecificPalettes[d.depth] || levelSpecificPalettes.default;
-            }
-            return palette.stroke;
-        });
-      nodeUpdate.select('text').style("fill-opacity", 1).call(wrapText, 380);
-
-      const nodeExit = node.exit().transition().duration(duration).attr('transform', d => `translate(${source.y},${source.x})`).remove();
-      nodeExit.select('circle').attr('r', 1e-6);
-      nodeExit.select('text').style('fill-opacity', 1e-6);
-
-      const link = g.selectAll('path.link').data(links, d => d.id);
-      const linkEnter = link.enter().insert('path', "g").attr('class', 'link').attr('d', d => { const o = { x: source.x0, y: source.y0 }; return diagonal(o, o); });
-
-      linkEnter.merge(link).transition().duration(duration).attr('d', d => diagonal(d, d.parent))
-        .style('stroke', d => {
-            const sourceNode = d.parent;
-            if (!sourceNode) return phaseColors.Default.stroke;
-            const l1AncestorName = sourceNode.data.originalStageName;
-            const colorPalette = phaseColors[l1AncestorName] || phaseColors.Default;
-            return colorPalette.stroke;
-        });
-      link.exit().transition().duration(duration).attr('d', d => { const o = { x: source.x, y: source.y }; return diagonal(o, o); }).remove();
-      nodes.forEach(d => { d.x0 = d.x; d.y0 = d.y; });
-    }
-
-    function diagonal(s, d) { return `M ${s.y} ${s.x} C ${(s.y + d.y) / 2} ${s.x}, ${(s.y + d.y) / 2} ${d.x}, ${d.y} ${d.x}`; }
-
-    function wrapText(textElements, maxWidth) {
-        const textPartColors = {
-            name: '#343a40',
-            count: '#0056b3'
-        };
-        const countRegex = /(\s\(Total Count: \d+\))$/;
-
-        textElements.each(function () {
-            const textD3 = d3.select(this);
-            const originalNodeText = textD3.datum().data.name;
-            const x = parseFloat(textD3.attr("x") || 0);
-            const initialDy = textD3.attr("dy");
-            const textAnchor = textD3.attr("text-anchor");
-            const lineHeight = 1.1;
-
-            textD3.text(null);
-
-            let namePart = originalNodeText;
-            let countPartText = "";
-
-            const countMatch = originalNodeText.match(countRegex);
-            if (countMatch && originalNodeText.endsWith(countMatch[0])) {
-                namePart = originalNodeText.substring(0, originalNodeText.length - countMatch[0].length).trim();
-                countPartText = countMatch[0].trim();
-            }
-
-            const tokens = [];
-            namePart.split(/\s+/).filter(Boolean).forEach(word => {
-                tokens.push({ text: word, type: 'name' });
-            });
-            if (countPartText) {
-                tokens.push({ text: countPartText, type: 'count' });
-            }
-
-            if (tokens.length === 0 && originalNodeText) {
-                tokens.push({ text: originalNodeText, type: 'name' });
-            }
-
-            let currentTspan = textD3.append("tspan").attr("x", x).attr("dy", initialDy);
-            if (textAnchor === "end") currentTspan.attr("text-anchor", "end");
-
-            let lineTokens = [];
-
-            for (let i = 0; i < tokens.length; i++) {
-                const tokenObj = tokens[i];
-
-                lineTokens.push(tokenObj);
-                currentTspan.text(lineTokens.map(t => t.text).join(" "));
-
-                if (currentTspan.node().getComputedTextLength() > maxWidth && lineTokens.length > 1) {
-                    lineTokens.pop();
-
-                    currentTspan.text(null);
-                    lineTokens.forEach((prevToken, idx) => {
-                        currentTspan.append("tspan")
-                            .text((idx > 0 ? " " : "") + prevToken.text)
-                            .style("fill", textPartColors[prevToken.type] || textPartColors.name)
-                            .style("font-weight", prevToken.type === 'count' ? "bold" : "normal");
-                    });
-
-                    lineTokens = [tokenObj];
-                    currentTspan = textD3.append("tspan").attr("x", x).attr("dy", lineHeight + "em");
-                    if (textAnchor === "end") currentTspan.attr("text-anchor", "end");
-                }
-            }
-
-            currentTspan.text(null);
-            lineTokens.forEach((token, idx) => {
-                currentTspan.append("tspan")
-                    .text((idx > 0 ? " " : "") + token.text)
-                    .style("fill", textPartColors[token.type] || textPartColors.name)
-                    .style("font-weight", token.type === 'count' ? "bold" : "normal");
-            });
-
-            if (textD3.selectAll("tspan > tspan").empty() && textD3.select("tspan").text().length === 0 && originalNodeText) {
-                let t = textD3.select("tspan");
-                let displayText = originalNodeText;
-                t.text(displayText).style("fill", textPartColors.name);
-                if (t.node() && t.node().getComputedTextLength() > maxWidth && displayText.length > 20) {
-                    let estimatedChars = Math.floor(maxWidth / (t.node().getComputedTextLength()/displayText.length) );
-                    displayText = displayText.substring(0, Math.max(0, estimatedChars - 3)) + "...";
-                    t.text(displayText);
-                }
-            }
-        });
-    }
-  </script>
+    const updates = RAW_NODES
+      .filter(n => n.community === c.cid)
+      .map(n => ({ id: n.id, hidden: !cb.checked }));
+    nodesDS.update(updates);
+    updateSelectAllState();
+  });
+  item.innerHTML = `<div class="legend-dot" style="background:${c.color}"></div>
+    <span class="legend-label">${c.label}</span>
+    <span class="legend-count">${c.count}</span>`;
+  item.prepend(cb);
+  item.onclick = (e) => {
+    if (e.target === cb) return;
+    cb.checked = !cb.checked;
+    cb.dispatchEvent(new Event('change'));
+  };
+  legendEl.appendChild(item);
+});
+</script>
+<script>
+// Render hyperedges as shaded regions
+const hyperedges = [];
+// afterDrawing passes ctx already transformed to network coordinate space.
+// Draw node positions raw — no manual pan/zoom/DPR math needed.
+network.on('afterDrawing', function(ctx) {
+    hyperedges.forEach(h => {
+        const positions = h.nodes
+            .map(nid => network.getPositions([nid])[nid])
+            .filter(p => p !== undefined);
+        if (positions.length < 2) return;
+        ctx.save();
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = '#6366f1';
+        ctx.strokeStyle = '#6366f1';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        // Centroid and expanded hull in network coordinates
+        const cx = positions.reduce((s, p) => s + p.x, 0) / positions.length;
+        const cy = positions.reduce((s, p) => s + p.y, 0) / positions.length;
+        const expanded = positions.map(p => ({
+            x: cx + (p.x - cx) * 1.15,
+            y: cy + (p.y - cy) * 1.15
+        }));
+        ctx.moveTo(expanded[0].x, expanded[0].y);
+        expanded.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 0.4;
+        ctx.stroke();
+        // Label
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = '#4f46e5';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(h.label, cx, cy - 5);
+        ctx.restore();
+    });
+});
+</script>
 </body>
 </html>
