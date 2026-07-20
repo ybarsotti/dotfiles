@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.local/schemas/deep-execute/run-state.schema.json",
+  "title": "Deep-execute run-state record",
+  "description": "Contract for the manifest, event, and reply records exchanged between the deep-execute orchestrator and its lane workers.",
+  "type": "object",
+  "properties": {
+    "manifest": {
+      "type": "object",
+      "description": "Orchestrator-authored run manifest written once per run before fan-out.",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "1.0.0"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "plan_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cwd": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "round": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_rounds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "orchestrator_surface": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract": {
+          "type": "object",
+          "description": "The interface contract lane workers must build and validate against.",
+          "properties": {
+            "version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": ["openapi", "typescript", "json-schema", "command"]
+            },
+            "validation_command": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "version",
+            "path",
+            "kind",
+            "validation_command",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "shared_read_only": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "workers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/worker"
+          }
+        }
+      },
+      "required": [
+        "schema_version",
+        "run_id",
+        "plan_path",
+        "cwd",
+        "baseline_commit",
+        "round",
+        "max_rounds",
+        "orchestrator_surface",
+        "contract",
+        "shared_read_only",
+        "workers"
+      ],
+      "additionalProperties": false
+    },
+    "event": {
+      "type": "object",
+      "description": "A single lifecycle event emitted by a worker or the orchestrator.",
+      "properties": {
+        "ts": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lane": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "start",
+            "progress",
+            "waiting",
+            "blocked",
+            "done",
+            "crashed",
+            "log"
+          ]
+        },
+        "msg": {
+          "type": "string",
+          "pattern": "^[^\r\n]*$",
+          "maxLength": 3000
+        }
+      },
+      "required": ["ts", "lane", "task", "type", "msg"],
+      "additionalProperties": false
+    },
+    "reply": {
+      "type": "object",
+      "description": "A response the orchestrator sends back to a waiting or blocked worker.",
+      "properties": {
+        "lane": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "msg": {
+          "type": "string",
+          "pattern": "^[^\r\n]*$",
+          "maxLength": 3000
+        }
+      },
+      "required": ["lane", "contract_version", "msg"],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "worker": {
+      "type": "object",
+      "description": "A single lane worker tracked in the manifest.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lane": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runner": {
+          "type": "string",
+          "enum": ["claude", "codex"]
+        },
+        "effort": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "xhigh", "max"]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "running",
+            "waiting",
+            "blocked",
+            "done",
+            "crashed"
+          ]
+        }
+      },
+      "required": ["id", "lane", "runner", "effort", "status"],
+      "additionalProperties": false
+    }
+  }
+}
