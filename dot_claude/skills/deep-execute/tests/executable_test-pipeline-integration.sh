@@ -15,4 +15,10 @@ assert_exit 0 jq -e '
     "task_start", "task_done", "progress", "question", "waiting", "blocked", "done"
   ]
 ' "$SCHEMA"
+
+ALLOW="${ROOT}/dot_claude/skills/deep-execute/agents.allowlist"
+assert_exit 0 test -f "$ALLOW"
+assert_exit 0 grep -qx 'opus high' "$ALLOW"
+assert_exit 0 grep -qx 'codex gpt-5.6-terra high' "$ALLOW"
+
 assert_summary
