@@ -4,20 +4,29 @@
 #
 # Before this existed, `## Superpowers invoked` was free prose an agent could
 # edit directly, so a `[x]` proved nothing — an agent could certify a skill it
-# never ran. Routing every tick through here makes the claim (the box) and
-# the evidence (the receipt) the same action:
-# `validate-plan.sh`'s `superpowers-ticks-have-receipts` check rejects any
-# `[x]` that has no matching, chain-valid, ancestor-verified receipt line.
+# never ran. Routing every tick through here ties the claim (the box) to a
+# durable, chain-verified record of THIS SCRIPT having been run with that
+# skill name: `validate-plan.sh`'s `superpowers-ticks-have-receipts` check
+# rejects any `[x]` that has no matching, chain-valid, ancestor-verified
+# receipt line.
 #
-# This is tamper-EVIDENT, not tamper-proof. Each receipt is anchored to the
-# project repo's HEAD commit and chained by hash to the previous receipt, so
-# forging one requires either fabricating a self-consistent sha256 chain by
-# hand (possible — the algorithm is documented right here) or rewriting local
-# git history to mint a commit to point at (also possible, for anyone with
-# push/rewrite access to their own clone). The 0444 chmod below is a cheap
-# speed bump against casual editing, not a security boundary. What this
-# mechanism actually buys is raised cost and a durable trail, not
-# impossibility.
+# This is a tamper-EVIDENT audit trail, chain-verified by the validator and
+# anchored to a repo commit — it is NOT tamper-proof, and it does NOT prove
+# the skill itself ran. It proves this script was invoked with that skill
+# name; nothing stops an agent from calling superpowers-invoke.sh without
+# ever calling `Skill()` first — that discipline still depends on the agent
+# actually following the workflow, the same as any other instruction in this
+# skill. What the chain does defend against is a DIFFERENT, narrower thing:
+# an agent (or a human) editing the log or the checkbox after the fact to
+# fabricate a receipt that was never written by this script. Forging even
+# that narrower claim requires either fabricating a self-consistent sha256
+# chain by hand (possible — the algorithm is documented right here) or
+# rewriting local git history to mint a commit to point at (also possible,
+# for anyone with push/rewrite access to their own clone). The 0444 chmod
+# below is a cheap speed bump against casual editing, not a security
+# boundary. What this mechanism actually buys is raised cost and a durable
+# trail, not impossibility, and it is scoped to "was this script run", not
+# "did the real work happen".
 #
 # The caller invokes this AFTER actually invoking the skill (via the Skill
 # tool) — this script only records the fact, it never invokes a skill itself.
