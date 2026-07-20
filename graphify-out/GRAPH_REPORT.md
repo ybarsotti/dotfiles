@@ -1,12 +1,18 @@
-# Graph Report - .  (2026-07-01)
+# Graph Report - chezmoi  (2026-07-20)
 
 ## Corpus Check
-- Corpus is ~49,816 words - fits in a single context window. You may not need a graph.
+- 12 files · ~61,001 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
 - 16 nodes · 5 edges · 11 communities
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
+
+## Graph Freshness
+- Built from commit: `d2246e8d`
+- Run `git rev-parse HEAD` and compare to check if the graph is stale.
+- Run `graphify update .` after code changes (no API cost).
 
 ## God Nodes (most connected - your core abstractions)
 
