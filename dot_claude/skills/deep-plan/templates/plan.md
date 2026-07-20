@@ -52,6 +52,33 @@ sequenceDiagram
 - `path/to/file.ext` — <what changes; what it is responsible for>
 - `path/to/new_file.ext` — <new; single responsibility>
 
+## Execution shape
+<!-- Only required when this plan will run through `/deep-execute` in lane-parallel mode.
+     For a single work stream, write exactly `- Mode: \`serial\`` and drop the rest of this
+     section — `plan-to-json.sh` and the validators treat a missing/serial section as a
+     no-op and record `n/a — serial plan`. -->
+- Mode: `<parallel|serial>`
+- Orchestrator lane: `<lane that commits between rounds>`
+- Shared, committed pre-fanout and read-only afterwards: `<path>`, `<path>`
+- Ownership syntax: exact repo-relative path, or a directory prefix ending in `/**`; multiple entries separated by `<br>`
+
+| lane | scope | owns (path globs) | must-not-touch | agent | test_command | mock_command | depends_on |
+|---|---|---|---|---|---|---|---|
+| `<lane-name>` | <one sentence: what this lane owns> | `<path glob>`<br>`<path glob>` | `<path glob>`<br>`<path glob>` | `<agent from agents.allowlist, or \`orchestrator\`>` | `<test command>` | `<mock command, or \`none\`>` | `<lane name, or \`none\`>` |
+
+## API contract
+<!-- Required whenever Mode above is `parallel` — lanes cannot build against a contract
+     they have not agreed on. Materialize and commit this file before fan-out. -->
+- Contract version: `<MAJOR.MINOR.PATCH>`
+- Materialized contract: `<path/to/contract/file>`
+- Contract kind: `<openapi|typescript|json-schema|command>`
+- Contract validation command: `<command that exits 0 iff the contract is well-formed>`
+- Endpoints: see table below — or, if there are none, delete the table and write exactly `Endpoints: none — <why this change has no HTTP endpoint>`
+
+| endpoint | method | full_path | status_codes | request_shape | response_shape |
+|---|---|---|---|---|---|
+| `<id>` | `<METHOD>` | `<full /path>` | `<comma-separated codes>` | `<shape>` | `<shape>` |
+
 ## Documentation impact
 <!-- Logic often lives in docs/ (business rules, flows, ADRs, API specs, runbooks), not only
      in code. List every doc this change makes stale or that must be updated, OR write exactly
@@ -74,7 +101,12 @@ sequenceDiagram
 ## Implementation tasks
 <!-- DO NOT invent a task format here. Load `superpowers:writing-plans` and follow ITS
      task structure, granularity and no-placeholder rules verbatim — that skill is the
-     single source of truth for this section. Fill it with `### Task N:` blocks it defines. -->
+     single source of truth for this section. Fill it with `### Task N:` blocks it defines.
+     If `## Execution shape` above declares lanes, tag every task with its owning lane on
+     its own line directly under the `### Task N:` title:
+
+     **Lane:** `backend`
+-->
 
 ## TDD test list
 > Mocking policy: mock ONLY the outermost boundaries (network, 3rd-party APIs, clock/random).
