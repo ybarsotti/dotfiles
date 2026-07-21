@@ -1,0 +1,14 @@
+# hunk — review-first terminal diff viewer
+# https://github.com/modem-dev/hunk
+
+theme = "dracula"        # built-in theme; press `t` in-app to switch
+mode = "auto"            # layout: auto | split | stack
+vcs = "git"              # git | jj | sl
+
+line_numbers = true
+wrap_lines = true        # wrap long diff lines instead of truncating
+agent_notes = true       # show AI/agent annotations by default
+menu_bar = true
+
+# chezmoi owns this file — don't nag to persist in-app view tweaks
+prompt_save_view_preferences = false
