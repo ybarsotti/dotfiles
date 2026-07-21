@@ -14,6 +14,10 @@ EVENT="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_event.sh"
 BOARD="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_board.sh"
 INIT_RUN="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_init-run.sh"
 VALIDATE_STATE="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_validate-run-state.sh"
+MONITOR="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_monitor-events.sh"
+REPLY="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_reply.sh"
+VALIDATE_CONTRACT="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_validate-contract.sh"
+ROUND_GATE="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_round-gate.sh"
 WORKER_PROMPT="${ROOT}/dot_claude/skills/deep-execute/templates/worker-system-prompt.txt"
 FIXTURE_PLAN="${ROOT}/dot_claude/skills/deep-execute/tests/fixtures/init-run-plan.md"
 
@@ -21,6 +25,10 @@ assert_exit 0 test -f "$EVENT"
 assert_exit 0 test -f "$BOARD"
 assert_exit 0 test -f "$INIT_RUN"
 assert_exit 0 test -f "$VALIDATE_STATE"
+assert_exit 0 test -f "$MONITOR"
+assert_exit 0 test -f "$REPLY"
+assert_exit 0 test -f "$VALIDATE_CONTRACT"
+assert_exit 0 test -f "$ROUND_GATE"
 assert_exit 0 test -f "$WORKER_PROMPT"
 assert_exit 0 test -f "$FIXTURE_PLAN"
 
@@ -381,5 +389,456 @@ assert_contains "$(detail_of "$J11" post-done-writes-absent)" "backend:backend/s
   "diagnostic names the offending lane and path"
 assert_eq "$(jq '[.[] | select(.status=="fail")] | length' <<<"$J11")" 0 \
   "no item actually failed — post-done-writes-absent alone never trips the fail count"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Task 10: monitor-events.sh, reply.sh, validate-contract.sh, round-gate.sh
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ─── monitor-events.sh: a minimal RUN_DIR is enough — it only reads ────────
+# .workers[]?.lane from manifest.json (not the full run-state schema) and
+# events.jsonl.
+mon_run() {
+  local d
+  d=$(mktemp -d)
+  printf '{"workers":[{"lane":"backend"},{"lane":"frontend"}]}\n' >"${d}/manifest.json"
+  : >"${d}/events.jsonl"
+  printf '%s' "$d"
+}
+
+# mon_run_with_surface — same, plus a cmux/manifest.json giving lane
+# "backend" a real surface_ref, for the pane-health (vanished-pane /
+# fatal-signature) triggers.
+mon_run_with_surface() {
+  local d
+  d=$(mktemp -d)
+  mkdir -p "${d}/cmux"
+  printf '{"workers":[{"lane":"backend"}]}\n' >"${d}/manifest.json"
+  printf '{"workers":[{"name":"backend","surface_ref":"surface:1"}]}\n' >"${d}/cmux/manifest.json"
+  : >"${d}/events.jsonl"
+  printf '%s' "$d"
+}
+
+# ─── Backlog drain: an event written BEFORE monitor-events.sh even starts ──
+# must still produce a trigger — a bare `tail -n 0 -F` alone would miss it
+# (see the script's own header for why the persisted watermark exists).
+# This is the brief's own step-1 scenario, content-asserted field by field.
+
+MON_WAIT=$(mon_run)
+assert_exit 0 "$EVENT" "$MON_WAIT" frontend "Task 10" waiting "mock suite passed"
+TRIGGER_WAIT=$("$MONITOR" "$MON_WAIT")
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_WAIT")" waiting "monitor-events.sh: a backlogged 'waiting' event produces a waiting trigger"
+assert_eq "$(jq -r '.lane' <<<"$TRIGGER_WAIT")" frontend "monitor-events.sh: waiting trigger names the lane"
+assert_eq "$(jq -r '.task' <<<"$TRIGGER_WAIT")" "Task 10" "monitor-events.sh: waiting trigger names the task"
+assert_eq "$(jq -r '.msg' <<<"$TRIGGER_WAIT")" "mock suite passed" "monitor-events.sh: waiting trigger carries the event's own message"
+
+MON_Q=$(mon_run)
+assert_exit 0 "$EVENT" "$MON_Q" backend "Task 3" question "which endpoint shape?"
+TRIGGER_Q=$("$MONITOR" "$MON_Q")
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_Q")" question "monitor-events.sh: a backlogged 'question' event produces a question trigger"
+assert_eq "$(jq -r '.msg' <<<"$TRIGGER_Q")" "which endpoint shape?" "monitor-events.sh: question trigger carries the event's own message"
+
+MON_B=$(mon_run)
+assert_exit 0 "$EVENT" "$MON_B" backend "Task 4" blocked "need contract v1.0.1"
+TRIGGER_B=$("$MONITOR" "$MON_B")
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_B")" blocked "monitor-events.sh: a backlogged 'blocked' event produces a blocked trigger"
+assert_eq "$(jq -r '.lane' <<<"$TRIGGER_B")" backend "monitor-events.sh: blocked trigger names the lane"
+
+MON_D=$(mon_run)
+assert_exit 0 "$EVENT" "$MON_D" frontend "Task 5" "done" "nothing left this round"
+TRIGGER_D=$("$MONITOR" "$MON_D")
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_D")" "done" "monitor-events.sh: a backlogged 'done' event produces a done trigger"
+
+# task_start/task_done/progress are NOT triggers — the monitor must skip
+# past them in the backlog and only fire on the real blocked event that
+# follows.
+MON_SKIP=$(mon_run)
+assert_exit 0 "$EVENT" "$MON_SKIP" backend "Task 6" task_start "starting"
+assert_exit 0 "$EVENT" "$MON_SKIP" backend "Task 6" progress "halfway"
+assert_exit 0 "$EVENT" "$MON_SKIP" backend "Task 6" task_done "lane test passed"
+assert_exit 0 "$EVENT" "$MON_SKIP" backend "Task 6" blocked "now blocked"
+TRIGGER_SKIP=$("$MONITOR" "$MON_SKIP")
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_SKIP")" blocked \
+  "monitor-events.sh: task_start/progress/task_done are skipped as non-triggers; the first real trigger in the backlog still fires"
+assert_eq "$(jq -r '.msg' <<<"$TRIGGER_SKIP")" "now blocked" \
+  "monitor-events.sh: the fired trigger is the blocked event, not an earlier informational one"
+
+# ─── Invalid event line: malformed JSON, and well-formed JSON missing ──────
+# required fields — both must be caught, by name, not silently skipped.
+
+MON_INV1=$(mon_run)
+printf 'not valid json\n' >>"${MON_INV1}/events.jsonl"
+TRIGGER_INV1=$("$MONITOR" "$MON_INV1")
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_INV1")" invalid_event "monitor-events.sh: a line that isn't JSON at all produces an invalid_event trigger"
+assert_contains "$(jq -r '.msg' <<<"$TRIGGER_INV1")" "not valid json" "monitor-events.sh: invalid_event's msg quotes the offending raw line"
+assert_eq "$(jq -r '.lane' <<<"$TRIGGER_INV1")" null "monitor-events.sh: a line with no parseable lane names no lane"
+
+MON_INV2=$(mon_run)
+printf '{"lane":"backend","type":"waiting"}\n' >>"${MON_INV2}/events.jsonl"
+TRIGGER_INV2=$("$MONITOR" "$MON_INV2")
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_INV2")" invalid_event "monitor-events.sh: valid JSON missing required fields (task, msg, ts) still fails the event schema"
+assert_eq "$(jq -r '.lane' <<<"$TRIGGER_INV2")" backend "monitor-events.sh: when the lane field IS parseable, invalid_event still names it"
+
+# ─── Live-follow: an event appended by ANOTHER process AFTER monitor ───────
+# starts — proves the blocking `tail -F` path actually blocks and wakes,
+# not just the backlog-drain path exercised above.
+
+MON_LIVE=$(mon_run)
+(
+  sleep 1
+  "$EVENT" "$MON_LIVE" backend "Task 7" "done" "arrived after monitor started"
+) &
+LIVE_BGPID=$!
+TRIGGER_LIVE=$(MONITOR_LIVENESS_INTERVAL=5 MONITOR_MAX_WAIT=10 "$MONITOR" "$MON_LIVE")
+wait "$LIVE_BGPID"
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_LIVE")" "done" "monitor-events.sh: an event appended after the monitor started is caught by the blocking tail -F, not just backlog drain"
+assert_eq "$(jq -r '.msg' <<<"$TRIGGER_LIVE")" "arrived after monitor started" "monitor-events.sh: live-follow trigger carries the event's own message"
+
+# ─── Vanished pane: capture-pane fails for the lane's surface_ref ──────────
+
+MON_VANISHED=$(mon_run_with_surface)
+CMUX_BIN_CRASH=$(mktemp -d)
+cat >"${CMUX_BIN_CRASH}/cmux" <<'STUB'
+#!/usr/bin/env bash
+exit 1
+STUB
+chmod +x "${CMUX_BIN_CRASH}/cmux"
+TRIGGER_VANISHED=$(PATH="${CMUX_BIN_CRASH}:${PATH}" MONITOR_LIVENESS_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "$MON_VANISHED")
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_VANISHED")" vanished_pane "monitor-events.sh: capture-pane failing produces a vanished_pane trigger"
+assert_eq "$(jq -r '.lane' <<<"$TRIGGER_VANISHED")" backend "monitor-events.sh: vanished_pane trigger names the lane"
+assert_contains "$(jq -r '.msg' <<<"$TRIGGER_VANISHED")" "surface:1" "monitor-events.sh: vanished_pane trigger names the surface that failed"
+
+# ─── Fatal signature: capture-pane succeeds but the NEW pane output ────────
+# contains a known-fatal signature.
+
+MON_FATAL=$(mon_run_with_surface)
+CMUX_BIN_FATAL=$(mktemp -d)
+cat >"${CMUX_BIN_FATAL}/cmux" <<'STUB'
+#!/usr/bin/env bash
+echo "some ordinary output"
+echo "panic: something exploded"
+exit 0
+STUB
+chmod +x "${CMUX_BIN_FATAL}/cmux"
+TRIGGER_FATAL=$(PATH="${CMUX_BIN_FATAL}:${PATH}" MONITOR_LIVENESS_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "$MON_FATAL")
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_FATAL")" fatal_signature "monitor-events.sh: a fatal signature in fresh pane output produces a fatal_signature trigger"
+assert_eq "$(jq -r '.lane' <<<"$TRIGGER_FATAL")" backend "monitor-events.sh: fatal_signature trigger names the lane"
+assert_contains "$(jq -r '.msg' <<<"$TRIGGER_FATAL")" "panic: something exploded" "monitor-events.sh: fatal_signature trigger quotes the matched line"
+
+# ─── Bounded wait: nothing happens at all — must still emit a trigger ──────
+# (never hang, never report success by silence) and this is the one path
+# that exits nonzero.
+
+MON_TIMEOUT=$(mktemp -d)
+printf '{"workers":[]}\n' >"${MON_TIMEOUT}/manifest.json"
+: >"${MON_TIMEOUT}/events.jsonl"
+TIMEOUT_RC=0
+TRIGGER_TIMEOUT=$(MONITOR_LIVENESS_INTERVAL=1 MONITOR_MAX_WAIT=2 "$MONITOR" "$MON_TIMEOUT") || TIMEOUT_RC=$?
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_TIMEOUT")" timeout "monitor-events.sh: exhausting MONITOR_MAX_WAIT with nothing to report still emits a trigger"
+assert_contains "$(jq -r '.msg' <<<"$TRIGGER_TIMEOUT")" "timeout" "monitor-events.sh: timeout trigger's msg says timeout"
+assert_eq "$TIMEOUT_RC" 1 "monitor-events.sh: the bound-exhausted timeout is the one trigger that exits nonzero"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# reply.sh
+# ═══════════════════════════════════════════════════════════════════════════
+
+# reply_run — a 3-lane RUN_DIR (backend, frontend get a real surface_ref;
+# review does not) wired entirely by hand — reply.sh only reads
+# manifest.json's .contract.version/.workers[].lane and cmux/manifest.json's
+# .workers[].name/.surface_ref, so it doesn't need a full init-run.sh run.
+reply_run() {
+  local d
+  d=$(mktemp -d)
+  mkdir -p "${d}/cmux" "${d}/lanes/backend" "${d}/lanes/frontend" "${d}/lanes/review"
+  : >"${d}/lanes/backend/reply.md"
+  : >"${d}/lanes/frontend/reply.md"
+  : >"${d}/lanes/review/reply.md"
+  printf '{"contract":{"version":"1.0.1"},"workers":[{"lane":"backend"},{"lane":"frontend"},{"lane":"review"}]}\n' >"${d}/manifest.json"
+  printf '{"workers":[{"name":"backend","surface_ref":"surface:1"},{"name":"frontend","surface_ref":"surface:2"},{"name":"review","surface_ref":null}]}\n' >"${d}/cmux/manifest.json"
+  printf '%s' "$d"
+}
+
+# cmux stub for the "every wake succeeds" side of the run — logs argv,
+# always exits 0 (send-task.sh's own `cmux send` call succeeds).
+CMUX_BIN_OK=$(mktemp -d)
+cat >"${CMUX_BIN_OK}/cmux" <<'STUB'
+#!/usr/bin/env bash
+echo "cmux-stub: $*" >&2
+exit 0
+STUB
+chmod +x "${CMUX_BIN_OK}/cmux"
+
+# ─── --all across 3 lanes: two wake, one has no surface_ref (reported, ─────
+# not swallowed) — this is exactly the "waiting forever" failure mode the
+# team-lead flagged: a lane that emitted `waiting` and stopped by design
+# must never be silently left unwoken.
+
+RUN_R=$(reply_run)
+REPLY_RC=0
+REPLY_OUT=$(PATH="${CMUX_BIN_OK}:${PATH}" "$REPLY" "$RUN_R" --all "Contract 1.0.1 published" 2>/dev/null) || REPLY_RC=$?
+assert_eq "$REPLY_RC" 1 "reply.sh --all: exits 1 when at least one of 3 lanes fails to wake"
+
+assert_exit 0 grep -q 'Contract 1.0.1 published' "${RUN_R}/lanes/backend/reply.md"
+assert_exit 0 grep -q 'Contract 1.0.1 published' "${RUN_R}/lanes/frontend/reply.md"
+assert_exit 0 grep -q 'Contract 1.0.1 published' "${RUN_R}/lanes/review/reply.md"
+assert_contains "$(cat "${RUN_R}/lanes/backend/reply.md")" "- Contract version: 1.0.1" "reply.sh: reply.md's structured header names the contract version"
+assert_contains "$(cat "${RUN_R}/lanes/backend/reply.md")" "- Sent at:" "reply.sh: reply.md's structured header has a Sent-at timestamp"
+
+REPLY_BACKEND=$(printf '%s\n' "$REPLY_OUT" | jq -c 'select(.lane=="backend")')
+REPLY_FRONTEND=$(printf '%s\n' "$REPLY_OUT" | jq -c 'select(.lane=="frontend")')
+REPLY_REVIEW=$(printf '%s\n' "$REPLY_OUT" | jq -c 'select(.lane=="review")')
+assert_eq "$(jq -r '.woken' <<<"$REPLY_BACKEND")" true "reply.sh --all: backend (has a surface_ref) is woken"
+assert_eq "$(jq -r '.woken' <<<"$REPLY_FRONTEND")" true "reply.sh --all: frontend (has a surface_ref) is woken"
+assert_eq "$(jq -r '.woken' <<<"$REPLY_REVIEW")" false "reply.sh --all: review (no surface_ref) fails to wake"
+assert_eq "$(jq -r '.reply_written' <<<"$REPLY_REVIEW")" true "reply.sh --all: reply.md is still written for review even though the wake itself failed"
+assert_contains "$(jq -r '.detail' <<<"$REPLY_REVIEW")" "no surface_ref" "reply.sh --all: the wake failure names the exact reason, not a generic error"
+assert_contains "$(jq -r '.detail' <<<"$REPLY_REVIEW")" "review" "reply.sh --all: the wake-failure detail names the failing lane"
+
+# ─── send-task.sh itself failing (surface_ref present, but the wake call ───
+# errors) is a DIFFERENT failure mode than "no surface_ref" and must be
+# reported with its own distinguishable detail.
+
+CMUX_BIN_FAIL=$(mktemp -d)
+cat >"${CMUX_BIN_FAIL}/cmux" <<'STUB'
+#!/usr/bin/env bash
+echo "cmux-stub: send failed" >&2
+exit 1
+STUB
+chmod +x "${CMUX_BIN_FAIL}/cmux"
+
+RUN_R2=$(reply_run)
+REPLY_RC2=0
+REPLY_OUT2=$(PATH="${CMUX_BIN_FAIL}:${PATH}" "$REPLY" "$RUN_R2" backend "urgent update" 2>/dev/null) || REPLY_RC2=$?
+assert_eq "$REPLY_RC2" 1 "reply.sh: a single-lane call where send-task.sh itself fails exits 1"
+assert_eq "$(jq -r '.woken' <<<"$REPLY_OUT2")" false "reply.sh: send-task.sh's own failure is reported as woken:false"
+assert_contains "$(jq -r '.detail' <<<"$REPLY_OUT2")" "send-task.sh failed" "reply.sh: the detail distinguishes 'send-task.sh failed' from 'no surface_ref'"
+
+# ─── An unknown lane name is a usage error, not a silent no-op ────────────
+
+RUN_R3=$(reply_run)
+assert_exit 2 "$REPLY" "$RUN_R3" nonexistent-lane "hello"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# validate-contract.sh
+# ═══════════════════════════════════════════════════════════════════════════
+
+# contract_run CWD VERSION PATH KIND VALCMD SHA — hand-assembles just the
+# manifest.json fields validate-contract.sh actually reads (.cwd,
+# .contract.*); it doesn't need a full run-state manifest.
+contract_run() {
+  local cwd="$1" version="$2" cpath="$3" kind="$4" valcmd="$5" sha="$6" d
+  d=$(mktemp -d)/run
+  mkdir -p "$d"
+  jq -n --arg cwd "$cwd" --arg version "$version" --arg cpath "$cpath" \
+    --arg kind "$kind" --arg valcmd "$valcmd" --arg sha "$sha" \
+    '{cwd:$cwd, contract:{version:$version, path:$cpath, kind:$kind, validation_command:$valcmd, sha256:$sha}}' \
+    >"${d}/manifest.json"
+  printf '%s' "$d"
+}
+contract_sha256() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  else
+    shasum -a 256 "$1" | awk '{print $1}'
+  fi
+}
+ZERO_SHA=$(printf '0%.0s' $(seq 1 64))
+
+# ─── 1. SHA mismatch fails ──────────────────────────────────────────────────
+
+CT1_CWD=$(mktemp -d)
+printf '{"type":"object"}\n' >"${CT1_CWD}/contract.schema.json"
+CT1_RUN=$(contract_run "$CT1_CWD" "1.0.0" "contract.schema.json" "json-schema" "jq -e '.type' contract.schema.json" "$ZERO_SHA")
+CT1_JSON=$("$VALIDATE_CONTRACT" "$CT1_RUN" --json) || true
+assert_exit 1 "$VALIDATE_CONTRACT" "$CT1_RUN" --json
+assert_eq "$(status_of "$CT1_JSON" contract-sha256-matches)" fail "validate-contract.sh: a sha256 mismatch fails contract-sha256-matches"
+assert_contains "$(detail_of "$CT1_JSON" contract-sha256-matches)" "sha256 mismatch" "validate-contract.sh: the mismatch detail says so explicitly"
+assert_eq "$(status_of "$CT1_JSON" contract-exists)" pass "validate-contract.sh: contract-exists is unaffected by a sha mismatch"
+
+# ─── 2. version mismatch fails ──────────────────────────────────────────────
+
+CT2_CWD=$(mktemp -d)
+printf '{"type":"object","version":"9.9.9"}\n' >"${CT2_CWD}/contract.schema.json"
+CT2_SHA=$(contract_sha256 "${CT2_CWD}/contract.schema.json")
+CT2_RUN=$(contract_run "$CT2_CWD" "1.0.0" "contract.schema.json" "json-schema" "jq -e '.type' contract.schema.json" "$CT2_SHA")
+CT2_JSON=$("$VALIDATE_CONTRACT" "$CT2_RUN" --json) || true
+assert_exit 1 "$VALIDATE_CONTRACT" "$CT2_RUN" --json
+assert_eq "$(status_of "$CT2_JSON" contract-version-matches)" fail "validate-contract.sh: an embedded version that disagrees with the manifest fails contract-version-matches"
+assert_contains "$(detail_of "$CT2_JSON" contract-version-matches)" "9.9.9" "validate-contract.sh: the mismatch detail quotes the embedded version"
+assert_contains "$(detail_of "$CT2_JSON" contract-version-matches)" "1.0.0" "validate-contract.sh: the mismatch detail quotes the manifest's declared version"
+assert_eq "$(status_of "$CT2_JSON" contract-sha256-matches)" pass "validate-contract.sh: sha256 still matches — the version mismatch is isolated to its own item"
+
+# A contract kind/shape with NO embedded version at all must pass, not fail
+# by default — nothing to compare against.
+CT2B_CWD=$(mktemp -d)
+printf '{"type":"object"}\n' >"${CT2B_CWD}/contract.schema.json"
+CT2B_SHA=$(contract_sha256 "${CT2B_CWD}/contract.schema.json")
+CT2B_RUN=$(contract_run "$CT2B_CWD" "1.0.0" "contract.schema.json" "json-schema" "jq -e '.type' contract.schema.json" "$CT2B_SHA")
+CT2B_JSON=$("$VALIDATE_CONTRACT" "$CT2B_RUN" --json)
+assert_exit 0 "$VALIDATE_CONTRACT" "$CT2B_RUN" --json
+assert_eq "$(status_of "$CT2B_JSON" contract-version-matches)" pass "validate-contract.sh: no readable version field in the contract passes — 'matches where readable', never fail-by-default"
+assert_contains "$(detail_of "$CT2B_JSON" contract-version-matches)" "no readable version field" "validate-contract.sh: the pass detail says why — nothing was there to compare"
+
+# ─── 3. a real linter (validation_command) failure fails ───────────────────
+
+CT3_CWD=$(mktemp -d)
+printf '{"type":"object"}\n' >"${CT3_CWD}/contract.schema.json"
+CT3_SHA=$(contract_sha256 "${CT3_CWD}/contract.schema.json")
+CT3_RUN=$(contract_run "$CT3_CWD" "1.0.0" "contract.schema.json" "json-schema" "jq -e '.bogusfield' contract.schema.json" "$CT3_SHA")
+CT3_JSON=$("$VALIDATE_CONTRACT" "$CT3_RUN" --json) || true
+assert_exit 1 "$VALIDATE_CONTRACT" "$CT3_RUN" --json
+assert_eq "$(status_of "$CT3_JSON" contract-lint)" fail "validate-contract.sh: a real validation_command failure fails contract-lint"
+assert_contains "$(detail_of "$CT3_JSON" contract-lint)" "validation_command failed" "validate-contract.sh: the fail detail says a real command failed, not a missing tool"
+
+# ─── 4. a genuinely absent OpenAPI linter passes, honestly ─────────────────
+# redocly and spectral are both genuinely absent from this machine's PATH
+# (verified, not assumed) — no PATH trickery needed to exercise this path.
+
+command -v redocly >/dev/null 2>&1 && echo "WARNING: redocly is installed — the 'absent linter' test below is no longer exercising the absent-linter path" >&2
+command -v spectral >/dev/null 2>&1 && echo "WARNING: spectral is installed — the 'absent linter' test below is no longer exercising the absent-linter path" >&2
+
+CT4_CWD=$(mktemp -d)
+printf 'openapi: 3.0.0\ninfo:\n  version: 1.0.0\n' >"${CT4_CWD}/contract.yaml"
+CT4_SHA=$(contract_sha256 "${CT4_CWD}/contract.yaml")
+CT4_RUN=$(contract_run "$CT4_CWD" "1.0.0" "contract.yaml" "openapi" "true" "$CT4_SHA")
+CT4_JSON=$("$VALIDATE_CONTRACT" "$CT4_RUN" --json)
+assert_exit 0 "$VALIDATE_CONTRACT" "$CT4_RUN" --json
+assert_eq "$(status_of "$CT4_JSON" contract-lint)" pass "validate-contract.sh: a genuinely absent OpenAPI linter (no redocly/spectral) records pass, not fail"
+assert_contains "$(detail_of "$CT4_JSON" contract-lint)" "no OpenAPI linter" "validate-contract.sh: the pass detail says lint was skipped, not silently performed"
+assert_contains "$(detail_of "$CT4_JSON" contract-lint)" "redocly" "validate-contract.sh: the pass detail names which linters it looked for"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# round-gate.sh
+# ═══════════════════════════════════════════════════════════════════════════
+
+# claude_stub_bin VERDICT — a bin dir whose `claude` ignores its args,
+# reads (and discards) reviewer.sh's stdin, and emits a minimal review body
+# ending in the one line round-gate.sh's parser looks for. Always shadows
+# the real `claude` on PATH (prepended) so these tests never make a real
+# network call.
+claude_stub_bin() {
+  local verdict="$1" d
+  d=$(mktemp -d)
+  cat >"${d}/claude" <<STUB
+#!/usr/bin/env bash
+cat >/dev/null
+echo "Reviewed the diff against project conventions."
+echo "VERDICT: ${verdict}"
+STUB
+  chmod +x "${d}/claude"
+  printf '%s' "$d"
+}
+
+# new_run_with_plan PLAN REPO — same as the suite's own new_run helper,
+# but for a caller-supplied PLAN rather than the fixed FIXTURE_PLAN (needed
+# below to exercise a lane whose test_command genuinely fails).
+new_run_with_plan() {
+  local plan="$1" repo="$2" run_dir
+  run_dir="$(mktemp -d)/run"
+  "$INIT_RUN" "$plan" "$run_dir" "$repo" "surface:test" >/dev/null 2>&1 || true
+  printf '%s' "$run_dir"
+}
+
+RG_CLAUDE_APPROVE=$(claude_stub_bin APPROVE)
+RG_CLAUDE_REJECT=$(claude_stub_bin REQUEST_CHANGES)
+
+# ─── Happy path: every stage genuinely runs and passes, round 1 ───────────
+
+RG_REPO=$(new_repo)
+RG_RUN=$(new_run "$RG_REPO")
+RG_JSON=$(PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN" 1 --json)
+assert_exit 0 env PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN" 1 --json
+assert_eq "$(status_of "$RG_JSON" round-within-max-rounds)" pass "round-gate.sh: round 1 is within max_rounds"
+assert_eq "$(jq -r '[.[] | select(.stage=="lane-tests")] | length' <<<"$RG_JSON")" 3 \
+  "round-gate.sh: lane-tests runs one item per non-orchestrator lane (backend, frontend, review)"
+assert_eq "$(jq -r '[.[] | select(.stage=="lane-tests" and .status=="pass")] | length' <<<"$RG_JSON")" 3 \
+  "round-gate.sh: all 3 lane tests pass (fixture plan's test_command is \`true\`)"
+assert_eq "$(status_of "$RG_JSON" contract-exists)" pass "round-gate.sh: the contract stage's own sub-items are merged in verbatim"
+assert_eq "$(status_of "$RG_JSON" changed-files-within-union)" pass "round-gate.sh: the run-state stage's own sub-items are merged in verbatim"
+assert_eq "$(status_of "$RG_JSON" light-review-verdict)" pass "round-gate.sh: the reviewer approved, via the stubbed claude"
+assert_eq "$(jq -r '[.[] | select(.status=="skipped")] | length' <<<"$RG_JSON")" 0 \
+  "round-gate.sh: on a clean happy path, nothing is skipped — every stage genuinely ran"
+
+# ─── Short-circuit: a lane-test failure stops everything after it ─────────
+# — contract, run-state and review must all show status:"skipped", not
+# absent and not silently "pass".
+
+RG_REPO_FAIL=$(new_repo)
+RG_PLAN_DIR=$(mktemp -d)
+sed "s/\`opus high\` | \`true\`/\`opus high\` | \`false\`/" "$FIXTURE_PLAN" >"${RG_PLAN_DIR}/plan.md"
+cp -r "$(dirname "$FIXTURE_PLAN")/subplans" "${RG_PLAN_DIR}/"
+cp "$(dirname "$FIXTURE_PLAN")/codeintel-status.json" "${RG_PLAN_DIR}/"
+RG_RUN_FAIL=$(new_run_with_plan "${RG_PLAN_DIR}/plan.md" "$RG_REPO_FAIL")
+RG_JSON_FAIL=$(PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN_FAIL" 1 --json) || true
+assert_exit 1 env PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN_FAIL" 1 --json
+assert_eq "$(jq -r '.[] | select(.stage=="lane-tests" and .item=="lane-test:backend") | .status' <<<"$RG_JSON_FAIL")" fail \
+  "round-gate.sh: the doctored backend test_command (\`false\`) fails lane-test:backend by name"
+assert_eq "$(jq -r '.[] | select(.stage=="contract") | .status' <<<"$RG_JSON_FAIL")" skipped \
+  "round-gate.sh: contract never ran after the lane-test failure — status is skipped, not pass"
+assert_eq "$(jq -r '.[] | select(.stage=="run-state") | .status' <<<"$RG_JSON_FAIL")" skipped \
+  "round-gate.sh: run-state never ran after the lane-test failure"
+assert_eq "$(jq -r '.[] | select(.stage=="review") | .status' <<<"$RG_JSON_FAIL")" skipped \
+  "round-gate.sh: review (the most expensive stage) never ran after the lane-test failure"
+assert_contains "$(jq -r '.[] | select(.stage=="contract") | .detail' <<<"$RG_JSON_FAIL")" "not run" \
+  "round-gate.sh: the skipped stage's own detail says it was not run, not that it passed"
+
+# ─── changed-files-within-union failure (the hard boundary) blocks at the ──
+# run-state stage, and correctly skips review after it.
+
+RG_REPO_BOUNDARY=$(new_repo)
+RG_RUN_BOUNDARY=$(new_run "$RG_REPO_BOUNDARY")
+mkdir -p "${RG_REPO_BOUNDARY}/rogue"
+printf 'x\n' >"${RG_REPO_BOUNDARY}/rogue/file.txt"
+printf 'rogue/file.txt\n' >>"${RG_RUN_BOUNDARY}/worker-backend.files.txt"
+RG_JSON_BOUNDARY=$(PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN_BOUNDARY" 1 --json) || true
+assert_exit 1 env PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN_BOUNDARY" 1 --json
+assert_eq "$(jq -r '.[] | select(.stage=="run-state" and .item=="changed-files-within-union") | .status' <<<"$RG_JSON_BOUNDARY")" fail \
+  "round-gate.sh: an unowned write outside every lane's union fails changed-files-within-union by name"
+assert_eq "$(jq -r '.[] | select(.stage=="review") | .status' <<<"$RG_JSON_BOUNDARY")" skipped \
+  "round-gate.sh: review is skipped after the boundary violation"
+
+# ─── A warn-only run-state (post-done-writes-absent) does NOT block — the ──
+# round proceeds to review and, with an approving reviewer, passes overall.
+
+RG_REPO_WARN=$(new_repo)
+RG_RUN_WARN=$(new_run "$RG_REPO_WARN")
+assert_exit 0 "$EVENT" "$RG_RUN_WARN" backend "Task 9" "done" "nothing left this round"
+printf 'more work after done\n' >>"${RG_REPO_WARN}/backend/service.sh"
+printf 'backend/service.sh\n' >>"${RG_RUN_WARN}/worker-backend.files.txt"
+RG_FUTURE_TS=$(date -v+1H +%Y%m%d%H%M.%S 2>/dev/null || date -d '+1 hour' +%Y%m%d%H%M.%S)
+touch -t "$RG_FUTURE_TS" "${RG_REPO_WARN}/backend/service.sh"
+RG_JSON_WARN=$(PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN_WARN" 1 --json)
+assert_exit 0 env PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN_WARN" 1 --json
+assert_eq "$(jq -r '.[] | select(.item=="post-done-writes-absent") | .status' <<<"$RG_JSON_WARN")" warn \
+  "round-gate.sh: post-done-writes-absent is merged in as warn, exactly as validate-run-state.sh reported it"
+assert_eq "$(status_of "$RG_JSON_WARN" light-review-verdict)" pass \
+  "round-gate.sh: a warn-only run-state did not short-circuit — review still ran and approved"
+assert_eq "$(jq -r '[.[] | select(.status=="fail")] | length' <<<"$RG_JSON_WARN")" 0 \
+  "round-gate.sh: zero fail items — a warn never counts as a failure"
+
+# ─── Reviewer non-approval (REQUEST_CHANGES) fails the review stage ───────
+
+RG_REPO_REJECT=$(new_repo)
+RG_RUN_REJECT=$(new_run "$RG_REPO_REJECT")
+RG_JSON_REJECT=$(PATH="${RG_CLAUDE_REJECT}:${PATH}" "$ROUND_GATE" "$RG_RUN_REJECT" 1 --json) || true
+assert_exit 1 env PATH="${RG_CLAUDE_REJECT}:${PATH}" "$ROUND_GATE" "$RG_RUN_REJECT" 1 --json
+assert_eq "$(status_of "$RG_JSON_REJECT" light-review-verdict)" fail \
+  "round-gate.sh: a REQUEST_CHANGES verdict fails light-review-verdict"
+assert_contains "$(detail_of "$RG_JSON_REJECT" light-review-verdict)" "REQUEST_CHANGES" \
+  "round-gate.sh: the fail detail quotes the actual verdict, not a generic message"
+
+# ─── ROUND 4 is refused outright — an escalation record, every other ──────
+# stage skipped, nothing (not even the cheap lane-tests stage) runs.
+
+RG_REPO_R4=$(new_repo)
+RG_RUN_R4=$(new_run "$RG_REPO_R4")
+RG_JSON_R4=$("$ROUND_GATE" "$RG_RUN_R4" 4 --json) || true
+assert_exit 1 "$ROUND_GATE" "$RG_RUN_R4" 4 --json
+assert_eq "$(status_of "$RG_JSON_R4" round-within-max-rounds)" fail "round-gate.sh: ROUND 4 fails round-within-max-rounds (max_rounds=3)"
+assert_contains "$(detail_of "$RG_JSON_R4" round-within-max-rounds)" "exceeds max_rounds=3" "round-gate.sh: the escalation record names the actual bound"
+assert_contains "$(detail_of "$RG_JSON_R4" round-within-max-rounds)" "escalate" "round-gate.sh: the escalation record says this needs a human decision"
+assert_eq "$(jq -r '.[] | select(.stage=="lane-tests") | .status' <<<"$RG_JSON_R4")" skipped \
+  "round-gate.sh: round 4 refuses before even the cheap lane-tests stage runs"
+assert_eq "$(jq -r '[.[] | select(.status=="skipped")] | length' <<<"$RG_JSON_R4")" 4 \
+  "round-gate.sh: all 4 later stages (lane-tests, contract, run-state, review) are skipped, none silently omitted"
 
 assert_summary
