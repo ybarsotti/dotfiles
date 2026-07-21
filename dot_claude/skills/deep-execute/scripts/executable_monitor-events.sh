@@ -30,6 +30,13 @@
 #                               while waiting for the next event (default 30)
 #   MONITOR_MAX_WAIT           absolute bound on total wait before emitting
 #                               the timeout trigger (default 1800 = 30m)
+#   MONITOR_TEST_DELAY_BEFORE_TAIL  test-only, unset by default (no-op):
+#                               sleeps this many seconds immediately before
+#                               the tail attach below, so a test can append
+#                               an event squarely inside that window and
+#                               prove it is still caught — see this script's
+#                               startup-race test in
+#                               tests/executable_test-deep-execute.sh.
 #
 # ── How blocking works, and why `tail -n 0 -F` alone is not enough ────────
 # `events.jsonl` can already hold unprocessed lines the moment this script
@@ -37,23 +44,41 @@
 # around to calling this script again for the next trigger) — a bare
 # `tail -n 0 -F`, which only shows content appended AFTER it attaches, would
 # silently skip that backlog and then sit blocked on lines that already
-# arrived. So every invocation first drains any backlog since the last
-# invocation's watermark (persisted under RUN_DIR/.monitor-events-state/,
-# same technique as monitor-workers.sh's per-worker liveness watermark, and
-# for the same reason: without it, a re-invoked script has no memory of what
-# it already reported). Only once the backlog is fully drained with no
-# trigger does it attach `tail -n 0 -F` and wait for genuinely new content —
-# at that point "new" and "unprocessed" are the same thing.
+# arrived. So every invocation resumes from the watermark it persisted last
+# time (under RUN_DIR/.monitor-events-state/, same technique as
+# monitor-workers.sh's per-worker liveness watermark, and for the same
+# reason: without it, a re-invoked script has no memory of what it already
+# reported) — but it does NOT do this by separately snapshotting "how many
+# lines exist right now" and only afterward attaching a live tail. An
+# earlier version of this script did exactly that: `wc -l` the file, spend
+# time computing LANES via a `jq` subprocess, THEN attach `tail -n 0 -F`. A
+# line appended in that window landed past the wc -l watermark (so the
+# backlog-drain loop never saw it) AND before the tail attach (so
+# `tail -n 0 -F`, which only shows content appended after it attaches, never
+# saw it either) — invisible to both. If that line was a lane's own last
+# event (`blocked`/`waiting` — lanes stop after emitting one), this
+# invocation would idle until MONITOR_MAX_WAIT and wrongly report `timeout`.
 #
-# Combining a blocking tail with a bounded, periodic pane-health check (no
-# model polling — this is a plain shell timer) is done with `read -t`
+# Instead, backlog-drain and live-follow are the SAME stream: one
+# `tail -n "+${START_LINE}" -F events.jsonl` call, where START_LINE is the
+# watermark's next line. `tail -n +K -F` reads from line K to whatever is
+# currently in the file, then keeps following — there is no separate "count
+# what's there" step for a line to fall between, because counting and
+# following are the same read of the same file by the same process. A line
+# written a nanosecond before this script ran `tail`, or a nanosecond after,
+# is caught the same way: as part of that one stream.
+#
+# Combining that blocking stream with a bounded, periodic pane-health check
+# (no model polling — this is a plain shell timer) is done with `read -t`
 # against the tail's output, not two independent loops: each iteration
-# either processes a new event line the instant it arrives, or times out
-# after MONITOR_LIVENESS_INTERVAL seconds of silence and runs exactly one
+# either processes a line (backlog or genuinely new — the loop doesn't know
+# or care which) the instant it arrives, or times out after
+# MONITOR_LIVENESS_INTERVAL seconds of silence and runs exactly one
 # pane-health check before waiting again. Only time spent with NOTHING
 # happening (no event, no health-check trigger) counts against
 # MONITOR_MAX_WAIT; draining a backlog of ordinary progress events costs
-# nothing against that bound.
+# nothing against that bound, because `read -t` returns immediately for
+# already-buffered lines instead of timing out.
 #
 # Fatal-signature scanning reuses monitor-workers.sh's own regex verbatim
 # (not re-derived) and the same incremental/per-lane-watermark technique —
@@ -149,30 +174,13 @@ handle_line() {
   esac
 }
 
-# ─── Backlog drain: everything since the persisted watermark ──────────────
+# ─── Resume point: the watermark's next line — see the header block for ───
+# why this is a starting line number for a single tail stream, not a
+# separate "count what's there" snapshot.
 PREV_LINES=$(cat "$WATERMARK_FILE" 2>/dev/null || echo 0)
 case "$PREV_LINES" in '' | *[!0-9]*) PREV_LINES=0 ;; esac
-TOTAL_LINES=$(wc -l <"$EVENTS" 2>/dev/null | tr -d ' ')
-case "$TOTAL_LINES" in '' | *[!0-9]*) TOTAL_LINES=0 ;; esac
-
-if [ "$TOTAL_LINES" -gt "$PREV_LINES" ]; then
-  LINE_NO=0
-  while IFS= read -r line || [ -n "$line" ]; do
-    LINE_NO=$((LINE_NO + 1))
-    [ "$LINE_NO" -le "$PREV_LINES" ] && continue
-    # Watermark advances before the trigger check — same "unconditional,
-    # before the match" ordering monitor-workers.sh uses, so a line that
-    # DOES trigger (and ends this whole process via emit's `exit`) is still
-    # recorded as processed for the NEXT invocation.
-    printf '%s' "$LINE_NO" >"$WATERMARK_FILE"
-    handle_line "$line"
-  done <"$EVENTS"
-fi
-# LINE_NO must reflect "lines processed so far" even when the backlog loop
-# above never ran (nothing new since the last invocation) — the live-follow
-# loop below keeps counting from here, and `set -u` would otherwise trip on
-# a LINE_NO that was never assigned.
-LINE_NO="$TOTAL_LINES"
+START_LINE=$((PREV_LINES + 1))
+LINE_NO="$PREV_LINES"
 
 # ─── Lane / surface lookups for pane-health checks ─────────────────────────
 LANES=()
@@ -214,8 +222,14 @@ do_liveness_check() {
   done
 }
 
-# ─── Live follow: from here on, "appended" and "unprocessed" coincide ─────
-exec 3< <(tail -n 0 -F "$EVENTS" 2>/dev/null)
+# ─── Single stream: catches up on any backlog from START_LINE, then keeps ─
+# following — see the header block for why there is no seam between
+# "backlog" and "live" here, unlike the two-step drain-then-attach this
+# replaced.
+if [ -n "${MONITOR_TEST_DELAY_BEFORE_TAIL:-}" ]; then
+  sleep "$MONITOR_TEST_DELAY_BEFORE_TAIL"
+fi
+exec 3< <(tail -n "+${START_LINE}" -F "$EVENTS" 2>/dev/null)
 TAIL_PID=$!
 trap 'kill "$TAIL_PID" 2>/dev/null || true' EXIT
 
