@@ -2,11 +2,18 @@
 # monitor-workers.sh — Blocks until exactly one of the following fires for
 # some worker in RUN_DIR/manifest.json, then prints ONE trigger JSON to
 # stdout and exits: a done marker (`done` or `blocked: <reason>`), a
-# vanished pane (`cmux capture-pane` fails), or a pane log containing a
-# fatal signature. If none of those fire before the bound below, it still
-# emits a trigger — {"type":"failed","reason":"timeout: ..."} — rather than
-# hang or return silently; a caller must never mistake "no output yet" for
-# "still working", and must never see a `done` the worker didn't earn.
+# vanished pane (`cmux capture-pane` fails), or NEW pane-log output (since
+# the previous liveness check) containing a fatal signature. If none of
+# those fire before the bound below, it still emits a trigger —
+# {"type":"failed","reason":"timeout: ..."} — rather than hang or return
+# silently; a caller must never mistake "no output yet" for "still
+# working", and must never see a `done` the worker didn't earn.
+#
+# WARNING: done/blocked/crashed/failed-via-fatal-signature — all four REAL
+# triggers — exit 0. Only the bound-exhausted timeout path exits nonzero.
+# Never guard a call with `if monitor-workers.sh; then` — that treats a
+# crash as success. Callers MUST branch on the JSON `.type` field, not the
+# exit code, to tell the four triggers apart.
 #
 # Usage:
 #   monitor-workers.sh RUN_DIR
@@ -20,6 +27,22 @@
 #   MONITOR_MAX_WAIT          absolute bound on total wait before emitting
 #                              the timeout trigger (default 1800 = 30m)
 #
+# Fatal-signature scanning is INCREMENTAL and NARROW, on purpose:
+# - Incremental: only pane-log lines new since the previous liveness check
+#   for that worker (per-worker watermark persisted under
+#   RUN_DIR/.monitor-liveness-state/) are scanned. A line already seen —
+#   whether it matched or not — is never rescanned. The caller re-invokes
+#   this script in a loop for the next event, each invocation a fresh
+#   process with no memory of its own; without a persisted watermark, one
+#   benign line sitting in scrollback would be rescanned and re-fire on
+#   every future invocation for the rest of the run.
+# - Narrow: the regex only lists signatures that genuinely indicate a dead
+#   agent (panic, fatal, segmentation fault, killed, traceback, unhandled).
+#   `command not found` / `permission denied` were deliberately dropped —
+#   both are routine output when a worker probes for an optional tool or
+#   checks a permission, not evidence the agent died. The vanished-pane
+#   check above remains the backstop for an actually-dead worker.
+#
 # set -e is deliberately NOT used: an individual check failing for a
 # transient reason (one worker's capture-pane call erroring) must not abort
 # the whole loop and every other worker's chance to report. Only the bound
@@ -27,7 +50,7 @@
 # failure is meaningful is checked explicitly instead.
 set -uo pipefail
 
-FATAL_REGEX='panic|fatal|segmentation fault|killed|traceback|unhandled|command not found|permission denied'
+FATAL_REGEX='panic|fatal|segmentation fault|killed|traceback|unhandled'
 
 RUN_DIR="${1:-}"
 if [ -z "$RUN_DIR" ]; then
@@ -40,6 +63,12 @@ if [ ! -f "$MANIFEST" ]; then
   echo "monitor-workers.sh: missing ${MANIFEST}" >&2
   exit 2
 fi
+
+# Per-worker watermark (lines already scanned for a fatal signature),
+# persisted across separate invocations of this script — see the
+# "Incremental" note in the header.
+STATE_DIR="${RUN_DIR}/.monitor-liveness-state"
+mkdir -p "$STATE_DIR"
 
 POLL_INTERVAL="${MONITOR_POLL_INTERVAL:-5}"
 LIVENESS_INTERVAL="${MONITOR_LIVENESS_INTERVAL:-30}"
@@ -114,9 +143,22 @@ while [ "$ELAPSED" -lt "$MAX_WAIT" ]; do
         emit "crashed" "${NAMES[$i]}" "pane vanished: capture-pane failed for ${surface}"
       fi
 
-      if printf '%s\n' "$PANE_LOG" | grep -qEi "$FATAL_REGEX"; then
-        MATCH=$(printf '%s\n' "$PANE_LOG" | grep -Ei "$FATAL_REGEX" | head -n1)
-        emit "failed" "${NAMES[$i]}" "fatal signature: ${MATCH}"
+      # ─── Incremental scan: only NEW lines (since this worker's last ──────
+      # liveness check) are examined — see the header's "Incremental" note.
+      # The watermark is written unconditionally, before the match check, so
+      # it's persisted even on the branch that emits and exits.
+      STATE_FILE="${STATE_DIR}/${NAMES[$i]}.lines"
+      TOTAL_LINES=$(printf '%s\n' "$PANE_LOG" | wc -l | tr -d ' ')
+      PREV_LINES=$(cat "$STATE_FILE" 2>/dev/null || echo 0)
+      case "$PREV_LINES" in '' | *[!0-9]*) PREV_LINES=0 ;; esac
+      printf '%s\n' "$TOTAL_LINES" >"$STATE_FILE"
+
+      if [ "$TOTAL_LINES" -gt "$PREV_LINES" ]; then
+        NEW_LOG=$(printf '%s\n' "$PANE_LOG" | tail -n +"$((PREV_LINES + 1))")
+        if printf '%s\n' "$NEW_LOG" | grep -qEi "$FATAL_REGEX"; then
+          MATCH=$(printf '%s\n' "$NEW_LOG" | grep -Ei "$FATAL_REGEX" | head -n1)
+          emit "failed" "${NAMES[$i]}" "fatal signature: ${MATCH}"
+        fi
       fi
     done
     SINCE_LIVENESS=0

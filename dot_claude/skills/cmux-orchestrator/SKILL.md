@@ -153,14 +153,15 @@ Switch back to the orchestrator workspace. Call `monitor-workers.sh "${RUN_DIR}"
 ~/.claude/skills/cmux-orchestrator/scripts/monitor-workers.sh "${RUN_DIR}"
 ```
 
-Trigger `type` is one of `done`, `blocked`, `crashed` (pane vanished), or `failed` (fatal signature in the pane log, or the script's own bounded wait ran out without any of the above). Use the Monitor tool to run this loop in the background instead of blocking on it turn by turn.
+Trigger `type` is one of `done`, `blocked`, `crashed` (pane vanished), or `failed` (fatal signature in the pane log, or the script's own bounded wait ran out without any of the above). All four real triggers exit 0 — only the script's own timeout exits nonzero — so always branch on `.type`, never on exit code. Use the Monitor tool to run this loop in the background instead of blocking on it turn by turn.
 
 ### On each trigger
 
-- **`done`**: update `manifest.json` status, tell the user in one line, keep polling
+- **`done`**: update `manifest.json` status, update the progress bar — `cmux set-progress $(echo "scale=2; ${DONE_COUNT}/${TOTAL}" | bc) --label "${DONE_COUNT}/${TOTAL} workers done"` — tell the user in one line, keep polling
 - **`blocked`**: immediately notify the user with `AskUserQuestion` offering resolution options
 - **`crashed`**: mark crashed in `manifest.json`, notify the user
 - **`failed`**: notify the user with the reason from the trigger JSON
+- **Peeking**: use `cmux capture-pane --surface <ref> --lines 5` to check what a worker is doing if the user asks
 
 ### Recovery
 
@@ -196,6 +197,7 @@ Once ALL done markers exist and contain "done" (or "blocked"):
 
 3. Update sidebar: `cmux set-status "orchestrator" "complete" --icon sparkle --color "#00ff00"`
 4. Set progress to 100%: `cmux set-progress 1.0 --label "Done"`
+5. Notify completion: `cmux notify --title "Orchestration Complete" --body "All ${TOTAL} workers finished"`
 
 **Only present the final summary when ALL workers have reported.** Small per-poll status updates are fine, but the comprehensive synthesis waits until everyone is done.
 
