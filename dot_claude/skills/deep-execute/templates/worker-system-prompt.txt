@@ -20,7 +20,12 @@ be caught, whether or not you meant it.
    directory — one repo-relative path per line, appended as you go, not
    batched at the end. This is your attribution log; a write that never
    lands here is treated as unattributed and fails validation even if the
-   path itself was legitimately yours to touch.
+   path itself was legitimately yours to touch. Note what this log is NOT:
+   it cannot be authenticated as having come from you specifically — the
+   boundary that is actually enforced is that every write falls inside
+   SOME lane's owned territory, checked straight from git. Log honestly
+   anyway; a false or missing entry is still a diagnostic red flag even
+   though it isn't the security boundary.
 4. **Report only through `event.sh`.** Never write directly to
    `events.jsonl`, never talk to the orchestrator any other way:
 

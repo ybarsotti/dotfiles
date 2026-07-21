@@ -180,7 +180,7 @@ assert_exit 0 test -f "${RUN_HAPPY}/cmux/worker-backend.prompt.md"
 HAPPY_JSON=$("$VALIDATE_STATE" "$RUN_HAPPY" --json)
 assert_exit 0 "$VALIDATE_STATE" "$RUN_HAPPY" --json
 assert_eq "$(status_of "$HAPPY_JSON" manifest-schema-valid)" pass "fresh manifest validates against the schema"
-assert_eq "$(status_of "$HAPPY_JSON" baseline-diff-owned)" pass "fresh run: nothing changed yet"
+assert_eq "$(status_of "$HAPPY_JSON" changed-files-within-union)" pass "fresh run: nothing changed yet"
 assert_eq "$(status_of "$HAPPY_JSON" contract-untouched)" pass "fresh run: contract sha matches"
 assert_eq "$(jq '[.[] | select(.status=="fail")] | length' <<<"$HAPPY_JSON")" 0 "fresh run: zero failing items"
 
@@ -217,7 +217,7 @@ assert_exit 1 "$VALIDATE_STATE" "$RUN2" --json
 assert_eq "$(status_of "$J2" changed-files-owned)" fail "an untracked write outside every lane's owns fails changed-files-owned"
 assert_contains "$(detail_of "$J2" changed-files-owned)" "rogue/file.txt" "diagnostic names the offending path"
 assert_contains "$(detail_of "$J2" changed-files-owned)" "matches=0" "diagnostic shows zero owning lanes"
-assert_eq "$(status_of "$J2" baseline-diff-owned)" fail "the same violation is caught by the baseline-diff union too"
+assert_eq "$(status_of "$J2" changed-files-within-union)" fail "the same violation is caught by the baseline-diff union too"
 
 # ─── Boundary 3: a worker that COMMITS an out-of-ownership write — the ────
 # worktree goes clean, but the baseline diff still catches it. The write
@@ -238,7 +238,7 @@ assert_eq "$(git -C "$REPO3" status --porcelain)" "" "worktree is clean after th
 J3=$("$VALIDATE_STATE" "$RUN3" --json) || true
 assert_exit 1 "$VALIDATE_STATE" "$RUN3" --json
 assert_eq "$(status_of "$J3" changed-files-owned)" pass \
-  "status-only check sees nothing — this is exactly the gap baseline-diff-owned exists to close"
+  "status-only check sees nothing — this is exactly the gap changed-files-within-union exists to close"
 assert_eq "$(status_of "$J3" changed-files-attributed-once)" fail \
   "the baseline-diff union still shows the committed file; no lane logged it"
 assert_contains "$(detail_of "$J3" changed-files-attributed-once)" "stolen.md" "diagnostic names the offending path"
@@ -253,11 +253,11 @@ UNI_PATH='rogue/héllo wörld 世界.txt'
 printf 'x\n' >"${REPO4}/${UNI_PATH}"
 J4=$("$VALIDATE_STATE" "$RUN4" --json) || true
 assert_exit 1 "$VALIDATE_STATE" "$RUN4" --json
-assert_contains "$(detail_of "$J4" baseline-diff-owned)" "$UNI_PATH" \
+assert_contains "$(detail_of "$J4" changed-files-within-union)" "$UNI_PATH" \
   "a path with spaces and unicode survives -z parsing and is named verbatim"
 
 # ─── Boundary 5: a rename (--no-renames -> delete + add); the deleted ─────
-# source is an unowned file, so it alone must fail baseline-diff-owned even
+# source is an unowned file, so it alone must fail changed-files-within-union even
 # though the destination lands inside backend's own owns.
 
 REPO5=$(new_repo)
@@ -266,8 +266,8 @@ git -C "$REPO5" mv misc.txt backend/renamed.txt
 git -C "$REPO5" commit --quiet -m rename
 J5=$("$VALIDATE_STATE" "$RUN5" --json) || true
 assert_exit 1 "$VALIDATE_STATE" "$RUN5" --json
-assert_eq "$(status_of "$J5" baseline-diff-owned)" fail "a rename whose source is unowned fails baseline-diff-owned"
-assert_contains "$(detail_of "$J5" baseline-diff-owned)" "misc.txt" "diagnostic names the deleted (source) path"
+assert_eq "$(status_of "$J5" changed-files-within-union)" fail "a rename whose source is unowned fails changed-files-within-union"
+assert_contains "$(detail_of "$J5" changed-files-within-union)" "misc.txt" "diagnostic names the deleted (source) path"
 
 # ─── Boundary 6: a file touched by two lanes (attribution ambiguity) ──────
 
@@ -301,5 +301,85 @@ J8=$("$VALIDATE_STATE" "$RUN8" --json) || true
 assert_exit 1 "$VALIDATE_STATE" "$RUN8" --json
 assert_eq "$(status_of "$J8" shared-files-untouched)" fail "a modified shared file fails shared-files-untouched"
 assert_contains "$(detail_of "$J8" shared-files-untouched)" "README.md" "diagnostic names the offending shared path"
+
+# ─── Boundary 9: forged attribution — the union check still passes (the ────
+# write is genuinely inside `review`'s own territory), because attribution
+# cannot be authenticated from inside one shared worktree. This is the
+# scenario the Task 9 review found: `backend` commits a file that lives in
+# `review`'s owned dir, the worktree goes clean, then a forged entry is
+# appended to `worker-review.files.txt` claiming `review` logged it. Every
+# check that only knows "is this self-consistent" (worker-file-logs-valid,
+# changed-files-attributed-once) is blind to the forgery and passes — the
+# split this task hardens is that their pass detail says so, so a reader of
+# the JSON output does not mistake "passed" for "attribution is proven".
+
+REPO9=$(new_repo)
+RUN9=$(new_run "$REPO9")
+git -C "$REPO9" commit --quiet --allow-empty -m base
+git -C "$REPO9" checkout --quiet -b forged-attribution
+printf 'x\n' >"${REPO9}/dot_claude/skills/deep-review/stolen2.md"
+git -C "$REPO9" add -A
+git -C "$REPO9" commit --quiet -m "backend commits into review's territory"
+assert_eq "$(git -C "$REPO9" status --porcelain)" "" "worktree is clean after the forged commit"
+printf 'dot_claude/skills/deep-review/stolen2.md\n' >>"${RUN9}/worker-review.files.txt"
+
+J9=$("$VALIDATE_STATE" "$RUN9" --json)
+assert_exit 0 "$VALIDATE_STATE" "$RUN9" --json
+assert_eq "$(status_of "$J9" changed-files-within-union)" pass \
+  "the hard union check passes — the write IS genuinely inside review's owned territory"
+assert_eq "$(status_of "$J9" changed-files-attributed-once)" pass \
+  "a single self-consistent forged log entry is indistinguishable from a true one — this check cannot catch it"
+assert_eq "$(status_of "$J9" worker-file-logs-valid)" pass \
+  "same blindness: the forged entry is inside review's own ownership and reflects a real (if not review-made) change"
+assert_contains "$(detail_of "$J9" changed-files-attributed-once)" "self-declared" \
+  "the passing attribution check's own detail says it is self-declared, not authenticated"
+assert_contains "$(detail_of "$J9" worker-file-logs-valid)" "not proof of who wrote it" \
+  "the passing log-validity check's own detail says the same"
+assert_contains "$(detail_of "$J9" changed-files-within-union)" "computed from git only" \
+  "the check that actually blocks describes itself as independent of any self-reported attribution"
+
+# ─── Boundary 10: path-traversal guard is segment-based, not substring ────
+# `foo..bar.txt` is a legitimate filename that merely contains two dots —
+# it must be accepted. `../escape.txt` and `a/../../b` are genuine
+# traversal and must be rejected, regardless of whether they're otherwise
+# well-formed repo-relative-looking strings.
+
+REPO10=$(new_repo)
+RUN10=$(new_run "$REPO10")
+printf 'x\n' >"${REPO10}/backend/foo..bar.txt"
+printf 'backend/foo..bar.txt\n' >"${RUN10}/worker-backend.files.txt"
+printf '../escape.txt\n' >>"${RUN10}/worker-backend.files.txt"
+printf 'backend/a/../../b\n' >>"${RUN10}/worker-backend.files.txt"
+
+J10=$("$VALIDATE_STATE" "$RUN10" --json) || true
+assert_exit 1 "$VALIDATE_STATE" "$RUN10" --json
+D10=$(detail_of "$J10" worker-file-logs-valid)
+assert_contains "$D10" "../escape.txt(path-traversal)" "a leading ../ segment is rejected as path-traversal"
+assert_contains "$D10" "backend/a/../../b(path-traversal)" "an embedded ../../ is rejected as path-traversal"
+assert_eq "$(printf '%s' "$D10" | grep -c 'foo\.\.bar\.txt' || true)" "0" \
+  "foo..bar.txt has no traversal segment and is not flagged at all — it was legitimately written and logged"
+
+# ─── Boundary 11: post-done-writes-absent flags without hard-failing ──────
+# `backend` emits `done`, then (properly logged, so every other check stays
+# green) writes into its own territory again with an mtime manufactured to
+# land after that `done` event. The new check must flag it — but only as
+# "warn", never contributing to the exit code by itself.
+
+REPO11=$(new_repo)
+RUN11=$(new_run "$REPO11")
+assert_exit 0 "$EVENT" "$RUN11" backend "Task 9" "done" "nothing left this round"
+printf 'more work after done\n' >>"${REPO11}/backend/service.sh"
+printf 'backend/service.sh\n' >>"${RUN11}/worker-backend.files.txt"
+FUTURE_TS=$(date -v+1H +%Y%m%d%H%M.%S 2>/dev/null || date -d '+1 hour' +%Y%m%d%H%M.%S)
+touch -t "$FUTURE_TS" "${REPO11}/backend/service.sh"
+
+J11=$("$VALIDATE_STATE" "$RUN11" --json)
+assert_exit 0 "$VALIDATE_STATE" "$RUN11" --json
+assert_eq "$(status_of "$J11" post-done-writes-absent)" warn \
+  "a lane writing in its own territory after its own done event is flagged, status warn not fail"
+assert_contains "$(detail_of "$J11" post-done-writes-absent)" "backend:backend/service.sh" \
+  "diagnostic names the offending lane and path"
+assert_eq "$(jq '[.[] | select(.status=="fail")] | length' <<<"$J11")" 0 \
+  "no item actually failed — post-done-writes-absent alone never trips the fail count"
 
 assert_summary
