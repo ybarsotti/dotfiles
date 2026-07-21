@@ -24,15 +24,25 @@
 # passes, honestly
 # For kind=openapi, a real OpenAPI linter (redocly, then spectral) is
 # preferred when installed — its exit code is the ground truth, and a real
-# finding in the contract fails this item. When NEITHER is installed, this
-# is a missing optional dev tool, not a contract problem: the item records
-# `pass`, with `detail` stating plainly that lint was skipped because no
-# linter was found — it does NOT quietly substitute the plan's
-# validation_command and call THAT "lint" (that would misrepresent what was
-# actually checked). For every other kind, the plan's own
+# finding in the contract fails this item. `command -v` alone is not proof a
+# linter is runnable: bash's `command -v` (unlike POSIX `sh`'s) reports
+# success for a PATH entry that exists but lacks the execute bit — verified
+# on both /bin/bash and a Homebrew bash on this repo's target platform, so
+# it isn't a version quirk — so this item also checks `-x` on the resolved
+# path and, in its pass detail, distinguishes "found on PATH but not
+# executable" from genuinely absent — both still skip lint (see
+# below), but they are different findings and must not be reported the same
+# way. When NEITHER linter is runnable, this is a missing optional dev tool,
+# not a contract problem: the item records `pass`, with `detail` stating
+# plainly that lint was skipped and why — it does NOT quietly substitute the
+# plan's validation_command and call THAT "lint" (that would misrepresent
+# what was actually checked). For every other kind, the plan's own
 # `validation_command` is not optional tooling — it's the contract's
 # declared, mandatory check — so it always runs, and a real failure there
-# always fails this item.
+# always fails this item. An empty or whitespace-only `validation_command`
+# is not "nothing to check, pass" — `sh -c ""` exits 0 trivially, having
+# validated nothing, so this item fails outright rather than letting that
+# silence read as a passing check.
 set -uo pipefail
 
 RESULTS=()
@@ -132,24 +142,42 @@ fi
 if [ -f "$CONTRACT_ABS" ]; then
   case "$CONTRACT_KIND" in
     openapi)
-      if command -v redocly >/dev/null 2>&1; then
+      REDOCLY_BIN=""
+      SPECTRAL_BIN=""
+      if P=$(command -v redocly 2>/dev/null) && [ -x "$P" ]; then REDOCLY_BIN="$P"; fi
+      if P=$(command -v spectral 2>/dev/null) && [ -x "$P" ]; then SPECTRAL_BIN="$P"; fi
+
+      if [ -n "$REDOCLY_BIN" ]; then
         if LINT_OUT=$(cd "$CWD" && redocly lint "$CONTRACT_PATH" 2>&1); then
           record "contract-lint" "pass" "redocly lint passed"
         else
           record "contract-lint" "fail" "redocly lint failed: ${LINT_OUT}"
         fi
-      elif command -v spectral >/dev/null 2>&1; then
+      elif [ -n "$SPECTRAL_BIN" ]; then
         if LINT_OUT=$(cd "$CWD" && spectral lint "$CONTRACT_PATH" 2>&1); then
           record "contract-lint" "pass" "spectral lint passed"
         else
           record "contract-lint" "fail" "spectral lint failed: ${LINT_OUT}"
         fi
       else
-        record "contract-lint" "pass" "no OpenAPI linter (redocly/spectral) found on PATH — lint skipped, not silently replaced by validation_command; contract already checked by sha256 + version above"
+        # A bare `command -v` hit here (checked again, this time without the
+        # `-x` guard that ruled it out above) means the name resolves on
+        # PATH but isn't runnable — present-but-not-executable, not
+        # genuinely absent. Say which.
+        NOTE=""
+        command -v redocly >/dev/null 2>&1 && NOTE="${NOTE}redocly found on PATH but not executable; "
+        command -v spectral >/dev/null 2>&1 && NOTE="${NOTE}spectral found on PATH but not executable; "
+        if [ -n "$NOTE" ]; then
+          record "contract-lint" "pass" "${NOTE}no runnable OpenAPI linter (redocly/spectral) — lint skipped, not silently replaced by validation_command; contract already checked by sha256 + version above"
+        else
+          record "contract-lint" "pass" "no OpenAPI linter (redocly/spectral) found on PATH — lint skipped, not silently replaced by validation_command; contract already checked by sha256 + version above"
+        fi
       fi
       ;;
     typescript | json-schema | command)
-      if LINT_OUT=$(cd "$CWD" && sh -c "$VALIDATION_COMMAND" 2>&1); then
+      if [ -z "${VALIDATION_COMMAND//[[:space:]]/}" ]; then
+        record "contract-lint" "fail" "validation_command is empty or whitespace-only for kind=${CONTRACT_KIND} — contract declares no runnable validation"
+      elif LINT_OUT=$(cd "$CWD" && sh -c "$VALIDATION_COMMAND" 2>&1); then
         record "contract-lint" "pass" "validation_command succeeded: ${VALIDATION_COMMAND}"
       else
         record "contract-lint" "fail" "validation_command failed: ${VALIDATION_COMMAND}: ${LINT_OUT}"
