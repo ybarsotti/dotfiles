@@ -13,11 +13,13 @@ description: |
   ticket, renaming the cmux tab, creating a branch (main repo or new worktree),
   transitioning the Jira status to "Under investigation", then delegating the deep
   planning to /deep-plan (grill-with-docs → brainstorming → writing-plans → 5-persona
-  review incl. ticket-matcher → plannotator → approved plan), executing the approved plan
-  via /deep-execute (lane fanout, round tests, run-state validation, orchestrator commits,
-  one final /deep-review), running /qa-test-plan when flows or screens change, opening the
-  PR via /pr-description (conventional title, Mermaid, no file list, assigned to the user),
-  and looping on CI + Copilot feedback until both are clean.
+  review incl. ticket-matcher → plannotator → approved plan), then executing it — via
+  /deep-execute for an approved `Mode: parallel` plan with 2+ lanes (lane fanout, round
+  tests, run-state validation, orchestrator commits, one final /deep-review), or the
+  superpowers execution workflow under strict TDD otherwise — running /qa-test-plan when
+  flows or screens change, opening the PR via /pr-description (conventional title,
+  Mermaid, no file list, assigned to the user), and looping on CI + Copilot feedback
+  until both are clean.
 ---
 
 # Jira Ticket Workflow
@@ -60,9 +62,11 @@ items.
 - [ ] **Deep planning** — run `/deep-plan "<CODE>" --ticket <CODE>`: grill-with-docs →
       brainstorming → writing-plans → 5-persona review (incl. **ticket-matcher**, which bats
       the plan point-by-point against the ticket) → plannotator → approved plan
-- [ ] **Execute approved plan** — run `/deep-execute ~/.claude/deep-plan-runs/<RUN_ID>/plan.md`.
-      `/deep-execute` owns lane fanout, round tests, run-state validation, orchestrator
-      commits, and one final `/deep-review`.
+- [ ] **Execute approved plan** — the plan's `## Execution shape` decides the path:
+      `Mode: parallel` + 2+ lanes → `/deep-execute ~/.claude/deep-plan-runs/<RUN_ID>/plan.md`
+      (lane fanout, round tests, run-state validation, orchestrator commits, one final
+      `/deep-review`). Anything else → superpowers execution (`subagent-driven-development` /
+      `executing-plans`) under strict TDD, then `/simplify` ×2 and `/deep-review`.
 - [ ] **`/qa-test-plan`** (if the plan's QA flag is "yes" — flow change or new screens):
       manual test doc + codex review + agent-browser execution with video
 - [ ] **Re-run tests**: every test (new + existing) must be green
@@ -81,7 +85,7 @@ Use `cmux set-progress` at natural boundaries:
 | Intake + clarity | 0.10 |
 | Branch created | 0.15 |
 | Plan approved (`/deep-plan`) | 0.30 |
-| Plan executed (`/deep-execute` — build, round tests, final `/deep-review`) | 0.75 |
+| Plan executed (`/deep-execute`, or superpowers build + `/simplify` + `/deep-review`) | 0.75 |
 | PR opened (`/pr-description`) | 0.85 |
 | CI + Copilot clean | 1.00 |
 
@@ -218,7 +222,13 @@ Do NOT hand-trace, hand-write tests, or plan inline here — that duplicates dee
 ticket-matcher flags the plan as vague or missing an acceptance criterion, resolve it inside
 the deep-plan loop before continuing. Set `cmux set-progress 0.30 --label "Plan approved"`.
 
-## 3. Execute approved plan — delegate to `/deep-execute`
+## 3. Execute approved plan
+
+Check the approved plan's `## Execution shape` section — its `Mode:` line (plus lane count)
+decides which path applies. `/deep-execute` itself refuses to start on anything but
+`Mode: parallel`, so don't hand it a serial plan.
+
+**`Mode: parallel` with 2+ lanes → delegate to `/deep-execute`:**
 
 ```
 /deep-execute ~/.claude/deep-plan-runs/<RUN_ID>/plan.md
@@ -230,11 +240,25 @@ or `/deep-review` separately here; that duplicates what `/deep-execute` already 
 end of its last round. See `dot_claude/skills/deep-execute/SKILL.md` (and
 `ARCHITECTURE.md` §9) for the fan-out, round-gate, and contract-drift protocol.
 
-`Skill(skill="superpowers:verification-before-completion")` once `/deep-execute` reports the
-run complete, before any PR work.
+**`Mode: serial`, or no declared shape → build it yourself:**
 
-Set `cmux set-progress 0.75 --label "Plan executed"` when the run's final round passed and
-`/deep-review` came back clean.
+- `Skill(skill="superpowers:using-git-worktrees")` if not already isolated (you usually made
+  a worktree in §1.5 — reuse it).
+- `Skill(skill="superpowers:subagent-driven-development")` (or `executing-plans` when
+  subagents are unavailable) against `~/.claude/deep-plan-runs/<RUN_ID>/plan.md`.
+- Strict red-green-refactor per `superpowers:test-driven-development`. **Mock only the
+  outermost boundaries** (network, 3rd-party APIs, clock/random) — inner services,
+  repositories, and domain logic run REAL code in tests.
+- **Bug/regression ticket?** Drive the fix through `superpowers:systematic-debugging`
+  (reproduce → minimise → hypothesise → instrument → fix → regression-test) before writing
+  the fix.
+- Then `/simplify` ×2 (re-run tests after each pass) and `/deep-review` (the fixed-roster
+  panel); `Skill(skill="superpowers:receiving-code-review")` before applying its findings,
+  then address every actionable one with a small TDD cycle.
+
+**Either path:** `Skill(skill="superpowers:verification-before-completion")` once execution
+reports complete, before any PR work. Set `cmux set-progress 0.75 --label "Plan executed"`
+when tests are green and (for the parallel path) `/deep-review` came back clean.
 
 ## 4. QA test plan (only if flows/screens changed)
 
