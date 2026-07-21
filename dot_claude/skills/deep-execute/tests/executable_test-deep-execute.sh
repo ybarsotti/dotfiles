@@ -20,6 +20,9 @@ VALIDATE_CONTRACT="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_val
 ROUND_GATE="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_round-gate.sh"
 WORKER_PROMPT="${ROOT}/dot_claude/skills/deep-execute/templates/worker-system-prompt.txt"
 FIXTURE_PLAN="${ROOT}/dot_claude/skills/deep-execute/tests/fixtures/init-run-plan.md"
+SKILL_MD="${ROOT}/dot_claude/skills/deep-execute/SKILL.md"
+README_MD="${ROOT}/dot_claude/skills/deep-execute/README.md"
+COMMAND_MD="${ROOT}/dot_claude/commands/deep-execute.md"
 
 assert_exit 0 test -f "$EVENT"
 assert_exit 0 test -f "$BOARD"
@@ -493,6 +496,39 @@ wait "$LIVE_BGPID"
 assert_eq "$(jq -r '.type' <<<"$TRIGGER_LIVE")" "done" "monitor-events.sh: an event appended after the monitor started is caught by the blocking tail -F, not just backlog drain"
 assert_eq "$(jq -r '.msg' <<<"$TRIGGER_LIVE")" "arrived after monitor started" "monitor-events.sh: live-follow trigger carries the event's own message"
 
+# ─── Startup race: an event appended in the window between "how far to ────
+# resume from" and the tail attach itself must still be caught. This is the
+# Task 10 review finding: an earlier version of this script snapshotted
+# `wc -l` (the resume point), spent time on a `jq` LANES lookup, and only
+# THEN attached `tail -n 0 -F` — a line appended in that gap landed past the
+# snapshot's watermark AND before the attach, invisible to both, so a
+# lane's own last event (blocked/waiting) could be lost and this call would
+# idle out to `timeout`.
+#
+# MONITOR_TEST_DELAY_BEFORE_TAIL widens that exact window (it sleeps
+# immediately before the real tail attach — see the script's own header) so
+# the race is deterministic rather than a timing gamble: the background
+# writer lands squarely inside the delay, not "probably before the script
+# gets there." Against the pre-fix script (verified by hand, not shipped
+# here — see the task's own report for the transcript) the same scenario,
+# with an equivalent sleep inserted right after ITS `wc -l` snapshot,
+# reliably produced `timeout`; the fix removes that snapshot entirely in
+# favor of a single `tail -n +K -F` stream, so widening the delay here
+# proves nothing is lost regardless of how long the gap is, not just that
+# today's gap happens to be narrow.
+MON_RACE=$(mon_run)
+(
+  sleep 0.3
+  "$EVENT" "$MON_RACE" backend "Task 8" blocked "landed during the pre-tail delay"
+) &
+RACE_BGPID=$!
+TRIGGER_RACE=$(MONITOR_TEST_DELAY_BEFORE_TAIL=1 MONITOR_LIVENESS_INTERVAL=2 MONITOR_MAX_WAIT=5 "$MONITOR" "$MON_RACE")
+wait "$RACE_BGPID"
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_RACE")" blocked \
+  "monitor-events.sh: an event written during the pre-attach delay is caught as a real trigger, not lost to timeout"
+assert_eq "$(jq -r '.msg' <<<"$TRIGGER_RACE")" "landed during the pre-tail delay" \
+  "monitor-events.sh: the startup-race trigger carries the event's own message, proving it was genuinely read (not a stale/default value)"
+
 # ─── Vanished pane: capture-pane fails for the lane's surface_ref ──────────
 
 MON_VANISHED=$(mon_run_with_surface)
@@ -706,6 +742,62 @@ assert_eq "$(status_of "$CT4_JSON" contract-lint)" pass "validate-contract.sh: a
 assert_contains "$(detail_of "$CT4_JSON" contract-lint)" "no OpenAPI linter" "validate-contract.sh: the pass detail says lint was skipped, not silently performed"
 assert_contains "$(detail_of "$CT4_JSON" contract-lint)" "redocly" "validate-contract.sh: the pass detail names which linters it looked for"
 
+# ─── 5. a real validation_command that succeeds passes (positive control ───
+# for #3 above — a real command running is not itself sufficient evidence
+# the pass/fail wiring is right without also seeing the success case).
+
+CT5_CWD=$(mktemp -d)
+printf '{"type":"object"}\n' >"${CT5_CWD}/contract.schema.json"
+CT5_SHA=$(contract_sha256 "${CT5_CWD}/contract.schema.json")
+CT5_RUN=$(contract_run "$CT5_CWD" "1.0.0" "contract.schema.json" "json-schema" "jq -e '.type' contract.schema.json" "$CT5_SHA")
+CT5_JSON=$("$VALIDATE_CONTRACT" "$CT5_RUN" --json)
+assert_exit 0 "$VALIDATE_CONTRACT" "$CT5_RUN" --json
+assert_eq "$(status_of "$CT5_JSON" contract-lint)" pass "validate-contract.sh: a real validation_command that succeeds passes contract-lint"
+assert_contains "$(detail_of "$CT5_JSON" contract-lint)" "validation_command succeeded" "validate-contract.sh: the pass detail says a real command ran and succeeded"
+
+# ─── 6. an empty validation_command fails outright — `sh -c ""` exits 0 ────
+# trivially, having checked nothing; that must never read as "succeeded".
+
+CT6_CWD=$(mktemp -d)
+printf '{"type":"object"}\n' >"${CT6_CWD}/contract.schema.json"
+CT6_SHA=$(contract_sha256 "${CT6_CWD}/contract.schema.json")
+CT6_RUN=$(contract_run "$CT6_CWD" "1.0.0" "contract.schema.json" "json-schema" "" "$CT6_SHA")
+CT6_JSON=$("$VALIDATE_CONTRACT" "$CT6_RUN" --json) || true
+assert_exit 1 "$VALIDATE_CONTRACT" "$CT6_RUN" --json
+assert_eq "$(status_of "$CT6_JSON" contract-lint)" fail "validate-contract.sh: an empty validation_command fails contract-lint, not a silent pass"
+assert_contains "$(detail_of "$CT6_JSON" contract-lint)" "empty or whitespace-only" "validate-contract.sh: the fail detail names exactly why — no runnable validation was declared"
+
+# ─── 7. a whitespace-only validation_command fails the same way — `sh -c ` ──
+# with only spaces/tabs is exactly as vacuous as an empty string.
+
+CT7_CWD=$(mktemp -d)
+printf '{"type":"object"}\n' >"${CT7_CWD}/contract.schema.json"
+CT7_SHA=$(contract_sha256 "${CT7_CWD}/contract.schema.json")
+CT7_RUN=$(contract_run "$CT7_CWD" "1.0.0" "contract.schema.json" "command" "$(printf '   \t  ')" "$CT7_SHA")
+CT7_JSON=$("$VALIDATE_CONTRACT" "$CT7_RUN" --json) || true
+assert_exit 1 "$VALIDATE_CONTRACT" "$CT7_RUN" --json
+assert_eq "$(status_of "$CT7_JSON" contract-lint)" fail "validate-contract.sh: a whitespace-only validation_command fails contract-lint too — 'blank' is not just the empty string"
+assert_contains "$(detail_of "$CT7_JSON" contract-lint)" "empty or whitespace-only" "validate-contract.sh: same diagnostic wording as the empty-string case"
+
+# ─── 8. an OpenAPI linter present on PATH but not executable is reported ───
+# distinctly from genuinely absent — `command -v` alone isn't proof of
+# runnability under bash (unlike POSIX `sh`, it reports success for a PATH
+# entry with no execute bit — verified directly against this machine's
+# bash), so the pass detail must say which case it is, not conflate the two.
+
+CT8_CWD=$(mktemp -d)
+printf 'openapi: 3.0.0\ninfo:\n  version: 1.0.0\n' >"${CT8_CWD}/contract.yaml"
+CT8_SHA=$(contract_sha256 "${CT8_CWD}/contract.yaml")
+CT8_RUN=$(contract_run "$CT8_CWD" "1.0.0" "contract.yaml" "openapi" "true" "$CT8_SHA")
+CT8_FAKEBIN=$(mktemp -d)
+printf '#!/bin/sh\necho hi\n' >"${CT8_FAKEBIN}/redocly"
+chmod -x "${CT8_FAKEBIN}/redocly"
+CT8_JSON=$(PATH="${CT8_FAKEBIN}:${PATH}" "$VALIDATE_CONTRACT" "$CT8_RUN" --json)
+assert_exit 0 env PATH="${CT8_FAKEBIN}:${PATH}" "$VALIDATE_CONTRACT" "$CT8_RUN" --json
+assert_eq "$(status_of "$CT8_JSON" contract-lint)" pass "validate-contract.sh: a present-but-non-executable redocly still skips lint gracefully (pass, not fail)"
+assert_contains "$(detail_of "$CT8_JSON" contract-lint)" "found on PATH but not executable" \
+  "validate-contract.sh: the detail distinguishes present-but-not-executable from genuinely absent"
+
 # ═══════════════════════════════════════════════════════════════════════════
 # round-gate.sh
 # ═══════════════════════════════════════════════════════════════════════════
@@ -840,5 +932,118 @@ assert_eq "$(jq -r '.[] | select(.stage=="lane-tests") | .status' <<<"$RG_JSON_R
   "round-gate.sh: round 4 refuses before even the cheap lane-tests stage runs"
 assert_eq "$(jq -r '[.[] | select(.status=="skipped")] | length' <<<"$RG_JSON_R4")" 4 \
   "round-gate.sh: all 4 later stages (lane-tests, contract, run-state, review) are skipped, none silently omitted"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Task 11: SKILL.md, README.md, /deep-execute command
+# ═══════════════════════════════════════════════════════════════════════════
+
+assert_exit 0 test -f "$SKILL_MD"
+assert_exit 0 test -f "$README_MD"
+assert_exit 0 test -f "$COMMAND_MD"
+
+# ─── Frontmatter ────────────────────────────────────────────────────────────
+
+SKILL_MD_TEXT=$(cat "$SKILL_MD")
+assert_contains "$SKILL_MD_TEXT" "name: deep-execute" "SKILL.md: frontmatter names the skill"
+assert_contains "$SKILL_MD_TEXT" "description:" "SKILL.md: frontmatter has a description"
+
+# ─── Every mechanism script is referenced by name ──────────────────────────
+
+for script in init-run.sh monitor-events.sh reply.sh round-gate.sh board.sh \
+  validate-contract.sh validate-run-state.sh; do
+  assert_contains "$SKILL_MD_TEXT" "$script" "SKILL.md: references ${script}"
+done
+
+# ─── Required strings (brief step 1) ───────────────────────────────────────
+
+assert_contains "$SKILL_MD_TEXT" "Monitor" "SKILL.md: mentions the Monitor tool"
+assert_contains "$SKILL_MD_TEXT" "events.jsonl" "SKILL.md: mentions events.jsonl"
+assert_contains "$SKILL_MD_TEXT" "reply.md" "SKILL.md: mentions reply.md"
+assert_contains "$SKILL_MD_TEXT" "agents.allowlist" "SKILL.md: mentions agents.allowlist"
+assert_contains "$SKILL_MD_TEXT" "max 3 rounds" "SKILL.md: states the default round cap as 'max 3 rounds'"
+
+# ─── Fix: must-survive rules pinned so the line-count metric can't be ──────
+# gamed by deleting judgement content (a line-count check alone would still
+# pass if a rule got quietly dropped and the doc padded back to length —
+# only pinning the rule's actual text catches that; see deep-plan's own
+# identical fix for the same failure mode).
+
+assert_contains "$SKILL_MD_TEXT" "the orchestrator is the sole committer, between rounds" \
+  "SKILL.md: rule survives — workers never run git; the orchestrator commits between rounds"
+assert_contains "$SKILL_MD_TEXT" "committed before fanout and are read-only afterwards" \
+  "SKILL.md: rule survives — contract and shared files committed before fanout, read-only after"
+assert_contains "$SKILL_MD_TEXT" "A failing \`round-gate.sh\` JSON is a hard gate" \
+  "SKILL.md: rule survives — a failing round-gate.sh JSON is a hard gate"
+assert_contains "$SKILL_MD_TEXT" "never advance" \
+  "SKILL.md: rule survives — never advance on a failing gate"
+assert_contains "$SKILL_MD_TEXT" "\`AskUserQuestion\` confirms it against \`agents.allowlist\`" \
+  "SKILL.md: rule survives — the plan suggests an agent, AskUserQuestion confirms it"
+assert_contains "$SKILL_MD_TEXT" "Round 1 gets orchestrator review before anything reaches the human" \
+  "SKILL.md: rule survives — round 1 gets orchestrator review before the human sees it"
+assert_contains "$SKILL_MD_TEXT" "After three rounds, stop and \`AskUserQuestion\`" \
+  "SKILL.md: rule survives — after three rounds, stop and AskUserQuestion"
+
+# ─── Honest attribution framing (never claims proof/authentication) ───────
+
+assert_contains "$SKILL_MD_TEXT" "self-declared" "SKILL.md: attribution framed as self-declared"
+assert_contains "$SKILL_MD_TEXT" "not authenticated" "SKILL.md: attribution framed as unauthenticated"
+assert_contains "$SKILL_MD_TEXT" "computed from git only" \
+  "SKILL.md: the one enforced boundary is described as computed from git only"
+for FORBIDDEN in "proves who wrote" "prevents a worker" "cannot forge"; do
+  assert_eq "$(printf '%s' "$SKILL_MD_TEXT" | grep -c -F "$FORBIDDEN" || true)" "0" \
+    "SKILL.md: never overclaims attribution with '${FORBIDDEN}'"
+done
+
+# ─── Monitor filter covers failure signatures, not just the happy path ────
+
+for TRIGGER in waiting blocked question "done" invalid_event vanished_pane fatal_signature timeout; do
+  assert_contains "$SKILL_MD_TEXT" "$TRIGGER" "SKILL.md: Monitor filter names trigger type '${TRIGGER}'"
+done
+
+# ─── Contract-drift protocol spelled out ───────────────────────────────────
+
+assert_contains "$SKILL_MD_TEXT" "bump" "SKILL.md: contract drift bumps the version"
+assert_contains "$SKILL_MD_TEXT" "semantic version" "SKILL.md: contract drift names semantic versioning"
+assert_contains "$SKILL_MD_TEXT" "reply.sh RUN_DIR --all" "SKILL.md: contract drift wakes every lane via reply.sh --all"
+
+# ─── Resume is honest about what is/isn't recoverable ──────────────────────
+
+assert_contains "$SKILL_MD_TEXT" "--resume RUN_DIR" "SKILL.md: documents --resume RUN_DIR"
+assert_contains "$SKILL_MD_TEXT" "Not** reconstructible" "SKILL.md: resume names what cannot be recovered"
+assert_contains "$SKILL_MD_TEXT" "mid-edit" "SKILL.md: resume names the specific unrecoverable state (a pane mid-edit)"
+
+# ─── Judgement, not procedure: this doc must stay well short of the other ──
+# slimmed deep-* skills' combined length (693 lines across deep-plan +
+# deep-review + cmux-orchestrator) — a length ceiling alone doesn't prove
+# judgement-only prose, but a doc that blows past every sibling's line
+# count is a strong signal it re-derived procedure instead of naming scripts.
+
+SKILL_MD_LINES=$(wc -l <"$SKILL_MD" | tr -d ' ')
+assert_eq "$([ "$SKILL_MD_LINES" -le 250 ] && echo yes || echo no)" yes \
+  "SKILL.md: stays at or under 250 lines (got ${SKILL_MD_LINES}) — judgement, not a restated procedure"
+
+# ─── README.md documents the allowlist, protocol, round policy, resume, ───
+# artifacts and the honest attribution limit (brief step 4)
+
+README_MD_TEXT=$(cat "$README_MD")
+assert_contains "$README_MD_TEXT" "agents.allowlist" "README.md: documents the agent allowlist"
+assert_contains "$README_MD_TEXT" "event.sh" "README.md: documents the event protocol"
+assert_contains "$README_MD_TEXT" "reply.sh" "README.md: documents the reply protocol"
+assert_contains "$README_MD_TEXT" "max 3 rounds" "README.md: documents the round policy's default cap"
+assert_contains "$README_MD_TEXT" "--resume RUN_DIR" "README.md: documents resume behavior"
+assert_contains "$README_MD_TEXT" "self-declared and" "README.md: states the attribution limit honestly"
+assert_contains "$README_MD_TEXT" "Artifacts produced" "README.md: documents the artifacts produced"
+
+# ─── Command file delegates and does not restate the protocol ─────────────
+
+COMMAND_MD_TEXT=$(cat "$COMMAND_MD")
+assert_contains "$COMMAND_MD_TEXT" "description:" "deep-execute.md: frontmatter has a description"
+# shellcheck disable=SC2088 # asserting literal doc text, not expanding a path
+assert_contains "$COMMAND_MD_TEXT" "~/.claude/skills/deep-execute/SKILL.md" \
+  "deep-execute.md: points at the skill"
+assert_contains "$COMMAND_MD_TEXT" "--resume RUN_DIR" "deep-execute.md: argument grammar documents --resume"
+assert_contains "$COMMAND_MD_TEXT" "--max-rounds N" "deep-execute.md: argument grammar documents --max-rounds"
+assert_eq "$(printf '%s' "$COMMAND_MD_TEXT" | grep -c 'round-gate.sh\|monitor-events.sh\|init-run.sh' || true)" "0" \
+  "deep-execute.md: does not restate the skill's protocol by naming its internal scripts"
 
 assert_summary
