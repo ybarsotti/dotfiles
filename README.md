@@ -389,6 +389,7 @@ This repository includes a `Justfile` with convenient commands for common tasks.
 - **`just status`** - Check status of managed files
 - **`just install-hooks`** - Install pre-commit hooks
 - **`just pre-commit`** - Run pre-commit hooks on all files
+- **`just test-deep-pipeline`** - Run the deep-plan / deep-execute / deep-review / cmux-orchestrator shell test suites (see "Deep-* Agent Pipeline" under Claude Code, below)
 - **`just format`** - Format all shell scripts and YAML files
 - **`just clean`** - Clean up temporary files and caches
 - **`just info`** - Show system information
@@ -442,6 +443,41 @@ Run `just` to see the full list of available commands.
   - `/docs` - Generate documentation
   - `/refactor` - Suggest refactorings
   - `/deps` - Analyze dependencies
+  - `/deep-plan` - Multi-agent planning pipeline (see below)
+  - `/deep-execute` - Runs an approved deep-plan parallel plan as lane workers (see below)
+  - `/deep-review` - Multi-persona peer review of a diff
+
+#### Deep-* Agent Pipeline
+
+Three slash commands chain together for planning and parallel execution of non-trivial work:
+
+- **`/deep-plan`** - Multi-agent planning pipeline (Opus + Codex draft, a 5-persona review
+  loop, a Plannotator approval gate). Stops at an **approved plan** — it never builds or
+  reviews code itself.
+- **`/deep-execute <plan.md>`** - Runs an approved parallel plan as lane workers sharing ONE
+  git worktree, in parallel cmux panes (via `cmux-orchestrator`). Coordinates fan-out, an
+  event/reply protocol (`event.sh` / `board.sh` / `monitor-events.sh` / `reply.sh`),
+  contract-drift handling, per-round gating (`round-gate.sh`: lane tests → contract →
+  run-state → one light review, in that order), a 3-round cap with escalation, and one full
+  `/deep-review` pass at the end. The orchestrator is the sole `git` committer between
+  rounds; lane workers never run `git` themselves.
+- **`/deep-review`** - Multi-persona peer review of a diff (Claude + Codex headless
+  reviewers), invoked once per `/deep-execute` run and usable standalone.
+
+An approved plan for `/deep-execute` extends deep-plan's normal plan format with an
+**Execution shape** (`Mode: parallel`, exactly one `orchestrator` lane, a lane table of
+`owns` path globs / `test_command` / `agent` / `depends_on`) and an **API contract** (a
+single materialized, versioned file every lane treats as read-only after fanout).
+`validate-plan.sh --root` enforces this shape before `/deep-execute` will accept the plan.
+The lane boundary itself is enforced by `changed-files-within-union` — a git-only diff
+against the round's baseline commit; per-lane attribution (`worker-<lane>.files.txt`) is
+self-declared and unauthenticated, so treat it as a diagnostic, never as proof of who wrote
+what.
+
+Run `just test-deep-pipeline` to exercise the whole pipeline's shell test suites (700+
+assertions across plan validation, lane/ownership boundaries, the event/reply protocol,
+round gating, and an end-to-end integration test walking a real plan through
+`validate-plan.sh` → `init-run.sh` → `validate-contract.sh` → `validate-run-state.sh`).
 
 ### Pre-commit
 - **`.pre-commit-config.yaml`** - Pre-commit hooks for:
