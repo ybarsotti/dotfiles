@@ -5,30 +5,80 @@
 # Usage:
 #   validate-run-state.sh RUN_DIR [--json]
 #
-# Emits 9 records via the same `record item status detail` + `--json` + exit-1
-# contract as deep-plan's validate-plan.sh: manifest-schema-valid,
+# Emits 10 records via the same `record item status detail` + `--json` +
+# exit-1 contract as deep-plan's validate-plan.sh: manifest-schema-valid,
 # events-schema-valid, events-line-size-valid, worker-file-logs-valid,
 # changed-files-owned, changed-files-attributed-once, contract-untouched,
-# shared-files-untouched, baseline-diff-owned. Exit 0 iff all pass.
+# shared-files-untouched, changed-files-within-union, post-done-writes-absent.
+# Exit 0 iff every "pass"/"fail" item passes ("warn" never blocks — see
+# below). NOTE: `baseline-diff-owned` was renamed to `changed-files-within-
+# union` — anything consuming these item names by string needs to follow.
 #
-# baseline-diff-owned is the safety-critical item. The changed-file set it
-# checks is the UNION of `git diff --name-only --no-renames BASELINE..HEAD`
-# and `git status --porcelain=v1 --untracked-files=all`, both NUL-delimited
-# so paths with spaces, tabs, unicode or renames survive intact. Workers are
-# told never to run git — but one that disobeys and commits its work leaves
-# a clean worktree, which a status-only check would wave through. Diffing
-# against the round's baseline commit closes that hole: a commit still shows
-# up in the baseline diff even once the worktree is clean again.
-# changed-files-owned runs the same ownership match over `git status` alone
-# (no baseline diff) as a second, faster signal — redundant by design, so a
-# gap in one check's git plumbing doesn't silently become a gap in both.
+# ── The hard guarantee vs. advisory signals ────────────────────────────────
+# Lane attribution (`worker-<lane>.files.txt`, fed by event.sh's `--files`)
+# is self-declared by whichever process calls event.sh. Nothing binds that
+# call to the identity of the worker that actually wrote a file — a process
+# with access to RUN_DIR can log any path under any lane's name, and an
+# env-var handshake would be theatre (the same process can set its own env).
+# Within one shared worktree, same user, same privileges, attribution CANNOT
+# be authenticated. Do not describe it as if it can be.
+#
+# What IS enforceable, because it depends only on git and the plan's `owns`
+# globs, neither of which any single lane process can rewrite on its own:
+#
+#   No write landed outside the UNION of every lane's owns (plus the
+#   contract path and shared_read_only exclusions).
+#
+# `changed-files-within-union` is that check, and it is the one a round gate
+# should treat as blocking. It never consults worker-*.files.txt. The
+# changed-file set it walks is the UNION of `git diff --name-only
+# --no-renames BASELINE..HEAD` and `git status --porcelain=v1
+# --untracked-files=all`, both NUL-delimited so paths with spaces, tabs,
+# unicode or renames survive intact. Workers are told never to run git — but
+# one that disobeys and commits its work leaves a clean worktree, which a
+# status-only check would wave through. Diffing against the round's baseline
+# commit closes that hole: a commit still shows up in the baseline diff even
+# once the worktree is clean again. A path only needs to match SOME lane's
+# owns (or an exclusion) to pass here — matching more than one is a plan-
+# validation concern (disjoint owns), not this check's job.
+# `changed-files-owned` runs the same idea over `git status` alone (no
+# baseline diff, and it does still require exactly one owner) as a second,
+# faster signal — redundant by design, so a gap in one check's git plumbing
+# doesn't silently become a gap in both.
+#
+# `worker-file-logs-valid` and `changed-files-attributed-once` are DIAGNOSTIC
+# / advisory only. They catch self-inconsistency in the logs (a lane logging
+# a path outside its own ownership, a path logged by zero or by more than one
+# lane) — genuinely useful signals when a worker misbehaves accidentally, or
+# when a hostile write forgets to log itself at all. What they cannot catch:
+# a single, internally-consistent forged log entry (a write that landed in
+# lane A's own territory, but was actually made by lane B, which then logs
+# it under A's name). That is fundamentally unauthenticatable from inside
+# one shared worktree — do not read a "pass" from either of these two items
+# as proof of who wrote what.
+#
+# `post-done-writes-absent` is a cheap, heuristic, advisory-only temporal
+# signal: a lane that already emitted `done` shouldn't have new writes
+# appearing in its own territory afterwards. It compares each lane's last
+# `done` event timestamp against on-disk mtimes and can both false-positive
+# (a rebuild touching mtimes, clock skew, a file whose mtime survived an
+# unrelated checkout) and miss real violations (mtime granularity, a file
+# later touched by something else entirely). It records "warn", not "fail",
+# and never contributes to the exit code on its own.
 #
 # Lane ownership (`owns` globs) is not duplicated into manifest.json — it
 # lives in the plan, and plan-to-json.sh is re-invoked here to read it, the
 # same way validate-plan.sh does. The orchestrator lane is excluded from the
 # ownership set entirely: it isn't a monitored cmux worker (it's the one
 # running this script), so any change under its own territory mid-round is
-# itself suspicious, not exempt — it correctly shows up as "unowned".
+# itself suspicious, not exempt — it correctly shows up as "unowned". This
+# assumes the orchestrator lane's own `owns` (if the plan gives it any at
+# all) never extends beyond the contract path and shared_read_only — those
+# are the only orchestrator-territory paths this script exempts. If a plan
+# ever gave the orchestrator lane real owns globs beyond that, a legitimate
+# orchestrator write there would show up as "unowned" and fail. That
+# assumption is not enforced here (deep-plan's validate-plan.sh is the place
+# that would need to, and is out of this script's scope).
 
 set -uo pipefail
 
@@ -258,13 +308,28 @@ if [ "$GIT_OK" -eq 1 ] && [ "$PLAN_OK" -eq 1 ]; then
     done < <(git -C "$CWD" diff --name-only --no-renames -z "${BASELINE}..HEAD" 2>/dev/null)
   fi
 
-  # ─── worker-file-logs-valid ─────────────────────────────────────────────
-  # worker-<lane>.files.txt is attribution input, not authorization — an
-  # entry must (a) be a syntactically real repo-relative path, (b) fall
-  # inside the LOGGING lane's own ownership (catches a lane logging a path
-  # that was never its territory), and (c) correspond to a path this git
-  # view actually shows changed (catches a lane logging a write it never
+  # ─── worker-file-logs-valid (advisory) ──────────────────────────────────
+  # worker-<lane>.files.txt is attribution input, not authorization — see
+  # the header note: this is a diagnostic consistency check, not a security
+  # boundary. An entry must (a) be a syntactically real repo-relative path,
+  # (b) fall inside the LOGGING lane's own ownership (catches a lane logging
+  # a path that was never its territory), and (c) correspond to a path this
+  # git view actually shows changed (catches a lane logging a write it never
   # made).
+  #
+  # path_has_dotdot_segment PATH — true iff some `/`-delimited SEGMENT of
+  # PATH is exactly `..`. Segment-based on purpose: a substring test like
+  # `case $p in *'..'*)` also rejects a legitimate filename that merely
+  # contains two dots, e.g. `foo..bar.txt`.
+  path_has_dotdot_segment() {
+    local path="$1" seg segs
+    IFS='/' read -ra segs <<<"$path"
+    for seg in "${segs[@]}"; do
+      [ "$seg" = ".." ] && return 0
+    done
+    return 1
+  }
+
   LOGS_BAD=""
   for f in "${RUN_DIR}"/worker-*.files.txt; do
     [ -f "$f" ] || continue
@@ -282,11 +347,11 @@ if [ "$GIT_OK" -eq 1 ] && [ "$PLAN_OK" -eq 1 ]; then
           LOGS_BAD="${LOGS_BAD}${LOGS_BAD:+; }${flog_lane}:${p}(wildcard-not-a-real-path)"
           continue
           ;;
-        *'..'*)
-          LOGS_BAD="${LOGS_BAD}${LOGS_BAD:+; }${flog_lane}:${p}(path-traversal)"
-          continue
-          ;;
       esac
+      if path_has_dotdot_segment "$p"; then
+        LOGS_BAD="${LOGS_BAD}${LOGS_BAD:+; }${flog_lane}:${p}(path-traversal)"
+        continue
+      fi
       own_ok=0
       oi=0
       while [ "$oi" -lt "$OWNS_N" ]; do
@@ -306,9 +371,9 @@ if [ "$GIT_OK" -eq 1 ] && [ "$PLAN_OK" -eq 1 ]; then
     done <"$f"
   done
   if [ -z "$LOGS_BAD" ]; then
-    record "worker-file-logs-valid" "pass" "every logged path is a real repo-relative path, inside its own lane's ownership, and reflects an actual change"
+    record "worker-file-logs-valid" "pass" "advisory: every logged path is a real repo-relative path, inside its own lane's ownership, and reflects an actual change (self-declared log, internally consistent — not proof of who wrote it)"
   else
-    record "worker-file-logs-valid" "fail" "$LOGS_BAD"
+    record "worker-file-logs-valid" "fail" "advisory: $LOGS_BAD"
   fi
 
   # ─── changed-files-owned (status-only) / baseline-diff-owned (union) ────
@@ -324,16 +389,25 @@ if [ "$GIT_OK" -eq 1 ] && [ "$PLAN_OK" -eq 1 ]; then
     record "changed-files-owned" "fail" "$BAD_STATUS"
   fi
 
+  # ─── changed-files-within-union (the hard, blocking guarantee) ──────────
+  # Formerly named `baseline-diff-owned`. Unlike changed-files-owned above,
+  # this passes on OWNER_COUNT >= 1 — a path only needs to fall in SOME
+  # lane's territory (or an exclusion), not exactly one. Matching more than
+  # one lane's owns is a plan-validation concern (disjoint owns should
+  # already guarantee this can't happen); it is not what this check exists
+  # to catch. This is computed purely from git + the plan's owns globs — it
+  # never reads worker-*.files.txt, so it cannot be defeated by a forged or
+  # missing attribution log. See the header note for why that split matters.
   BAD_UNION=""
   for path in "${!CHANGED_UNION[@]}"; do
     is_excluded "$path" && continue
     owner_of "$path"
-    [ "$OWNER_COUNT" -eq 1 ] || BAD_UNION="${BAD_UNION}${BAD_UNION:+; }${path}(matches=${OWNER_COUNT}:${OWNER_NAMES:-none})"
+    [ "$OWNER_COUNT" -ge 1 ] || BAD_UNION="${BAD_UNION}${BAD_UNION:+; }${path}(matches=${OWNER_COUNT}:${OWNER_NAMES:-none})"
   done
   if [ -z "$BAD_UNION" ]; then
-    record "baseline-diff-owned" "pass" "every baseline-diff change (committed or not) is owned by exactly one lane (or exempt)"
+    record "changed-files-within-union" "pass" "every baseline-diff change (committed or not) falls inside the union of every lane's owns (or an exclusion) — computed from git only, independent of any self-reported attribution"
   else
-    record "baseline-diff-owned" "fail" "$BAD_UNION"
+    record "changed-files-within-union" "fail" "$BAD_UNION"
   fi
 
   # ─── contract-untouched ──────────────────────────────────────────────────
@@ -374,10 +448,14 @@ if [ "$GIT_OK" -eq 1 ] && [ "$PLAN_OK" -eq 1 ]; then
     record "shared-files-untouched" "fail" "modified: $SHARED_BAD"
   fi
 
-  # ─── changed-files-attributed-once ───────────────────────────────────────
+  # ─── changed-files-attributed-once (advisory) ────────────────────────────
   # Only meaningful for paths that are legitimately owned by exactly one
-  # lane — an unowned path is already flagged by baseline-diff-owned, and
-  # flagging it again here as "unattributed" would just be noise.
+  # lane — an unowned path is already flagged by changed-files-within-union,
+  # and flagging it again here as "unattributed" would just be noise.
+  # Diagnostic only, per the header note: catches an unlogged write (zero
+  # attributions) or two lanes both logging the same path, but a single,
+  # internally-consistent forged attribution is indistinguishable from a
+  # true one from inside this check.
   declare -A LOG_COUNT=()
   declare -A LOG_LANES=()
   for f in "${RUN_DIR}"/worker-*.files.txt; do
@@ -401,16 +479,71 @@ if [ "$GIT_OK" -eq 1 ] && [ "$PLAN_OK" -eq 1 ]; then
     [ "$acnt" -eq 1 ] || ATTR_BAD="${ATTR_BAD}${ATTR_BAD:+; }${path}(owner=${OWNER_NAMES},attributed=${acnt}:${LOG_LANES[$path]:-none})"
   done
   if [ -z "$ATTR_BAD" ]; then
-    record "changed-files-attributed-once" "pass" "every lane-owned changed path is logged by exactly one lane"
+    record "changed-files-attributed-once" "pass" "advisory: every lane-owned changed path is logged by exactly one lane (self-declared logs, internally consistent — not proof of who actually wrote it)"
   else
-    record "changed-files-attributed-once" "fail" "$ATTR_BAD"
+    record "changed-files-attributed-once" "fail" "advisory: $ATTR_BAD"
+  fi
+
+  # ─── post-done-writes-absent (advisory, heuristic) ───────────────────────
+  # A lane that already emitted `done` shouldn't have new writes appearing
+  # in its own territory afterwards. Compares each lane's last `done` event
+  # timestamp against on-disk mtimes of that lane's owned, changed paths.
+  # Heuristic and advisory only — see header note: it can false-positive
+  # (a rebuild touching mtimes, clock skew, a file whose mtime survived an
+  # unrelated checkout) and can miss real violations. Records "warn", not
+  # "fail" or "pass", and never contributes to the exit code by itself.
+  declare -A LANE_DONE_TS=()
+  if [ -f "$EVENTS" ]; then
+    while IFS=$'\t' read -r dlane dts; do
+      [ -z "$dlane" ] && continue
+      dcur="${LANE_DONE_TS[$dlane]:-}"
+      if [ -z "$dcur" ] || [[ "$dts" > "$dcur" ]]; then
+        LANE_DONE_TS["$dlane"]="$dts"
+      fi
+    done < <(jq -r 'select(.type == "done") | "\(.lane)\t\(.ts)"' "$EVENTS" 2>/dev/null)
+  fi
+
+  # ts_to_epoch / file_mtime_epoch — GNU-first, BSD-fallback (this skill's
+  # test suite runs on both macOS dev machines and Ubuntu CI).
+  ts_to_epoch() {
+    date -u -d "$1" +%s 2>/dev/null || date -u -j -f '%Y-%m-%dT%H:%M:%SZ' "$1" +%s 2>/dev/null
+  }
+  file_mtime_epoch() {
+    stat -c %Y "$1" 2>/dev/null || stat -f %m "$1" 2>/dev/null
+  }
+
+  POST_DONE_BAD=""
+  for dlane in "${!LANE_DONE_TS[@]}"; do
+    done_epoch=$(ts_to_epoch "${LANE_DONE_TS[$dlane]}")
+    [ -n "$done_epoch" ] || continue
+    for path in "${!CHANGED_UNION[@]}"; do
+      is_excluded "$path" && continue
+      owner_of "$path"
+      case ",${OWNER_NAMES}," in
+        *",${dlane},"*) ;;
+        *) continue ;;
+      esac
+      pdw_abs="${CWD}/${path}"
+      [ -e "$pdw_abs" ] || continue
+      pdw_mtime=$(file_mtime_epoch "$pdw_abs")
+      [ -n "$pdw_mtime" ] || continue
+      if [ "$pdw_mtime" -gt "$done_epoch" ]; then
+        POST_DONE_BAD="${POST_DONE_BAD}${POST_DONE_BAD:+; }${dlane}:${path}(mtime=${pdw_mtime},done=${done_epoch})"
+      fi
+    done
+  done
+  if [ -z "$POST_DONE_BAD" ]; then
+    record "post-done-writes-absent" "pass" "advisory, heuristic: no owned changed path has an on-disk mtime after its lane's last done event"
+  else
+    record "post-done-writes-absent" "warn" "advisory, heuristic (mtime vs. done-ts; can false-positive on rebuilds or clock skew, not a security boundary): $POST_DONE_BAD"
   fi
 else
   DETAIL="prerequisite failed: manifest-ok=${MANIFEST_OK} git-ok=${GIT_OK} plan-ok=${PLAN_OK}"
   for item in worker-file-logs-valid changed-files-owned changed-files-attributed-once \
-    contract-untouched shared-files-untouched baseline-diff-owned; do
+    contract-untouched shared-files-untouched changed-files-within-union; do
     record "$item" "fail" "$DETAIL"
   done
+  record "post-done-writes-absent" "warn" "$DETAIL"
 fi
 
 # ─── Output ─────────────────────────────────────────────────────────────
@@ -422,7 +555,7 @@ if [ "$JSON_OUT" -eq 1 ]; then
   echo "$ALL_JSON"
 else
   printf "## validate-run-state: %s\n\n" "$RUN_DIR"
-  echo "$ALL_JSON" | jq -r '.[] | "- [" + (if .status == "pass" then "x" else " " end) + "] " + .item + " — " + .detail'
+  echo "$ALL_JSON" | jq -r '.[] | "- [" + (if .status == "pass" then "x" elif .status == "warn" then "~" else " " end) + "] " + .item + " — " + .detail'
   echo
   if [ "$FAILS" -eq 0 ]; then
     echo "verdict: ALL PASS"
