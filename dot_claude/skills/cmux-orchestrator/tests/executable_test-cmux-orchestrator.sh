@@ -336,15 +336,14 @@ PREP_RC=0
   >"${PREP_WORK}/prepare.out" 2>"${PREP_WORK}/prepare.err" || PREP_RC=$?
 assert_eq "$PREP_RC" 0 "prepare-run.sh: two specs exits 0"
 
-assert_exit 0 test -f "${PREP_RUN}/system-prompt.txt"
-assert_exit 0 test -f "${PREP_RUN}/worker-auth-refactor.prompt.md"
-assert_exit 0 test -f "${PREP_RUN}/worker-add-tests.prompt.md"
-assert_exit 0 test -f "${PREP_RUN}/worker-auth-refactor.result.md"
-assert_exit 0 test -f "${PREP_RUN}/worker-add-tests.result.md"
+assert_eq "$(cat "${PREP_RUN}/system-prompt.txt")" "$(cat "$TEMPLATE")" \
+  "prepare-run.sh: system-prompt.txt content matches the packaged template, not just exists"
 
 MANIFEST_JSON=$(cat "${PREP_RUN}/manifest.json")
 assert_eq "$(jq '.workers | length' <<<"$MANIFEST_JSON")" 2 \
   "prepare-run.sh: manifest.json has one entry per spec"
+assert_eq "$(jq -r '.run_id' <<<"$MANIFEST_JSON")" "run" \
+  "prepare-run.sh: manifest.json run_id is the run dir's basename"
 assert_eq "$(jq -r '.worker_pane_ref' <<<"$MANIFEST_JSON")" "null" \
   "prepare-run.sh: manifest.json worker_pane_ref starts null (not launched yet)"
 assert_eq "$(jq -c '[.workers[].name] | sort' <<<"$MANIFEST_JSON")" \
@@ -355,16 +354,66 @@ assert_eq "$(jq -r '.workers[0].status' <<<"$MANIFEST_JSON")" "pending" \
 assert_eq "$(jq -r '.workers[0].prompt_file' <<<"$MANIFEST_JSON")" \
   "${PREP_RUN}/worker-auth-refactor.prompt.md" \
   "prepare-run.sh: manifest.json prompt_file is the real path prepare-run.sh wrote"
+assert_eq "$(jq -r '.workers[0].result_file' <<<"$MANIFEST_JSON")" \
+  "${PREP_RUN}/worker-auth-refactor.result.md" \
+  "prepare-run.sh: manifest.json result_file is the real path prepare-run.sh wrote"
+assert_eq "$(jq -r '.workers[0].done_marker' <<<"$MANIFEST_JSON")" \
+  "${PREP_RUN}/worker-auth-refactor.done" \
+  "prepare-run.sh: manifest.json done_marker is the real path, not a placeholder"
+assert_eq "$(jq -r '.workers[1].prompt_file' <<<"$MANIFEST_JSON")" \
+  "${PREP_RUN}/worker-add-tests.prompt.md" \
+  "prepare-run.sh: manifest.json's second worker also gets its real prompt_file path"
+assert_eq "$(jq -r '.workers[1].done_marker' <<<"$MANIFEST_JSON")" \
+  "${PREP_RUN}/worker-add-tests.done" \
+  "prepare-run.sh: manifest.json's second worker also gets its real done_marker path"
 assert_eq "$(jq -r '.cwd' <<<"$MANIFEST_JSON")" "$PREP_CWD" \
   "prepare-run.sh: manifest.json records the cwd argument"
 assert_eq "$(jq -r '.orchestrator_surface' <<<"$MANIFEST_JSON")" "surface:orch" \
   "prepare-run.sh: manifest.json records the orchestrator surface argument"
 
+# ─── Prompt files: full content, not just existence — every fixed section ──
+# prepare-run.sh is responsible for (orchestration info + judgement
+# placeholders) must actually be there, for BOTH workers, not just one.
 PROMPT_TEXT=$(cat "${PREP_RUN}/worker-auth-refactor.prompt.md")
+assert_contains "$PROMPT_TEXT" "# Task: auth-refactor" \
+  "prepare-run.sh: prompt file header names the worker"
+assert_contains "$PROMPT_TEXT" "Run ID: run" \
+  "prepare-run.sh: prompt file records the real run ID, not a placeholder"
+assert_contains "$PROMPT_TEXT" "Run directory: ${PREP_RUN}" \
+  "prepare-run.sh: prompt file records the real run directory"
+assert_contains "$PROMPT_TEXT" "Orchestrator surface: surface:orch" \
+  "prepare-run.sh: prompt file records the real orchestrator surface"
+assert_contains "$PROMPT_TEXT" "Result file: ${PREP_RUN}/worker-auth-refactor.result.md" \
+  "prepare-run.sh: prompt file names the real result-file path"
 assert_contains "$PROMPT_TEXT" "Done marker: ${PREP_RUN}/worker-auth-refactor.done" \
   "prepare-run.sh: prompt file names the real done-marker path, not a placeholder"
 assert_contains "$PROMPT_TEXT" "<Detailed task description" \
   "prepare-run.sh: prompt file leaves the Task section as a judgement placeholder"
+assert_contains "$PROMPT_TEXT" "<Explicit list of files" \
+  "prepare-run.sh: prompt file leaves the Files to Work With section as a judgement placeholder"
+assert_contains "$PROMPT_TEXT" "<Architecture notes" \
+  "prepare-run.sh: prompt file leaves the Context section as a judgement placeholder"
+assert_contains "$PROMPT_TEXT" "<Concrete, verifiable definition of done" \
+  "prepare-run.sh: prompt file leaves the Success Criteria section as a judgement placeholder"
+assert_contains "$PROMPT_TEXT" "Write \"done\" (just that word) to: ${PREP_RUN}/worker-auth-refactor.done" \
+  "prepare-run.sh: prompt file's When Finished section names the real done-marker path"
+assert_contains "$PROMPT_TEXT" "Stay available — do not exit" \
+  "prepare-run.sh: prompt file tells the worker to stay available"
+
+PROMPT_TEXT_2=$(cat "${PREP_RUN}/worker-add-tests.prompt.md")
+assert_contains "$PROMPT_TEXT_2" "# Task: add-tests" \
+  "prepare-run.sh: the second worker's prompt file is also filled in, not a copy of the first"
+assert_contains "$PROMPT_TEXT_2" "Result file: ${PREP_RUN}/worker-add-tests.result.md" \
+  "prepare-run.sh: the second worker's prompt file names its own result file"
+
+# ─── Result files: prepare-run.sh's actual placeholder content, per worker ─
+# — not just "a file exists at this path".
+assert_eq "$(cat "${PREP_RUN}/worker-auth-refactor.result.md")" \
+  "<!-- pending: auth-refactor has not reported yet -->" \
+  "prepare-run.sh: result-file placeholder names the worker, not a generic stub"
+assert_eq "$(cat "${PREP_RUN}/worker-add-tests.result.md")" \
+  "<!-- pending: add-tests has not reported yet -->" \
+  "prepare-run.sh: the second worker's result-file placeholder is also worker-specific"
 
 # ─── Idempotence: re-running with the same args leaves every file byte- ───
 # identical — hashed, not just re-checked for exit 0 (exit 0 alone would
@@ -450,12 +499,16 @@ assert_eq "$(jq -r '.type' <<<"$DONE_JSON")" "done" \
   "monitor-workers.sh: a done marker produces a done trigger"
 assert_eq "$(jq -r '.worker' <<<"$DONE_JSON")" "w1" \
   "monitor-workers.sh: done trigger names the worker"
+assert_eq "$(jq -r '.reason' <<<"$DONE_JSON")" "done" \
+  "monitor-workers.sh: done trigger's reason is the marker's literal content"
 rm -f "${MON_WORK}/run/w1.done"
 
 echo "blocked: needs human review" >"${MON_WORK}/run/w1.done"
 BLOCKED_JSON=$("$MONITOR" "${MON_WORK}/run")
 assert_eq "$(jq -r '.type' <<<"$BLOCKED_JSON")" "blocked" \
   "monitor-workers.sh: a 'blocked: ...' marker produces a blocked trigger"
+assert_eq "$(jq -r '.worker' <<<"$BLOCKED_JSON")" "w1" \
+  "monitor-workers.sh: blocked trigger names the worker"
 assert_eq "$(jq -r '.reason' <<<"$BLOCKED_JSON")" "needs human review" \
   "monitor-workers.sh: blocked trigger's reason strips the 'blocked: ' prefix"
 rm -f "${MON_WORK}/run/w1.done"
@@ -471,6 +524,8 @@ chmod +x "${MON_BIN_CRASH}/cmux"
 CRASHED_JSON=$(PATH="${MON_BIN_CRASH}:${PATH}" MONITOR_LIVENESS_INTERVAL=0 MONITOR_POLL_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "${MON_WORK}/run")
 assert_eq "$(jq -r '.type' <<<"$CRASHED_JSON")" "crashed" \
   "monitor-workers.sh: a vanished pane (capture-pane fails) produces a crashed trigger"
+assert_eq "$(jq -r '.worker' <<<"$CRASHED_JSON")" "w1" \
+  "monitor-workers.sh: crashed trigger names the worker"
 assert_contains "$(jq -r '.reason' <<<"$CRASHED_JSON")" "pane vanished" \
   "monitor-workers.sh: crashed trigger's reason says the pane vanished"
 
@@ -489,10 +544,73 @@ FAILED_RC=0
 FAILED_JSON=$(PATH="${MON_BIN_FATAL}:${PATH}" MONITOR_LIVENESS_INTERVAL=0 MONITOR_POLL_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "${MON_WORK}/run") || FAILED_RC=$?
 assert_eq "$(jq -r '.type' <<<"$FAILED_JSON")" "failed" \
   "monitor-workers.sh: a fatal signature in the pane log produces a failed trigger"
+assert_eq "$(jq -r '.worker' <<<"$FAILED_JSON")" "w1" \
+  "monitor-workers.sh: failed trigger names the worker"
 assert_contains "$(jq -r '.reason' <<<"$FAILED_JSON")" "panic: something exploded" \
   "monitor-workers.sh: failed trigger's reason quotes the matched fatal-signature line"
 assert_eq "$FAILED_RC" 0 \
   "monitor-workers.sh: a fatal-signature failed trigger still exits 0 — the monitor did its job of detecting and reporting it"
+
+# ─── A benign line ("command not found") must NOT produce a failed trigger. ─
+# Regression test for the false-positive: a worker probing for an optional
+# tool (`bash: foobar: command not found`) used to be indistinguishable from
+# a real crash because the old regex included this phrase unconditionally.
+# With MAX_WAIT this short and nothing else to detect, the run below must
+# end via the timeout path, NOT a "fatal signature" match.
+mkdir -p "${MON_WORK}/run-benign"
+cat >"${MON_WORK}/run-benign/manifest.json" <<EOF
+{"workers":[{"name":"w1","done_marker":"${MON_WORK}/run-benign/w1.done","surface_ref":"surface:1"}]}
+EOF
+MON_BIN_BENIGN="${MON_WORK}/bin-benign"
+mkdir -p "$MON_BIN_BENIGN"
+cat >"${MON_BIN_BENIGN}/cmux" <<'STUB'
+#!/usr/bin/env bash
+echo "bash: foobar: command not found"
+exit 0
+STUB
+chmod +x "${MON_BIN_BENIGN}/cmux"
+BENIGN_RC=0
+BENIGN_JSON=$(PATH="${MON_BIN_BENIGN}:${PATH}" MONITOR_LIVENESS_INTERVAL=0 MONITOR_POLL_INTERVAL=1 MONITOR_MAX_WAIT=2 "$MONITOR" "${MON_WORK}/run-benign") || BENIGN_RC=$?
+assert_eq "$(jq -r '.reason' <<<"$BENIGN_JSON")" "timeout: no trigger fired within 2s" \
+  "monitor-workers.sh: a 'command not found' line does not produce a failed/fatal-signature trigger — the run times out instead"
+assert_eq "$BENIGN_RC" 1 \
+  "monitor-workers.sh: no fatal signature fired, so the only trigger is the timeout path (exit 1)"
+
+# ─── Incremental scanning: a line already seen must not re-trigger on a ────
+# later, separate invocation of the script. This is the mechanism behind
+# the "poisons every subsequent poll" bug: the old code rescanned the ENTIRE
+# pane buffer on every liveness check, so a fatal-looking line that was
+# already reported once (the caller re-invokes monitor-workers.sh in a loop
+# for the NEXT event) fired again, forever. Two SEPARATE invocations here,
+# sharing one run dir (so the per-worker watermark persists between them):
+# call 1 sees "panic: ..." for the first time and correctly reports it;
+# call 2, with the exact same unchanged pane content, must NOT re-report
+# "fatal signature" — it must fall through to the (different) timeout path.
+mkdir -p "${MON_WORK}/run-incremental"
+cat >"${MON_WORK}/run-incremental/manifest.json" <<EOF
+{"workers":[{"name":"w1","done_marker":"${MON_WORK}/run-incremental/w1.done","surface_ref":"surface:1"}]}
+EOF
+MON_BIN_STALE="${MON_WORK}/bin-stale"
+mkdir -p "$MON_BIN_STALE"
+cat >"${MON_BIN_STALE}/cmux" <<'STUB'
+#!/usr/bin/env bash
+echo "panic: something exploded"
+exit 0
+STUB
+chmod +x "${MON_BIN_STALE}/cmux"
+
+FIRST_JSON=$(PATH="${MON_BIN_STALE}:${PATH}" MONITOR_LIVENESS_INTERVAL=0 MONITOR_POLL_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "${MON_WORK}/run-incremental")
+assert_eq "$(jq -r '.type' <<<"$FIRST_JSON")" "failed" \
+  "monitor-workers.sh: incremental scan sanity check — the first invocation still catches the real fatal signature"
+assert_contains "$(jq -r '.reason' <<<"$FIRST_JSON")" "fatal signature" \
+  "monitor-workers.sh: incremental scan sanity check — first invocation's trigger is a genuine fatal-signature match"
+
+SECOND_RC=0
+SECOND_JSON=$(PATH="${MON_BIN_STALE}:${PATH}" MONITOR_LIVENESS_INTERVAL=0 MONITOR_POLL_INTERVAL=1 MONITOR_MAX_WAIT=2 "$MONITOR" "${MON_WORK}/run-incremental") || SECOND_RC=$?
+assert_eq "$(jq -r '.reason' <<<"$SECOND_JSON")" "timeout: no trigger fired within 2s" \
+  "monitor-workers.sh: a second invocation with the SAME unchanged pane content does not re-trigger on the already-seen line"
+assert_eq "$SECOND_RC" 1 \
+  "monitor-workers.sh: the second invocation's only trigger is the timeout path, not a repeated fatal-signature match"
 
 # ─── Bounded wait: exhausting MAX_WAIT with no marker and no pane to check ─
 # still emits a trigger — the "never hang, never report success by
@@ -506,17 +624,22 @@ TIMEOUT_RC=0
 TIMEOUT_JSON=$(MONITOR_MAX_WAIT=0 "$MONITOR" "${MON_WORK}/run2") || TIMEOUT_RC=$?
 assert_eq "$(jq -r '.type' <<<"$TIMEOUT_JSON")" "failed" \
   "monitor-workers.sh: exhausting the bound with nothing detected still emits a trigger, not a hang"
+assert_eq "$(jq -r '.worker' <<<"$TIMEOUT_JSON")" "null" \
+  "monitor-workers.sh: the bound-exceeded trigger names no specific worker"
 assert_contains "$(jq -r '.reason' <<<"$TIMEOUT_JSON")" "timeout" \
   "monitor-workers.sh: the bound-exceeded trigger's reason says timeout"
 assert_eq "$TIMEOUT_RC" 1 \
   "monitor-workers.sh: the bound-exceeded trigger is the one case that exits nonzero"
 
 # ─── The fatal-signature regex itself is pinned so a future edit can't ────
-# quietly narrow what counts as fatal without this test noticing.
-MONITOR_TEXT=$(cat "$MONITOR")
-assert_contains "$MONITOR_TEXT" \
-  'panic|fatal|segmentation fault|killed|traceback|unhandled|command not found|permission denied' \
-  "monitor-workers.sh: the fatal-signature regex is the full agreed set, not a narrowed subset"
+# quietly widen OR narrow what counts as fatal without this test noticing.
+# `command not found` / `permission denied` are deliberately excluded — see
+# the script's header for why (both are routine, non-fatal tool-probing
+# output; the benign-line test above is the regression proof).
+FATAL_REGEX_LINE=$(grep '^FATAL_REGEX=' "$MONITOR")
+assert_eq "$FATAL_REGEX_LINE" \
+  "FATAL_REGEX='panic|fatal|segmentation fault|killed|traceback|unhandled'" \
+  "monitor-workers.sh: the fatal-signature regex is exactly the narrowed, agreed set — 'command not found' / 'permission denied' dropped (see header for why; the benign-line test above is the regression proof), nothing else added or removed"
 
 rm -rf "$MON_WORK"
 
@@ -561,16 +684,20 @@ assert_contains "$SKILL_MD_TEXT" "Never parallelize dependent tasks" \
   "SKILL.md: must-survive — serialize dependent tasks"
 assert_contains "$SKILL_MD_TEXT" "Workers must not exit" \
   "SKILL.md: must-survive — workers stay in interactive mode"
+assert_contains "$SKILL_MD_TEXT" 'cmux notify --title "Orchestration Complete" --body "All ${TOTAL} workers finished"' \
+  "SKILL.md: must-survive — OS-level completion notification"
 
-# ─── templates/system-prompt.txt: verbatim wording pins — this is what ────
-# every worker is told; a silent edit changes every future worker's
-# behavior. A full-file diff against the original heredoc is done by hand
-# at commit time; these pin the opening and closing lines so an automated
-# regression is caught here too.
+# ─── templates/system-prompt.txt: full-content hash pin — this is what ────
+# every worker is told; a silent mid-file edit must fail CI. Pinning only
+# the opening/closing lines (the previous approach) lets any edit in the
+# middle of the file through undetected — the hash below covers every byte.
 TEMPLATE_TEXT=$(cat "$TEMPLATE")
 assert_contains "$TEMPLATE_TEXT" "You are a worker agent in a cmux parallel orchestration." \
   "templates/system-prompt.txt: opening line survived the extraction verbatim"
 assert_contains "$TEMPLATE_TEXT" "Handle errors explicitly at every level" \
   "templates/system-prompt.txt: closing line survived the extraction verbatim"
+assert_eq "$(sha256sum "$TEMPLATE" | awk '{print $1}')" \
+  "478da7da38c6a9088739707a3ba1330e602eed49ec5dc78bb9026d4146d0a1b6" \
+  "templates/system-prompt.txt: full-content hash pin — any mid-file edit, not just first/last line, fails this"
 
 assert_summary
