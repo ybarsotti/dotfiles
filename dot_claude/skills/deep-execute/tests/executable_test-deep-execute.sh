@@ -110,10 +110,12 @@ assert_eq "$NO_FILE_TABLE" "$EMPTY_TABLE" "a missing events.jsonl also renders t
 # ─── worker system prompt: behavioral spec pinned ──────────────────────────
 
 PROMPT_TEXT=$(cat "$WORKER_PROMPT")
+# shellcheck disable=SC2016 # literal backticked text being matched, not a command substitution
 assert_contains "$PROMPT_TEXT" 'Never run `git`' "prompt forbids git"
 assert_contains "$PROMPT_TEXT" 'worker-<lane>.files.txt' "prompt names the attribution log"
 assert_contains "$PROMPT_TEXT" 'event.sh RUN_DIR LANE TASK TYPE MSG' "prompt gives the event.sh interface"
 assert_contains "$PROMPT_TEXT" 'board.sh RUN_DIR [--lane LANE]' "prompt gives the board.sh interface"
+# shellcheck disable=SC2016 # literal backticked text being matched, not a command substitution
 assert_contains "$PROMPT_TEXT" 'emit `waiting` and STOP' "prompt states finishing-early behavior"
 assert_contains "$PROMPT_TEXT" 'Do not poll' "prompt forbids polling"
 

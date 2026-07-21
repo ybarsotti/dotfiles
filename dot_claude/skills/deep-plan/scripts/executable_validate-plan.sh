@@ -32,7 +32,7 @@ RESULTS=()
 
 # task_title_count / task_body_issues — shared with validate-draft.sh via
 # task-body-lib.sh (see that file for why).
-# shellcheck source=./task-body-lib.sh
+# shellcheck source=./task-body-lib.sh disable=SC1091 # sourced at runtime; CI shellcheck doesn't pass -x
 . "$(dirname "$0")/task-body-lib.sh"
 
 record() {
@@ -313,7 +313,7 @@ if [ "$MODE" = "root" ]; then
 
   # owns_match / valid_owns_pattern / owns_overlap — shared with
   # subplan-fanout.sh via owns-lib.sh (see that file for behavior notes).
-  # shellcheck source=./owns-lib.sh
+  # shellcheck source=./owns-lib.sh disable=SC1091 # sourced at runtime; CI shellcheck doesn't pass -x
   . "$(dirname "$0")/owns-lib.sh"
 
   PARSER="$(dirname "$0")/plan-to-json.sh"

@@ -119,7 +119,7 @@ fi
 # owns_match — shared with validate-plan.sh via owns-lib.sh (see that file
 # for behavior notes; this used to be a second, textually-identical copy
 # that could — and once did — drift out of sync with the other).
-# shellcheck source=./owns-lib.sh
+# shellcheck source=./owns-lib.sh disable=SC1091 # sourced at runtime; CI shellcheck doesn't pass -x
 . "${SKILL_DIR}/scripts/owns-lib.sh"
 
 generate_subplan() {

@@ -32,7 +32,7 @@ command -v jq >/dev/null 2>&1 || { echo "validate-draft.sh: jq required" >&2; ex
 
 # task_title_count / task_body_issues — shared with validate-plan.sh via
 # task-body-lib.sh (see that file for why).
-# shellcheck source=./task-body-lib.sh
+# shellcheck source=./task-body-lib.sh disable=SC1091 # sourced at runtime; CI shellcheck doesn't pass -x
 . "$(dirname "$0")/task-body-lib.sh"
 
 # The canonical checklist item vocabulary — read from the templates rather

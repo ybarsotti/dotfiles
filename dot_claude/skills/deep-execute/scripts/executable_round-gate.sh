@@ -203,6 +203,7 @@ else
     {
       printf '\n## Required output format\n\n'
       printf 'End your entire response with exactly one line, and nothing after it:\n\n'
+      # shellcheck disable=SC2016 # literal backticked text in the printed prompt, not a command substitution
       printf '`VERDICT: APPROVE` or `VERDICT: REQUEST_CHANGES` or `VERDICT: REJECT`\n'
     } >>"${REVIEWER_DIR}/reviewers/deep-execute-round.prompt.md"
     git -C "$CWD" diff --no-ext-diff "${BASELINE_COMMIT}" -- >"${REVIEWER_DIR}/context.md" 2>/dev/null || : >"${REVIEWER_DIR}/context.md"

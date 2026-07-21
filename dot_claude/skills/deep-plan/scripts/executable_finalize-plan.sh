@@ -29,10 +29,10 @@
 set -uo pipefail
 
 RUN_DIR="${1:-}"
-[ -n "$RUN_DIR" ] && [ -d "$RUN_DIR" ] || {
+if [ -z "$RUN_DIR" ] || [ ! -d "$RUN_DIR" ]; then
   echo "finalize-plan.sh: usage: finalize-plan.sh RUN_DIR" >&2
   exit 2
-}
+fi
 
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # Resolve the deployed sibling name first, falling back to the source-tree

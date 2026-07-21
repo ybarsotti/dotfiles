@@ -200,7 +200,9 @@ do_liveness_check() {
   local lane surface pane_log state_file total prev new match
   for lane in "${LANES[@]}"; do
     surface=$(jq -r --arg n "$lane" '.workers[]? | select(.name == $n) | .surface_ref // empty' "$CMUX_MANIFEST" 2>/dev/null)
-    [ -n "$surface" ] && [ "$surface" != "null" ] || continue
+    if [ -z "$surface" ] || [ "$surface" = "null" ]; then
+      continue
+    fi
 
     if ! pane_log=$(cmux capture-pane --surface "$surface" 2>&1); then
       emit "vanished_pane" "$lane" "" "pane vanished: capture-pane failed for ${surface}"
