@@ -146,6 +146,7 @@ All scripts use Go templates for OS/machine-purpose conditionals and share `erro
 | `dot_claude/mcp_servers.json.tmpl` | MCP server config merged from shared + machine-purpose sections |
 | `dot_claude/hooks/` | Shell hooks: auto-format, dangerous-guard, file-edit-tracker, session-log |
 | `dot_claude/commands/anki.md` | Custom slash command |
+| `dot_claude/commands/deep-plan.md`, `deep-execute.md`, `deep-review.md` | Deep-* agent pipeline slash commands (see §9) |
 | `dot_claude/CLAUDE.md.tmpl` | Per-project Claude instructions |
 | `modify_dot_claude.json` | JSON modifier for Claude config |
 
@@ -180,6 +181,7 @@ graph LR
     JUST --> LINT2["just lint"]
     JUST --> HOOKS["just validate-hooks"]
     JUST --> TEST["just test-all"]
+    JUST --> DEEPTEST["just test-deep-pipeline<br/>(deep-* agent pipeline, §9)"]
     TEST --> FRESH
     TEST --> IDEMP
 ```
@@ -188,6 +190,57 @@ graph LR
 - **CI pipeline** (`.github/workflows/ci.yml`): 3 parallel jobs on push/PR to main
 - **Justfile**: Local task runner for validation, linting, testing, formatting
 - **Pre-commit hooks**: shellcheck, yamllint, gitleaks, trailing-whitespace, detect-private-key
+
+### 9. Deep-* Agent Pipeline
+
+Three chained slash commands (`dot_claude/commands/deep-plan.md`, `deep-execute.md`,
+`deep-review.md`, backed by skills under `dot_claude/skills/deep-plan/`,
+`dot_claude/skills/deep-execute/`, `dot_claude/skills/deep-review/`, and
+`dot_claude/skills/cmux-orchestrator/`) take a non-trivial task from planning through
+parallel, multi-agent execution to a reviewed diff:
+
+```mermaid
+graph TD
+    PLAN["/deep-plan<br/>Opus+Codex draft, 5-persona review,<br/>Plannotator gate"] -->|"approved plan.md<br/>(Execution shape + API contract)"| INIT
+
+    subgraph "/deep-execute (orchestrator)"
+        INIT["init-run.sh<br/>validate-plan.sh --root, scaffold RUN_DIR/manifest.json"]
+        LAUNCH["cmux-orchestrator: launch-workers.sh<br/>one pane per non-orchestrator lane"]
+        LANES["Lane workers (parallel, ONE shared worktree)<br/>each owns disjoint path globs"]
+        MON["monitor-events.sh<br/>event.sh / board.sh / reply.sh"]
+        GATE["round-gate.sh<br/>lane tests → contract → run-state → light review"]
+        COMMIT["orchestrator commits<br/>(workers never run git)"]
+
+        INIT --> LAUNCH --> LANES
+        LANES -->|"events.jsonl"| MON
+        MON -->|"question / blocked / waiting"| LANES
+        MON -->|"all lanes done"| GATE
+        GATE -->|"pass"| COMMIT
+        GATE -->|"fail: fix + rerun"| LANES
+        COMMIT -->|"round < max_rounds (default 3)"| LAUNCH
+    end
+
+    COMMIT -->|"final round"| REVIEW["/deep-review<br/>full-diff, multi-persona"]
+```
+
+- **Boundary guarantee (git-only, unforgeable):** `changed-files-within-union` inside
+  `validate-run-state.sh` diffs the round's baseline commit against the union of every
+  lane's declared `owns` globs. This is the one hard, blocking check.
+- **Advisory only (self-declared, not authenticated):** `worker-<lane>.files.txt` (per-lane
+  attribution), `changed-files-attributed-once`, `worker-file-logs-valid`, and
+  `post-done-writes-absent` are diagnostics a worker could forge from inside the shared
+  worktree — status `warn` never blocks a round, and `fail` on these items is a signal to
+  investigate, not proof of authorship.
+- **Contract drift:** a lane `blocked` on the materialized API contract means the contract
+  is wrong, not the worker — the orchestrator edits it, bumps its semantic version, commits,
+  and broadcasts via `reply.sh RUN_DIR --all`.
+- **Round cap:** `max_rounds` (default 3, patchable via `--max-rounds`) lives in
+  `manifest.json`; a round beyond the cap is refused outright with an escalation record.
+- **Tests:** `just test-deep-pipeline` runs six shell suites (700+ assertions) covering plan
+  validation, lane/ownership boundaries, the event/reply protocol, round gating, and an
+  end-to-end integration test that walks a real plan through `validate-plan.sh` →
+  `init-run.sh` → `validate-contract.sh` → `validate-run-state.sh` with no real agent
+  launched (cmux/claude/codex/reviewer are stubbed).
 
 ## Key Design Decisions
 

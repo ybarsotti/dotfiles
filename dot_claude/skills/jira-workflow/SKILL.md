@@ -13,11 +13,11 @@ description: |
   ticket, renaming the cmux tab, creating a branch (main repo or new worktree),
   transitioning the Jira status to "Under investigation", then delegating the deep
   planning to /deep-plan (grill-with-docs → brainstorming → writing-plans → 5-persona
-  review incl. ticket-matcher → plannotator → approved plan), building via the superpowers
-  execution workflow under strict TDD (mock only outer boundaries), running /simplify twice
-  and /deep-review, running /qa-test-plan when flows or screens change, opening the PR via
-  /pr-description (conventional title, Mermaid, no file list, assigned to the user), and
-  looping on CI + Copilot feedback until both are clean.
+  review incl. ticket-matcher → plannotator → approved plan), executing the approved plan
+  via /deep-execute (lane fanout, round tests, run-state validation, orchestrator commits,
+  one final /deep-review), running /qa-test-plan when flows or screens change, opening the
+  PR via /pr-description (conventional title, Mermaid, no file list, assigned to the user),
+  and looping on CI + Copilot feedback until both are clean.
 ---
 
 # Jira Ticket Workflow
@@ -60,11 +60,9 @@ items.
 - [ ] **Deep planning** — run `/deep-plan "<CODE>" --ticket <CODE>`: grill-with-docs →
       brainstorming → writing-plans → 5-persona review (incl. **ticket-matcher**, which bats
       the plan point-by-point against the ticket) → plannotator → approved plan
-- [ ] **Build**: superpowers execution (`subagent-driven-development` / `executing-plans`),
-      strict TDD, **mock only the outermost boundaries** (network, 3rd-party APIs, clock) —
-      inner services/repositories/domain run real
-- [ ] **`/simplify` ×2**
-- [ ] **`/deep-review`**: fixed-roster panel (Sonnet + Codex); address every actionable finding
+- [ ] **Execute approved plan** — run `/deep-execute ~/.claude/deep-plan-runs/<RUN_ID>/plan.md`.
+      `/deep-execute` owns lane fanout, round tests, run-state validation, orchestrator
+      commits, and one final `/deep-review`.
 - [ ] **`/qa-test-plan`** (if the plan's QA flag is "yes" — flow change or new screens):
       manual test doc + codex review + agent-browser execution with video
 - [ ] **Re-run tests**: every test (new + existing) must be green
@@ -83,9 +81,7 @@ Use `cmux set-progress` at natural boundaries:
 | Intake + clarity | 0.10 |
 | Branch created | 0.15 |
 | Plan approved (`/deep-plan`) | 0.30 |
-| Build tests passing (TDD green) | 0.50 |
-| `/simplify` done | 0.60 |
-| `/deep-review` complete + fixes applied | 0.75 |
+| Plan executed (`/deep-execute` — build, round tests, final `/deep-review`) | 0.75 |
 | PR opened (`/pr-description`) | 0.85 |
 | CI + Copilot clean | 1.00 |
 
@@ -222,39 +218,25 @@ Do NOT hand-trace, hand-write tests, or plan inline here — that duplicates dee
 ticket-matcher flags the plan as vague or missing an acceptance criterion, resolve it inside
 the deep-plan loop before continuing. Set `cmux set-progress 0.30 --label "Plan approved"`.
 
-## 3. Build — superpowers execution (strict TDD)
+## 3. Execute approved plan — delegate to `/deep-execute`
 
-Execute the approved plan via the superpowers execution workflow:
+```
+/deep-execute ~/.claude/deep-plan-runs/<RUN_ID>/plan.md
+```
 
-- `Skill(skill="superpowers:using-git-worktrees")` if not already isolated (you usually made
-  a worktree in §1.5 — reuse it).
-- `Skill(skill="superpowers:subagent-driven-development")` (or `executing-plans` when
-  subagents are unavailable) against `~/.claude/deep-plan-runs/<RUN_ID>/plan.md`.
-- Strict red-green-refactor per `superpowers:test-driven-development`. **Mock only the
-  outermost boundaries** (network, 3rd-party APIs, clock/random) — inner services,
-  repositories, and domain logic run REAL code in tests. Do not mock every service.
-- **Bug/regression ticket?** Drive the fix through `superpowers:systematic-debugging`
-  (reproduce → minimise → hypothesise → instrument → fix → regression-test) before writing
-  the fix — the failing test is the reproduction.
-- **Fallback**: if agent-teams/subagent-driven is unavailable, fan out independent build
-  slices with `superpowers:dispatching-parallel-agents`, then integrate.
+`/deep-execute` owns lane fanout, round tests, run-state validation, orchestrator commits,
+and one final `/deep-review` — do NOT hand-run the superpowers execution workflow, `/simplify`,
+or `/deep-review` separately here; that duplicates what `/deep-execute` already does at the
+end of its last round. See `dot_claude/skills/deep-execute/SKILL.md` (and
+`ARCHITECTURE.md` §9) for the fan-out, round-gate, and contract-drift protocol.
 
-Set `cmux set-progress 0.50 --label "Tests green"` when the plan's tests pass.
+`Skill(skill="superpowers:verification-before-completion")` once `/deep-execute` reports the
+run complete, before any PR work.
 
-## 4. Simplify + review
+Set `cmux set-progress 0.75 --label "Plan executed"` when the run's final round passed and
+`/deep-review` came back clean.
 
-- `/simplify` ×2 (re-run tests after each pass).
-- `/deep-review` — the fixed-roster panel (project-patterns, docs-consistency, db-performance,
-  frontend, backend, security, edges, tests, architecture, concurrency, simplicity, scope; each
-  on Sonnet + Codex). Before applying its findings, `Skill(skill="superpowers:receiving-code-review")`
-  — verify each finding technically, push back on the questionable ones, don't blindly apply.
-  Then address every actionable finding with a small TDD cycle. `/deep-review` ends with its own
-  `/simplify` pass.
-- `Skill(skill="superpowers:verification-before-completion")` before any PR work.
-
-Set `cmux set-progress 0.75 --label "Reviews complete"` when done and tests are green.
-
-## 5. QA test plan (only if flows/screens changed)
+## 4. QA test plan (only if flows/screens changed)
 
 If the deep-plan `plan.md` `## QA / test-execution` flag is **yes** (a user-facing flow
 changed or a screen was added), run:
@@ -267,14 +249,14 @@ It writes a manual test plan to the project's `./tmp/`, has a codex agent review
 drives `agent-browser` (codex worker via cmux) to execute the steps and record a video,
 returning a pass/fail report. Reference the report + video path on the PR/ticket.
 
-## 6. Verification
+## 5. Verification
 
 Confirm every test (new + existing) is green and `verification-before-completion` passed.
 Do not open the PR on red.
 
-## 7. PR creation
+## 6. PR creation
 
-### 7.1 Commit
+### 6.1 Commit
 
 Conventional commit message. Mention the ticket in the body:
 
@@ -288,7 +270,7 @@ Implements <CODE>.
 
 Don't skip hooks. Don't `--no-verify`.
 
-### 7.2 Push + open PR — `/pr-description`
+### 6.2 Push + open PR — `/pr-description`
 
 Push the branch, then let `/pr-description` build the title + body and open the PR — do NOT
 hand-write the PR body here:
@@ -307,7 +289,7 @@ the PR is opened **assigned to you** (`--assignee @me`), and CODEOWNERS reviewer
 
 `cmux notify --title "<CODE> PR opened" --body "<PR URL>"` + `set-progress 0.85`.
 
-### 7.3 Jira comment (optional but nice)
+### 6.3 Jira comment (optional but nice)
 
 Add the PR URL to the ticket:
 
@@ -317,11 +299,11 @@ mcp__atlassian__addCommentToJiraIssue(cloudId, issueIdOrKey=<CODE>, commentBody=
 
 ---
 
-## 8. CI + Copilot loop
+## 7. CI + Copilot loop
 
 Both run concurrently. Keep looping until **both** converge.
 
-### 8.1 CI watcher
+### 7.1 CI watcher
 
 ```bash
 gh pr view <pr-number> --json statusCheckRollup \
@@ -333,7 +315,7 @@ through `superpowers:systematic-debugging` (reproduce the failure locally, minim
 hypothesise, fix, add a regression test), then push and the loop resumes. Don't close the loop
 while anything is `IN_PROGRESS`.
 
-### 8.2 Copilot review loop
+### 7.2 Copilot review loop
 
 Copilot's PR review arrives within ~5 min of the PR being opened (sometimes sooner).
 Fetch inline comments with:
@@ -358,7 +340,7 @@ After every push, Copilot may post a *new* review on the new commit. **Keep loop
 wait 3–5 min, re-fetch comments, address anything new. The loop ends when a fetch
 returns no unaddressed comments.
 
-### 8.3 Wrap-up
+### 7.3 Wrap-up
 
 When CI is green AND Copilot has no new comments for at least one full iteration after
 the last fix:
