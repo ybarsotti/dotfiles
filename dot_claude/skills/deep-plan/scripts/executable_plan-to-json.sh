@@ -45,7 +45,7 @@ command -v jq >/dev/null 2>&1 || {
 # instead of corrupting whatever it touches.
 SENTINEL=$(printf '\001')
 if LC_ALL=C grep -q "$SENTINEL" "$PLAN"; then
-  echo "plan-to-json.sh: plan file contains a raw \\001 byte (reserved internally as the pipe-escape sentinel) — remove it before parsing" >&2
+  printf 'plan-to-json.sh: plan file contains a raw \\001 byte (reserved internally as the pipe-escape sentinel) — remove it before parsing\n' >&2
   exit 1
 fi
 

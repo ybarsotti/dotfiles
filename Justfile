@@ -144,11 +144,15 @@ test-all: test-fresh test-idempotency
 # --- Linting ---
 
 # Run linters (shellcheck, yamllint, gitleaks)
+# Both shellcheck steps mirror .github/workflows/ci.yml exactly, including the
+# xargs (not `find -exec ... \;`) invocation: `find -exec cmd {} \;` always
+# returns 0 regardless of cmd's exit status, so it silently swallowed every
+# shellcheck finding here while CI's `xargs` correctly failed the job.
 lint:
     @echo "Running shellcheck on .sh files..."
-    @find . -name "*.sh" -type f -not -path "*/.git/*" -exec shellcheck {} \;
+    @find . -name "*.sh" -type f -not -path "*/.git/*" -print0 | xargs -0 -r shellcheck
     @echo "Running shellcheck on .sh.tmpl files..."
-    @find . -name "*.sh.tmpl" -type f -not -path "*/.git/*" -exec sh -c 'grep -v "^\s*{{"{{"}}" "$1" | shellcheck -s bash --severity=error -' _ {} \;
+    @find . -name "*.sh.tmpl" -type f -not -path "*/.git/*" -print0 | xargs -0 -r -n1 sh -c 'grep -v "^\s*{{"{{"}}" "$1" | shellcheck -s bash --severity=error -' _
     @echo "Running yamllint..."
     @yamllint -d relaxed .chezmoidata/packages.yaml
     @echo "Running gitleaks..."

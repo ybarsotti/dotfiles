@@ -189,6 +189,7 @@ assert_eq "$HAS_CLAUDE_EFFORT" "no" "claude no-effort: --effort flag is omitted"
 # clean environment (no cmux, claude, or codex on PATH) and runs parse_spec
 # on SPEC. Exit status is parse_spec's; used with assert_exit.
 parse_case() {
+  # shellcheck disable=SC2016 # $1/$2 are for the inner bash -c to expand, not this shell
   env -i PATH="/usr/bin:/bin" LAUNCH_WORKERS_LIB_ONLY=1 \
     bash -c '. "$1"; parse_spec "$2"' _ "$LAUNCHER" "$1"
 }
@@ -197,12 +198,14 @@ parse_case() {
 # (parse_spec never writes to stdout, so a plain `2>&1` merge is enough —
 # no need for the discard-stdout swap trick.)
 parse_case_stderr() {
+  # shellcheck disable=SC2016 # $1/$2 are for the inner bash -c to expand, not this shell
   env -i PATH="/usr/bin:/bin" LAUNCH_WORKERS_LIB_ONLY=1 \
     bash -c '. "$1"; parse_spec "$2"' _ "$LAUNCHER" "$1" 2>&1 || true
 }
 
 # parse_case_values SPEC — same, prints "name|runner|model|effort" on success.
 parse_case_values() {
+  # shellcheck disable=SC2016 # $1/$2/$name/etc are for the inner bash -c to expand, not this shell
   env -i PATH="/usr/bin:/bin" LAUNCH_WORKERS_LIB_ONLY=1 \
     bash -c '. "$1"; parse_spec "$2"; printf "%s|%s|%s|%s" "$name" "$runner" "$model" "$effort"' \
     _ "$LAUNCHER" "$1"
@@ -211,6 +214,7 @@ parse_case_values() {
 # Sourcing with the guard set requires nothing beyond bash — no positional
 # args, no cmux, no claude/codex — proving the guard short-circuits before
 # argument validation and before any cmux call.
+# shellcheck disable=SC2016 # $1 is for the inner bash -c to expand, not this shell
 assert_exit 0 env -i PATH="/usr/bin:/bin" LAUNCH_WORKERS_LIB_ONLY=1 \
   bash -c '. "$1"' _ "$LAUNCHER"
 
@@ -670,10 +674,13 @@ assert_eq "$NOT_CONTAINS_OLD_HEREDOC" "yes" \
 
 assert_contains "$SKILL_MD_TEXT" "Never create sessions before the plan is approved by the user." \
   "SKILL.md: must-survive — plan approval gate"
+# shellcheck disable=SC2016 # literal backticked text being matched, not a command substitution
 assert_contains "$SKILL_MD_TEXT" 'ALWAYS use the `launch-workers.sh` script' \
   "SKILL.md: must-survive — always use launch-workers.sh"
+# shellcheck disable=SC2016 # literal backticked text being matched, not a command substitution
 assert_contains "$SKILL_MD_TEXT" 'Do NOT manually run `cmux send`' \
   "SKILL.md: must-survive — do not manually run cmux send (Phase 3)"
+# shellcheck disable=SC2016 # literal backticked text being matched, not a command substitution
 assert_contains "$SKILL_MD_TEXT" 'NEVER use raw `cmux send` directly' \
   "SKILL.md: must-survive — never use raw cmux send (idle worker reuse)"
 assert_contains "$SKILL_MD_TEXT" "Never clean up automatically." \
@@ -684,6 +691,7 @@ assert_contains "$SKILL_MD_TEXT" "Never parallelize dependent tasks" \
   "SKILL.md: must-survive — serialize dependent tasks"
 assert_contains "$SKILL_MD_TEXT" "Workers must not exit" \
   "SKILL.md: must-survive — workers stay in interactive mode"
+# shellcheck disable=SC2016 # literal example text with ${TOTAL} being matched, not expanded
 assert_contains "$SKILL_MD_TEXT" 'cmux notify --title "Orchestration Complete" --body "All ${TOTAL} workers finished"' \
   "SKILL.md: must-survive — OS-level completion notification"
 

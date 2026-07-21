@@ -77,7 +77,7 @@ assert_contains "$SHORT_ROW_STDERR" "malformed lane row" \
 FANOUT_RUN=$(mktemp -d)
 cp "$FIXTURE" "${FANOUT_RUN}/plan.md"
 "$FANOUT" "$FANOUT_RUN" >/dev/null
-FANOUT_FILES=$(ls "${FANOUT_RUN}/subplans" | sort | tr '\n' ',')
+FANOUT_FILES=$(find "${FANOUT_RUN}/subplans" -maxdepth 1 -type f -exec basename {} \; | sort | tr '\n' ',')
 assert_eq "$FANOUT_FILES" "execution.md,orchestrator.md,planning.md,review.md," \
   "subplan-fanout produces one subplan per lane, not directory chapters"
 rm -rf "$FANOUT_RUN"
@@ -114,7 +114,7 @@ rm -rf "$MALFORMED_FANOUT_RUN"
 NO_SHAPE_FANOUT_RUN=$(mktemp -d)
 cp "$FANOUT_NO_SHAPE_FIXTURE" "${NO_SHAPE_FANOUT_RUN}/plan.md"
 assert_exit 0 "$FANOUT" "$NO_SHAPE_FANOUT_RUN"
-NO_SHAPE_FANOUT_FILES=$(ls "${NO_SHAPE_FANOUT_RUN}/subplans" | sort | tr '\n' ',')
+NO_SHAPE_FANOUT_FILES=$(find "${NO_SHAPE_FANOUT_RUN}/subplans" -maxdepth 1 -type f -exec basename {} \; | sort | tr '\n' ',')
 assert_eq "$NO_SHAPE_FANOUT_FILES" "docs.md,src.md," \
   "a plan with no Execution shape section still fans out via legacy directory grouping"
 rm -rf "$NO_SHAPE_FANOUT_RUN"
@@ -161,6 +161,7 @@ sed '/^| lane | scope | owns (path globs)/d' "$FIXTURE" > "$TMP/no-lane-table.md
 expect_fail_item "execution-shape-present" "$TMP/no-lane-table.md"
 
 # 2. exec-mode-valid
+# shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed 's/- Mode: `parallel`/- Mode: `burst`/' "$FIXTURE" > "$TMP/mode.md"
 expect_fail_item "exec-mode-valid" "$TMP/mode.md"
 
@@ -169,22 +170,26 @@ sed '/^| execution |/d; /^| review |/d' "$FIXTURE" > "$TMP/too-few-lanes.md"
 expect_fail_item "lanes->=2-if-parallel" "$TMP/too-few-lanes.md"
 
 # 4. lanes-own-paths-disjoint — give review the same ownership as execution.
+# shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed 's#| `src/review/\*\*` | `src/planning/\*\*`<br>`src/execution/\*\*` | `sonnet high`#| `src/execution/**` | `src/planning/**`<br>`src/execution/**` | `sonnet high`#' \
   "$FIXTURE" > "$TMP/overlap.md"
 expect_fail_item "lanes-own-paths-disjoint" "$TMP/overlap.md"
 
 # 5. affected-files-covered-by-exactly-one-lane — point an affected path
 # outside every lane's ownership.
+# shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed 's#`src/review/checklist.sh` — final acceptance checklist#`src/unowned/checklist.sh` — final acceptance checklist#' \
   "$FIXTURE" > "$TMP/orphan-path.md"
 expect_fail_item "affected-files-covered-by-exactly-one-lane" "$TMP/orphan-path.md"
 
 # 6. lane-agent-in-allowlist
+# shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed 's/| `opus high` | `tests\/planning.sh`/| `gpt-nonexistent low` | `tests\/planning.sh`/' \
   "$FIXTURE" > "$TMP/bad-agent.md"
 expect_fail_item "lane-agent-in-allowlist" "$TMP/bad-agent.md"
 
 # 7. lane-test-command-present
+# shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed 's/| `codex gpt-5.6-terra high` | `tests\/execution.sh` | `none` | `orchestrator` |/| `codex gpt-5.6-terra high` | `none` | `none` | `orchestrator` |/' \
   "$FIXTURE" > "$TMP/no-test-cmd.md"
 expect_fail_item "lane-test-command-present" "$TMP/no-test-cmd.md"
@@ -198,11 +203,13 @@ sed '/^- Endpoints: none/d' "$FIXTURE" > "$TMP/no-endpoints-decl.md"
 expect_fail_item "contract-endpoints-complete" "$TMP/no-endpoints-decl.md"
 
 # 10. contract-no-placeholders
+# shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed 's/- Contract version: `1.0.0`/- Contract version: `1.0.0` <!-- TBD -->/' \
   "$FIXTURE" > "$TMP/contract-tbd.md"
 expect_fail_item "contract-no-placeholders" "$TMP/contract-tbd.md"
 
 # 11. contract-version-present
+# shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed 's/- Contract version: `1.0.0`/- Contract version: `v1.0.0`/' \
   "$FIXTURE" > "$TMP/bad-version.md"
 expect_fail_item "contract-version-present" "$TMP/bad-version.md"
@@ -212,11 +219,13 @@ sed '/^\*\*Lane:\*\*/d' "$FIXTURE" > "$TMP/task-lane.md"
 expect_fail_item "tasks-tagged-with-lane" "$TMP/task-lane.md"
 
 # 13. every-lane-has-1-task — retag review's only task onto planning.
+# shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed 's/\*\*Lane:\*\* `review`/\*\*Lane:\*\* `planning`/' "$FIXTURE" > "$TMP/lane-no-task.md"
 expect_fail_item "every-lane-has-1-task" "$TMP/lane-no-task.md"
 
 # 14. lane-task-files-subset-of-lane-owns — execution's task creates a
 # planning-owned path.
+# shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed 's#- Create: `src/execution/runner.sh`#- Create: `src/planning/parser.sh`#' \
   "$FIXTURE" > "$TMP/task-file-wrong-lane.md"
 expect_fail_item "lane-task-files-subset-of-lane-owns" "$TMP/task-file-wrong-lane.md"
@@ -227,6 +236,7 @@ expect_fail_item "lane-names-unique" "$TMP/dup-lane.md"
 
 # 16. exactly-one-orchestrator-lane — orchestrator row's agent stops being
 # `orchestrator`, so zero lanes carry that agent.
+# shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed 's/| `orchestrator` | `tests\/orchestrator.sh`/| `opus high` | `tests\/orchestrator.sh`/' \
   "$FIXTURE" > "$TMP/no-orch.md"
 expect_fail_item "exactly-one-orchestrator-lane" "$TMP/no-orch.md"
@@ -236,15 +246,18 @@ sed 's/^| planning |/| Planning |/' "$FIXTURE" > "$TMP/bad-lane-name.md"
 expect_fail_item "lane-name-grammar-safe" "$TMP/bad-lane-name.md"
 
 # 18. depends-on-lanes-known
+# shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed 's/| `opus high` | `tests\/planning.sh` | `none` | `orchestrator` |/| `opus high` | `tests\/planning.sh` | `none` | `ghost` |/' \
   "$FIXTURE" > "$TMP/unknown-dep.md"
 expect_fail_item "depends-on-lanes-known" "$TMP/unknown-dep.md"
 
 # 19. depends-on-no-self
+# shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed 's/^| review | \(.*\) | `none` |$/| review | \1 | `review` |/' "$FIXTURE" > "$TMP/self-dep.md"
 expect_fail_item "depends-on-no-self" "$TMP/self-dep.md"
 
 # 20. depends-on-acyclic — planning and execution depend on each other.
+# shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed -e 's/| `opus high` | `tests\/planning.sh` | `none` | `orchestrator` |/| `opus high` | `tests\/planning.sh` | `none` | `execution` |/' \
     -e 's/| `codex gpt-5.6-terra high` | `tests\/execution.sh` | `none` | `orchestrator` |/| `codex gpt-5.6-terra high` | `tests\/execution.sh` | `none` | `planning` |/' \
     "$FIXTURE" > "$TMP/cycle.md"
@@ -311,6 +324,7 @@ expect_fail_item "superpowers-ticks-have-receipts" "$SERIAL_HAND_TICK"
 # 1. Lane table present, `Mode:` line deleted → exec-mode-valid FAILS (not
 # n/a) — MODE_VAL is empty, and an empty lane table no longer buys a
 # free pass.
+# shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed '/^- Mode: `parallel`/d' "$FIXTURE" > "$TMP/no-mode.md"
 NO_MODE_JSON=$("$VALIDATE" "$TMP/no-mode.md" --root --json) || true
 assert_eq "$(jq -r '.[] | select(.item=="exec-mode-valid") | .status' <<<"$NO_MODE_JSON")" fail \
@@ -320,6 +334,7 @@ assert_eq "$(jq -r '.[] | select(.item=="execution-shape-present") | .status' <<
 
 # 2. Same, plus a genuine duplicate lane name -> lane-names-unique FAILS
 # instead of sliding into the n/a serial exemption.
+# shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed '/^- Mode: `parallel`/d; s/^| review |/| planning |/' "$FIXTURE" > "$TMP/no-mode-dup.md"
 expect_fail_item "lane-names-unique" "$TMP/no-mode-dup.md"
 
@@ -639,6 +654,7 @@ done
 # as a genuine, complete item name. draft-tail-complete now checks the last
 # line's item name against CHECKLIST_VOCAB (read from the templates), a
 # closed set a shape regex cannot consult.
+# shellcheck disable=SC2016 # literal markdown fixture text, no expansion wanted
 TAIL_BASE='# Sample Feature Implementation Plan
 
 **Goal:** Ship the sample feature end to end.
@@ -955,6 +971,7 @@ exit 0
 STUBEOF
 chmod +x "${FIN_STUB_DIR}/claude"
 
+# shellcheck disable=SC2016 # literal markdown fixture text, no expansion wanted
 FIN_ROOT_ONE_SUB='# Widget Refactor Implementation Plan
 
 REQUIRED SUB-SKILL: superpowers:writing-plans
@@ -1058,6 +1075,7 @@ no
 - [ ] superpowers-all-invoked
 '
 
+# shellcheck disable=SC2016 # literal markdown fixture text, no expansion wanted
 FIN_GOOD_SUBPLAN='# Subplan: good
 
 **Lane:** `misc`
@@ -1116,6 +1134,7 @@ sequenceDiagram
 
 # Missing mermaid/TDD/edges/clarifying-questions on purpose: the no-op stub
 # above never fixes it, so this file must still be failing after 3 repairs.
+# shellcheck disable=SC2016 # literal markdown fixture text, no expansion wanted
 FIN_BAD_SUBPLAN='# Subplan: bad
 
 **Lane:** `misc`
@@ -1235,8 +1254,10 @@ assert_contains "$SKILL_MD_TEXT" "never advance" \
   "SKILL.md: the hard-gate rule still says never advance on a failing status"
 assert_contains "$SKILL_MD_TEXT" "outermost boundaries" \
   "SKILL.md: TDD policy still says mocks only the outermost boundaries"
+# shellcheck disable=SC2016 # literal `"$RUN_DIR"` text being matched, not expanded
 assert_contains "$SKILL_MD_TEXT" 'scripts/superpowers-invoke.sh "$RUN_DIR" <skill>' \
   "SKILL.md: superpowers-invoke.sh is still named by its invocation form"
+# shellcheck disable=SC2016 # literal backticked text being matched, not a command substitution
 assert_contains "$SKILL_MD_TEXT" 'is the only thing permitted to tick a `## Superpowers invoked` box' \
   "SKILL.md: superpowers-invoke.sh is still the only thing permitted to tick that box"
 assert_contains "$SKILL_MD_TEXT" "--no-codex" \
