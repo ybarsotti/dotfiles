@@ -16,6 +16,7 @@ packages:
           - git-flow          # Git branching model extensions
           - lazygit           # Terminal UI for git commands
           - git-delta         # Enhanced git diff viewer
+          - hunk              # Review-first terminal diff viewer for agent changesets
           - gitleaks          # Detect secrets in git repos
           - git-sizer         # Compute size metrics for git repos
 
