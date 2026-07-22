@@ -1,0 +1,36 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# Generate agent-owned integrations locally. Never store generated hooks or
+# OpenCode plugin code in chezmoi because they may include local configuration.
+
+set -eufo pipefail
+umask 077
+
+ai_memory_bin="{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory"
+data_dir="{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory"
+
+if [ ! -x "$ai_memory_bin" ]; then
+    echo "ai-memory binary missing: $ai_memory_bin" >&2
+    exit 1
+fi
+
+if [ -d "{{ .chezmoi.homeDir }}/.codex" ]; then
+    "$ai_memory_bin" --data-dir "$data_dir" install-hooks \
+        --agent codex \
+        --apply \
+        --server-url http://127.0.0.1:49374 \
+        --project-strategy repo-root
+fi
+
+if [ -d "{{ .chezmoi.homeDir }}/.config/opencode" ]; then
+    "$ai_memory_bin" --data-dir "$data_dir" install-hooks \
+        --agent open-code \
+        --apply \
+        --server-url http://127.0.0.1:49374 \
+        --project-strategy repo-root
+fi
+
+# Hook generation creates executable helpers; keep all runtime state user-only.
+chmod -R go-rwx "$data_dir"
+{{ end -}}
