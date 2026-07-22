@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event session-start --agent cursor --server-url http://127.0.0.1:49374 --project-strategy repo-root",
+        "matcher": ""
+      }
+    ],
+    "sessionEnd": [
+      {
+        "type": "command",
+        "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event session-end --agent cursor --server-url http://127.0.0.1:49374 --project-strategy repo-root",
+        "matcher": ""
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "type": "command",
+        "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event user-prompt-submit --agent cursor --server-url http://127.0.0.1:49374 --project-strategy repo-root",
+        "matcher": ""
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event pre-tool-use --agent cursor --server-url http://127.0.0.1:49374 --project-strategy repo-root",
+        "matcher": ""
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event post-tool-use --agent cursor --server-url http://127.0.0.1:49374 --project-strategy repo-root",
+        "matcher": ""
+      }
+    ],
+    "postToolUseFailure": [
+      {
+        "type": "command",
+        "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event post-tool-use --agent cursor --server-url http://127.0.0.1:49374 --project-strategy repo-root",
+        "matcher": ""
+      }
+    ],
+    "preCompact": [
+      {
+        "type": "command",
+        "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event pre-compact --agent cursor --server-url http://127.0.0.1:49374 --project-strategy repo-root",
+        "matcher": ""
+      }
+    ],
+    "stop": [
+      {
+        "type": "command",
+        "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event stop --agent cursor --server-url http://127.0.0.1:49374 --project-strategy repo-root",
+        "matcher": ""
+      }
+    ]
+  }
+}

@@ -2,3 +2,7 @@ bin/
 Library/
 .gitnexus
 .serena/memories/
+
+# ai-memory runtime state may contain prompts, source excerpts, and credentials.
+private_Library/**/ai-memory/
+private_Library/**/private_ai-memory/
