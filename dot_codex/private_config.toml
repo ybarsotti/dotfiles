@@ -109,6 +109,10 @@ args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-s
 command = "/Users/barsotti/.local/bin/uv"
 args = ["--directory", "/Users/barsotti/Developer/Pers/notetaker", "run", "notetaker", "mcp", "--api-url", "http://127.0.0.1:8742"]
 
+[mcp_servers.ai-memory]
+url = "http://127.0.0.1:49374/mcp"
+default_tools_approval_mode = "approve"
+
 [hooks.state."omo@sisyphuslabs:hooks/session-start-loading-project-rules.json:session_start:0:0"]
 trusted_hash = "sha256:7110bdc6b474f491ba130385898460a217f517315c8a159e4a26c1861597e4b9"
 

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.barsotti.ai-memory</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory</string>
+    <string>--data-dir</string>
+    <string>{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory</string>
+    <string>serve</string>
+    <string>--transport</string>
+    <string>http</string>
+    <string>--bind</string>
+    <string>127.0.0.1:49374</string>
+    <string>--enable-web</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory</string>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+
+  <key>ProcessType</key>
+  <string>Background</string>
+
+  <key>StandardOutPath</key>
+  <string>{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory/logs/serve.out.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory/logs/serve.err.log</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>{{ .chezmoi.homeDir }}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+</dict>
+</plist>
