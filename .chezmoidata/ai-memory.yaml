@@ -1,0 +1,6 @@
+---
+ai_memory:
+  version: "1.17.3"
+  sha256:
+    aarch64: 5aba8767234727f1556c5f039c5aec43cf417c2d6b647dca833ea9fd26ed5f0c
+    x86_64: 2974b2a590fa66a354658eafe731d084a4f50c2a44dad14b6583b9610fc09444

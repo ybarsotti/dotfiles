@@ -28,6 +28,15 @@
             "command": "~/.claude/hooks/session-log.sh"
           }
         ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event stop --agent claude-code --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+          }
+        ]
       }
     ],
     "PreToolUse": [
@@ -69,6 +78,15 @@
             "command": "uvx --from git+https://github.com/oraios/serena serena-hooks auto-approve --client=claude-code"
           }
         ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event pre-tool-use --agent claude-code --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -98,6 +116,15 @@
             "command": "~/.claude/hooks/reindex-on-commit.sh"
           }
         ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event post-tool-use --agent claude-code --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+          }
+        ]
       }
     ],
     "SessionStart": [
@@ -122,6 +149,15 @@
             "statusMessage": "Activating Serena..."
           }
         ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event session-start --agent claude-code --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -132,6 +168,59 @@
             "command": "node \"{{ .chezmoi.homeDir }}/.claude/hooks/caveman-mode-tracker.js\"",
             "timeout": 5,
             "statusMessage": "Tracking caveman mode..."
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event user-prompt-submit --agent claude-code --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event pre-compact --agent claude-code --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event session-end --agent claude-code --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event subagent-start --agent claude-code --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event subagent-stop --agent claude-code --server-url http://127.0.0.1:49374 --project-strategy repo-root"
           }
         ]
       }
@@ -232,7 +321,7 @@
 {{- if $first }}{{- $first = false }}{{- else }},{{- end }}
 {{- if hasKey $config "url" }}
     "{{ $name }}": {
-      "type": "sse",
+      "type": "{{ $config.type | default "sse" }}",
       "url": "{{ $config.url }}"
     }
 {{- else }}

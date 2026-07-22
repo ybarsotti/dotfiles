@@ -1,0 +1,143 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# Installs ai-memory binaries and service wiring only.
+# Runtime memory, databases, wiki pages, logs, and credentials stay local.
+
+set -eufo pipefail
+umask 077
+
+version="{{ .ai_memory.version }}"
+
+case "$(uname -m)" in
+    arm64)
+        release_arch="aarch64"
+        expected_sha256="{{ .ai_memory.sha256.aarch64 }}"
+        ;;
+    x86_64)
+        release_arch="x86_64"
+        expected_sha256="{{ .ai_memory.sha256.x86_64 }}"
+        ;;
+    *)
+        echo "Unsupported macOS architecture: $(uname -m)" >&2
+        exit 1
+        ;;
+esac
+
+asset="ai-memory-macos-${release_arch}.tar.gz"
+download_url="https://github.com/akitaonrails/ai-memory/releases/download/v${version}/${asset}"
+install_root="$HOME/Applications/ai-memory"
+releases_dir="$install_root/releases"
+release_dir="$releases_dir/v${version}"
+current_link="$install_root/current"
+cli_link="$HOME/.local/bin/ai-memory"
+data_dir="$HOME/Library/Application Support/ai-memory"
+plist="$HOME/Library/LaunchAgents/com.barsotti.ai-memory.plist"
+label="com.barsotti.ai-memory"
+launch_domain="gui/$(id -u)"
+
+mkdir -p "$releases_dir" "$HOME/.local/bin"
+
+installed_version=""
+if [ -x "$release_dir/ai-memory" ]; then
+    installed_version=$("$release_dir/ai-memory" --version 2>/dev/null || true)
+fi
+
+if [ "$installed_version" != "ai-memory ${version}" ]; then
+    install_tmp=$(mktemp -d "${TMPDIR:-/tmp}/ai-memory-install.XXXXXX")
+    trap 'rm -rf -- "$install_tmp"' EXIT
+
+    archive="$install_tmp/$asset"
+    entries="$install_tmp/archive-entries.txt"
+    extracted="$install_tmp/extracted"
+
+    echo "Installing ai-memory ${version} (${release_arch})..."
+    curl -fL --proto '=https' --tlsv1.2 "$download_url" -o "$archive"
+
+    actual_sha256=$(shasum -a 256 "$archive" | awk '{print $1}')
+    if [ "$actual_sha256" != "$expected_sha256" ]; then
+        echo "ai-memory checksum mismatch" >&2
+        echo "expected: $expected_sha256" >&2
+        echo "actual:   $actual_sha256" >&2
+        exit 1
+    fi
+
+    tar -tzf "$archive" > "$entries"
+    if awk '/^\// || /(^|\/)\.\.($|\/)/ { unsafe = 1 } END { exit unsafe ? 0 : 1 }' "$entries"; then
+        echo "ai-memory archive contains unsafe paths" >&2
+        exit 1
+    fi
+
+    mkdir -p "$extracted"
+    tar -xzf "$archive" -C "$extracted"
+    chmod 0755 "$extracted/ai-memory"
+
+    extracted_version=$("$extracted/ai-memory" --version)
+    if [ "$extracted_version" != "ai-memory ${version}" ]; then
+        echo "Unexpected ai-memory binary version: $extracted_version" >&2
+        exit 1
+    fi
+
+    if [ -e "$release_dir" ]; then
+        invalid_release="${release_dir}.invalid.$(date +%Y%m%d%H%M%S)"
+        mv "$release_dir" "$invalid_release"
+        echo "Moved invalid release to $invalid_release" >&2
+    fi
+
+    mv "$extracted" "$release_dir"
+fi
+
+if [ -e "$current_link" ] && [ ! -L "$current_link" ]; then
+    echo "$current_link exists and is not a symlink" >&2
+    exit 1
+fi
+
+if [ -e "$cli_link" ] && [ ! -L "$cli_link" ]; then
+    echo "$cli_link exists and is not a symlink" >&2
+    exit 1
+fi
+
+ln -sfn "$release_dir" "$current_link"
+ln -sfn "$current_link/ai-memory" "$cli_link"
+
+if [ ! -f "$data_dir/config.toml" ]; then
+    "$current_link/ai-memory" --data-dir "$data_dir" init
+fi
+
+# Memory content and provider credentials must remain readable only by user.
+chmod -R go-rwx "$data_dir"
+
+if [ ! -f "$plist" ]; then
+    echo "Missing LaunchAgent: $plist" >&2
+    exit 1
+fi
+
+plutil -lint "$plist" >/dev/null
+
+if launchctl print "$launch_domain/$label" >/dev/null 2>&1; then
+    launchctl bootout "$launch_domain/$label"
+fi
+
+launchctl bootstrap "$launch_domain" "$plist"
+launchctl enable "$launch_domain/$label"
+launchctl kickstart -k "$launch_domain/$label"
+
+http_code=""
+attempt=1
+while [ "$attempt" -le 10 ]; do
+    http_code=$(curl -sS --max-time 1 -o /dev/null -w '%{http_code}' \
+        http://127.0.0.1:49374/mcp 2>/dev/null || true)
+    if [ "$http_code" = "405" ]; then
+        break
+    fi
+    sleep 1
+    attempt=$((attempt + 1))
+done
+
+if [ "$http_code" != "405" ]; then
+    echo "ai-memory service failed health check: HTTP ${http_code:-unreachable}" >&2
+    exit 1
+fi
+
+echo "ai-memory ${version} installed; service running on 127.0.0.1:49374"
+{{ end -}}

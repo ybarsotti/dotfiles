@@ -1,0 +1,65 @@
+{
+  "mcpServers": {
+    "ai-memory": {
+      "httpUrl": "http://127.0.0.1:49374/mcp",
+      "timeout": 5000
+    }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event session-start --agent gemini-cli --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event session-end --agent gemini-cli --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event pre-tool-use --agent gemini-cli --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event post-tool-use --agent gemini-cli --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+          }
+        ]
+      }
+    ],
+    "PreCompress": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event pre-compact --agent gemini-cli --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+          }
+        ]
+      }
+    ]
+  }
+}
