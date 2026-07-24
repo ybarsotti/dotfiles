@@ -175,9 +175,11 @@ sequenceDiagram
 
 ## QA / test-execution
 <!-- Does this change user-facing flows or add/alter screens? Answer yes/no.
-     If yes, the handoff MUST include `/qa-test-plan` (manual test doc + browser exec). -->
+     If yes, deep-plan MUST create a reviewed structured plan via `/qa-plan`.
+     deep-execute later consumes it via `/qa-execute` after deep-review. -->
 - Changes flows or adds screens? **<yes/no>**
 - If yes, QA focus: <which screens/flows a manual tester must exercise>
+- QA plan: <`$RUN_DIR/qa/qa-plan.yaml`, or `not applicable — reason`>
 
 ## Verification
 - <command or sequence to validate end-to-end>

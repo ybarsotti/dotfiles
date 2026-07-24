@@ -177,6 +177,7 @@ none — this is a throwaway test fixture with no user-facing documentation to u
 ## QA / test-execution
 
 No — shell-only pipeline fixture, no user-facing flows or screens.
+- QA plan: not applicable — shell-only fixture has no user-facing flow.
 
 ## TDD test list
 

@@ -1062,6 +1062,7 @@ none — no docs describe this logic
 
 ## QA / test-execution
 no
+- QA plan: not applicable — validator fixture has no user-facing flow.
 
 ## Verification
 - run the tests
