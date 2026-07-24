@@ -62,8 +62,8 @@ default. Override with `DEEP_PLAN_CODEX_MODEL` / `DEEP_PLAN_CODEX_EFFORT`
 deep-plan prints `/deep-execute "$RUN_DIR/plan.md"` and stops. `/deep-execute` drives:
 `superpowers:using-git-worktrees` → `subagent-driven-development` (TDD, mock only outer
 boundaries) → `/simplify` ×2 → `/qa-test-plan` (if flows/screens change) → `/deep-review` →
-`verification-before-completion` → `/pr-description` (Conventional-Commit title + Mermaid +
-rationale + ticket, no file list, assigned to you) → CI/Copilot watch →
+`verification-before-completion` → `/pr-description` (title + ticket/Slack + reconciled
+requirements + Mermaid + decisions, no file list, assigned to you) → CI/Copilot watch →
 `finishing-a-development-branch`. For a Jira ticket, `jira-workflow` drives all of this.
 
 ## Plan format
@@ -71,8 +71,10 @@ rationale + ticket, no file list, assigned to you) → CI/Copilot watch →
 The plan document always follows **`superpowers:writing-plans`** — deep-plan *invokes* that
 skill (orchestrator + both planners) instead of restating its rules, so the header,
 File Structure and `### Task N:` blocks stay in sync with upstream. `templates/plan.md` only
-wraps it with deep-plan's extra sections (clarifying Qs, Mermaid flow, rationale, QA flag,
-machine-validated checklist). `scripts/validate-plan.sh` enforces conformance
+wraps it with deep-plan's extra sections (ticket/Slack context, requirements matrix,
+applicable user journey, table/column value sources, product-design handoff prompt,
+clarifying Qs, Mermaid, rationale, QA flag, machine-validated checklist).
+`scripts/validate-plan.sh` enforces conformance
 (`writing-plans-header`, `global-constraints-present`, `tasks-≥1`,
 `tasks-have-files-and-interfaces`, `tasks-have-tdd-steps`).
 
@@ -107,5 +109,6 @@ See `~/.claude/commands/deep-plan.md` for full arg grammar. Common:
 Each run writes to `~/.claude/deep-plan-runs/<RUN_ID>/`:
 
 - `plan.md` — final approved plan (consumed by `/pr-description` and `jira-workflow`)
+- `related-context.md` — ticket and Slack source links supplied to planners/reviewers
 - `draft-opus.md`, `draft-codex.md` — initial drafts
 - `verdict-<persona>-iter<N>.json` — reviewer verdicts per iteration

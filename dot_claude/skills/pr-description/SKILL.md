@@ -1,6 +1,6 @@
 ---
 name: pr-description
-description: Generate AND review a pull-request title + description, then open or update the PR assigned to the user. Use when invoked via /pr-description, when the user asks to "write a PR description", "open a PR", "create the pull request", or as a runtime dependency of deep-plan's handoff and jira-workflow. Produces a Conventional Commit title and an objective body (what it solves + Mermaid flow + rationale + key decisions + ticket) with NO changed-file list. A claude Sonnet agent writes it; a codex agent reviews it.
+description: Generate and review a pull-request title/body, then open or update assigned PR. Use for /pr-description, PR-description/opening requests, or deep-plan/jira-workflow handoff. Produces Conventional Commit title plus objective, ticket, Slack threads, reconciled requirements matrix, Mermaid, key decisions and verification, with no changed-file inventory. Claude Sonnet writes; Codex reviews.
 ---
 
 # pr-description
@@ -16,7 +16,8 @@ its concrete fixes, and open/update the PR.
 ## Conventions (non-negotiable)
 
 - **Title = Conventional Commit**: `type(scope): summary`, `type` ∈ `feat` `fix` `refactor` `perf` `docs` `test` `chore`, ≤ 70 chars.
-- **Body contains**: what it solves (objective), a **Mermaid** flow diagram, rationale, key decisions, linked ticket (if any).
+- **Body contains**: what it solves, **Mermaid**, ticket, Slack threads, requirements matrix,
+  rationale/key decisions, verification.
 - **Body must NOT contain**: a changed-file list, file paths as an inventory, or file/line counts. Objective about *what we solve*, not *what moved*.
 - **Writer is claude Sonnet. Reviewer is codex.** Any additional reviewers on the claude side are Sonnet; the codex reviewer stays codex.
 - **PR is assigned to the user**: `--assignee @me` on create, `--add-assignee @me` on update.
@@ -41,9 +42,10 @@ Verify binaries: `git`, `gh`. Verify `codex` unless `--no-codex`. If `gh` is not
 2. Current branch name: `git rev-parse --abbrev-ref HEAD | grep -oE '[A-Z]{2,}-[0-9]+'`
 3. Last commit body: `git log -1 --pretty=%B | grep -oE '[A-Z]{2,}-[0-9]+'`
 
-**Locate the plan**: if `--plan <path>` was passed, verify it exists; read `## Context`
-(→ what solves), `## Flow diagram` (→ mermaid), `## Rationale & key decisions`, and the
-ticket from it. If no `--plan`, the writer generates everything from the diff.
+**Locate the plan**: if `--plan <path>` was passed, verify it exists; read `## Context`,
+`## Ticket and Slack context`, `## Requirements matrix`, `## Flow diagram`,
+`## Rationale & key decisions`, and ticket. If no `--plan`, derive requirements and source
+links from ticket/task context plus diff; never invent missing Slack threads.
 
 If `--dry-run`, note it — you will stop after Phase 2.
 
@@ -56,7 +58,10 @@ Assemble the writer input into `$RUN_DIR/writer-input.md`:
    understanding only** (remind it: never echo file names/counts into the body), the
    changed-path domains from `git diff --name-only main...HEAD`, the recent commit
    subjects (`git log --pretty=%s main..HEAD`), and — if a plan exists — the extracted
-   `## Context`, `## Flow diagram`, `## Rationale & key decisions` verbatim.
+   `## Context`, `## Ticket and Slack context`, `## Requirements matrix`,
+   `## Flow diagram`, `## Rationale & key decisions` verbatim. Tell writer to reconcile
+   every requirement against finished diff/tests: `✅ Implemented`, `⚠️ Partial`, or
+   `❌ Missing`; never carry `✅ Planned` forward blindly.
 
 Dispatch the writer headless (mirror `deep-review/scripts/executable_reviewer.sh` flags):
 
@@ -103,6 +108,9 @@ The reviewer validates, returning concrete fixes:
 - **Mermaid present and consistent** with the domains in `git diff --name-only main...HEAD`? (no phantom components, no missing major area)
 - **NO file list / no counts** anywhere in the body?
 - **Ticket present** (linked or an explicit `_no ticket_`)?
+- **Slack threads present** (linked when supplied, or explicit `_none found_`)?
+- **Requirements matrix complete** and statuses supported by diff/test evidence?
+- **Key decisions preserved** from plan/ticket context?
 - Body is objective about *what we solve* (not a changelog of the diff)?
 
 Read `$RUN_DIR/review.md` and **apply every concrete fix** to the title / `pr-body.md`.
@@ -163,6 +171,9 @@ Verify each and report the state to the user:
 - [ ] `mermaid-present` — body has a ```mermaid block, consistent with the changed domains
 - [ ] `no-file-list` — no "Affected files"/"Files changed" section, no path inventory, no `+/-` counts
 - [ ] `ticket-linked-or-n/a` — ticket linked, or an explicit `_no ticket_` when none exists
+- [ ] `slack-linked-or-n/a` — relevant threads linked, or explicit `_none found_`
+- [ ] `requirements-reconciled` — every requirement maps to implementation evidence and status
+- [ ] `key-decisions-present` — important decisions and trade-offs are preserved
 - [ ] `assigned-to-me` — PR assignee includes `@me`
 - [ ] `codex-review-applied` — codex reviewer ran and its fixes were applied (or `--no-codex` was set)
 

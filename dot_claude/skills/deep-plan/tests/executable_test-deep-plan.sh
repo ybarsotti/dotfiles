@@ -986,6 +986,27 @@ _no ambiguity_
 ## Global Constraints
 - Follow existing shellcheck conventions.
 
+## Ticket and Slack context
+- Ticket: none — no related ticket exists
+- Slack threads: none found — checked task context
+
+## Requirements matrix
+| status | requirement | how the plan satisfies it | verification |
+|---|---|---|---|
+| ✅ Planned | Ship widget refactor | Task 1 changes adapter behavior | targeted shell tests |
+
+## User journey
+- Applies: no
+- Not applicable: internal refactor has no user interaction flow
+
+## Data model
+- Schema changes: no
+- None: refactor does not touch persistent storage
+
+## Product design handoff prompt
+- Needed: no
+- Not needed: refactor has no interface changes
+
 ## Flow diagram
 ```mermaid
 sequenceDiagram
@@ -1069,6 +1090,11 @@ no
 - [ ] each-subplan-file-exists
 - [ ] each-subplan-has-flow-and-tdd
 - [ ] rationale-present
+- [ ] related-context-present
+- [ ] requirements-matrix-present
+- [ ] user-journey-documented
+- [ ] data-model-documented
+- [ ] product-design-handoff-documented
 - [ ] mocking-policy-stated
 - [ ] docs-impact-listed
 - [ ] qa-flag-set
@@ -1199,6 +1225,34 @@ assert_eq "$(count_unticked_checklist "${FIN_PASS_RUN}/plan.md")" "0" \
   "finalize-plan.sh: passing run ticks every root checklist item (no [ ] left)"
 assert_eq "$(count_unticked_checklist "${FIN_PASS_RUN}/subplans/good.md")" "0" \
   "finalize-plan.sh: passing run ticks every subplan checklist item (no [ ] left)"
+
+FIN_VALID_JSON=$("$VALIDATE" "${FIN_PASS_RUN}/plan.md" --root --json)
+for item in related-context-present requirements-matrix-present user-journey-documented \
+  data-model-documented product-design-handoff-documented; do
+  assert_eq "$(jq -r --arg item "$item" '.[] | select(.item == $item) | .status' <<<"$FIN_VALID_JSON")" \
+    pass "finalize-plan.sh: ${item} passes on complete root plan"
+done
+
+sed '/^- Ticket:/d' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/missing-ticket.md"
+expect_fail_item "related-context-present" "${FIN_PASS_RUN}/missing-ticket.md"
+sed 's/| ✅ Planned |/| Planned |/' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/missing-requirement-status.md"
+expect_fail_item "requirements-matrix-present" "${FIN_PASS_RUN}/missing-requirement-status.md"
+sed '/^- Not applicable:/d' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/missing-journey-reason.md"
+expect_fail_item "user-journey-documented" "${FIN_PASS_RUN}/missing-journey-reason.md"
+sed '/^- None:/d' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/missing-data-reason.md"
+expect_fail_item "data-model-documented" "${FIN_PASS_RUN}/missing-data-reason.md"
+sed '/^- Not needed:/d' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/missing-design-reason.md"
+expect_fail_item "product-design-handoff-documented" "${FIN_PASS_RUN}/missing-design-reason.md"
+perl -0pe '
+  s/- Applies: no\n- Not applicable: internal refactor has no user interaction flow/- Applies: yes\n1. User opens widget settings\n2. System saves and confirms widget settings/;
+  s/- Schema changes: no\n- None: refactor does not touch persistent storage/- Schema changes: yes\n| create | `widgets` | `name` | `text` | required | request payload | written on create |/;
+  s/- Needed: no\n- Not needed: refactor has no interface changes/- Needed: yes\n> Page\/screen: Widget settings\n>\n> Interactions: Edit and save widget name\n>\n> Behavior and states: Loading, validation error, saving and success/;
+' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/applicable-sections.md"
+APPLICABLE_JSON=$("$VALIDATE" "${FIN_PASS_RUN}/applicable-sections.md" --root --json)
+for item in user-journey-documented data-model-documented product-design-handoff-documented; do
+  assert_eq "$(jq -r --arg item "$item" '.[] | select(.item == $item) | .status' <<<"$APPLICABLE_JSON")" \
+    pass "finalize-plan.sh: ${item} passes when applicable"
+done
 rm -rf "$FIN_PASS_RUN"
 
 # Failing case: root + one good subplan + one permanently-broken subplan.
@@ -1266,5 +1320,10 @@ assert_contains "$SKILL_MD_TEXT" "--skip-grill" \
   "SKILL.md: the --skip-grill flag is still documented"
 assert_contains "$SKILL_MD_TEXT" "--max-plan-iter" \
   "SKILL.md: the --max-plan-iter flag is still documented"
+assert_contains "$SKILL_MD_TEXT" "related-context.md" \
+  "SKILL.md: ticket and Slack context artifact is still required"
+assert_contains "$SKILL_MD_TEXT" "Product design handoff prompt" \
+  "SKILL.md: substantial UI still produces a product-design prompt"
+assert_exit 0 grep -q "RELATED_CONTEXT=\"\${RUN_DIR}/related-context.md\"" "$DISPATCH"
 
 assert_summary

@@ -452,8 +452,9 @@ Run `just` to see the full list of available commands.
 Three slash commands chain together for planning and parallel execution of non-trivial work:
 
 - **`/deep-plan`** - Multi-agent planning pipeline (Opus + Codex draft, a 5-persona review
-  loop, a Plannotator approval gate). Stops at an **approved plan** — it never builds or
-  reviews code itself.
+  loop, a Plannotator approval gate). Plan captures ticket/Slack sources, requirements
+  coverage, applicable user journey, data-column population, and substantial-UI design
+  handoff. Stops at an **approved plan** — it never builds or reviews code itself.
 - **`/deep-execute <plan.md>`** - Runs an approved parallel plan as lane workers sharing ONE
   git worktree, in parallel cmux panes (via `cmux-orchestrator`). Coordinates fan-out, an
   event/reply protocol (`event.sh` / `board.sh` / `monitor-events.sh` / `reply.sh`),

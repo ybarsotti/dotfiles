@@ -20,6 +20,7 @@ NO_CODEX="${3:-}"
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RUNNER="${SKILL_DIR}/scripts/runner.sh"
 PLAN="${RUN_DIR}/plan.md"
+RELATED_CONTEXT="${RUN_DIR}/related-context.md"
 
 [ -f "$PLAN" ] || { echo "dispatch-reviewers.sh: missing $PLAN" >&2; exit 1; }
 
@@ -55,6 +56,10 @@ build_prompt() {
   cat "${SKILL_DIR}/personas/${persona}.md"
   printf '\n\n---\n\n## Plan to review\n\n'
   cat "$PLAN"
+  if [ -f "$RELATED_CONTEXT" ]; then
+    printf '\n\n---\n\n## Source ticket and Slack context\n\n'
+    cat "$RELATED_CONTEXT"
+  fi
   if [ -n "$CLAUDE_MD" ]; then
     printf '\n\n---\n\n## Project CLAUDE.md (excerpt)\n\n'
     head -200 "$CLAUDE_MD"

@@ -1,6 +1,6 @@
 ---
 name: deep-plan
-description: Multi-agent deep-planning pipeline. Use when invoked via /deep-plan, or when the user explicitly wants a deeply reviewed plan before any code is written for a non-trivial task (new feature, refactor, architectural change). Drafts a plan with parallel Opus + Codex planners, hardens it with reviewer personas (architect, project-developer, flow-mapper, qa, ticket-matcher) until unanimous approval, presents it via plannotator, then hands off to /deep-execute. deep-plan STOPS at the approved plan — it does not build, review, or open the PR itself.
+description: Multi-agent deep-planning pipeline with ticket/Slack context, requirements traceability, user journey, data model and product-design handoff. Use when invoked via /deep-plan, or when the user wants a deeply reviewed plan before code for a non-trivial feature, refactor or architecture change. Parallel Opus + Codex planners and five reviewers converge before Plannotator approval and /deep-execute handoff. Stops at approved plan; does not implement or open PR.
 ---
 
 # deep-plan
@@ -96,6 +96,14 @@ The persona prompts (planner-opus, planner-codex, architect, project-developer, 
 - `gitnexus_query`, `gitnexus_context`, `gitnexus_impact`, `gitnexus_rename`, `gitnexus_detect_changes`
 - `graphify path/explain` for cross-symbol reasoning
 
+## Phase 0.3 — Resolve ticket + Slack context
+
+Create `$RUN_DIR/related-context.md` before drafting. Record `Ticket:` and `Slack threads:`.
+Use connected ticket/Slack tools when available; inspect ticket description/comments and linked
+threads. Preserve URLs plus one-line relevance. If none exist or access is unavailable, record
+where you checked; never fabricate context. `dispatch-planners.sh` and
+`dispatch-reviewers.sh` include this artifact when present.
+
 ## Phase 0.5 — Clarifying questions (mandatory)
 
 Before any grill or draft, surface every ambiguity in the task description to the user. Use `AskUserQuestion` with focused options (no open-ended prose questions when a multiple-choice will do).
@@ -141,8 +149,8 @@ After it returns, run:
 document header, the File Structure step, task right-sizing, the `### Task N:` blocks with
 their bite-sized checkbox steps, and the no-placeholder rules. deep-plan never restates or
 paraphrases those rules: it **invokes the skill** and follows what it returns, on every run.
-`templates/plan.md` only adds deep-plan's extra sections (clarifying Qs, flow diagram,
-rationale, QA flag, checklist) around it.
+`templates/plan.md` only adds deep-plan's extra sections (requirements, journey, data model,
+design handoff, context links, clarifying Qs, flow, rationale, QA flag, checklist) around it.
 
 **Step 1 — invoke the skill via the Skill tool:**
 ```
@@ -234,6 +242,10 @@ Confirm the plan includes, at minimum:
 - The **`superpowers:writing-plans` document header** + an **`## Implementation tasks`** section in that skill's exact task format (`### Task N:` + Files + Interfaces + bite-sized checkbox steps with real code).
 - A **Mermaid flow diagram** (sequence or flowchart) — required.
 - A **Rationale & key decisions** section (fed by grill-with-docs + brainstorming).
+- **Ticket + Slack context** and a point-by-point **Requirements matrix**.
+- A sequenced **User journey** when applicable; otherwise an explicit reason.
+- A **Data model** mapping every affected table/column to its value source, or explicit `no`.
+- A copyable **Product design handoff prompt** for substantial UI, or explicit `no`.
 - A **TDD test list** with the outer-boundary-only mocking policy stated.
 - An **Abstractions decision log**.
 - A **Documentation impact** section (docs/ that go stale must be updated, or `none`).

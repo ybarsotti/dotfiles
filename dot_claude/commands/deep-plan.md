@@ -1,5 +1,5 @@
 ---
-description: Multi-agent deep-planning pipeline — Opus+Codex draft, 5-persona review loop (incl. ticket-matcher), plannotator, then hands off to /deep-execute
+description: Deep planning with Opus+Codex, requirement/journey/data/UI-design traceability, 5-persona review, Plannotator, then /deep-execute
 ---
 
 # /deep-plan
@@ -14,7 +14,9 @@ approved plan — deep-plan does NOT build, review, or open the PR itself. It ha
    interview + ADRs/glossary).
 2. **Brainstorm** — `superpowers:brainstorming`.
 3. **Draft** — `superpowers:writing-plans` defines the plan format (always — the skill is
-   invoked, never paraphrased); two parallel planners (Opus + Codex) → one merged plan.
+   invoked, never paraphrased); plan captures ticket/Slack context, requirements matrix,
+   applicable user journey, table/column population, and substantial-UI design prompt;
+   two parallel planners (Opus + Codex) → one merged plan.
 4. **Review** — 5 parallel personas (architect, project-developer, ticket-matcher on
    Sonnet; flow-mapper, qa on Codex) until unanimous approval (≤ 3 iterations, then tiebreak).
 5. **Present** — `finalize-plan.sh` validate/repair/tick gate, then **Plannotator**:
@@ -62,7 +64,7 @@ itself. `/deep-execute` drives the full superpowers execution workflow from the 
 3. `/simplify` ×2.
 4. `/qa-test-plan` — if the plan flags flow/screen changes.
 5. `/deep-review` → then `superpowers:verification-before-completion`.
-6. `/pr-description` — Conventional-Commit title + Mermaid + rationale + ticket, assigned to you.
+6. `/pr-description` — title + ticket/Slack + requirements + Mermaid + decisions, assigned to you.
 7. CI + Copilot watch → `superpowers:finishing-a-development-branch`.
 
 ### Quick examples

@@ -8,7 +8,8 @@ it. Used standalone via `/pr-description`, and as a runtime dependency of `deep-
 ## What it produces
 
 - **Title** — a Conventional Commit (`feat`/`fix`/`refactor`/`perf`/`docs`/`test`/`chore` + optional scope), ≤ 70 chars.
-- **Body** — what the change solves (objective), a **Mermaid** flow diagram, the rationale, the key decisions, and the linked ticket.
+- **Body** — objective, ticket, relevant Slack threads, requirement-by-requirement
+  implementation status/evidence, **Mermaid**, rationale, key decisions, and verification.
 - **Never** a changed-file list or file/line counts — the body is about *what we solve*, not *what moved*.
 - The PR is **assigned to you** (`gh pr create --assignee @me`, or `gh pr edit --add-assignee @me` on update).
 
@@ -26,8 +27,9 @@ it. Used standalone via `/pr-description`, and as a runtime dependency of `deep-
 
 - The **writer** is always **claude Sonnet** (headless `claude -p --model sonnet`).
 - The **reviewer** is **codex** (headless `codex exec`) — it checks: title is conventional,
-  Mermaid is consistent with the actual changed domains, no file list is present, and the
-  ticket is linked. `--no-codex` falls back to a Sonnet self-review with the same checklist.
+  Mermaid matches changed domains, no file list exists, ticket/Slack sources are explicit,
+  requirements are reconciled against diff/tests, and key decisions survive.
+  `--no-codex` falls back to a Sonnet self-review with same checklist.
 
 ## Layout
 

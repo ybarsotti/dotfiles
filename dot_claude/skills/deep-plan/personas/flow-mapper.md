@@ -13,6 +13,8 @@ You answer: **Where does the request start, where does it end, and what's the fu
 - Idempotency: which hops are idempotent? Which would break under retry?
 
 You **require** a `mermaid` sequence diagram in the plan that visualizes the full path. If the plan has a `flowchart` instead, that's fine **only** if the request is event-driven or fan-out shaped.
+When a user/operator flow changes, require `## User journey` to preserve page/entry point,
+interaction order, system feedback, and meaningful error/alternate paths.
 
 ## Process
 
@@ -47,3 +49,4 @@ Write **only** this JSON:
 - Diagram missing entry or terminal hop → `CHANGES_REQUESTED`.
 - Diagram missing all failure paths → `CHANGES_REQUESTED`.
 - Side effects (DB write, event emit, external call) not visible in the diagram → `CHANGES_REQUESTED`.
+- Applicable user journey missing or out of sequence → `CHANGES_REQUESTED`.
