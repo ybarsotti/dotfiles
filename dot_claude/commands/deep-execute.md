@@ -1,5 +1,5 @@
 ---
-description: Runs an approved deep-plan parallel plan as lane workers in parallel cmux panes inside one shared worktree — event/reply protocol, round gating, contract drift, escalation after 3 rounds.
+description: Executes approved deep-plan lanes, reviews/fixes final diff, freezes SHA, then runs approved QA plan with HTML evidence
 ---
 
 # /deep-execute
@@ -28,6 +28,8 @@ directory, launch workers, or parse events by hand. The skill lives at
 the worktree, confirm each lane's agent via `AskUserQuestion` against `agents.allowlist`,
 commit the contract and shared files before fanout, scaffold and launch the lanes, hold the
 `Monitor` on the run's event stream, and gate every round before advancing.
+After final `/deep-review` and verification, freeze commit SHA. If plan references a QA artifact,
+run `/qa-execute` against environment serving that SHA before reporting completion.
 
 ### Quick examples
 

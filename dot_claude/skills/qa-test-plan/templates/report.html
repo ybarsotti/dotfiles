@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QA Report — {{ report.run.plan.feature }}</title>
+  <style>
+    :root { color-scheme: light; --green:#0b7f3f; --red:#d92d20; --amber:#f79009; --gray:#667085; --ink:#101828; --line:#e4e7ec; --bg:#f8fafc; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 Inter, ui-sans-serif, system-ui, sans-serif; }
+    header, main { width:min(1180px, calc(100% - 32px)); margin:auto; }
+    header { padding:40px 0 24px; }
+    h1, h2, h3 { line-height:1.2; }
+    h1 { margin:0 0 8px; font-size:32px; }
+    h2 { margin:40px 0 16px; }
+    .meta, .stats, .requirements { display:grid; gap:12px; }
+    .meta { grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
+    .stats { grid-template-columns:repeat(4,1fr); margin:24px 0; }
+    .card { background:white; border:1px solid var(--line); border-radius:12px; padding:16px; box-shadow:0 2px 8px rgb(16 24 40 / 5%); }
+    .label { color:var(--gray); font-size:12px; text-transform:uppercase; letter-spacing:.06em; }
+    .value { font-weight:650; overflow-wrap:anywhere; }
+    .status { display:inline-flex; padding:4px 9px; border-radius:999px; color:white; font-size:12px; font-weight:750; text-transform:uppercase; }
+    .status-pass { background:var(--green); } .status-fail { background:var(--red); }
+    .status-blocked { background:var(--amber); } .status-skipped { background:var(--gray); }
+    .stat { text-align:center; } .stat strong { display:block; font-size:28px; }
+    table { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; }
+    th, td { padding:12px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line); }
+    th { background:#f2f4f7; font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+    .scenario { margin:20px 0 36px; }
+    .scenario-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+    .scenario h3 { margin:0 0 6px; }
+    .step { margin-top:14px; }
+    .step-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .evidence { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px; margin-top:12px; }
+    figure { margin:0; } img, video { display:block; width:100%; border-radius:8px; background:#101828; }
+    figcaption { margin-top:6px; color:var(--gray); font-size:13px; }
+    button { border:1px solid var(--line); background:white; border-radius:7px; padding:6px 10px; cursor:pointer; }
+    code { background:#f2f4f7; padding:2px 5px; border-radius:4px; }
+    ul { margin:8px 0; }
+    @media (max-width:720px) { .stats,.step-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<header>
+  <span class="status status-{{ report.overall_status.value }}">{{ report.overall_status.value }}</span>
+  <h1>{{ report.run.plan.feature }}</h1>
+  <p>Run <code>{{ report.run.results.run_id }}</code>, attempt {{ report.run.results.attempt }}</p>
+  <div class="meta">
+    <div class="card"><div class="label">Commit</div><div class="value"><code>{{ report.run.results.environment.commit_sha }}</code></div></div>
+    <div class="card"><div class="label">Environment</div><div class="value">{{ report.run.results.environment.base_url }}</div></div>
+    <div class="card"><div class="label">Browser</div><div class="value">{{ report.run.results.environment.browser }} · {{ report.run.results.environment.viewport }}</div></div>
+    <div class="card"><div class="label">Executed</div><div class="value">{{ report.run.results.started_at }} → {{ report.run.results.finished_at }}</div></div>
+  </div>
+  <div class="stats">
+    {% for status, count in report.counts.items() -%}
+    <div class="card stat"><strong>{{ count }}</strong><span class="status status-{{ status.value }}">{{ status.value }}</span></div>
+    {% endfor %}
+  </div>
+</header>
+<main>
+  <h2>Requirements coverage</h2>
+  <table>
+    <thead><tr><th>Requirement</th><th>Scenarios</th><th>Results</th></tr></thead>
+    <tbody>
+    {% for item in report.requirements -%}
+      <tr>
+        <td><code>{{ item.requirement.id }}</code> {{ item.requirement.text }}</td>
+        <td>{% for id in item.scenario_ids %}<code>{{ id }}</code>{% if not loop.last %}, {% endif %}{% endfor %}</td>
+        <td>{% for status in item.statuses %}<span class="status status-{{ status.value }}">{{ status.value }}</span> {% endfor %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Executed scenarios</h2>
+  {% for scenario in report.scenarios %}
+  <section class="card scenario" id="{{ scenario.plan.id }}">
+    <div class="scenario-head">
+      <div><h3>{{ scenario.plan.id }} — {{ scenario.plan.name }}</h3><div>{{ scenario.persona.name }} · {{ scenario.plan.requirement_ids | join(", ") }}</div></div>
+      <span class="status status-{{ scenario.result.status.value }}">{{ scenario.result.status.value }}</span>
+    </div>
+    {% if scenario.result.video_path %}
+    <figure class="evidence">
+      <video id="video-{{ scenario.plan.id }}" controls preload="metadata">
+        <source src="{{ scenario.result.video_path }}" type="video/webm">
+        {% if scenario.captions_path %}<track default kind="captions" srclang="en" label="QA steps" src="{{ scenario.captions_path }}">{% endif %}
+      </video>
+      <figcaption>Raw scenario recording with step-timed WebVTT captions.</figcaption>
+    </figure>
+    {% endif %}
+    {% for step in scenario.steps %}
+    <article class="card step">
+      <div class="scenario-head">
+        <strong>{{ step.plan.id }} · {{ step.plan.screen }}</strong>
+        <span class="status status-{{ step.result.status.value }}">{{ step.result.status.value }}</span>
+      </div>
+      <div class="step-grid">
+        <div><div class="label">Action</div><div>{{ step.plan.action }}</div></div>
+        <div><div class="label">Input</div><div>{{ step.plan.input or "—" }}</div></div>
+        <div><div class="label">Expected</div><div>{{ step.plan.expected }}</div></div>
+        <div><div class="label">Observed</div><div>{{ step.result.observed }}</div></div>
+      </div>
+      {% if scenario.result.video_path %}
+      <p><button type="button" data-video="video-{{ scenario.plan.id }}" data-time="{{ step.result.video_start_seconds }}">Play this step at {{ "%.1f"|format(step.result.video_start_seconds) }}s</button></p>
+      {% endif %}
+      {% if step.screenshot_raw %}
+      <div class="evidence">
+        <figure><a href="{{ step.screenshot_raw }}"><img src="{{ step.screenshot_raw }}" alt="Raw evidence for {{ step.plan.id }}"></a><figcaption>Raw screenshot.</figcaption></figure>
+        <figure><a href="{{ step.screenshot_annotated }}"><img src="{{ step.screenshot_annotated }}" alt="Annotated evidence for {{ step.plan.id }}"></a><figcaption>Annotated screenshot: action, expected, observed, result.</figcaption></figure>
+      </div>
+      {% endif %}
+      {% if step.result.console_errors or step.result.network_errors %}
+      <div class="step-grid">
+        <div><div class="label">Console errors</div><ul>{% for error in step.result.console_errors %}<li>{{ error }}</li>{% endfor %}</ul></div>
+        <div><div class="label">Network errors</div><ul>{% for error in step.result.network_errors %}<li>{{ error }}</li>{% endfor %}</ul></div>
+      </div>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </section>
+  {% endfor %}
+</main>
+<script>
+  document.querySelectorAll("[data-video]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const video = document.getElementById(button.dataset.video);
+      video.currentTime = Number(button.dataset.time);
+      video.play();
+    });
+  });
+</script>
+</body>
+</html>

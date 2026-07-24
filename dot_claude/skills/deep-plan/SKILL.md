@@ -24,6 +24,7 @@ execution half. Invoke each planning-phase skill via the Skill tool at its mappe
 | 0 | `grill-with-docs` | Phase 0.7 | deep-plan |
 | 1 | `brainstorming` | Phase 1 | deep-plan |
 | 2 | `writing-plans` | Phase 1.5 | deep-plan |
+| 2b| `/qa-plan` | Phase 2.4 when user flows/screens change | deep-plan |
 | 3 | `humanizing-plans` | Phase 3 (present) | deep-plan |
 | 4 | `plannotator-annotate` | Phase 3 (annotate) | deep-plan |
 | ✳ | `continuity-ledger` | any long session (save/resume) | deep-plan |
@@ -33,7 +34,7 @@ execution half. Invoke each planning-phase skill via the Skill tool at its mappe
 | 6 | `test-driven-development` | execution (per task) | deep-execute |
 | 6b| `systematic-debugging` | execution (bug/regression tasks) | deep-execute |
 | 6c| `dispatching-parallel-agents` | execution (fallback for parallel slices) | deep-execute |
-| 7 | `/deep-review` + `receiving-code-review` + `/qa-test-plan` | execution | deep-execute |
+| 7 | `/deep-review` + `receiving-code-review` + `/qa-execute` | execution | deep-execute |
 | 8 | `/pr-description` + `finishing-a-development-branch` | execution | deep-execute |
 
 Plus deep-plan adds: multi-model planner/reviewer fan-out, the `ticket-matcher` reviewer,
@@ -211,6 +212,11 @@ Loop, starting at iteration 1:
 
 4. If ITER > `--max-plan-iter`: stop the loop. Use `AskUserQuestion` to present the **remaining disagreements** (per persona) and ask the user to tiebreak each one. Apply user decisions to `plan.md`. Treat as approved.
 
+## Phase 2.4 — QA plan artifact
+After reviewer convergence, when QA flag is yes invoke `qa-test-plan` with
+`--phase plan --plan $RUN_DIR/plan.md --ticket $TICKET --output-dir $RUN_DIR/qa`.
+Require validated `$RUN_DIR/qa/qa-plan.yaml`, derived Markdown, and Codex review; write that YAML path into plan's `- QA plan:` line. For QA flag no, write
+`- QA plan: not applicable — <reason>`. `/deep-execute` consumes approved contract later.
 ## Phase 2.5 — Subplan fan-out
 
 After root plan reviewer-approved, split it into chapters:
@@ -300,10 +306,8 @@ is what the user reads; Plannotator carries the detail.
 
 ## Phase 4 — Handoff (deep-plan stops here)
 
-Approved-plan handoff: `/deep-execute "$RUN_DIR/plan.md"`. deep-plan stops here — it does not
-build, review the code, or open the PR. `/deep-execute` drives the full superpowers execution
-workflow from the approved plan: isolate (worktree) → build (strict TDD, outer-boundary-only
-mocking) → simplify → QA (if the plan's QA flag is "yes") → review → PR → ship.
+Handoff `/deep-execute "$RUN_DIR/plan.md"` then stop. It drives isolate → TDD build → simplify
+→ deep-review/fixes → frozen commit → approved QA execution → PR → ship.
 
 > Tip: for a Jira ticket, `/deep-plan` is invoked **inside** the `jira-workflow` skill, which
 > then drives `/deep-execute` automatically after approval.

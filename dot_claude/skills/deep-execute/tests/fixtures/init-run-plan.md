@@ -123,6 +123,7 @@ sequenceDiagram
 ## QA / test-execution
 
 - QA flag: no — this fixture never runs against a real UI or user flow.
+- QA plan: not applicable — fixture has no user-facing flow.
 
 ## Implementation tasks
 

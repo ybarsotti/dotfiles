@@ -1,0 +1,8 @@
+schema_version: "1.0"
+plan_id: invalid
+feature: Invalid fixture
+ticket: null
+source_plan: ./plan.md
+requirements: []
+personas: []
+scenarios: []

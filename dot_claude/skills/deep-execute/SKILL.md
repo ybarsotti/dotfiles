@@ -100,13 +100,29 @@ either start the next round (more tasks remain) or move to Phase 4.
 exceeds `max_rounds`) already refuses outright with its own escalation record instead of
 running anything — obey it rather than calling it a fourth time on your own judgement.
 
-## Phase 4 — Final review and report
+## Phase 4 — Final review, frozen SHA, and QA evidence
 
 When every lane is `done` and the last round's gate passed, run one full `/deep-review` over
 the whole run's diff (`Skill(skill="deep-review")`) — this is the one thorough pass; every
-per-round `round-gate.sh` review was intentionally light. Report the run directory, the final
-`board.sh` table, the contract's final version, and the round count. **Leave the panes alive**
-— this run does not tear down cmux state on success; that's a separate, human-confirmed step.
+per-round `round-gate.sh` review was intentionally light. Apply required fixes, rerun relevant
+verification, commit final state, then record full `git rev-parse HEAD`.
+
+If approved plan's `## QA / test-execution` references `qa-plan.yaml`, resolve running URL from
+environment/worktree config and invoke:
+
+```text
+Skill(
+  skill="qa-test-plan",
+  args="--phase execute --qa-plan <path> --url <url> --commit <full-sha>"
+)
+```
+
+QA must execute after review/fixes so evidence binds final SHA. Any later code change invalidates
+that report and requires new QA attempt. Do not finish with missing, blocked, or stale evidence;
+surface blocker when URL or commit proof is unavailable.
+
+Report run directory, final `board.sh` table, contract version, round count, final SHA, QA verdict,
+and HTML report path. **Leave panes alive** — success does not tear down cmux state.
 
 ## Resume (`--resume RUN_DIR`)
 

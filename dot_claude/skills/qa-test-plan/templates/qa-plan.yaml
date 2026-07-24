@@ -1,0 +1,37 @@
+schema_version: "1.0"
+plan_id: <stable-kebab-id>
+feature: <user-facing feature name>
+ticket: <KEY-123 or null>
+source_plan: <approved implementation plan path>
+requirements:
+  - id: REQ-1
+    text: <observable user requirement>
+personas:
+  - id: <persona-id>
+    name: <persona name>
+    description: <permissions and role in this flow>
+scenarios:
+  - id: QA-<AREA>-001
+    name: <scenario name>
+    requirement_ids:
+      - REQ-1
+    persona_id: <persona-id>
+    preconditions:
+      - <exact starting state>
+    test_data:
+      - <isolated seed or fixture>
+    steps:
+      - id: QA-<AREA>-001-01
+        screen: <screen or route>
+        action: <semantic action and accessible control name>
+        input: <literal input or null>
+        expected: <objective observable result>
+        evidence:
+          screenshot: after
+          video: true
+          console: errors
+          network: errors
+    edge_cases:
+      - <applicable invalid, empty, permission, refresh, concurrency, boundary, or dependency case>
+    acceptance_rules:
+      - <objective scenario pass/fail rule>
