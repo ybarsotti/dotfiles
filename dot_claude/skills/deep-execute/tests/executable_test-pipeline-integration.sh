@@ -134,6 +134,32 @@ sequenceDiagram
 
 _no ambiguity_
 
+## Ticket and Slack context
+
+- Ticket: none — no related ticket exists
+- Slack threads: none found — checked fixture context
+
+## Requirements matrix
+
+| status | requirement | how the plan satisfies it | verification |
+|---|---|---|---|
+| ✅ Planned | Initialize parallel run safely | Contract and lane validators gate initialization | integration assertions below |
+
+## User journey
+
+- Applies: no
+- Not applicable: internal shell pipeline has no user interaction flow
+
+## Data model
+
+- Schema changes: no
+- None: integration fixture does not use a database
+
+## Product design handoff prompt
+
+- Needed: no
+- Not needed: integration fixture has no interface changes
+
 ## Abstractions decision log
 
 | decision | rationale |

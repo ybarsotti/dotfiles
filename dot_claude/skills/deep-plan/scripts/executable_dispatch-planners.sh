@@ -16,6 +16,7 @@ NO_CODEX="${3:-}"
 
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATE="${SKILL_DIR}/templates/plan.md"
+RELATED_CONTEXT="${RUN_DIR}/related-context.md"
 # Deployed tree (chezmoi strips the `executable_` prefix) is the default
 # target; fall back to the source-tree name so this script also runs
 # directly out of the chezmoi source (tests invoke it that way).
@@ -54,7 +55,12 @@ build_prompt() {
     fi
     printf 'Follow it verbatim for the plan header, File Structure and `### Task N:` blocks.\n'
   fi
-  printf '\n\n---\n\n## Task\n%s\n\n---\n\n## Target skeleton\n\n' "$TASK_DESC"
+  printf '\n\n---\n\n## Task\n%s\n' "$TASK_DESC"
+  if [ -f "$RELATED_CONTEXT" ]; then
+    printf '\n\n---\n\n## Related ticket and Slack context\n\n'
+    cat "$RELATED_CONTEXT"
+  fi
+  printf '\n\n---\n\n## Target skeleton\n\n'
   cat "$TEMPLATE"
   printf '\n\n---\n\nWrite the full plan now. Output Markdown only. No commentary.\n'
 }

@@ -61,7 +61,8 @@ items.
       after `/clear`. Skip for a quick single-session fix.
 - [ ] **Deep planning** — run `/deep-plan "<CODE>" --ticket <CODE>`: grill-with-docs →
       brainstorming → writing-plans → 5-persona review (incl. **ticket-matcher**, which bats
-      the plan point-by-point against the ticket) → plannotator → approved plan
+      requirements matrix point-by-point against ticket, preserving linked Slack threads) →
+      plannotator → approved plan
 - [ ] **Execute approved plan** — the plan's `## Execution shape` decides the path:
       `Mode: parallel` + 2+ lanes → `/deep-execute ~/.claude/deep-plan-runs/<RUN_ID>/plan.md`
       (lane fanout, round tests, run-state validation, orchestrator commits, one final
@@ -70,8 +71,8 @@ items.
 - [ ] **`/qa-test-plan`** (if the plan's QA flag is "yes" — flow change or new screens):
       manual test doc + codex review + agent-browser execution with video
 - [ ] **Re-run tests**: every test (new + existing) must be green
-- [ ] **`/pr-description`**: Conventional-Commit title + Mermaid + rationale + ticket link,
-      **no file list**, assigned to me
+- [ ] **`/pr-description`**: title + ticket/Slack + reconciled requirements + Mermaid +
+      decisions, **no file list**, assigned to me
 - [ ] **cmux notify (PR opened)**
 - [ ] **Wait for CI green** (in parallel with Copilot loop)
 - [ ] **Copilot review loop** — keep checking until **zero new comments**; address every
@@ -307,8 +308,9 @@ git push -u origin HEAD
 ```
 
 `/pr-description` produces a Conventional-Commit title `<type>(<scope>): <summary> (<CODE>)`
-and an **objective** body — what it solves + Mermaid flow + rationale + key decisions +
-ticket link. It contains **no file list and no counts**. A codex agent reviews the draft,
+and an **objective** body — what it solves + ticket/Slack links + reconciled requirements
+matrix + Mermaid + rationale/key decisions. It contains **no file list and no counts**.
+A codex agent reviews the draft,
 the PR is opened **assigned to you** (`--assignee @me`), and CODEOWNERS reviewers are added.
 
 `cmux notify --title "<CODE> PR opened" --body "<PR URL>"` + `set-progress 0.85`.

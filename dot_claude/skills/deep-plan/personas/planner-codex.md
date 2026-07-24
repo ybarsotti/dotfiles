@@ -42,3 +42,6 @@ only, no commentary.
 - Every `### Task N:` code step MUST use the project's real framework/imports — no pseudo-code.
 - ≤ 600 lines outside the `## Implementation tasks` section.
 - Mermaid block required.
+- Every requirement maps to a concrete task/interface and verification.
+- User journey order, affected tables/columns/value sources, and substantial-UI design prompt
+  are explicit when applicable; otherwise use the template's reasoned `no` form.

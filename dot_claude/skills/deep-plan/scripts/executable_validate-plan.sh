@@ -250,6 +250,62 @@ if [ "$MODE" = "root" ]; then
     record "rationale-present" "fail" "empty '## Rationale & key decisions' section"
   fi
 
+  RELATED_BODY=$(section_body "Ticket and Slack context")
+  TICKET_LINES=$(printf '%s\n' "$RELATED_BODY" | grep -cE '^- Ticket: [^<[:space:]]')
+  SLACK_LINES=$(printf '%s\n' "$RELATED_BODY" | grep -cE '^- Slack threads: [^<[:space:]]')
+  if [ "$TICKET_LINES" -eq 1 ] && [ "$SLACK_LINES" -eq 1 ] &&
+     ! printf '%s\n' "$RELATED_BODY" | grep -qE '<[^>]+>'; then
+    record "related-context-present" "pass" "ticket and Slack sources declared"
+  else
+    record "related-context-present" "fail" "need one filled '- Ticket:' and one filled '- Slack threads:' line"
+  fi
+
+  REQ_ROWS=$(section_body "Requirements matrix" | grep -cE '^\| *(✅|☑|⬜|⚠|❌)')
+  if [ "$REQ_ROWS" -ge 1 ] &&
+     ! section_body "Requirements matrix" | grep -qE '<[^>]+>'; then
+    record "requirements-matrix-present" "pass" "$REQ_ROWS requirement row(s)"
+  else
+    record "requirements-matrix-present" "fail" "'## Requirements matrix' needs ≥1 status-icon row with implementation + verification"
+  fi
+
+  JOURNEY_BODY=$(section_body "User journey")
+  JOURNEY_APPLIES=$(printf '%s\n' "$JOURNEY_BODY" | tr '[:upper:]' '[:lower:]' | sed -nE 's/^- applies: *(yes|no).*$/\1/p' | head -1)
+  JOURNEY_STEPS=$(printf '%s\n' "$JOURNEY_BODY" | grep -cE '^[0-9]+\. ')
+  if [ "$JOURNEY_APPLIES" = "yes" ] && [ "$JOURNEY_STEPS" -ge 2 ] &&
+     ! printf '%s\n' "$JOURNEY_BODY" | grep -qE '<[^>]+>'; then
+    record "user-journey-documented" "pass" "$JOURNEY_STEPS ordered step(s)"
+  elif [ "$JOURNEY_APPLIES" = "no" ] && printf '%s\n' "$JOURNEY_BODY" | grep -qE '^- Not applicable: [^<[:space:]]'; then
+    record "user-journey-documented" "pass" "not applicable with reason"
+  else
+    record "user-journey-documented" "fail" "set Applies yes + ≥2 ordered steps, or no + filled Not applicable reason"
+  fi
+
+  DATA_BODY=$(section_body "Data model")
+  SCHEMA_CHANGES=$(printf '%s\n' "$DATA_BODY" | tr '[:upper:]' '[:lower:]' | sed -nE 's/^- schema changes: *(yes|no).*$/\1/p' | head -1)
+  COLUMN_ROWS=$(printf '%s\n' "$DATA_BODY" | grep -ciE '^\| *(create|alter) *\|')
+  if [ "$SCHEMA_CHANGES" = "yes" ] && [ "$COLUMN_ROWS" -ge 1 ] &&
+     ! printf '%s\n' "$DATA_BODY" | grep -qE '<[^>]+>'; then
+    record "data-model-documented" "pass" "$COLUMN_ROWS affected column row(s)"
+  elif [ "$SCHEMA_CHANGES" = "no" ] && printf '%s\n' "$DATA_BODY" | grep -qE '^- None: [^<[:space:]]'; then
+    record "data-model-documented" "pass" "no schema change with reason"
+  else
+    record "data-model-documented" "fail" "set Schema changes yes + column rows, or no + filled None reason"
+  fi
+
+  DESIGN_BODY=$(section_body "Product design handoff prompt")
+  DESIGN_NEEDED=$(printf '%s\n' "$DESIGN_BODY" | tr '[:upper:]' '[:lower:]' | sed -nE 's/^- needed: *(yes|no).*$/\1/p' | head -1)
+  if [ "$DESIGN_NEEDED" = "yes" ] &&
+     printf '%s\n' "$DESIGN_BODY" | grep -qE '^> Page/screen: [^<[:space:]]' &&
+     printf '%s\n' "$DESIGN_BODY" | grep -qE '^> Interactions: [^<[:space:]]' &&
+     printf '%s\n' "$DESIGN_BODY" | grep -qE '^> Behavior and states: [^<[:space:]]' &&
+     ! printf '%s\n' "$DESIGN_BODY" | grep -qE '<[^>]+>'; then
+    record "product-design-handoff-documented" "pass" "copyable UI design prompt present"
+  elif [ "$DESIGN_NEEDED" = "no" ] && printf '%s\n' "$DESIGN_BODY" | grep -qE '^- Not needed: [^<[:space:]]'; then
+    record "product-design-handoff-documented" "pass" "not needed with reason"
+  else
+    record "product-design-handoff-documented" "fail" "set Needed yes + filled page/interactions/behavior prompt, or no + reason"
+  fi
+
   # 9.6 Mocking policy stated in the TDD section (mock only outer boundaries)
   TDD_SECTION=$(section_body "TDD test list")
   if echo "$TDD_SECTION" | grep -qiE 'mock' && \
