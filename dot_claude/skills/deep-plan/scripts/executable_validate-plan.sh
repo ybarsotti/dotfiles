@@ -323,12 +323,19 @@ if [ "$MODE" = "root" ]; then
     record "docs-impact-listed" "fail" "empty '## Documentation impact' — list affected docs or write 'none — no docs describe this logic'"
   fi
 
-  # 9.7 QA / test-execution flag set (yes/no)
-  QA_FLAG=$(section_body "QA / test-execution" | grep -ciE '\b(yes|no)\b')
-  if [ "$QA_FLAG" -ge 1 ]; then
-    record "qa-flag-set" "pass" "QA flag present"
+  QA_BODY=$(section_body "QA / test-execution")
+  QA_FLAG=$(printf '%s\n' "$QA_BODY" | grep -ciE '\b(yes|no)\b')
+  if printf '%s\n' "$QA_BODY" | grep -qiE 'Changes flows or adds screens.*yes'; then
+    if printf '%s\n' "$QA_BODY" | grep -qE '^- QA plan: .+qa-plan\.yaml'; then
+      record "qa-flag-set" "pass" "QA flag yes with structured plan artifact"
+    else
+      record "qa-flag-set" "fail" "QA flag yes requires '- QA plan: ...qa-plan.yaml'"
+    fi
+  elif [ "$QA_FLAG" -ge 1 ] &&
+       printf '%s\n' "$QA_BODY" | grep -qiE 'QA plan:.*not applicable'; then
+    record "qa-flag-set" "pass" "QA flag no with non-applicability reason"
   else
-    record "qa-flag-set" "fail" "'## QA / test-execution' must answer yes/no (changes flows or adds screens?)"
+    record "qa-flag-set" "fail" "'## QA / test-execution' needs yes + qa-plan.yaml, or no + not applicable reason"
   fi
 
   # 10. Superpowers all invoked — every `- [ ]` line under the REQUIRED
