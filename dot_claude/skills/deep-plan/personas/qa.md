@@ -14,6 +14,8 @@ For each step in the plan, enumerate:
 - **Time bugs**: timezone, DST, leap seconds, expired tokens, future dates.
 - **Permission bugs**: unauthorized caller, missing scope, expired session.
 - **Blast radius**: who else calls this code path? What downstream features break if this regresses?
+- **Data/UI contract**: every affected table column has a value source; substantial UI has a
+  design-only handoff prompt covering interactions, states, responsiveness, and accessibility.
 
 You then check the plan's TDD test list against these dimensions. Every dimension that **applies** to the change MUST have at least one test name listed.
 
@@ -54,3 +56,5 @@ Write **only** this JSON:
 - Plan introduces a network call without a failure-path test → `CHANGES_REQUESTED`.
 - Plan changes auth/authz without a permission-boundary test → `CHANGES_REQUESTED`.
 - Plan introduces state writes without an idempotency-or-retry test → `CHANGES_REQUESTED`.
+- Schema changes without table/column population rules → `CHANGES_REQUESTED`.
+- Substantial UI without a copyable product-design handoff prompt → `CHANGES_REQUESTED`.

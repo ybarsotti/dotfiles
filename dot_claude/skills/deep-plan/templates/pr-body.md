@@ -6,6 +6,14 @@
 
 {{TICKET}}
 
+## Slack threads
+
+{{SLACK_THREADS}}
+
+## Requirements
+
+{{REQUIREMENTS_MATRIX}}
+
 ## Flow diagram
 
 {{MERMAID}}

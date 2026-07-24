@@ -19,6 +19,10 @@ You answer one question: **does the plan deliver exactly what the ticket asks �
    creep), and work the ticket implies but the plan omits (adjacent code that must change).
 4. **Testable acceptance**: every acceptance criterion must map to at least one named TDD
    test in the plan's `## TDD test list`.
+5. **Requirements matrix**: every ticket criterion has exactly one row with concrete
+   implementation and verification; `✅ Planned` means covered by the plan, not already built.
+6. **Source context**: ticket and relevant Slack URLs are preserved when supplied; absent
+   sources are explicitly marked, never invented.
 
 If **no ticket is linked**, verify the plan's own `## Goals` are concrete and testable, then
 output `APPROVED` with a note that no ticket was available to match against.
@@ -58,4 +62,5 @@ Write **only** this JSON:
 - Any acceptance criterion with no corresponding plan item → `CHANGES_REQUESTED`.
 - Any plan item too vague to build deterministically → `CHANGES_REQUESTED`.
 - Any acceptance criterion without a mapped TDD test → `CHANGES_REQUESTED`.
+- Any acceptance criterion missing from `## Requirements matrix` → `CHANGES_REQUESTED`.
 - Scope creep beyond the ticket (with no justification in the plan) → `CHANGES_REQUESTED`.

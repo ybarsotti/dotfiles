@@ -15,11 +15,63 @@
 ## Context
 <2-4 sentences: why this change is needed, what prompted it, intended outcome. Include brainstorming insights.>
 
+## Ticket and Slack context
+<!-- Preserve source links. Never invent a ticket or Slack thread. -->
+- Ticket: <URL/key, or `none — no related ticket exists`>
+- Slack threads: <one or more URLs with a short relevance note, or `none found — where you checked`>
+
 ## Goals
 - <verb> <object> — succinct, testable
 
 ## Non-goals
 - <what this change explicitly does NOT do>
+
+## Requirements matrix
+<!-- One row per ticket acceptance criterion or, without a ticket, per concrete user requirement.
+     `✅ Planned` means the plan has a concrete implementation + verification mapping; it does
+     NOT claim implementation is complete. `/pr-description` later reconciles each row against
+     the finished diff/tests and changes status to ✅ Implemented, ⚠️ Partial, or ❌ Missing. -->
+| status | requirement | how the plan satisfies it | verification |
+|---|---|---|---|
+| ✅ Planned | <requirement> | <task/interface/behavior> | <test or observable evidence> |
+
+## User journey
+<!-- Use when the change affects a user/operator flow. Preserve meaningful interaction order. -->
+- Applies: <yes|no>
+1. <actor starts on page/entry point and performs action>
+2. <system responds; include alternate/error paths where meaningful>
+- Not applicable: <reason, only when Applies is no>
+
+## Data model
+<!-- Cover every created or altered table and every affected column. Explain exactly where each
+     value comes from. For no schema change, set no and explain why. -->
+- Schema changes: <yes|no>
+- None: <reason, only when Schema changes is no>
+
+| action | table | column | type | nullable / default | filled from | backfill / lifecycle |
+|---|---|---|---|---|---|---|
+| <create|alter> | `<table>` | `<column>` | `<type>` | <rule> | <request/event/derived source> | <migration/write/update rule> |
+
+## Product design handoff prompt
+<!-- Needed=yes for multiple screens, a new workflow, or a substantial interaction/layout change.
+     This is a design-only prompt for claude.design or Codex Product Design. It is NOT an
+     implementation task and must not request frontend code. -->
+- Needed: <yes|no>
+- Not needed: <reason, only when Needed is no>
+
+> Design-only handoff. Do not write implementation code.
+>
+> Page/screen: <affected page, or screen requirement if new>
+>
+> Requirements: <user problem, audience, constraints, information hierarchy>
+>
+> Interactions: <controls, navigation, validation, feedback, keyboard/touch behavior>
+>
+> Behavior and states: <loading, empty, error, success, permission and edge states>
+>
+> Responsive/accessibility: <breakpoints, focus order, semantics, contrast, reduced motion>
+>
+> Deliverable: <design artifact suitable to return for later frontend implementation>
 
 ## Clarifying questions
 <!--
@@ -178,6 +230,11 @@ docs). Use `### Q:` / `### A:` headers. If `--skip-grill` was passed, write exac
 - [ ] tdd-list-≥3
 - [ ] mocking-policy-stated
 - [ ] rationale-present
+- [ ] related-context-present
+- [ ] requirements-matrix-present
+- [ ] user-journey-documented
+- [ ] data-model-documented
+- [ ] product-design-handoff-documented
 - [ ] docs-impact-listed
 - [ ] qa-flag-set
 - [ ] adapter-decision-log-≥1-row
