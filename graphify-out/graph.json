@@ -6,258 +6,1103 @@
     {
       "label": "keys.lua",
       "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/keys.lua",
+      "source_file": "dot_config/wezterm/keys.lua",
       "source_location": "L1",
-      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_keys_lua",
-      "community": 0,
+      "id": "dot_config_wezterm_keys_lua",
+      "community": 9,
       "norm_label": "keys.lua"
     },
     {
       "label": "M.setup()",
       "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/keys.lua",
+      "source_file": "dot_config/wezterm/keys.lua",
       "source_location": "L19",
       "id": "wezterm_keys_m_setup",
-      "community": 0,
-      "norm_label": "m.setup()"
-    },
-    {
-      "label": "wezterm.lua",
-      "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/wezterm.lua",
-      "source_location": "L1",
-      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_wezterm_lua",
-      "community": 5,
-      "norm_label": "wezterm.lua"
-    },
-    {
-      "label": "fonts.lua",
-      "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/fonts.lua",
-      "source_location": "L1",
-      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_fonts_lua",
-      "community": 1,
-      "norm_label": "fonts.lua"
-    },
-    {
-      "label": "M.setup()",
-      "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/fonts.lua",
-      "source_location": "L5",
-      "id": "wezterm_fonts_m_setup",
-      "community": 1,
-      "norm_label": "m.setup()"
-    },
-    {
-      "label": "zen-mode-vim.lua",
-      "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/plugins/zen-mode-vim.lua",
-      "source_location": "L1",
-      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_zen_mode_vim_lua",
-      "community": 6,
-      "norm_label": "zen-mode-vim.lua"
-    },
-    {
-      "label": "workspace-switcher.lua",
-      "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/plugins/workspace-switcher.lua",
-      "source_location": "L1",
-      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_workspace_switcher_lua",
-      "community": 2,
-      "norm_label": "workspace-switcher.lua"
-    },
-    {
-      "label": "M.setup()",
-      "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/plugins/workspace-switcher.lua",
-      "source_location": "L7",
-      "id": "plugins_workspace_switcher_m_setup",
-      "community": 2,
-      "norm_label": "m.setup()"
-    },
-    {
-      "label": "move_workspace.lua",
-      "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/plugins/move_workspace.lua",
-      "source_location": "L1",
-      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_move_workspace_lua",
-      "community": 3,
-      "norm_label": "move_workspace.lua"
-    },
-    {
-      "label": "M.setup()",
-      "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/plugins/move_workspace.lua",
-      "source_location": "L5",
-      "id": "plugins_move_workspace_m_setup",
-      "community": 3,
-      "norm_label": "m.setup()"
-    },
-    {
-      "label": "bar.lua",
-      "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/plugins/bar.lua",
-      "source_location": "L1",
-      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_bar_lua",
-      "community": 4,
-      "norm_label": "bar.lua"
-    },
-    {
-      "label": "M.setup()",
-      "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/plugins/bar.lua",
-      "source_location": "L5",
-      "id": "plugins_bar_m_setup",
-      "community": 4,
-      "norm_label": "m.setup()"
-    },
-    {
-      "label": "melange_dark.lua",
-      "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/themes/melange_dark.lua",
-      "source_location": "L1",
-      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_themes_melange_dark_lua",
-      "community": 7,
-      "norm_label": "melange_dark.lua"
-    },
-    {
-      "label": "kanagawa-dragon.lua",
-      "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/themes/kanagawa-dragon.lua",
-      "source_location": "L1",
-      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_themes_kanagawa_dragon_lua",
-      "community": 8,
-      "norm_label": "kanagawa-dragon.lua"
-    },
-    {
-      "label": "cyberdream.lua",
-      "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/themes/cyberdream.lua",
-      "source_location": "L1",
-      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_themes_cyberdream_lua",
       "community": 9,
-      "norm_label": "cyberdream.lua"
-    },
-    {
-      "label": "init.lua",
-      "file_type": "code",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/yazi/plugins/smart-tab.yazi/init.lua",
-      "source_location": "L1",
-      "id": "users_barsotti_local_share_chezmoi_dot_config_yazi_plugins_smart_tab_yazi_init_lua",
-      "community": 10,
-      "norm_label": "init.lua"
-    },
-    {
-      "label": "keys.lua",
-      "file_type": "code",
-      "source_file": "dot_config/wezterm/keys.lua",
-      "source_location": "L1",
-      "community": 0,
-      "norm_label": "keys.lua",
-      "id": "dot_config_wezterm_keys_lua"
+      "norm_label": "m.setup()"
     },
     {
       "label": "wezterm.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/wezterm.lua",
       "source_location": "L1",
-      "community": 11,
-      "norm_label": "wezterm.lua",
-      "id": "dot_config_wezterm_wezterm_lua"
+      "id": "dot_config_wezterm_wezterm_lua",
+      "community": 16,
+      "norm_label": "wezterm.lua"
     },
     {
       "label": "fonts.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/fonts.lua",
       "source_location": "L1",
-      "community": 1,
-      "norm_label": "fonts.lua",
-      "id": "dot_config_wezterm_fonts_lua"
+      "id": "dot_config_wezterm_fonts_lua",
+      "community": 10,
+      "norm_label": "fonts.lua"
+    },
+    {
+      "label": "M.setup()",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/fonts.lua",
+      "source_location": "L5",
+      "id": "wezterm_fonts_m_setup",
+      "community": 10,
+      "norm_label": "m.setup()"
     },
     {
       "label": "zen-mode-vim.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/zen-mode-vim.lua",
       "source_location": "L1",
-      "community": 12,
-      "norm_label": "zen-mode-vim.lua",
-      "id": "dot_config_wezterm_plugins_zen_mode_vim_lua"
+      "id": "dot_config_wezterm_plugins_zen_mode_vim_lua",
+      "community": 17,
+      "norm_label": "zen-mode-vim.lua"
     },
     {
       "label": "workspace-switcher.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
       "source_location": "L1",
-      "community": 2,
-      "norm_label": "workspace-switcher.lua",
-      "id": "dot_config_wezterm_plugins_workspace_switcher_lua"
+      "id": "dot_config_wezterm_plugins_workspace_switcher_lua",
+      "community": 11,
+      "norm_label": "workspace-switcher.lua"
+    },
+    {
+      "label": "M.setup()",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
+      "source_location": "L7",
+      "id": "plugins_workspace_switcher_m_setup",
+      "community": 11,
+      "norm_label": "m.setup()"
     },
     {
       "label": "move_workspace.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
       "source_location": "L1",
-      "community": 3,
-      "norm_label": "move_workspace.lua",
-      "id": "dot_config_wezterm_plugins_move_workspace_lua"
+      "id": "dot_config_wezterm_plugins_move_workspace_lua",
+      "community": 12,
+      "norm_label": "move_workspace.lua"
+    },
+    {
+      "label": "M.setup()",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
+      "source_location": "L5",
+      "id": "plugins_move_workspace_m_setup",
+      "community": 12,
+      "norm_label": "m.setup()"
     },
     {
       "label": "bar.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/bar.lua",
       "source_location": "L1",
-      "community": 4,
-      "norm_label": "bar.lua",
-      "id": "dot_config_wezterm_plugins_bar_lua"
+      "id": "dot_config_wezterm_plugins_bar_lua",
+      "community": 13,
+      "norm_label": "bar.lua"
+    },
+    {
+      "label": "M.setup()",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/plugins/bar.lua",
+      "source_location": "L5",
+      "id": "plugins_bar_m_setup",
+      "community": 13,
+      "norm_label": "m.setup()"
     },
     {
       "label": "melange_dark.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/themes/melange_dark.lua",
       "source_location": "L1",
-      "community": 13,
-      "norm_label": "melange_dark.lua",
-      "id": "dot_config_wezterm_themes_melange_dark_lua"
+      "id": "dot_config_wezterm_themes_melange_dark_lua",
+      "community": 18,
+      "norm_label": "melange_dark.lua"
     },
     {
       "label": "kanagawa-dragon.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/themes/kanagawa-dragon.lua",
       "source_location": "L1",
-      "community": 14,
-      "norm_label": "kanagawa-dragon.lua",
-      "id": "dot_config_wezterm_themes_kanagawa_dragon_lua"
+      "id": "dot_config_wezterm_themes_kanagawa_dragon_lua",
+      "community": 19,
+      "norm_label": "kanagawa-dragon.lua"
     },
     {
       "label": "cyberdream.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/themes/cyberdream.lua",
       "source_location": "L1",
-      "community": 15,
-      "norm_label": "cyberdream.lua",
-      "id": "dot_config_wezterm_themes_cyberdream_lua"
+      "id": "dot_config_wezterm_themes_cyberdream_lua",
+      "community": 20,
+      "norm_label": "cyberdream.lua"
     },
     {
       "label": "init.lua",
       "file_type": "code",
       "source_file": "dot_config/yazi/plugins/smart-tab.yazi/init.lua",
       "source_location": "L1",
-      "community": 16,
+      "id": "dot_config_yazi_plugins_smart_tab_yazi_init_lua",
+      "community": 21,
+      "norm_label": "init.lua"
+    },
+    {
+      "label": "executable_qa_artifacts.py",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L1",
+      "id": "dot_claude_skills_qa_test_plan_scripts_executable_qa_artifacts_py",
+      "community": 0,
+      "norm_label": "executable_qa_artifacts.py"
+    },
+    {
+      "label": "validate_plan()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L44",
+      "id": "scripts_executable_qa_artifacts_validate_plan",
+      "community": 0,
+      "norm_label": "validate_plan()"
+    },
+    {
+      "label": "render_plan()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L53",
+      "id": "scripts_executable_qa_artifacts_render_plan",
+      "community": 0,
+      "norm_label": "render_plan()"
+    },
+    {
+      "label": "validate_results()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L65",
+      "id": "scripts_executable_qa_artifacts_validate_results",
+      "community": 0,
+      "norm_label": "validate_results()"
+    },
+    {
+      "label": "render_report()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L75",
+      "id": "scripts_executable_qa_artifacts_render_report",
+      "community": 0,
+      "norm_label": "render_report()"
+    },
+    {
+      "label": "write_schemas()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L87",
+      "id": "scripts_executable_qa_artifacts_write_schemas",
+      "community": 0,
+      "norm_label": "write_schemas()"
+    },
+    {
+      "label": "Parse a QA plan and reject invalid or dangling references.",
+      "file_type": "rationale",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L47",
+      "id": "scripts_executable_qa_artifacts_rationale_47",
+      "community": 0,
+      "norm_label": "parse a qa plan and reject invalid or dangling references."
+    },
+    {
+      "label": "Render human-readable Markdown from the structured QA plan.",
+      "file_type": "rationale",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L57",
+      "id": "scripts_executable_qa_artifacts_rationale_57",
+      "community": 0,
+      "norm_label": "render human-readable markdown from the structured qa plan."
+    },
+    {
+      "label": "Parse results and prove complete scenario/step coverage against the plan.",
+      "file_type": "rationale",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L69",
+      "id": "scripts_executable_qa_artifacts_rationale_69",
+      "community": 0,
+      "norm_label": "parse results and prove complete scenario/step coverage against the plan."
+    },
+    {
+      "label": "Render HTML, WebVTT captions, and annotated screenshots from a bound run.",
+      "file_type": "rationale",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L80",
+      "id": "scripts_executable_qa_artifacts_rationale_80",
+      "community": 0,
+      "norm_label": "render html, webvtt captions, and annotated screenshots from a bound run."
+    },
+    {
+      "label": "Write versioned JSON Schemas for QA plan and results contracts.",
+      "file_type": "rationale",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L88",
+      "id": "scripts_executable_qa_artifacts_rationale_88",
+      "community": 0,
+      "norm_label": "write versioned json schemas for qa plan and results contracts."
+    },
+    {
+      "label": "models.py",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L1",
+      "id": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "community": 2,
+      "norm_label": "models.py"
+    },
+    {
+      "label": "_parse_relative_path()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L27",
+      "id": "qa_artifacts_lib_models_parse_relative_path",
+      "community": 2,
+      "norm_label": "_parse_relative_path()"
+    },
+    {
+      "label": "FrozenModel",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L41",
+      "id": "qa_artifacts_lib_models_frozenmodel",
+      "community": 2,
+      "norm_label": "frozenmodel"
+    },
+    {
+      "label": "BaseModel",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "basemodel",
+      "community": 2,
+      "norm_label": "basemodel"
+    },
+    {
+      "label": "ScreenshotPolicy",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L45",
+      "id": "qa_artifacts_lib_models_screenshotpolicy",
+      "community": 14,
+      "norm_label": "screenshotpolicy"
+    },
+    {
+      "label": "StrEnum",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "strenum",
+      "community": 14,
+      "norm_label": "strenum"
+    },
+    {
+      "label": "CapturePolicy",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L51",
+      "id": "qa_artifacts_lib_models_capturepolicy",
+      "community": 14,
+      "norm_label": "capturepolicy"
+    },
+    {
+      "label": "ResultStatus",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L57",
+      "id": "qa_artifacts_lib_models_resultstatus",
+      "community": 1,
+      "norm_label": "resultstatus"
+    },
+    {
+      "label": "Requirement",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L64",
+      "id": "qa_artifacts_lib_models_requirement",
+      "community": 1,
+      "norm_label": "requirement"
+    },
+    {
+      "label": "Persona",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L69",
+      "id": "qa_artifacts_lib_models_persona",
+      "community": 1,
+      "norm_label": "persona"
+    },
+    {
+      "label": "EvidencePolicy",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L75",
+      "id": "qa_artifacts_lib_models_evidencepolicy",
+      "community": 2,
+      "norm_label": "evidencepolicy"
+    },
+    {
+      "label": "QAStep",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L82",
+      "id": "qa_artifacts_lib_models_qastep",
+      "community": 1,
+      "norm_label": "qastep"
+    },
+    {
+      "label": "QAScenario",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L91",
+      "id": "qa_artifacts_lib_models_qascenario",
+      "community": 1,
+      "norm_label": "qascenario"
+    },
+    {
+      "label": "QAPlan",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L103",
+      "id": "qa_artifacts_lib_models_qaplan",
+      "community": 1,
+      "norm_label": "qaplan"
+    },
+    {
+      "label": "references_exist()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L114",
+      "id": "qa_artifacts_lib_models_references_exist",
+      "community": 2,
+      "norm_label": "references_exist()"
+    },
+    {
+      "label": "QAEnvironment",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L129",
+      "id": "qa_artifacts_lib_models_qaenvironment",
+      "community": 2,
+      "norm_label": "qaenvironment"
+    },
+    {
+      "label": "HighlightBox",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L137",
+      "id": "qa_artifacts_lib_models_highlightbox",
+      "community": 2,
+      "norm_label": "highlightbox"
+    },
+    {
+      "label": "StepResult",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L144",
+      "id": "qa_artifacts_lib_models_stepresult",
+      "community": 1,
+      "norm_label": "stepresult"
+    },
+    {
+      "label": "interval_is_ordered()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L158",
+      "id": "qa_artifacts_lib_models_interval_is_ordered",
+      "community": 2,
+      "norm_label": "interval_is_ordered()"
+    },
+    {
+      "label": "ScenarioResult",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L171",
+      "id": "qa_artifacts_lib_models_scenarioresult",
+      "community": 1,
+      "norm_label": "scenarioresult"
+    },
+    {
+      "label": "scenario_is_consistent()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L180",
+      "id": "qa_artifacts_lib_models_scenario_is_consistent",
+      "community": 2,
+      "norm_label": "scenario_is_consistent()"
+    },
+    {
+      "label": "QAResults",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L200",
+      "id": "qa_artifacts_lib_models_qaresults",
+      "community": 2,
+      "norm_label": "qaresults"
+    },
+    {
+      "label": "run_is_consistent()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L211",
+      "id": "qa_artifacts_lib_models_run_is_consistent",
+      "community": 2,
+      "norm_label": "run_is_consistent()"
+    },
+    {
+      "label": "BoundRun",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L223",
+      "id": "qa_artifacts_lib_models_boundrun",
+      "community": 1,
+      "norm_label": "boundrun"
+    },
+    {
+      "label": "_require_unique()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L228",
+      "id": "qa_artifacts_lib_models_require_unique",
+      "community": 2,
+      "norm_label": "_require_unique()"
+    },
+    {
+      "label": "_require_known()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L237",
+      "id": "qa_artifacts_lib_models_require_known",
+      "community": 2,
+      "norm_label": "_require_known()"
+    },
+    {
+      "label": "binding.py",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
+      "source_location": "L1",
+      "id": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_binding_py",
+      "community": 0,
+      "norm_label": "binding.py"
+    },
+    {
+      "label": "load_plan()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
+      "source_location": "L16",
+      "id": "qa_artifacts_lib_binding_load_plan",
+      "community": 0,
+      "norm_label": "load_plan()"
+    },
+    {
+      "label": "load_results()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
+      "source_location": "L21",
+      "id": "qa_artifacts_lib_binding_load_results",
+      "community": 0,
+      "norm_label": "load_results()"
+    },
+    {
+      "label": "bind_run()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
+      "source_location": "L25",
+      "id": "qa_artifacts_lib_binding_bind_run",
+      "community": 0,
+      "norm_label": "bind_run()"
+    },
+    {
+      "label": "report.py",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L1",
+      "id": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "community": 3,
+      "norm_label": "report.py"
+    },
+    {
+      "label": "StepView",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L31",
+      "id": "qa_artifacts_lib_report_stepview",
+      "community": 1,
+      "norm_label": "stepview"
+    },
+    {
+      "label": "ScenarioView",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L39",
+      "id": "qa_artifacts_lib_report_scenarioview",
+      "community": 1,
+      "norm_label": "scenarioview"
+    },
+    {
+      "label": "RequirementView",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L48",
+      "id": "qa_artifacts_lib_report_requirementview",
+      "community": 1,
+      "norm_label": "requirementview"
+    },
+    {
+      "label": "ReportView",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L55",
+      "id": "qa_artifacts_lib_report_reportview",
+      "community": 1,
+      "norm_label": "reportview"
+    },
+    {
+      "label": "ScreenshotAnnotation",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L64",
+      "id": "qa_artifacts_lib_report_screenshotannotation",
+      "community": 1,
+      "norm_label": "screenshotannotation"
+    },
+    {
+      "label": "ScenarioCaption",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L72",
+      "id": "qa_artifacts_lib_report_scenariocaption",
+      "community": 1,
+      "norm_label": "scenariocaption"
+    },
+    {
+      "label": "render_plan()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L79",
+      "id": "qa_artifacts_lib_report_render_plan",
+      "community": 3,
+      "norm_label": "render_plan()"
+    },
+    {
+      "label": "render_report()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L85",
+      "id": "qa_artifacts_lib_report_render_report",
+      "community": 3,
+      "norm_label": "render_report()"
+    },
+    {
+      "label": "_build_scenario_views()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L100",
+      "id": "qa_artifacts_lib_report_build_scenario_views",
+      "community": 3,
+      "norm_label": "_build_scenario_views()"
+    },
+    {
+      "label": "_build_step_view()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L135",
+      "id": "qa_artifacts_lib_report_build_step_view",
+      "community": 3,
+      "norm_label": "_build_step_view()"
+    },
+    {
+      "label": "_annotate_screenshot()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L156",
+      "id": "qa_artifacts_lib_report_annotate_screenshot",
+      "community": 3,
+      "norm_label": "_annotate_screenshot()"
+    },
+    {
+      "label": "_write_vtt()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L203",
+      "id": "qa_artifacts_lib_report_write_vtt",
+      "community": 3,
+      "norm_label": "_write_vtt()"
+    },
+    {
+      "label": "_vtt_time()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L225",
+      "id": "qa_artifacts_lib_report_vtt_time",
+      "community": 3,
+      "norm_label": "_vtt_time()"
+    },
+    {
+      "label": "_overall_status()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L233",
+      "id": "qa_artifacts_lib_report_overall_status",
+      "community": 3,
+      "norm_label": "_overall_status()"
+    },
+    {
+      "label": "_status_counts()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L244",
+      "id": "qa_artifacts_lib_report_status_counts",
+      "community": 3,
+      "norm_label": "_status_counts()"
+    },
+    {
+      "label": "_requirement_views()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L251",
+      "id": "qa_artifacts_lib_report_requirement_views",
+      "community": 3,
+      "norm_label": "_requirement_views()"
+    },
+    {
+      "label": "_status_color()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L274",
+      "id": "qa_artifacts_lib_report_status_color",
+      "community": 3,
+      "norm_label": "_status_color()"
+    },
+    {
+      "label": "_template_environment()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L278",
+      "id": "qa_artifacts_lib_report_template_environment",
+      "community": 3,
+      "norm_label": "_template_environment()"
+    },
+    {
+      "label": "private_ai-memory.ts",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L1",
+      "community": 4,
+      "norm_label": "private_ai-memory.ts",
+      "id": "dot_config_opencode_plugins_private_ai_memory_ts"
+    },
+    {
+      "label": "readFileSync()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L30",
+      "community": 6,
+      "norm_label": "readfilesync()",
+      "id": "plugins_private_ai_memory_readfilesync"
+    },
+    {
+      "label": "captureTrimComment()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L31",
+      "community": 8,
+      "norm_label": "capturetrimcomment()",
+      "id": "plugins_private_ai_memory_capturetrimcomment"
+    },
+    {
+      "label": "captureNormalize()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L32",
+      "community": 8,
+      "norm_label": "capturenormalize()",
+      "id": "plugins_private_ai_memory_capturenormalize"
+    },
+    {
+      "label": "captureJoin()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L33",
+      "community": 4,
+      "norm_label": "capturejoin()",
+      "id": "plugins_private_ai_memory_capturejoin"
+    },
+    {
+      "label": "captureValidGlob()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L34",
+      "community": 4,
+      "norm_label": "capturevalidglob()",
+      "id": "plugins_private_ai_memory_capturevalidglob"
+    },
+    {
+      "label": "captureParseArray()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L35",
+      "community": 8,
+      "norm_label": "captureparsearray()",
+      "id": "plugins_private_ai_memory_captureparsearray"
+    },
+    {
+      "label": "captureConfig()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L36",
+      "community": 8,
+      "norm_label": "captureconfig()",
+      "id": "plugins_private_ai_memory_captureconfig"
+    },
+    {
+      "label": "captureGlob()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L93",
+      "community": 15,
+      "norm_label": "captureglob()",
+      "id": "plugins_private_ai_memory_captureglob"
+    },
+    {
+      "label": "captureTool()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L94",
+      "community": 15,
+      "norm_label": "capturetool()",
+      "id": "plugins_private_ai_memory_capturetool"
+    },
+    {
+      "label": "capturePolicy()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L95",
+      "community": 15,
+      "norm_label": "capturepolicy()",
+      "id": "plugins_private_ai_memory_capturepolicy"
+    },
+    {
+      "label": "timeoutSignal()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L98",
+      "community": 7,
+      "norm_label": "timeoutsignal()",
+      "id": "plugins_private_ai_memory_timeoutsignal"
+    },
+    {
+      "label": "authHeaders()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L104",
+      "community": 7,
+      "norm_label": "authheaders()",
+      "id": "plugins_private_ai_memory_authheaders"
+    },
+    {
+      "label": "sleep()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L122",
+      "community": 7,
+      "norm_label": "sleep()",
+      "id": "plugins_private_ai_memory_sleep"
+    },
+    {
+      "label": "scheduleHookFlush()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L126",
+      "community": 4,
+      "norm_label": "schedulehookflush()",
+      "id": "plugins_private_ai_memory_schedulehookflush"
+    },
+    {
+      "label": "requestHookDrain()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L135",
+      "community": 4,
+      "norm_label": "requesthookdrain()",
+      "id": "plugins_private_ai_memory_requesthookdrain"
+    },
+    {
+      "label": "disposeDrainTimeout()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L145",
+      "community": 4,
+      "norm_label": "disposedraintimeout()",
+      "id": "plugins_private_ai_memory_disposedraintimeout"
+    },
+    {
+      "label": "drainHookQueueForDispose()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L152",
+      "community": 4,
+      "norm_label": "drainhookqueuefordispose()",
+      "id": "plugins_private_ai_memory_drainhookqueuefordispose"
+    },
+    {
+      "label": "enqueueHook()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L156",
+      "community": 4,
+      "norm_label": "enqueuehook()",
+      "id": "plugins_private_ai_memory_enqueuehook"
+    },
+    {
+      "label": "drainHookQueue()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L166",
+      "community": 7,
+      "norm_label": "drainhookqueue()",
+      "id": "plugins_private_ai_memory_drainhookqueue"
+    },
+    {
+      "label": "findMarker()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L194",
+      "community": 8,
+      "norm_label": "findmarker()",
+      "id": "plugins_private_ai_memory_findmarker"
+    },
+    {
+      "label": "tomlKey()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L207",
+      "community": 6,
+      "norm_label": "tomlkey()",
+      "id": "plugins_private_ai_memory_tomlkey"
+    },
+    {
+      "label": "repoRootProject()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L217",
+      "community": 6,
+      "norm_label": "reporootproject()",
+      "id": "plugins_private_ai_memory_reporootproject"
+    },
+    {
+      "label": "tomlFlag()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L238",
+      "community": 6,
+      "norm_label": "tomlflag()",
+      "id": "plugins_private_ai_memory_tomlflag"
+    },
+    {
+      "label": "applyMarkerParams()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L246",
+      "community": 6,
+      "norm_label": "applymarkerparams()",
+      "id": "plugins_private_ai_memory_applymarkerparams"
+    },
+    {
+      "label": "sessionID()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L286",
+      "community": 4,
+      "norm_label": "sessionid()",
+      "id": "plugins_private_ai_memory_sessionid"
+    },
+    {
+      "label": "textFromParts()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L291",
+      "community": 4,
+      "norm_label": "textfromparts()",
+      "id": "plugins_private_ai_memory_textfromparts"
+    },
+    {
+      "label": "cwdFor()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L310",
+      "community": 5,
+      "norm_label": "cwdfor()",
+      "id": "plugins_private_ai_memory_cwdfor"
+    },
+    {
+      "label": "rememberCwd()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L314",
+      "community": 5,
+      "norm_label": "remembercwd()",
+      "id": "plugins_private_ai_memory_remembercwd"
+    },
+    {
+      "label": "startSession()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L318",
+      "community": 5,
+      "norm_label": "startsession()",
+      "id": "plugins_private_ai_memory_startsession"
+    },
+    {
+      "label": "endSession()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L330",
+      "community": 5,
+      "norm_label": "endsession()",
+      "id": "plugins_private_ai_memory_endsession"
+    },
+    {
+      "label": "postPreCompact()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L339",
+      "community": 5,
+      "norm_label": "postprecompact()",
+      "id": "plugins_private_ai_memory_postprecompact"
+    },
+    {
+      "label": "postHook()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L349",
+      "community": 5,
+      "norm_label": "posthook()",
+      "id": "plugins_private_ai_memory_posthook"
+    },
+    {
+      "label": "fetchHandoff()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L363",
+      "community": 7,
+      "norm_label": "fetchhandoff()",
+      "id": "plugins_private_ai_memory_fetchhandoff"
+    },
+    {
+      "label": "AiMemoryHooks()",
+      "file_type": "code",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L381",
+      "community": 4,
+      "norm_label": "aimemoryhooks()",
+      "id": "plugins_private_ai_memory_aimemoryhooks"
+    },
+    {
+      "label": "keys.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/keys.lua",
+      "source_location": "L1",
+      "community": 9,
+      "norm_label": "keys.lua",
+      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_keys_lua"
+    },
+    {
+      "label": "wezterm.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/wezterm.lua",
+      "source_location": "L1",
+      "community": 22,
+      "norm_label": "wezterm.lua",
+      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_wezterm_lua"
+    },
+    {
+      "label": "fonts.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/fonts.lua",
+      "source_location": "L1",
+      "community": 10,
+      "norm_label": "fonts.lua",
+      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_fonts_lua"
+    },
+    {
+      "label": "zen-mode-vim.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/plugins/zen-mode-vim.lua",
+      "source_location": "L1",
+      "community": 23,
+      "norm_label": "zen-mode-vim.lua",
+      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_zen_mode_vim_lua"
+    },
+    {
+      "label": "workspace-switcher.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
+      "source_location": "L1",
+      "community": 11,
+      "norm_label": "workspace-switcher.lua",
+      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_workspace_switcher_lua"
+    },
+    {
+      "label": "move_workspace.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
+      "source_location": "L1",
+      "community": 12,
+      "norm_label": "move_workspace.lua",
+      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_move_workspace_lua"
+    },
+    {
+      "label": "bar.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/plugins/bar.lua",
+      "source_location": "L1",
+      "community": 13,
+      "norm_label": "bar.lua",
+      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_bar_lua"
+    },
+    {
+      "label": "melange_dark.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/themes/melange_dark.lua",
+      "source_location": "L1",
+      "community": 24,
+      "norm_label": "melange_dark.lua",
+      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_themes_melange_dark_lua"
+    },
+    {
+      "label": "kanagawa-dragon.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/themes/kanagawa-dragon.lua",
+      "source_location": "L1",
+      "community": 25,
+      "norm_label": "kanagawa-dragon.lua",
+      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_themes_kanagawa_dragon_lua"
+    },
+    {
+      "label": "cyberdream.lua",
+      "file_type": "code",
+      "source_file": "dot_config/wezterm/themes/cyberdream.lua",
+      "source_location": "L1",
+      "community": 26,
+      "norm_label": "cyberdream.lua",
+      "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_themes_cyberdream_lua"
+    },
+    {
+      "label": "init.lua",
+      "file_type": "code",
+      "source_file": "dot_config/yazi/plugins/smart-tab.yazi/init.lua",
+      "source_location": "L1",
+      "community": 27,
       "norm_label": "init.lua",
-      "id": "dot_config_yazi_plugins_smart_tab_yazi_init_lua"
+      "id": "users_barsotti_local_share_chezmoi_dot_config_yazi_plugins_smart_tab_yazi_init_lua"
     }
   ],
   "links": [
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/keys.lua",
-      "source_location": "L19",
-      "weight": 1.0,
-      "source": "users_barsotti_local_share_chezmoi_dot_config_wezterm_keys_lua",
-      "target": "wezterm_keys_m_setup",
-      "confidence_score": 1.0
-    },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -271,12 +1116,12 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/fonts.lua",
-      "source_location": "L5",
+      "source_file": "dot_config/wezterm/keys.lua",
+      "source_location": "L19",
       "weight": 1.0,
-      "source": "users_barsotti_local_share_chezmoi_dot_config_wezterm_fonts_lua",
-      "target": "wezterm_fonts_m_setup",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "users_barsotti_local_share_chezmoi_dot_config_wezterm_keys_lua",
+      "target": "wezterm_keys_m_setup"
     },
     {
       "relation": "contains",
@@ -291,12 +1136,12 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/plugins/workspace-switcher.lua",
-      "source_location": "L7",
+      "source_file": "dot_config/wezterm/fonts.lua",
+      "source_location": "L5",
       "weight": 1.0,
-      "source": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_workspace_switcher_lua",
-      "target": "plugins_workspace_switcher_m_setup",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "users_barsotti_local_share_chezmoi_dot_config_wezterm_fonts_lua",
+      "target": "wezterm_fonts_m_setup"
     },
     {
       "relation": "contains",
@@ -311,12 +1156,12 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/plugins/move_workspace.lua",
-      "source_location": "L5",
+      "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
+      "source_location": "L7",
       "weight": 1.0,
-      "source": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_move_workspace_lua",
-      "target": "plugins_move_workspace_m_setup",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_workspace_switcher_lua",
+      "target": "plugins_workspace_switcher_m_setup"
     },
     {
       "relation": "contains",
@@ -331,12 +1176,12 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/plugins/bar.lua",
+      "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
       "source_location": "L5",
       "weight": 1.0,
-      "source": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_bar_lua",
-      "target": "plugins_bar_m_setup",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_move_workspace_lua",
+      "target": "plugins_move_workspace_m_setup"
     },
     {
       "relation": "contains",
@@ -347,8 +1192,2292 @@
       "confidence_score": 1.0,
       "source": "dot_config_wezterm_plugins_bar_lua",
       "target": "plugins_bar_m_setup"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/wezterm/plugins/bar.lua",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_bar_lua",
+      "target": "plugins_bar_m_setup"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L44",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_executable_qa_artifacts_py",
+      "target": "scripts_executable_qa_artifacts_validate_plan"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L53",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_executable_qa_artifacts_py",
+      "target": "scripts_executable_qa_artifacts_render_plan"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L65",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_executable_qa_artifacts_py",
+      "target": "scripts_executable_qa_artifacts_validate_results"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L75",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_executable_qa_artifacts_py",
+      "target": "scripts_executable_qa_artifacts_render_report"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L87",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_executable_qa_artifacts_py",
+      "target": "scripts_executable_qa_artifacts_write_schemas"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L47",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_executable_qa_artifacts_rationale_47",
+      "target": "scripts_executable_qa_artifacts_validate_plan"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "scripts_executable_qa_artifacts_validate_plan",
+      "target": "qa_artifacts_lib_binding_load_plan"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L57",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_executable_qa_artifacts_rationale_57",
+      "target": "scripts_executable_qa_artifacts_render_plan"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L58",
+      "weight": 1.0,
+      "source": "scripts_executable_qa_artifacts_render_plan",
+      "target": "qa_artifacts_lib_binding_load_plan"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L69",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_executable_qa_artifacts_rationale_69",
+      "target": "scripts_executable_qa_artifacts_validate_results"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L70",
+      "weight": 1.0,
+      "source": "scripts_executable_qa_artifacts_validate_results",
+      "target": "qa_artifacts_lib_binding_bind_run"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L70",
+      "weight": 1.0,
+      "source": "scripts_executable_qa_artifacts_validate_results",
+      "target": "qa_artifacts_lib_binding_load_plan"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L70",
+      "weight": 1.0,
+      "source": "scripts_executable_qa_artifacts_validate_results",
+      "target": "qa_artifacts_lib_binding_load_results"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L80",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_executable_qa_artifacts_rationale_80",
+      "target": "scripts_executable_qa_artifacts_render_report"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L81",
+      "weight": 1.0,
+      "source": "scripts_executable_qa_artifacts_render_report",
+      "target": "qa_artifacts_lib_binding_bind_run"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L81",
+      "weight": 1.0,
+      "source": "scripts_executable_qa_artifacts_render_report",
+      "target": "qa_artifacts_lib_binding_load_plan"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L81",
+      "weight": 1.0,
+      "source": "scripts_executable_qa_artifacts_render_report",
+      "target": "qa_artifacts_lib_binding_load_results"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
+      "source_location": "L88",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_executable_qa_artifacts_rationale_88",
+      "target": "scripts_executable_qa_artifacts_write_schemas"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L27",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_parse_relative_path"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L41",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_frozenmodel"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L45",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_screenshotpolicy"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L51",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_capturepolicy"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L57",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_resultstatus"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L64",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_requirement"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L69",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_persona"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L75",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_evidencepolicy"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L82",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_qastep"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L91",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_qascenario"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L103",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_qaplan"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L114",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_references_exist"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L129",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_qaenvironment"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L137",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_highlightbox"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L144",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_stepresult"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L158",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_interval_is_ordered"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L171",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_scenarioresult"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L180",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_scenario_is_consistent"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L200",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_qaresults"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L211",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_run_is_consistent"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L223",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_boundrun"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L228",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_require_unique"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L237",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
+      "target": "qa_artifacts_lib_models_require_known"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L41",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_frozenmodel",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L64",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_requirement",
+      "target": "qa_artifacts_lib_models_frozenmodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L69",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_persona",
+      "target": "qa_artifacts_lib_models_frozenmodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L75",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_evidencepolicy",
+      "target": "qa_artifacts_lib_models_frozenmodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L82",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_qastep",
+      "target": "qa_artifacts_lib_models_frozenmodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L91",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_qascenario",
+      "target": "qa_artifacts_lib_models_frozenmodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L103",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_qaplan",
+      "target": "qa_artifacts_lib_models_frozenmodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L129",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_qaenvironment",
+      "target": "qa_artifacts_lib_models_frozenmodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L137",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_highlightbox",
+      "target": "qa_artifacts_lib_models_frozenmodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L144",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_stepresult",
+      "target": "qa_artifacts_lib_models_frozenmodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L171",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_scenarioresult",
+      "target": "qa_artifacts_lib_models_frozenmodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L200",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_qaresults",
+      "target": "qa_artifacts_lib_models_frozenmodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L45",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_screenshotpolicy",
+      "target": "strenum"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L51",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_capturepolicy",
+      "target": "strenum"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L57",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_resultstatus",
+      "target": "strenum"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_stepview",
+      "target": "qa_artifacts_lib_models_resultstatus"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenarioview",
+      "target": "qa_artifacts_lib_models_resultstatus"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_requirementview",
+      "target": "qa_artifacts_lib_models_resultstatus"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_reportview",
+      "target": "qa_artifacts_lib_models_resultstatus"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_screenshotannotation",
+      "target": "qa_artifacts_lib_models_resultstatus"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenariocaption",
+      "target": "qa_artifacts_lib_models_resultstatus"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_stepview",
+      "target": "qa_artifacts_lib_models_requirement"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenarioview",
+      "target": "qa_artifacts_lib_models_requirement"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_requirementview",
+      "target": "qa_artifacts_lib_models_requirement"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_reportview",
+      "target": "qa_artifacts_lib_models_requirement"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_screenshotannotation",
+      "target": "qa_artifacts_lib_models_requirement"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenariocaption",
+      "target": "qa_artifacts_lib_models_requirement"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_stepview",
+      "target": "qa_artifacts_lib_models_persona"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenarioview",
+      "target": "qa_artifacts_lib_models_persona"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_requirementview",
+      "target": "qa_artifacts_lib_models_persona"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_reportview",
+      "target": "qa_artifacts_lib_models_persona"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_screenshotannotation",
+      "target": "qa_artifacts_lib_models_persona"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenariocaption",
+      "target": "qa_artifacts_lib_models_persona"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_stepview",
+      "target": "qa_artifacts_lib_models_qastep"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenarioview",
+      "target": "qa_artifacts_lib_models_qastep"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_requirementview",
+      "target": "qa_artifacts_lib_models_qastep"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_reportview",
+      "target": "qa_artifacts_lib_models_qastep"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_screenshotannotation",
+      "target": "qa_artifacts_lib_models_qastep"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenariocaption",
+      "target": "qa_artifacts_lib_models_qastep"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_stepview",
+      "target": "qa_artifacts_lib_models_qascenario"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenarioview",
+      "target": "qa_artifacts_lib_models_qascenario"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_requirementview",
+      "target": "qa_artifacts_lib_models_qascenario"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_reportview",
+      "target": "qa_artifacts_lib_models_qascenario"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_screenshotannotation",
+      "target": "qa_artifacts_lib_models_qascenario"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenariocaption",
+      "target": "qa_artifacts_lib_models_qascenario"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_stepview",
+      "target": "qa_artifacts_lib_models_qaplan"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenarioview",
+      "target": "qa_artifacts_lib_models_qaplan"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_requirementview",
+      "target": "qa_artifacts_lib_models_qaplan"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_reportview",
+      "target": "qa_artifacts_lib_models_qaplan"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_screenshotannotation",
+      "target": "qa_artifacts_lib_models_qaplan"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenariocaption",
+      "target": "qa_artifacts_lib_models_qaplan"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L118",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_references_exist",
+      "target": "qa_artifacts_lib_models_require_unique"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L122",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_references_exist",
+      "target": "qa_artifacts_lib_models_require_known"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_stepview",
+      "target": "qa_artifacts_lib_models_stepresult"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenarioview",
+      "target": "qa_artifacts_lib_models_stepresult"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_requirementview",
+      "target": "qa_artifacts_lib_models_stepresult"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_reportview",
+      "target": "qa_artifacts_lib_models_stepresult"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_screenshotannotation",
+      "target": "qa_artifacts_lib_models_stepresult"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenariocaption",
+      "target": "qa_artifacts_lib_models_stepresult"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_stepview",
+      "target": "qa_artifacts_lib_models_scenarioresult"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenarioview",
+      "target": "qa_artifacts_lib_models_scenarioresult"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_requirementview",
+      "target": "qa_artifacts_lib_models_scenarioresult"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_reportview",
+      "target": "qa_artifacts_lib_models_scenarioresult"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_screenshotannotation",
+      "target": "qa_artifacts_lib_models_scenarioresult"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenariocaption",
+      "target": "qa_artifacts_lib_models_scenarioresult"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L181",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_scenario_is_consistent",
+      "target": "qa_artifacts_lib_models_require_unique"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
+      "source_location": "L212",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_models_run_is_consistent",
+      "target": "qa_artifacts_lib_models_require_unique"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_stepview",
+      "target": "qa_artifacts_lib_models_boundrun"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenarioview",
+      "target": "qa_artifacts_lib_models_boundrun"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_requirementview",
+      "target": "qa_artifacts_lib_models_boundrun"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_reportview",
+      "target": "qa_artifacts_lib_models_boundrun"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_screenshotannotation",
+      "target": "qa_artifacts_lib_models_boundrun"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L10",
+      "weight": 0.8,
+      "confidence_score": 0.5,
+      "source": "qa_artifacts_lib_report_scenariocaption",
+      "target": "qa_artifacts_lib_models_boundrun"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
+      "source_location": "L73",
+      "weight": 1.0,
+      "source": "qa_artifacts_lib_binding_bind_run",
+      "target": "qa_artifacts_lib_models_boundrun"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_binding_py",
+      "target": "qa_artifacts_lib_binding_load_plan"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_binding_py",
+      "target": "qa_artifacts_lib_binding_load_results"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
+      "source_location": "L25",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_binding_py",
+      "target": "qa_artifacts_lib_binding_bind_run"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L31",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_stepview"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_scenarioview"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L48",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_requirementview"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L55",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_reportview"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L64",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_screenshotannotation"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L72",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_scenariocaption"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L79",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_render_plan"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L85",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_render_report"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L100",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_build_scenario_views"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L135",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_build_step_view"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L156",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_annotate_screenshot"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L203",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_write_vtt"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L225",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_vtt_time"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L233",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_overall_status"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L244",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_status_counts"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L251",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_requirement_views"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L274",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_status_color"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L278",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
+      "target": "qa_artifacts_lib_report_template_environment"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L138",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_build_step_view",
+      "target": "qa_artifacts_lib_report_stepview"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L124",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_build_scenario_views",
+      "target": "qa_artifacts_lib_report_scenarioview"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L263",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_requirement_views",
+      "target": "qa_artifacts_lib_report_requirementview"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L88",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_render_report",
+      "target": "qa_artifacts_lib_report_reportview"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L144",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_build_step_view",
+      "target": "qa_artifacts_lib_report_screenshotannotation"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L109",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_build_scenario_views",
+      "target": "qa_artifacts_lib_report_scenariocaption"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L80",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_render_plan",
+      "target": "qa_artifacts_lib_report_template_environment"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L87",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_render_report",
+      "target": "qa_artifacts_lib_report_build_scenario_views"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L90",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_render_report",
+      "target": "qa_artifacts_lib_report_overall_status"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L91",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_render_report",
+      "target": "qa_artifacts_lib_report_status_counts"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L92",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_render_report",
+      "target": "qa_artifacts_lib_report_requirement_views"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L95",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_render_report",
+      "target": "qa_artifacts_lib_report_template_environment"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L108",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_build_scenario_views",
+      "target": "qa_artifacts_lib_report_write_vtt"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L120",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_build_scenario_views",
+      "target": "qa_artifacts_lib_report_build_step_view"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L143",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_build_step_view",
+      "target": "qa_artifacts_lib_report_annotate_screenshot"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L166",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_annotate_screenshot",
+      "target": "qa_artifacts_lib_report_status_color"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
+      "source_location": "L213",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "qa_artifacts_lib_report_write_vtt",
+      "target": "qa_artifacts_lib_report_vtt_time"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L30",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_readfilesync"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L31",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_capturetrimcomment"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L32",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_capturenormalize"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_capturejoin"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L34",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_capturevalidglob"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L35",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_captureparsearray"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L36",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_captureconfig"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L93",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_captureglob"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L94",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_capturetool"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L95",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_capturepolicy"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L98",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_timeoutsignal"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L104",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_authheaders"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L122",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_sleep"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L126",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_schedulehookflush"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L135",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_requesthookdrain"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L145",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_disposedraintimeout"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L152",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_drainhookqueuefordispose"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L156",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_enqueuehook"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L166",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_drainhookqueue"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L194",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_findmarker"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L207",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_tomlkey"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L217",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_reporootproject"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L238",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_tomlflag"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L246",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_applymarkerparams"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L286",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_sessionid"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L291",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_textfromparts"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L310",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_cwdfor"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L314",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_remembercwd"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L318",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_startsession"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L330",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_endsession"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L339",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_postprecompact"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L349",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_posthook"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L363",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_fetchhandoff"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L381",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "dot_config_opencode_plugins_private_ai_memory_ts",
+      "target": "plugins_private_ai_memory_aimemoryhooks"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L41",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_captureconfig",
+      "target": "plugins_private_ai_memory_readfilesync"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L261",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_applymarkerparams",
+      "target": "plugins_private_ai_memory_readfilesync"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L49",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_captureconfig",
+      "target": "plugins_private_ai_memory_capturetrimcomment"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L38",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_captureconfig",
+      "target": "plugins_private_ai_memory_capturenormalize"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L71",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_captureconfig",
+      "target": "plugins_private_ai_memory_captureparsearray"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L37",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_captureconfig",
+      "target": "plugins_private_ai_memory_findmarker"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L95",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_capturepolicy",
+      "target": "plugins_private_ai_memory_captureconfig"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L95",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_capturepolicy",
+      "target": "plugins_private_ai_memory_captureglob"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L95",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_capturepolicy",
+      "target": "plugins_private_ai_memory_capturetool"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L354",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_posthook",
+      "target": "plugins_private_ai_memory_capturepolicy"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L182",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_drainhookqueue",
+      "target": "plugins_private_ai_memory_timeoutsignal"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L372",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_fetchhandoff",
+      "target": "plugins_private_ai_memory_timeoutsignal"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L180",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_drainhookqueue",
+      "target": "plugins_private_ai_memory_authheaders"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L371",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_fetchhandoff",
+      "target": "plugins_private_ai_memory_authheaders"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L187",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_drainhookqueue",
+      "target": "plugins_private_ai_memory_sleep"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L162",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_enqueuehook",
+      "target": "plugins_private_ai_memory_schedulehookflush"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L137",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_requesthookdrain",
+      "target": "plugins_private_ai_memory_drainhookqueue"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L153",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_drainhookqueuefordispose",
+      "target": "plugins_private_ai_memory_requesthookdrain"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L160",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_enqueuehook",
+      "target": "plugins_private_ai_memory_requesthookdrain"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L153",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_drainhookqueuefordispose",
+      "target": "plugins_private_ai_memory_disposedraintimeout"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L357",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_posthook",
+      "target": "plugins_private_ai_memory_enqueuehook"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L258",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_applymarkerparams",
+      "target": "plugins_private_ai_memory_findmarker"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L262",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_applymarkerparams",
+      "target": "plugins_private_ai_memory_tomlkey"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L274",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_applymarkerparams",
+      "target": "plugins_private_ai_memory_reporootproject"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L266",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_applymarkerparams",
+      "target": "plugins_private_ai_memory_tomlflag"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L353",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_posthook",
+      "target": "plugins_private_ai_memory_applymarkerparams"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L368",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_fetchhandoff",
+      "target": "plugins_private_ai_memory_applymarkerparams"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L332",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_endsession",
+      "target": "plugins_private_ai_memory_cwdfor"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L340",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_postprecompact",
+      "target": "plugins_private_ai_memory_cwdfor"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L321",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_startsession",
+      "target": "plugins_private_ai_memory_remembercwd"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L326",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_startsession",
+      "target": "plugins_private_ai_memory_posthook"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L340",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_postprecompact",
+      "target": "plugins_private_ai_memory_startsession"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L333",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_endsession",
+      "target": "plugins_private_ai_memory_posthook"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
+      "source_location": "L346",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "plugins_private_ai_memory_postprecompact",
+      "target": "plugins_private_ai_memory_posthook"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "176e020e8ab1ec2b5a6c42560ca399f40fd70d24"
+  "built_at_commit": "48afbe77cf57899f558e9549e46c03b50bdf039b"
 }
