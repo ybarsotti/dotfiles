@@ -1,0 +1,287 @@
+{
+  "$defs": {
+    "HighlightBox": {
+      "additionalProperties": false,
+      "properties": {
+        "height": {
+          "exclusiveMinimum": 0,
+          "title": "Height",
+          "type": "integer"
+        },
+        "width": {
+          "exclusiveMinimum": 0,
+          "title": "Width",
+          "type": "integer"
+        },
+        "x": {
+          "minimum": 0,
+          "title": "X",
+          "type": "integer"
+        },
+        "y": {
+          "minimum": 0,
+          "title": "Y",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "title": "HighlightBox",
+      "type": "object"
+    },
+    "QAEnvironment": {
+      "additionalProperties": false,
+      "properties": {
+        "base_url": {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Base Url",
+          "type": "string"
+        },
+        "browser": {
+          "minLength": 1,
+          "title": "Browser",
+          "type": "string"
+        },
+        "commit_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Commit Sha",
+          "type": "string"
+        },
+        "feature_flags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Feature Flags",
+          "type": "array"
+        },
+        "viewport": {
+          "pattern": "^\\d+x\\d+$",
+          "title": "Viewport",
+          "type": "string"
+        }
+      },
+      "required": [
+        "commit_sha",
+        "base_url",
+        "browser",
+        "viewport"
+      ],
+      "title": "QAEnvironment",
+      "type": "object"
+    },
+    "ResultStatus": {
+      "enum": [
+        "pass",
+        "fail",
+        "blocked",
+        "skipped"
+      ],
+      "title": "ResultStatus",
+      "type": "string"
+    },
+    "ScenarioResult": {
+      "additionalProperties": false,
+      "properties": {
+        "finished_at": {
+          "format": "date-time",
+          "title": "Finished At",
+          "type": "string"
+        },
+        "scenario_id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "started_at": {
+          "format": "date-time",
+          "title": "Started At",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ResultStatus"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/StepResult"
+          },
+          "minItems": 1,
+          "title": "Steps",
+          "type": "array"
+        },
+        "video_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Video Path"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "status",
+        "started_at",
+        "finished_at",
+        "video_path",
+        "steps"
+      ],
+      "title": "ScenarioResult",
+      "type": "object"
+    },
+    "StepResult": {
+      "additionalProperties": false,
+      "properties": {
+        "console_errors": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Console Errors",
+          "type": "array"
+        },
+        "finished_at": {
+          "format": "date-time",
+          "title": "Finished At",
+          "type": "string"
+        },
+        "highlight_box": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HighlightBox"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "network_errors": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Network Errors",
+          "type": "array"
+        },
+        "observed": {
+          "minLength": 1,
+          "title": "Observed",
+          "type": "string"
+        },
+        "screenshot_raw": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Screenshot Raw"
+        },
+        "started_at": {
+          "format": "date-time",
+          "title": "Started At",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ResultStatus"
+        },
+        "step_id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "title": "Step Id",
+          "type": "string"
+        },
+        "video_end_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Video End Seconds",
+          "type": "number"
+        },
+        "video_start_seconds": {
+          "minimum": 0,
+          "title": "Video Start Seconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "step_id",
+        "status",
+        "observed",
+        "started_at",
+        "finished_at",
+        "video_start_seconds",
+        "video_end_seconds"
+      ],
+      "title": "StepResult",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "attempt": {
+      "minimum": 1,
+      "title": "Attempt",
+      "type": "integer"
+    },
+    "environment": {
+      "$ref": "#/$defs/QAEnvironment"
+    },
+    "finished_at": {
+      "format": "date-time",
+      "title": "Finished At",
+      "type": "string"
+    },
+    "plan_id": {
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "run_id": {
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "scenarios": {
+      "items": {
+        "$ref": "#/$defs/ScenarioResult"
+      },
+      "minItems": 1,
+      "title": "Scenarios",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "started_at": {
+      "format": "date-time",
+      "title": "Started At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "run_id",
+    "plan_id",
+    "attempt",
+    "environment",
+    "started_at",
+    "finished_at",
+    "scenarios"
+  ],
+  "title": "QAResults",
+  "type": "object"
+}

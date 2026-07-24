@@ -1,115 +1,218 @@
 ---
 name: qa-test-plan
-description: Produce a MANUAL (human, on-screen) QA test plan for a change, review it, then execute it in a real browser recording a video, and return a pass/fail report. Use when invoked via /qa-test-plan, when the user asks for a "QA test plan", "manual test plan", to "test the flow", or after a change that alters user flows or adds screens. Referenced by /deep-plan's plan handoff and by jira-workflow. The plan is human steps (which screen, where to click, what to type) — never automated test code.
+description: Plan and execute evidence-backed manual QA for user-facing changes. Use via /qa-plan before implementation, /qa-execute after review on a frozen commit, or /qa-test-plan for both phases. Produces a validated qa-plan.yaml, human Markdown, browser-recorded scenario evidence, annotated screenshots, WebVTT-captioned videos, structured results.json, and an HTML report tied to the tested commit.
 ---
 
-# qa-test-plan
+# QA test plan
 
-You are the **orchestrator** of a QA pipeline. Your job is to coordinate a QA-mapper agent, a codex doc reviewer, and a codex browser executor — you do **not** map the flow, review the doc, or drive the browser yourself. You parse args, dispatch agents, apply their fixes, and present the final report.
+Orchestrate two separable phases:
 
-The document this pipeline produces is a **MANUAL test plan**: the steps a human runs on-screen (which screen, where to click, what to type, what to expect). It is **never** automated test code (no Playwright/Cypress/Jest source). Only the browser-execution phase automates anything, and only to *replay* the manual steps for evidence.
+1. `plan`: map requirements, personas, journeys, edge cases, steps, and evidence policy.
+2. `execute`: replay approved manual steps with `agent-browser` against a frozen commit and render evidence.
 
-## Model-split convention (mandatory)
+Keep `qa-plan.yaml` and `results.json` as sources of truth. Generate Markdown, annotated PNGs,
+WebVTT, and HTML through bundled scripts. Never parse generated Markdown back into execution data.
 
-Multi-agent work splits Claude + codex and uses **cmux** for visibility:
+## Arguments
 
-| Role | Model | How |
-|------|-------|-----|
-| QA-mapper (flow + doc author) | **Claude Sonnet** | subagent / cmux worker |
-| Doc reviewer | **codex** | `codex exec` |
-| Browser executor | **codex** | codex worker in a cmux pane driving `agent-browser` |
+```text
+--phase plan|execute|all  default: all
+--plan PATH               approved implementation plan
+--qa-plan PATH            validated qa-plan.yaml; required for execute
+--url URL                 running application URL; required for execute
+--ticket KEY              ticket used for scope and traceability
+--slug NAME               stable artifact name
+--output-dir PATH         explicit plan or execution bundle
+--commit SHA              exact commit deployed at --url; execute defaults to HEAD
+--no-exec                 compatibility alias for --phase plan
+--dry-run                 print phases, paths, and worker count without spawning
+```
 
-## Phase 0 — Parse args & sanity checks
+`/qa-plan` supplies `--phase plan`. `/qa-execute` supplies `--phase execute`.
+`/qa-test-plan` defaults to `--phase all`.
 
-Read `$ARGUMENTS`. Extract:
+## Contract files
 
-- `--url <app-url>` (base URL of the running app; if absent, prompt the user or infer from the project's dev-server config)
-- `--ticket KEY-123` (used for slug + scope framing; else auto-detect from branch/commit)
-- `--slug <name>` (else derive: ticket key lowercased, else the git branch's last path segment, else a kebab summary of the change)
-- `--plan <path>` (a plan.md, e.g. from /deep-plan, describing the change under test)
-- `--no-exec` (default off — stop after the reviewed doc, skip Phase 3)
-- `--dry-run` (default off)
+Use:
 
-Set:
-- `PROJECT_DIR` = the project being tested (cwd of the repo under test).
-- `TMP_DIR="$PROJECT_DIR/tmp"` — create it with `mkdir -p "$TMP_DIR"` (this is the project's `./tmp/`, where the doc + all artifacts land).
-- `DOC="$TMP_DIR/<slug>-manual-test-plan.md"`, `REPORT="$TMP_DIR/<slug>-qa-report.md"`, `VIDEO="$TMP_DIR/<slug>.webm"`.
-- `RUN_DIR=~/.claude/qa-test-plan-runs/$(date +%Y%m%d-%H%M%S)-<slug>` — orchestration scratch (prompts, done markers). `mkdir -p`.
+- `templates/qa-plan.yaml` as mapper starting point.
+- `schemas/qa-plan.schema.json` for plan shape.
+- `schemas/qa-results.schema.json` for execution result shape.
+- `scripts/qa_artifacts.py` after chezmoi deployment, or
+  `scripts/executable_qa_artifacts.py` inside chezmoi source.
 
-Verify binaries: `git`, `codex`, `agent-browser`. Verify you are inside cmux for Phase 3: `cmux identify --json` and `which claude`.
+Run:
 
-If `--dry-run`: print the phases below with spawned-agent counts (QA-mapper ×1 Sonnet, reviewer ×1 codex, executor ×1 codex) and exit. Spawn nothing.
+```bash
+uv run ~/.claude/skills/qa-test-plan/scripts/qa_artifacts.py validate-plan QA_PLAN
+uv run ~/.claude/skills/qa-test-plan/scripts/qa_artifacts.py render-plan QA_PLAN QA_DOC
+uv run ~/.claude/skills/qa-test-plan/scripts/qa_artifacts.py validate-results QA_PLAN RESULTS
+uv run ~/.claude/skills/qa-test-plan/scripts/qa_artifacts.py render-report QA_PLAN RESULTS REPORT
+```
 
-## Phase 1 — QA-mapper writes the MANUAL test plan (Claude Sonnet)
+## Phase 0: resolve paths
 
-Spawn one **Claude Sonnet** QA-tester agent. Give it: the change under test (git diff `main...HEAD`, the `--plan` file if given, the ticket body if `--ticket`), the app `--url`, the template at `~/.claude/skills/qa-test-plan/templates/manual-test-plan.md`, and the target path `DOC`.
+Set `PROJECT_DIR` to repository under test. Derive slug from explicit `--slug`, ticket,
+branch suffix, or short feature name.
 
-Its brief:
+For planning:
 
-1. **Detect the FULL user flow** for the change — trace entry point → each screen → each action. Do not stop at the happy path; enumerate branches.
-2. **Enumerate edge cases**: invalid input, empty states, permission-denied, back/refresh mid-flow, concurrent sessions, boundary values, error/timeout responses.
-3. **Identify every persona/role** the flow touches (anonymous, standard user, admin, etc.) and the test data each needs.
-4. **Write the MANUAL plan** into `DOC` using the template. For each scenario: the **role**, **preconditions**, then **numbered steps** where every step names *which screen*, *where to click / which control*, *what to type*, and the *expected result*. Add per-scenario **edge cases** and **acceptance rules** (objective pass/fail criteria).
-5. It writes **prose steps a human could follow**, never automated test code.
+- With `--output-dir`: use it.
+- With `--plan` and no output: use `<implementation-plan-dir>/qa`.
+- Otherwise: use `$PROJECT_DIR/tmp/qa/<slug>/plan`.
 
-When it returns, confirm `DOC` exists and follows the template (scenarios, steps, edge cases, acceptance rules).
+Set `QA_PLAN=<output>/qa-plan.yaml` and `QA_DOC=<output>/qa-plan.md`.
 
-## Phase 2 — Codex doc review
+For execution, create immutable attempt bundle:
 
-Spawn a `codex exec` agent to review `DOC` for completeness. Prompt it to check for: missing roles/personas, missing edge cases, ambiguous or non-actionable steps (a step a human couldn't unambiguously follow), missing or subjective acceptance rules, and steps that describe automated code instead of human actions. Have it output a concrete edit list.
+```text
+$PROJECT_DIR/tmp/qa/<slug>/<short-sha>-attempt-<n>/
+├── qa-plan.yaml
+├── results.json
+├── index.html
+├── manifest.json
+└── evidence/
+```
 
-Apply its fixes to `DOC`. If it finds nothing, note "codex review: clean".
+Never overwrite an earlier attempt. Copy approved `qa-plan.yaml` into bundle.
 
-**If `--no-exec`:** stop here. Present `DOC`'s path and a one-line summary of scenarios/edge cases. Tick the checklist through `doc-reviewed-by-codex` and report the executed/video/report items as skipped.
+If `--dry-run`, print selected phase, derived paths, QA-mapper ×1, reviewer ×1,
+browser executor ×1, then stop.
 
-## Phase 3 — Browser execution (codex worker via cmux)
+## Phase 1: map QA plan
 
-Launch a **codex** worker in a **cmux** pane (for visibility) that drives `agent-browser` to execute the manual steps against the running app.
+Run for `plan` and `all`.
 
-1. Write the executor task file `$RUN_DIR/executor-task.md`. It must instruct the codex worker to, from `PROJECT_DIR`:
-   - `mkdir -p ./tmp` (no auto-dir for the recording).
-   - Set a cleanup trap: `trap 'agent-browser record stop 2>/dev/null || true; agent-browser close 2>/dev/null || true' EXIT`.
-   - `agent-browser record start ./tmp/<slug>.webm` to begin the video.
-   - For **each scenario** in `DOC`: `agent-browser open <url>` → `agent-browser wait --load networkidle` → `agent-browser snapshot -i` (lists interactive elements as `@e1,@e2,…`), then perform each step with `agent-browser click @eN` / `fill @eN "text"` / `type @eN "text"` / `select @eN "Value"` / `check @eN`. Semantic fallback: `agent-browser find role button click --name "Submit"` or `agent-browser find text "Sign In" click`. **Re-snapshot after any DOM change or navigation.**
-   - `agent-browser screenshot ./tmp/<slug>-<scenario>-<state>.png` at key states.
-   - Compare each step's observed result to the doc's expected result; record **pass/fail per step** against the acceptance rules.
-   - `agent-browser record stop` when done.
-   - Auth: if the flow needs a logged-in session, `agent-browser state save ./tmp/<slug>-auth.json` once and `state load` it in later scenarios.
-   - Write `REPORT` (`./tmp/<slug>-qa-report.md`): pass/fail per scenario+step, the failure detail for any fail, and artifact paths (video + screenshots).
-   - On completion write exactly `done` (or `blocked: <reason>`) to `$RUN_DIR/executor.done`.
+Spawn one Claude Sonnet QA-mapper. Give it implementation plan, ticket body, relevant user
+journey, requirements matrix, code diff when present, project instructions, and
+`templates/qa-plan.yaml`.
 
-2. Launch the worker:
-   ```
-   ~/.claude/skills/qa-test-plan/scripts/launch-codex-worker.sh "$RUN_DIR" "$PROJECT_DIR" qa-exec "$RUN_DIR/executor-task.md"
-   ```
-   It opens one cmux pane split-right, `cd`s to `PROJECT_DIR`, runs `codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check` on the task file, and echoes the pane/surface ref. If any cmux primitive is unavailable it falls back to a plain background `codex exec` (no pane) — note the loss of visibility to the user.
+Require mapper to write only structured `QA_PLAN` containing:
 
-3. Monitor: poll `$RUN_DIR/executor.done` every 30–60s; peek with `cmux capture-pane --surface <ref> --lines 5`. If the marker reads `blocked: <reason>`, surface it to the user immediately.
+- stable requirement, persona, scenario, and step IDs;
+- every requirement mapped to at least one scenario;
+- one scenario per meaningful persona/flow combination;
+- explicit preconditions and isolated test data;
+- happy path plus invalid, empty, permission, refresh/back, concurrency, boundary, and
+  dependency-failure cases when applicable;
+- objective acceptance rules;
+- evidence policy per step.
 
-## Phase 4 — Present the report
+Store semantic actions such as `Click "Submit order"` and accessible names. Never store
+ephemeral `@e1` references or brittle CSS selectors.
 
-Read `REPORT`. Present:
-- one-line verdict (e.g. `QA: 4/5 scenarios pass, 1 fail`),
-- the failing scenario/step and why (if any),
-- artifact paths: `DOC`, `REPORT`, `VIDEO`, and the screenshots directory (all under `PROJECT_DIR/tmp/`).
+Validate:
 
-If any scenario failed, offer to open the video/screenshots or to start fixing.
+```bash
+uv run ~/.claude/skills/qa-test-plan/scripts/qa_artifacts.py validate-plan "$QA_PLAN"
+```
 
-## Checklist (machine-tickable — every box must be `[x]` before reporting complete)
+Spawn one Codex document reviewer. Ask it to inspect implementation plan and validated YAML
+for missing requirements, personas, branches, preconditions, data isolation, actionable steps,
+objective expectations, and evidence coverage. Apply concrete fixes to YAML, then validate again.
 
-- [ ] flow-mapped — full user flow traced (entry → screens → actions)
-- [ ] edges-listed — edge cases enumerated per scenario
-- [ ] acceptance-rules-listed — objective pass/fail rules per scenario
-- [ ] doc-reviewed-by-codex — codex completeness review applied
-- [ ] executed-in-browser — manual steps replayed via agent-browser *(skipped if `--no-exec`)*
-- [ ] video-recorded — `.webm` captured in `./tmp/` *(skipped if `--no-exec`)*
-- [ ] report-written — `<slug>-qa-report.md` written with pass/fail per scenario *(skipped if `--no-exec`)*
+Render human document deterministically:
 
-## Constraints & failure modes
+```bash
+uv run ~/.claude/skills/qa-test-plan/scripts/qa_artifacts.py \
+  render-plan "$QA_PLAN" "$QA_DOC"
+```
 
-- **The doc is MANUAL.** Human on-screen steps only — never emit or ask for Playwright/Cypress/Jest source. Only Phase 3 automates, and only to replay the manual steps for evidence.
-- **Artifacts live in the project's `./tmp/`**, not the home dir — the doc, video, screenshots, and report are all relative to `PROJECT_DIR`.
-- App URL missing/unreachable → ask the user for the running app's URL before Phase 3; do not guess.
-- `agent-browser` not installed → halt Phase 3, tell the user (`agent-browser` skill / CLI required), keep the reviewed doc.
-- Not inside cmux, or `launch-codex-worker.sh` can't get a pane → executor falls back to headless `codex exec`; warn that the run is not visible.
-- Executor `blocked: <reason>` → surface immediately; do not fabricate pass results for un-run steps.
+For `plan`, report both paths and stop.
+
+## Phase 2: freeze execution target
+
+Run for `execute` and `all`.
+
+Require `QA_PLAN` and reachable `--url`. Validate plan. Resolve requested commit from `--commit`
+or `git rev-parse HEAD`. Record full SHA, URL, browser, viewport, feature flags, timestamps,
+ticket, plan ID, and attempt in `manifest.json`.
+
+Confirm deployed environment represents exact SHA. If environment cannot prove SHA, mark run
+blocked; do not present evidence as commit-bound.
+
+Verify binaries: `git`, `codex`, `agent-browser`, `uv`. Prefer visible cmux worker; use existing
+headless fallback with explicit visibility warning.
+
+## Phase 3: execute with agent-browser
+
+Launch one Codex worker through `scripts/launch-codex-worker.sh`. Before browser commands,
+worker must try:
+
+```bash
+agent-browser skills get agent-browser --full
+```
+
+Use returned syntax. If installed CLI responds `Unknown command: skills`, record compatibility
+mode plus output of `agent-browser --version` and `agent-browser --help`, then use only commands
+advertised by that help. Any other discovery failure blocks execution. Never rely on remembered
+CLI flags.
+
+Executor responsibilities:
+
+1. Use seeded/demo identities and data. Never expose production PII, tokens, cookies, or secrets.
+2. Create isolated browser state per persona. Reuse auth state only within same persona.
+3. Execute scenarios in YAML order. Re-snapshot accessibility tree after every navigation or
+   DOM-changing action. Resolve live element references from semantic plan instructions.
+4. Record one raw WebM per scenario. Capture monotonic video start/end offsets for every step.
+5. Capture raw PNG according to evidence policy and immediately on every failure.
+6. Record observed result, status (`pass`, `fail`, `blocked`, `skipped`), console errors, network
+   errors, timestamps, video offsets, screenshot path, and optional target bounding box.
+7. Preserve failed attempts. Never change expectations to make implementation pass.
+8. Write `results.json` matching `schemas/qa-results.schema.json`. Include every planned
+   scenario and step exactly once.
+9. Stop recording and browser through cleanup trap on every exit.
+
+Write `done` or `blocked: <reason>` to executor marker. Surface blocked reason immediately.
+
+## Phase 4: validate and render
+
+Run:
+
+```bash
+uv run ~/.claude/skills/qa-test-plan/scripts/qa_artifacts.py \
+  validate-results "$QA_PLAN" "$RESULTS"
+uv run ~/.claude/skills/qa-test-plan/scripts/qa_artifacts.py \
+  render-report "$QA_PLAN" "$RESULTS" "$REPORT"
+```
+
+Renderer must produce:
+
+- `index.html` with run metadata, requirement coverage, scenario/step results, expected versus
+  observed behavior, console/network errors, and seek-to-step controls;
+- annotated PNG beside every raw screenshot, with step/action/expected/observed/result caption;
+- WebVTT beside every scenario video, timed from recorded step offsets;
+- untouched raw screenshots and videos.
+
+Open generated report in browser. Confirm HTML loads, relative assets resolve, annotated images
+render, video controls work, and WebVTT track exists. This report check is mandatory.
+
+For stakeholder narration or PR GIF, reuse `Guided Tour Video` after QA report passes. QA evidence
+stays raw and audit-oriented; narrated tour stays short and presentation-oriented.
+
+## Phase 5: report
+
+Return:
+
+- overall PASS/FAIL/BLOCKED/SKIPPED counts;
+- failed scenario and step IDs with observed result;
+- tested commit SHA and URL;
+- paths to `qa-plan.yaml`, `results.json`, `index.html`, and `evidence/`;
+- explicit note when cmux visibility, commit proof, video, screenshot, console, or network
+  evidence was unavailable.
+
+## Completion gates
+
+- [ ] structured-plan-valid
+- [ ] requirements-covered
+- [ ] personas-and-edges-covered
+- [ ] plan-reviewed-by-codex
+- [ ] exact-commit-recorded
+- [ ] every-step-has-result
+- [ ] failures-have-visual-evidence
+- [ ] scenario-videos-captioned
+- [ ] screenshots-preserved-and-annotated
+- [ ] html-report-rendered-and-opened
+
+Never claim QA complete with unchecked gate. Any code change after recorded SHA requires new
+attempt for affected scenarios; never relabel stale evidence.

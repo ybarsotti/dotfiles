@@ -1,0 +1,37 @@
+schema_version: "1.0"
+plan_id: checkout-confirmation
+feature: Checkout confirmation
+ticket: FBIT-TEST
+source_plan: ./plan.md
+requirements:
+  - id: REQ-1
+    text: Buyer sees an order confirmation after submitting checkout.
+personas:
+  - id: buyer
+    name: Buyer
+    description: Organization user allowed to place orders.
+scenarios:
+  - id: QA-CHECKOUT-001
+    name: Submit checkout successfully
+    requirement_ids:
+      - REQ-1
+    persona_id: buyer
+    preconditions:
+      - Buyer is authenticated with one item in cart.
+    test_data:
+      - Product SKU TEST-20X20X1 is available.
+    steps:
+      - id: QA-CHECKOUT-001-01
+        screen: Checkout
+        action: Click "Submit order".
+        input: null
+        expected: Confirmation screen shows generated order number.
+        evidence:
+          screenshot: after
+          video: true
+          console: errors
+          network: errors
+    edge_cases:
+      - Duplicate click does not create a second order.
+    acceptance_rules:
+      - Exactly one confirmation and one order number appear.

@@ -1,0 +1,304 @@
+{
+  "$defs": {
+    "CapturePolicy": {
+      "enum": [
+        "none",
+        "errors",
+        "all"
+      ],
+      "title": "CapturePolicy",
+      "type": "string"
+    },
+    "EvidencePolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "console": {
+          "$ref": "#/$defs/CapturePolicy",
+          "default": "errors"
+        },
+        "network": {
+          "$ref": "#/$defs/CapturePolicy",
+          "default": "errors"
+        },
+        "screenshot": {
+          "$ref": "#/$defs/ScreenshotPolicy",
+          "default": "after"
+        },
+        "video": {
+          "default": true,
+          "title": "Video",
+          "type": "boolean"
+        }
+      },
+      "title": "EvidencePolicy",
+      "type": "object"
+    },
+    "Persona": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description"
+      ],
+      "title": "Persona",
+      "type": "object"
+    },
+    "QAScenario": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptance_rules": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Acceptance Rules",
+          "type": "array"
+        },
+        "edge_cases": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Edge Cases",
+          "type": "array"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "persona_id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "title": "Persona Id",
+          "type": "string"
+        },
+        "preconditions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Preconditions",
+          "type": "array"
+        },
+        "requirement_ids": {
+          "items": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Requirement Ids",
+          "type": "array"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/QAStep"
+          },
+          "minItems": 1,
+          "title": "Steps",
+          "type": "array"
+        },
+        "test_data": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Test Data",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "requirement_ids",
+        "persona_id",
+        "preconditions",
+        "steps",
+        "edge_cases",
+        "acceptance_rules"
+      ],
+      "title": "QAScenario",
+      "type": "object"
+    },
+    "QAStep": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "minLength": 1,
+          "title": "Action",
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/$defs/EvidencePolicy"
+        },
+        "expected": {
+          "minLength": 1,
+          "title": "Expected",
+          "type": "string"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "input": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input"
+        },
+        "screen": {
+          "minLength": 1,
+          "title": "Screen",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "screen",
+        "action",
+        "expected",
+        "evidence"
+      ],
+      "title": "QAStep",
+      "type": "object"
+    },
+    "Requirement": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "Requirement",
+      "type": "object"
+    },
+    "ScreenshotPolicy": {
+      "enum": [
+        "none",
+        "after",
+        "on-failure"
+      ],
+      "title": "ScreenshotPolicy",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "feature": {
+      "minLength": 1,
+      "title": "Feature",
+      "type": "string"
+    },
+    "personas": {
+      "items": {
+        "$ref": "#/$defs/Persona"
+      },
+      "minItems": 1,
+      "title": "Personas",
+      "type": "array"
+    },
+    "plan_id": {
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "requirements": {
+      "items": {
+        "$ref": "#/$defs/Requirement"
+      },
+      "minItems": 1,
+      "title": "Requirements",
+      "type": "array"
+    },
+    "scenarios": {
+      "items": {
+        "$ref": "#/$defs/QAScenario"
+      },
+      "minItems": 1,
+      "title": "Scenarios",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_plan": {
+      "minLength": 1,
+      "title": "Source Plan",
+      "type": "string"
+    },
+    "ticket": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Ticket"
+    }
+  },
+  "required": [
+    "schema_version",
+    "plan_id",
+    "feature",
+    "ticket",
+    "source_plan",
+    "requirements",
+    "personas",
+    "scenarios"
+  ],
+  "title": "QAPlan",
+  "type": "object"
+}

@@ -19,10 +19,12 @@ approved plan — deep-plan does NOT build, review, or open the PR itself. It ha
    two parallel planners (Opus + Codex) → one merged plan.
 4. **Review** — 5 parallel personas (architect, project-developer, ticket-matcher on
    Sonnet; flow-mapper, qa on Codex) until unanimous approval (≤ 3 iterations, then tiebreak).
-5. **Present** — `finalize-plan.sh` validate/repair/tick gate, then **Plannotator**:
+5. **QA plan** — when flows/screens change, `/qa-plan` maps requirements and journeys into
+   reviewed `qa-plan.yaml` before implementation.
+6. **Present** — `finalize-plan.sh` validate/repair/tick gate, then **Plannotator**:
    `plannotator annotate <plan> --gate` for the full plan, then `ExitPlanMode` (its hook
    re-opens the UI for final approval).
-6. **Handoff** — print `/deep-execute "$RUN_DIR/plan.md"` and stop.
+7. **Handoff** — print `/deep-execute "$RUN_DIR/plan.md"` and stop.
 
 **Arguments:** `$ARGUMENTS`
 
@@ -62,10 +64,11 @@ itself. `/deep-execute` drives the full superpowers execution workflow from the 
 2. `superpowers:subagent-driven-development` (or `executing-plans`) → build with strict TDD
    (mock only outermost boundaries; inner services/repos run real).
 3. `/simplify` ×2.
-4. `/qa-test-plan` — if the plan flags flow/screen changes.
-5. `/deep-review` → then `superpowers:verification-before-completion`.
-6. `/pr-description` — title + ticket/Slack + requirements + Mermaid + decisions, assigned to you.
-7. CI + Copilot watch → `superpowers:finishing-a-development-branch`.
+4. `/deep-review` plus fixes → `superpowers:verification-before-completion`.
+5. Freeze final commit SHA.
+6. `/qa-execute` consumes approved QA plan against exact SHA when flows/screens changed.
+7. `/pr-description` — title + ticket/Slack + requirements + Mermaid + decisions, assigned to you.
+8. CI + Copilot watch → `superpowers:finishing-a-development-branch`.
 
 ### Quick examples
 
