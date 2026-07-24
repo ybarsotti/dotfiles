@@ -33,3 +33,7 @@ Markdown only, no commentary.
 - Cite existing files/utilities the task should reuse, not reinvent.
 - Fill `## Documentation impact`: logic often lives in `docs/` (business rules, flows, ADRs,
   API specs), not just code — list every doc the change makes stale, or confirm none apply.
+- Map every requirement to implementation + verification in `## Requirements matrix`.
+- Sequence the user journey when applicable. For schema work, map every table/column to its
+  value source. For substantial UI, write a design-only prompt for claude.design or Codex
+  Product Design; do not turn that prompt into an implementation task.
