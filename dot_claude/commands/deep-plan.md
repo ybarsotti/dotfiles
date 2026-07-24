@@ -43,6 +43,14 @@ You are the **orchestrator**. Invoke the `deep-plan` skill — do NOT plan or im
 The skill lives at `~/.claude/skills/deep-plan/SKILL.md`. Follow its phases exactly. deep-plan
 **stops at the approved plan**; the build/review/PR happen in the execution phase it hands off to.
 
+### Evidence discipline
+
+Do not let any planner or reviewer guess. Every claim about current behavior, architecture,
+dependencies, constraints, or risk must be proved with repository code or observed data and cite
+its evidence (for example, `path/to/file:line`, command output, test result, trace, metric, or ticket
+field). If evidence is missing, label the claim **unknown** and add an investigation step; never
+present an assumption as fact or approve a plan that depends on an unverified claim.
+
 ## Handoff (what runs after the plan is approved)
 
 deep-plan prints `/deep-execute "$RUN_DIR/plan.md"` and stops — it does not run any of this
