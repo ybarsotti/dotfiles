@@ -309,13 +309,17 @@ create_week() {
     printf '## Retro\n\n'
   } > "$file"
 
-  # Todo compromisso desce para o Radar, nunca para Compromissos. Sem checkbox
-  # não há como saber o que fechou, e reassumir deve ser um ato deliberado: na
-  # segunda você poda o Radar ao escrever os compromissos novos.
+  # Compromisso e radar da semana anterior descem para o Radar, nunca para
+  # Compromissos: sem checkbox não há como saber o que fechou, e reassumir deve
+  # ser um ato deliberado. O radar precisa descer também — é a seção que existe
+  # para não esquecer, e sem isso ela se esvaziava toda segunda.
+  #
+  # Nada é podado automaticamente. A poda é na segunda, ao escrever os
+  # compromissos novos; o marcador mostra há quantas semanas o item espera.
   if [ -f "$prev_file" ]; then
     awk -F'\t' '
-      /^## Compromissos$/ { inside = 1; next }
-      inside && /^## / { exit }
+      /^## (Compromissos|Radar)$/ { inside = 1; next }
+      inside && /^## / { inside = 0; next }
       inside && /^### / { proj = substr($0, 5); next }
       inside && /^[[:space:]]*- / { print proj "\t" $0 }
     ' "$prev_file" \
@@ -324,7 +328,12 @@ create_week() {
         line=${pair#*$'\t'}
         [ -n "$line" ] || continue
         [ -n "$proj" ] || proj="sem projeto"
-        insert_in_section "$file" "Radar" "$proj" "${line}  ↳ de [[${prev_wk}]]"
+        # Preserva a semana de origem: um item que espera há um mês deve
+        # mostrar o mês, não a semana passada.
+        case "$line" in
+          *"↳ de [["*) insert_in_section "$file" "Radar" "$proj" "$line" ;;
+          *) insert_in_section "$file" "Radar" "$proj" "${line}  ↳ de [[${prev_wk}]]" ;;
+        esac
       done
   fi
 
