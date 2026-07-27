@@ -157,6 +157,7 @@ assert_contains "$wk" 'AND !"Journal/weeks"' "query exclui as próprias notas se
 # semana e a poda é manual, na segunda.
 awk '{print}
      /^## Compromissos$/{print "### alfa"; print "- [[PROJ-1]] alguma promessa — ETA ter"}
+     /^## Radar$/{print "### alfa"; print "- item de radar antigo"}
     ' "$W" > "$W.tmp" && mv "$W.tmp" "$W"
 "$J" ensure-week 2026-08-03 >/dev/null
 W2="$TMP/vault/Journal/weeks/2026-W32.md"
@@ -164,7 +165,16 @@ radar=$(awk '/^## Radar$/{f=1;next} f&&/^## /{exit} f' "$W2")
 compr=$(awk '/^## Compromissos$/{f=1;next} f&&/^## /{exit} f' "$W2")
 assert_contains "$radar" "PROJ-1" "compromisso aberto desce para Radar"
 assert_contains "$radar" "### alfa" "Radar preserva o projeto do compromisso"
+assert_contains "$radar" "item de radar antigo" "radar também desce para a semana seguinte"
 assert_absent "$compr" "PROJ-1" "reassumir compromisso é deliberado"
+
+# Um item que espera há semanas deve mostrar a semana de origem, não a última.
+"$J" ensure-week 2026-08-10 >/dev/null
+W3="$TMP/vault/Journal/weeks/2026-W33.md"
+radar3=$(awk '/^## Radar$/{f=1;next} f&&/^## /{exit} f' "$W3")
+assert_contains "$radar3" "↳ de [[2026-W31]]" "marcador guarda a semana de origem"
+n=$(printf '%s\n' "$radar3" | grep -c "PROJ-1")
+assert_eq "$n" "1" "item não se duplica a cada semana"
 
 # ------------------------------------------------------- append na semana
 
