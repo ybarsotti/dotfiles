@@ -110,8 +110,9 @@ week_range() {
 
 # ---------------------------------------------------------------- paths
 
-day_path()  { echo "${ROOT}/$(date_fmt "$1" '+%Y/%m')/$1.md"; }
-week_path() { echo "${ROOT}/weeks/$(iso_week "$1").md"; }
+day_path()   { echo "${ROOT}/$(date_fmt "$1" '+%Y/%m')/$1.md"; }
+week_path()  { echo "${ROOT}/weeks/$(iso_week "$1").md"; }
+inbox_path() { echo "${ROOT}/inbox.md"; }
 
 # Só ticket e projeto nascem automaticamente: existem fora do diário e voltam
 # sempre. `decision` e `study` continuam disponíveis, mas apenas sob pedido —
@@ -449,6 +450,36 @@ cmd_status() {
 
 cmd_week() { create_week "${JOURNAL_DATE:-$(date '+%Y-%m-%d')}"; }
 
+# Captura livre. Sem seção, sem projeto, sem validação: o inbox só funciona
+# enquanto anotar não custar nada. Triagem é depois, à mão.
+cmd_note() {
+  local file text d
+  text="$*"
+  [ -n "$text" ] || die "escreva a nota: journal note \"...\""
+  file=$(inbox_path)
+  d=$(date '+%m-%d')
+  if [ ! -f "$file" ]; then
+    mkdir -p "$(dirname "$file")"
+    {
+      printf -- '---\n'
+      printf 'type: inbox\n'
+      printf -- '---\n'
+      printf '# Inbox\n\n'
+      printf 'Captura livre. Sem regra de entrada — tire daqui quando virar outra coisa.\n\n'
+    } > "$file"
+  fi
+  printf -- '- %s %s\n' "$d" "$text" >> "$file"
+  log_line "note -> inbox"
+  echo "$file"
+}
+
+cmd_inbox() {
+  local file
+  file=$(inbox_path)
+  [ -f "$file" ] || { echo "inbox vazio" >&2; return 0; }
+  cat "$file"
+}
+
 # Lista as notas de dia existentes da semana, em ordem. É o primitivo que o
 # /retro usa para percorrer a semana sem montar caminho.
 cmd_days() {
@@ -542,6 +573,8 @@ journal — diário de trabalho e estudo no Obsidian
   journal days [DATA]                     lista as notas de dia da semana
   journal open [day|week]                 abre a nota no Obsidian
   journal pending                         o que está aberto e há quanto tempo
+  journal note "..."                      anotação livre no inbox
+  journal inbox                           mostra o inbox
   journal append --section S --text T     append numa seção do dia
       [--project P]                       projeto (padrão: repo do cwd)
       [--week]                            escreve na nota da semana
@@ -568,6 +601,8 @@ main() {
     entity)       load_config; cmd_entity "$@" ;;
     status)       load_config; cmd_status "$@" ;;
     week)         load_config; cmd_week "$@" ;;
+    note)         load_config; cmd_note "$@" ;;
+    inbox)        load_config; cmd_inbox "$@" ;;
     days)         load_config; cmd_days "$@" ;;
     open)         load_config; cmd_open "$@" ;;
     pending)      load_config; cmd_pending "$@" ;;

@@ -67,6 +67,10 @@ Rules:
 
 Group by project, same as everywhere else — pass `--project`.
 
+If the inbox has anything in it (`journal inbox`), mention how many items are
+sitting there. Do not triage them — that is the user's call — just say they are
+waiting, so the week does not close on top of them.
+
 ## Do not
 
 - Do not judge or coach. No "could have been better", no advice. Say what
