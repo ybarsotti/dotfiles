@@ -1,4 +1,7 @@
 bin/
+# `bin/` acima não é ancorado e também casaria com a árvore-fonte do chezmoi,
+# tirando do versionamento os scripts que devem ir para ~/.local/bin.
+!dot_local/bin/
 Library/
 .gitnexus
 .serena/memories/

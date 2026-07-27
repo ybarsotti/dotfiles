@@ -1,0 +1,581 @@
+#!/usr/bin/env bash
+# journal — diário de trabalho e estudo no vault do Obsidian.
+#
+# Único componente que conhece o layout do vault. launchd, os agentes de IA e
+# o hook de nudge falam com o diário exclusivamente por esta interface.
+#
+# Ver docs/2026-07-26-journal-obsidian-design.md no repo de dotfiles.
+
+set -euo pipefail
+
+readonly CONFIG="${JOURNAL_CONFIG:-${HOME}/.config/journal/config.sh}"
+readonly STATE_DIR="${JOURNAL_STATE_DIR:-${HOME}/.local/state/journal}"
+readonly SECTIONS="Plano Decisões Threads Tickets Estudos Notas"
+readonly WEEK_SECTIONS="Compromissos Radar Retro"
+readonly WEEKDAYS_PT="dom seg ter qua qui sex sab"
+
+die() { printf 'journal: %s\n' "$*" >&2; exit 1; }
+
+log_line() {
+  mkdir -p "$STATE_DIR"
+  printf '%s %s\n' "$(date '+%Y-%m-%dT%H:%M:%S')" "$*" >> "${STATE_DIR}/log"
+}
+
+load_config() {
+  # shellcheck source=/dev/null
+  [ -f "$CONFIG" ] && . "$CONFIG"
+  # Override local, fora do controle de versão: é onde ficam nomes que não
+  # devem ir para um repositório público, como repositórios de trabalho.
+  # shellcheck source=/dev/null
+  [ -f "${CONFIG%.sh}.local.sh" ] && . "${CONFIG%.sh}.local.sh"
+  : "${JOURNAL_VAULT:=${HOME}/Documents/Dump}"
+  : "${JOURNAL_DIR:=Journal}"
+  : "${JOURNAL_NUDGE_MINUTES:=90}"
+  : "${JOURNAL_STREAMS:=}"
+  : "${JOURNAL_ALIASES:=}"
+  [ -d "$JOURNAL_VAULT" ] || die "vault não encontrado: ${JOURNAL_VAULT}"
+  ROOT="${JOURNAL_VAULT}/${JOURNAL_DIR}"
+}
+
+# ---------------------------------------------------------------- datas
+
+# date_offset YYYY-MM-DD DAYS -> YYYY-MM-DD
+date_offset() {
+  local d="$1" n="$2"
+  # BSD date exige sinal explícito: `-v1d` seta o dia do mês para 1,
+  # enquanto `-v+1d` soma um dia.
+  case "$n" in -*) ;; *) n="+${n}" ;; esac
+  if date -j >/dev/null 2>&1; then
+    date -j -v"${n}d" -f "%Y-%m-%d" "$d" '+%Y-%m-%d'   # BSD / macOS
+  else
+    date -d "${d} ${n} days" '+%Y-%m-%d'                # GNU
+  fi
+}
+
+# date_fmt YYYY-MM-DD FORMAT
+date_fmt() {
+  local d="$1" f="$2"
+  if date -j >/dev/null 2>&1; then
+    date -j -f "%Y-%m-%d" "$d" "$f"
+  else
+    date -d "$d" "$f"
+  fi
+}
+
+# date_epoch YYYY-MM-DD -> segundos desde a época
+date_epoch() {
+  if date -j >/dev/null 2>&1; then
+    date -j -f "%Y-%m-%d" "$1" '+%s'
+  else
+    date -d "$1" '+%s'
+  fi
+}
+
+# days_between YYYY-MM-DD YYYY-MM-DD -> inteiro
+days_between() {
+  local a b
+  a=$(date_epoch "$1"); b=$(date_epoch "$2")
+  echo $(( (b - a) / 86400 ))
+}
+
+# weekday_index YYYY-MM-DD -> 0=domingo .. 6=sábado
+weekday_index() { date_fmt "$1" '+%w'; }
+
+# weekday_pt YYYY-MM-DD -> seg, ter, ...
+weekday_pt() {
+  local i
+  i=$(weekday_index "$1")
+  echo "$WEEKDAYS_PT" | cut -d' ' -f"$((i + 1))"
+}
+
+is_weekend() { local i; i=$(weekday_index "$1"); [ "$i" -eq 0 ] || [ "$i" -eq 6 ]; }
+
+# next_weekday YYYY-MM-DD -> próximo dia útil
+next_weekday() {
+  local d; d=$(date_offset "$1" 1)
+  while is_weekend "$d"; do d=$(date_offset "$d" 1); done
+  echo "$d"
+}
+
+# iso_week YYYY-MM-DD -> 2026-W31
+iso_week() { date_fmt "$1" '+%G-W%V'; }
+
+# week_range YYYY-MM-DD -> "segunda domingo" da semana ISO
+week_range() {
+  local d="$1" dow start
+  dow=$(date_fmt "$d" '+%u')          # 1=segunda .. 7=domingo
+  start=$(date_offset "$d" "-$((dow - 1))")
+  printf '%s %s\n' "$start" "$(date_offset "$start" 6)"
+}
+
+# ---------------------------------------------------------------- paths
+
+day_path()  { echo "${ROOT}/$(date_fmt "$1" '+%Y/%m')/$1.md"; }
+week_path() { echo "${ROOT}/weeks/$(iso_week "$1").md"; }
+
+# Só ticket e projeto nascem automaticamente: existem fora do diário e voltam
+# sempre. `decision` e `study` continuam disponíveis, mas apenas sob pedido —
+# criar nota atômica para todo assunto gera stub vazio e polui o vault.
+entity_dir() {
+  case "$1" in
+    ticket)   echo "${ROOT}/entities" ;;
+    project)  echo "${ROOT}/projects" ;;
+    decision) echo "${ROOT}/decisions" ;;
+    study)    echo "${ROOT}/study" ;;
+    *)        die "tipo inválido: $1 (use ticket|project|decision|study)" ;;
+  esac
+}
+
+# prev_day_note YYYY-MM-DD -> caminho da nota anterior existente, ou vazio.
+# Varre até 30 dias para trás, o que pula fim de semana, feriado e folga sem
+# precisar de lógica de calendário.
+prev_day_note() {
+  local d="$1" i p
+  for i in $(seq 1 30); do
+    d=$(date_offset "$1" "-$i")
+    p=$(day_path "$d")
+    [ -f "$p" ] && { echo "$p"; return 0; }
+  done
+  return 0
+}
+
+# ---------------------------------------------------------------- seções
+
+# section_valid SECTION [week]
+section_valid() {
+  local s list="$SECTIONS"
+  [ "${2:-}" = "week" ] && list="$WEEK_SECTIONS"
+  for s in $list; do [ "$s" = "$1" ] && return 0; done
+  return 1
+}
+
+# project_for DIR -> nome do projeto
+# Raiz do repositório git, senão o próprio diretório. Uma entrada sem projeto é
+# inútil para quem trabalha em vários ao mesmo tempo, então isso nunca é vazio.
+project_for() {
+  local dir="${1:-$PWD}" root name entry
+  root=$(cd "$dir" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null) || root=""
+  if [ -n "$root" ]; then name=$(basename "$root"); else name=$(basename "$dir"); fi
+  # Um apelido faz o rótulo automático bater com o que você escreve à mão;
+  # sem isso a mesma coisa vira duas subseções.
+  if [ -n "$JOURNAL_ALIASES" ]; then
+    while IFS= read -r entry; do
+      [ -z "$entry" ] && continue
+      [ "${entry%%:*}" = "$name" ] && { echo "${entry#*:}"; return 0; }
+    done <<< "$JOURNAL_ALIASES"
+  fi
+  echo "$name"
+}
+
+# insert_in_section FILE SECTION PROJECT TEXT
+# Cada seção é dividida em `### projeto`. A entrada entra no fim da subseção do
+# projeto, que é criada no fim da seção caso ainda não exista.
+insert_in_section() {
+  local file="$1" section="$2" project="$3" text="$4" tmp
+  grep -q "^## ${section}\$" "$file" || die "seção '${section}' não existe em ${file}"
+  tmp=$(mktemp)
+  # O texto chega por ENVIRON, não por -v: `awk -v` não aceita newline no valor,
+  # e uma entrada de diário tem resumo e motivo em linhas separadas.
+  JOURNAL_ADD_TEXT="$text" awk -v sec="## ${section}" -v proj="### ${project}" '
+    function flush(  i, at, end) {
+      while (n > 0 && buf[n] == "") n--     # recua sobre o branco final
+      at = 0
+      for (i = 1; i <= n; i++) if (buf[i] == proj) { at = i; break }
+      if (at == 0) {                        # projeto ainda não está na seção
+        for (i = 1; i <= n; i++) print buf[i]
+        if (n > 0) print ""
+        print proj
+        print add
+      } else {
+        end = n                             # fim da subseção do projeto
+        for (i = at + 1; i <= n; i++) if (buf[i] ~ /^### /) { end = i - 1; break }
+        while (end > at && buf[end] == "") end--
+        for (i = 1; i <= end; i++) print buf[i]
+        print add
+        for (i = end + 1; i <= n; i++) {
+          if (i == end + 1) print ""
+          print buf[i]
+        }
+      }
+      print ""
+      n = 0
+    }
+    BEGIN { add = ENVIRON["JOURNAL_ADD_TEXT"] }
+    $0 == sec { inside = 1; print; next }
+    inside && /^## / { flush(); inside = 0; print; next }
+    inside { buf[++n] = $0; next }
+    { print }
+    END { if (inside) flush() }
+  ' "$file" > "$tmp"
+  mv "$tmp" "$file"
+}
+
+# ---------------------------------------------------------------- rollover
+
+# Copia itens não-ticados do `## Plano` da nota anterior. O arquivo anterior
+# não é alterado: ele é o registro daquele dia. O marcador de idade preserva a
+# data original, então um item que arrasta cinco dias mostra os cinco dias.
+rollover_into() {
+  local target="$1" today="$2" prev prev_date pair proj item stamped
+  prev=$(prev_day_note "$today")
+  [ -z "$prev" ] && return 0
+  prev_date=$(basename "$prev" .md)
+
+  # Emite "projeto<TAB>item" para que cada pendência volte sob o seu projeto.
+  awk -F'\t' '
+    /^## Plano$/ { inside = 1; next }
+    inside && /^## / { exit }
+    inside && /^### / { proj = substr($0, 5); next }
+    inside && /^[[:space:]]*- \[ \]/ { print proj "\t" $0 }
+  ' "$prev" \
+  | while IFS= read -r pair; do
+      # Split manual: tab conta como whitespace do IFS, então `read a b` descarta
+      # um primeiro campo vazio e desloca o item para dentro do nome do projeto.
+      proj=${pair%%$'\t'*}
+      item=${pair#*$'\t'}
+      [ -n "$item" ] || continue
+      [ -n "$proj" ] || proj="sem projeto"
+      case "$item" in
+        *"↳ aberto desde"*) stamped="$item" ;;
+        *) stamped="${item}  ↳ aberto desde [[${prev_date}]]" ;;
+      esac
+      insert_in_section "$target" "Plano" "$proj" "$stamped"
+    done
+}
+
+# ---------------------------------------------------------------- criação
+
+create_day() {
+  local d="$1" file prev prev_date next week
+  file=$(day_path "$d")
+  [ -f "$file" ] && { echo "$file"; return 0; }
+
+  prev=$(prev_day_note "$d")
+  prev_date=$([ -n "$prev" ] && basename "$prev" .md || echo "")
+  next=$(next_weekday "$d")
+  week=$(iso_week "$d")
+
+  mkdir -p "$(dirname "$file")"
+  {
+    printf -- '---\n'
+    printf 'date: %s\n' "$d"
+    printf 'weekday: %s\n' "$(weekday_pt "$d")"
+    printf -- '---\n'
+    printf '# %s · %s\n' "$d" "$(weekday_pt "$d")"
+    if [ -n "$prev_date" ]; then
+      printf '← [[%s]] · [[%s]] · [[%s]] →\n\n' "$prev_date" "$week" "$next"
+    else
+      printf '[[%s]] · [[%s]] →\n\n' "$week" "$next"
+    fi
+    local s
+    for s in $SECTIONS; do printf '## %s\n\n' "$s"; done
+  } > "$file"
+
+  rollover_into "$file" "$d"
+  log_line "created day ${d}"
+  echo "$file"
+}
+
+create_week() {
+  local d="$1" file wk range start end prev_file prev_wk pair proj line
+  file=$(week_path "$d")
+  [ -f "$file" ] && { echo "$file"; return 0; }
+
+  wk=$(iso_week "$d")
+  range=$(week_range "$d")
+  start=${range% *}
+  end=${range#* }
+  prev_wk=$(iso_week "$(date_offset "$start" -7)")
+  prev_file="${ROOT}/weeks/${prev_wk}.md"
+
+  mkdir -p "$(dirname "$file")"
+  {
+    printf -- '---\n'
+    printf 'week: %s\n' "$wk"
+    printf 'range: %s → %s\n' "$start" "$end"
+    printf -- '---\n'
+    printf '# %s\n\n' "$wk"
+    printf '## Compromissos\n'
+    printf 'Referência do que assumi, com ETA. Não se tica aqui — a execução é a nota do dia.\n\n'
+    printf '## Radar\n'
+    printf 'Não é desta semana. Só não quero esquecer.\n\n'
+    printf '## Semana\n'
+    printf '```dataview\n'
+    printf 'TASK FROM "%s" AND !"%s/weeks"\n' "${JOURNAL_DIR}" "${JOURNAL_DIR}"
+    printf 'WHERE file.day >= date(%s) AND file.day <= date(%s)\n' "$start" "$end"
+    printf 'GROUP BY file.link\n'
+    printf '```\n\n'
+    printf '## Retro\n\n'
+  } > "$file"
+
+  # Todo compromisso desce para o Radar, nunca para Compromissos. Sem checkbox
+  # não há como saber o que fechou, e reassumir deve ser um ato deliberado: na
+  # segunda você poda o Radar ao escrever os compromissos novos.
+  if [ -f "$prev_file" ]; then
+    awk -F'\t' '
+      /^## Compromissos$/ { inside = 1; next }
+      inside && /^## / { exit }
+      inside && /^### / { proj = substr($0, 5); next }
+      inside && /^[[:space:]]*- / { print proj "\t" $0 }
+    ' "$prev_file" \
+    | while IFS= read -r pair; do
+        proj=${pair%%$'\t'*}
+        line=${pair#*$'\t'}
+        [ -n "$line" ] || continue
+        [ -n "$proj" ] || proj="sem projeto"
+        insert_in_section "$file" "Radar" "$proj" "${line}  ↳ de [[${prev_wk}]]"
+      done
+  fi
+
+  log_line "created week ${wk}"
+  echo "$file"
+}
+
+# ---------------------------------------------------------------- streams
+
+# stream_for DIR -> nome do stream, ou vazio
+stream_for() {
+  local dir="$1" entry prefix name
+  [ -z "$JOURNAL_STREAMS" ] && return 0
+  while IFS= read -r entry; do
+    [ -z "$entry" ] && continue
+    prefix="${entry%:*}"
+    name="${entry##*:}"
+    case "$dir/" in "${prefix}/"*) echo "$name"; return 0 ;; esac
+  done <<< "$JOURNAL_STREAMS"
+  return 0
+}
+
+touch_state() {
+  local stream="${1:-default}"
+  mkdir -p "$STATE_DIR"
+  date '+%s' > "${STATE_DIR}/last-append-${stream}"
+}
+
+# ---------------------------------------------------------------- comandos
+
+cmd_ensure_today() {
+  local d; d=$(date '+%Y-%m-%d')
+  if is_weekend "$d" && [ "${JOURNAL_FORCE:-0}" != "1" ]; then
+    echo "fim de semana, nada a fazer" >&2
+    return 0
+  fi
+  create_day "$d" >/dev/null
+  if [ "$(weekday_index "$d")" = "1" ]; then
+    create_week "$d" >/dev/null
+  fi
+  day_path "$d"
+}
+
+cmd_ensure_week() { create_week "${1:-$(date '+%Y-%m-%d')}"; }
+
+cmd_today() { create_day "${JOURNAL_DATE:-$(date '+%Y-%m-%d')}"; }
+
+cmd_append() {
+  local section="" text="" project="" week=0 d="${JOURNAL_DATE:-$(date '+%Y-%m-%d')}" file stream
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --section) section="$2"; shift 2 ;;
+      --text)    text="$2";    shift 2 ;;
+      --project) project="$2"; shift 2 ;;
+      --date)    d="$2";       shift 2 ;;
+      --week)    week=1;       shift ;;
+      *) die "argumento desconhecido: $1" ;;
+    esac
+  done
+  [ -n "$text" ] || die "--text é obrigatório"
+
+  if [ "$week" -eq 1 ]; then
+    [ -n "$section" ] || die "--section é obrigatório (${WEEK_SECTIONS// /, })"
+    section_valid "$section" week \
+      || die "seção inválida para --week: ${section} (use: ${WEEK_SECTIONS// /, })"
+    file=$(create_week "$d")
+  else
+    [ -n "$section" ] || die "--section é obrigatório (${SECTIONS// /, })"
+    section_valid "$section" \
+      || die "seção inválida: ${section} (use: ${SECTIONS// /, })"
+    file=$(create_day "$d")
+  fi
+
+  [ -n "$project" ] || project=$(project_for "$PWD")
+  insert_in_section "$file" "$section" "$project" "$text"
+  stream=$(stream_for "$PWD")
+  touch_state "${stream:-default}"
+  log_line "append ${section}/${project} -> $(basename "$file")"
+  echo "$file"
+}
+
+cmd_entity() {
+  local type="" name="" dir file
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --type) type="$2"; shift 2 ;;
+      --name) name="$2"; shift 2 ;;
+      *) die "argumento desconhecido: $1" ;;
+    esac
+  done
+  [ -n "$type" ] || die "--type é obrigatório (decision|ticket|study)"
+  [ -n "$name" ] || die "--name é obrigatório"
+
+  dir=$(entity_dir "$type")
+  file="${dir}/${name}.md"
+  if [ ! -f "$file" ]; then
+    mkdir -p "$dir"
+    {
+      printf -- '---\n'
+      printf 'type: %s\n' "$type"
+      printf 'created: %s\n' "$(date '+%Y-%m-%d')"
+      printf -- '---\n'
+      printf '# %s\n\n' "$name"
+    } > "$file"
+    log_line "entity ${type} ${name}"
+  fi
+  echo "$file"
+}
+
+cmd_status() {
+  local stream file now last
+  stream=$(stream_for "$PWD")
+  stream="${stream:-default}"
+  file="${STATE_DIR}/last-append-${stream}"
+  now=$(date '+%s')
+  if [ -f "$file" ]; then last=$(cat "$file"); else last=0; fi
+  if [ "$last" -eq 0 ]; then
+    echo "999999 ${stream}"
+  else
+    echo "$(( (now - last) / 60 )) ${stream}"
+  fi
+}
+
+cmd_week() { create_week "${JOURNAL_DATE:-$(date '+%Y-%m-%d')}"; }
+
+# Lista as notas de dia existentes da semana, em ordem. É o primitivo que o
+# /retro usa para percorrer a semana sem montar caminho.
+cmd_days() {
+  local d="${1:-${JOURNAL_DATE:-$(date '+%Y-%m-%d')}}" range start i cur p
+  range=$(week_range "$d")
+  start=${range% *}
+  for i in 0 1 2 3 4 5 6; do
+    cur=$(date_offset "$start" "$i")
+    p=$(day_path "$cur")
+    [ -f "$p" ] && echo "$p"
+  done
+  return 0
+}
+
+# Percent-encode para a URI do Obsidian.
+urlencode() {
+  local s="$1" out="" c i
+  for (( i = 0; i < ${#s}; i++ )); do
+    c=${s:i:1}
+    case "$c" in
+      [a-zA-Z0-9.~_-]) out+="$c" ;;
+      *) out+=$(printf '%%%02X' "'$c") ;;
+    esac
+  done
+  printf '%s' "$out"
+}
+
+cmd_open() {
+  local what="${1:-day}" file rel vault
+  case "$what" in
+    day|dia|"")     file=$(cmd_today) ;;
+    week|semana)    file=$(cmd_week) ;;
+    *) die "use: journal open [day|week]" ;;
+  esac
+  vault=$(basename "$JOURNAL_VAULT")
+  rel=${file#"${JOURNAL_VAULT}/"}
+  open "obsidian://open?vault=$(urlencode "$vault")&file=$(urlencode "$rel")"
+}
+
+# O que está aberto e há quanto tempo. A nota mais recente já carrega tudo que
+# ficou em aberto, então ela é a fonte — não é preciso varrer a semana.
+cmd_pending() {
+  local today="${JOURNAL_DATE:-$(date '+%Y-%m-%d')}" file note_date
+  file=$(day_path "$today")
+  [ -f "$file" ] || file=$(prev_day_note "$today")
+  [ -n "$file" ] || { echo "nenhuma nota de dia ainda" >&2; return 0; }
+  note_date=$(basename "$file" .md)
+
+  awk -F'\t' '
+    /^## Plano$/ { inside = 1; next }
+    inside && /^## / { exit }
+    inside && /^### / { proj = substr($0, 5); next }
+    inside && /^[[:space:]]*- \[ \]/ { print proj "\t" $0 }
+  ' "$file" \
+  | while IFS= read -r pair; do
+      local proj item since age label
+      proj=${pair%%$'\t'*}
+      item=${pair#*$'\t'}
+      [ -n "$item" ] || continue
+      [ -n "$proj" ] || proj="sem projeto"
+      case "$item" in
+        *"↳ aberto desde [["*)
+          since=${item##*↳ aberto desde [[}
+          since=${since%%]]*} ;;
+        *) since="$note_date" ;;
+      esac
+      age=$(days_between "$since" "$today")
+      label=${item#*- \[ \] }
+      label=${label%%  ↳ aberto desde*}
+      printf '%s\t%s\t%s\n' "$proj" "$age" "$label"
+    done \
+  | sort -t"$(printf '\t')" -k1,1 -k2,2nr \
+  | awk -F'\t' '
+      # Sem coluna alinhada: awk conta bytes, e acento faria a coluna dançar.
+      $1 != last { if (NR > 1) print ""; print $1; last = $1 }
+      { print "  " $3 "  (" ($2 == 0 ? "hoje" : $2 " dia" ($2 > 1 ? "s" : "")) ")" }
+    '
+}
+
+cmd_stream()  { local s; s=$(stream_for "${1:-$PWD}"); echo "${s:-}"; }
+cmd_project() { project_for "${1:-$PWD}"; }
+
+usage() {
+  cat <<'EOF'
+journal — diário de trabalho e estudo no Obsidian
+
+  journal ensure-today                    cria a nota do dia + rollover (launchd)
+  journal ensure-week [DATA]              cria a nota da semana ISO
+  journal today                           imprime o path da nota do dia
+  journal week                            imprime o path da nota da semana
+  journal days [DATA]                     lista as notas de dia da semana
+  journal open [day|week]                 abre a nota no Obsidian
+  journal pending                         o que está aberto e há quanto tempo
+  journal append --section S --text T     append numa seção do dia
+      [--project P]                       projeto (padrão: repo do cwd)
+      [--week]                            escreve na nota da semana
+  journal entity --type T --name N        cria/retorna nota atômica
+  journal status                          minutos desde o último append + stream
+  journal stream [DIR]                    stream do diretório
+  journal project [DIR]                   projeto detectado do diretório
+
+Seções (dia):    Plano, Decisões, Threads, Tickets, Estudos, Notas
+Seções (--week): Compromissos, Radar, Retro
+        Cada seção é subdividida por `### projeto`.
+Tipos:  ticket, project, decision, study
+EOF
+}
+
+main() {
+  local cmd="${1:-}"
+  [ $# -gt 0 ] && shift || true
+  case "$cmd" in
+    ensure-today) load_config; cmd_ensure_today "$@" ;;
+    ensure-week)  load_config; cmd_ensure_week "$@" ;;
+    today)        load_config; cmd_today "$@" ;;
+    append)       load_config; cmd_append "$@" ;;
+    entity)       load_config; cmd_entity "$@" ;;
+    status)       load_config; cmd_status "$@" ;;
+    week)         load_config; cmd_week "$@" ;;
+    days)         load_config; cmd_days "$@" ;;
+    open)         load_config; cmd_open "$@" ;;
+    pending)      load_config; cmd_pending "$@" ;;
+    stream)       load_config; cmd_stream "$@" ;;
+    project)      load_config; cmd_project "$@" ;;
+    ""|-h|--help|help) usage ;;
+    *) die "comando desconhecido: ${cmd} (veja: journal --help)" ;;
+  esac
+}
+
+main "$@"

@@ -1,0 +1,33 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/usr/bin/env bash
+# Carrega o LaunchAgent do journal — cria a nota do dia em dias úteis às 07:00.
+# Reexecuta quando o plist ou o script mudam:
+# plist hash: {{ include "private_Library/LaunchAgents/com.barsotti.journal.plist.tmpl" | sha256sum }}
+# journal hash: {{ include "dot_local/bin/executable_journal" | sha256sum }}
+set -eufo pipefail
+
+label="com.barsotti.journal"
+plist="{{ .chezmoi.homeDir }}/Library/LaunchAgents/${label}.plist"
+launch_domain="gui/$(id -u)"
+
+mkdir -p "{{ .chezmoi.homeDir }}/.local/state/journal"
+
+if [ ! -f "$plist" ]; then
+    echo "journal: plist ausente em ${plist}" >&2
+    exit 1
+fi
+
+plutil -lint "$plist" >/dev/null
+
+if launchctl print "${launch_domain}/${label}" >/dev/null 2>&1; then
+    launchctl bootout "${launch_domain}/${label}"
+fi
+
+launchctl bootstrap "$launch_domain" "$plist"
+launchctl enable "${launch_domain}/${label}"
+
+# Cria a nota de hoje já, em vez de esperar as 07:00 do próximo dia útil.
+"{{ .chezmoi.homeDir }}/.local/bin/journal" ensure-today >/dev/null 2>&1 || true
+
+echo "journal: LaunchAgent carregado (dias úteis, 07:00)"
+{{ end -}}

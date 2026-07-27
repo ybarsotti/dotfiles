@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# journal-nudge — hook de UserPromptSubmit para Claude Code e Codex.
+#
+# Não escreve nada. Injeta uma linha de contexto para que o modelo — que já está
+# na sessão e tem julgamento — decida se algo merece registro. Hook é comando
+# shell e não consegue fazer essa avaliação sozinho.
+#
+# Sai em silêncio (código 0, sem saída) sempre que não houver o que dizer:
+# fora dos roots vigiados, dentro do intervalo, ou em qualquer erro. Um hook
+# barulhento vira ruído e o ruído vira hook desligado.
+
+set -uo pipefail
+
+JOURNAL_BIN="${JOURNAL_BIN:-${HOME}/.local/bin/journal}"
+CONFIG="${JOURNAL_CONFIG:-${HOME}/.config/journal/config.sh}"
+STATE_DIR="${JOURNAL_STATE_DIR:-${HOME}/.local/state/journal}"
+
+quiet() { exit 0; }
+
+[ -x "$JOURNAL_BIN" ] || quiet
+
+# shellcheck source=/dev/null
+[ -f "$CONFIG" ] && . "$CONFIG"
+: "${JOURNAL_NUDGE_MINUTES:=90}"
+
+# O payload do hook traz o cwd; cair no PWD cobre invocação manual.
+payload=$(cat 2>/dev/null || true)
+cwd=""
+if [ -n "$payload" ] && command -v jq >/dev/null 2>&1; then
+  cwd=$(printf '%s' "$payload" | jq -r '.cwd // empty' 2>/dev/null || true)
+fi
+[ -z "$cwd" ] && cwd="$PWD"
+
+stream=$("$JOURNAL_BIN" stream "$cwd" 2>/dev/null) || quiet
+[ -n "$stream" ] || quiet   # fora dos roots vigiados
+
+status=$(cd "$cwd" 2>/dev/null && "$JOURNAL_BIN" status 2>/dev/null) || quiet
+minutes=${status%% *}
+case "$minutes" in ''|*[!0-9]*) quiet ;; esac
+[ "$minutes" -ge "$JOURNAL_NUDGE_MINUTES" ] || quiet
+
+# Segundo portão: sem isto, passado o limiar o lembrete apareceria em todo
+# prompt até o usuário registrar algo.
+mkdir -p "$STATE_DIR" 2>/dev/null || quiet
+nudge_file="${STATE_DIR}/last-nudge-${stream}"
+now=$(date '+%s')
+if [ -f "$nudge_file" ]; then
+  last=$(cat "$nudge_file" 2>/dev/null || echo 0)
+  case "$last" in ''|*[!0-9]*) last=0 ;; esac
+  [ $(( (now - last) / 60 )) -ge "$JOURNAL_NUDGE_MINUTES" ] || quiet
+fi
+printf '%s' "$now" > "$nudge_file"
+
+# English, so that injecting this never nudges the model into another language.
+# Journal entries themselves are written in Portuguese — see the journal skill.
+if [ "$minutes" -ge 999999 ]; then
+  since="No journal entry yet"
+else
+  since="${minutes}min since the last journal entry"
+fi
+
+msg="journal: ${since} in stream '${stream}'. If a decision, Slack thread, ticket or learning here would be expensive to reconstruct later, record it with \`journal append --section <Plano|Decisões|Threads|Tickets|Estudos|Notas> --text ...\`, and \`journal entity\` for anything recurring. Write the entry in Portuguese, short and plain — simple words, no jargon, two lines at most — and keep replying in the language of the conversation. If nothing is worth recording, ignore this and carry on."
+
+if command -v jq >/dev/null 2>&1; then
+  jq -nc --arg m "$msg" \
+    '{hookSpecificOutput:{hookEventName:"UserPromptSubmit",additionalContext:$m}}'
+else
+  escaped=${msg//\"/\\\"}
+  printf '{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"%s"}}\n' "$escaped"
+fi
