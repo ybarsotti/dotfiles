@@ -168,6 +168,11 @@
             "command": "node \"{{ .chezmoi.homeDir }}/.claude/hooks/caveman-mode-tracker.js\"",
             "timeout": 5,
             "statusMessage": "Tracking caveman mode..."
+          },
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/.local/bin/journal-nudge",
+            "timeout": 5
           }
         ]
       },

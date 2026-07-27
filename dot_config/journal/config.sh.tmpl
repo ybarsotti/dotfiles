@@ -1,0 +1,14 @@
+# Managed by chezmoi — edit .chezmoidata/journal.yaml instead.
+# Sourced by ~/.local/bin/journal and ~/.local/bin/journal-nudge.
+
+JOURNAL_VAULT="${HOME}/{{ .journal.vault }}"
+JOURNAL_DIR="{{ .journal.dir }}"
+JOURNAL_NUDGE_MINUTES="{{ .journal.nudge_minutes }}"
+
+# Roots vigiados, um "prefixo:stream" por linha.
+JOURNAL_STREAMS="{{ range .journal.streams }}
+${HOME}/{{ .path }}:{{ .name }}{{ end }}"
+
+# Apelidos de projeto, um "detectado:apelido" por linha.
+JOURNAL_ALIASES="{{ range $from, $to := .journal.aliases }}
+{{ $from }}:{{ $to }}{{ end }}"
