@@ -1,0 +1,29 @@
+---
+# Journal — diário de trabalho e estudo no Obsidian.
+# Ver docs/2026-07-26-journal-obsidian-design.md
+journal:
+  # Caminho do vault, relativo a $HOME.
+  vault: "Documents/Dump"
+  # Pasta do diário dentro do vault.
+  dir: "Journal"
+  # Minutos sem registro antes do hook lembrar o agente.
+  nudge_minutes: 90
+  # Roots vigiados. `path` é relativo a $HOME e casa por prefixo.
+  streams:
+    - path: "Developer/Work"
+      name: "work"
+    - path: "Developer/Learning"
+      name: "study"
+  # Nome curto para o projeto no diário. Sem isto o rótulo é o nome do
+  # diretório do repositório, que raramente é como se fala do projeto — e um
+  # rótulo diferente do que você escreve à mão cria duas subseções para a
+  # mesma coisa.
+  #
+  # Este repositório é público, então nomes de repositório de trabalho não
+  # entram aqui: escreva-os em ~/.config/journal/config.local.sh, que não é
+  # versionado. Formato, um por linha:
+  #
+  #   JOURNAL_ALIASES="$JOURNAL_ALIASES
+  #   nome-do-repo:Apelido"
+  aliases:
+    chezmoi: "dotfiles"
