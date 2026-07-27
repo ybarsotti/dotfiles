@@ -3,7 +3,7 @@ name: jira-workflow
 description: |
   MANDATORY skill whenever a message contains a Jira ticket code — even if that is the
   ENTIRE message. If the user sends only "PROJ-2982" (or any `[A-Z]{2,}-\d+` pattern —
-  PROJ-123, PROJ-456, PROJ-789, PROJ-42, etc.), treat it as an implicit "start work on
+  PROJ-123, ABC-456, PLAT-789, XY-42, etc.), treat it as an implicit "start work on
   this ticket" and invoke this skill immediately. Do NOT fall back to answering without
   the skill just because the message is short or feels ambiguous; a bare ticket code is
   always a request to begin the workflow. Also triggers on: pasted Jira URLs
