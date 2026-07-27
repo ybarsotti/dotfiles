@@ -102,6 +102,18 @@ Ask before writing only when the intention is genuinely ambiguous about *which
 project* something belongs to. For an unclear ETA, write it without one rather
 than guessing — an invented deadline is worse than none.
 
+## When it is not work
+
+Something with no project and no date — a link, a reminder, a question for
+someone — is not a commitment and not a task. It goes to the inbox:
+
+```bash
+journal note "ver se dá pra automatizar o relatório"
+```
+
+`Radar` is for work that is real but not this week. The inbox is for everything
+else. Do not turn a loose thought into a commitment to give it a home.
+
 ## Do not
 
 - Do not tick anything. `/plan` writes open items only.

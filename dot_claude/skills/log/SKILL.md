@@ -74,6 +74,19 @@ reason, not the retelling.
 matter if the current task had never existed?** If not, it belongs in the commit
 message, not the journal.
 
+## When nothing fits
+
+A thought with no project, no date and no section — a link to read, a reminder,
+something to ask someone — goes to the inbox:
+
+```bash
+journal note "perguntar pro time sobre o cache"
+```
+
+The inbox has no rules on purpose: capture only works while it costs nothing.
+Never force a loose thought into a section just to have somewhere to put it —
+`Notas` is for facts about the system, not for whatever is left over.
+
 ## Do not record
 
 - What git already tells: changed files, diffs, branch names.
