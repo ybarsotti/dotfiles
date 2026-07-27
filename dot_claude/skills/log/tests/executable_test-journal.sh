@@ -194,6 +194,23 @@ printf 'conteúdo manual\n' >> "$f"
 f2=$("$J" entity --type ticket --name PROJ-201)
 assert_contains "$(cat "$f2")" "conteúdo manual" "entity não sobrescreve nota existente"
 
+# ---------------------------------------------------------------- inbox
+
+"$J" note "primeira anotação livre" >/dev/null
+"$J" note "segunda, com acento e — travessão" >/dev/null
+INBOX="$TMP/vault/Journal/inbox.md"
+assert_file "$INBOX" "note cria o inbox"
+inb=$(cat "$INBOX")
+assert_contains "$inb" "primeira anotação livre" "note grava a primeira"
+assert_contains "$inb" "segunda, com acento e — travessão" "note preserva acento e travessão"
+n=$(grep -c '^# Inbox$' "$INBOX")
+assert_eq "$n" "1" "cabeçalho do inbox não se repete"
+assert_contains "$("$J" inbox)" "primeira anotação livre" "inbox mostra o conteúdo"
+assert_fails "note sem texto falha" "$J" note
+
+# O inbox não pertence a nenhum dia nem projeto.
+assert_absent "$(cat "$D/2026-07-27.md")" "primeira anotação livre" "note não toca a nota do dia"
+
 # ---------------------------------------------------------------- streams
 
 assert_eq "$("$J" stream "$TMP/work/repo")" "work" "detecta stream work"
