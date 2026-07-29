@@ -212,6 +212,13 @@ clean:
     @brew cleanup 2>/dev/null || true
     @echo "✅ Cleanup complete"
 
-# Full update (git, brew, packages, apply)
-full-update: update-brew update
+# The installer script is run_once_, so extensions stay pinned to whatever version was current
+# at setup time and silently rot (this is how gh-dash sat on a version with a startup panic).
+# Upgrade all gh CLI extensions
+update-gh-extensions:
+    @echo "Upgrading gh extensions..."
+    @gh extension upgrade --all 2>/dev/null || echo "⚠️  gh not available or not authenticated"
+
+# Full update (git, brew, packages, gh extensions, apply)
+full-update: update-brew update-gh-extensions update
     @echo "✅ Full update complete"

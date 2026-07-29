@@ -181,6 +181,11 @@ if command -v gh &>/dev/null && gh auth status &>/dev/null; then
         gh extension install "$ext" || echo "⚠️  Failed to install gh extension $ext. Continuing."
       fi
     done
+
+    # Extensions installed on an older run stay pinned forever otherwise — this script is
+    # run_once_. Use `just update-gh-extensions` to refresh them outside a fresh install.
+    echo "Upgrading gh extensions..."
+    gh extension upgrade --all || echo "⚠️  Failed to upgrade gh extensions. Continuing."
 fi
 
 # --- Install Global NPM Packages ---
