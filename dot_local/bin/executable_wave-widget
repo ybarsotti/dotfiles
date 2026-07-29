@@ -1,0 +1,140 @@
+#!/usr/bin/env zsh
+# wave-widget — pick a git repo or worktree with fzf, cd into it, then exec a command there.
+#
+# Wave Terminal sidebar widgets (~/.config/waveterm/widgets.json) can only carry a *static*
+# cmd:cwd, so there is no way to choose a directory when a widget is clicked. This wraps that
+# gap: the widget runs `zsh -lc 'wave-widget <cmd>'`, the user picks a target, and <cmd> starts
+# there.
+#
+#   wave-widget codex               # pick a repo/worktree, run codex in it
+#   wave-widget lazygit
+#   WAVE_WIDGET_ROOT=~/other wave-widget yazi
+#   WAVE_WIDGET_ALL=1 wave-widget codex   # also list worktrees living outside the root
+#
+# Worktrees are enumerated with `git worktree list`, not by guessing paths — the repos here use
+# at least four layouts (.claude/worktrees, .worktrees, .zorch/worktrees, siblings), and a linked
+# worktree's `.git` is a *file*, so a path scan alone both misses and miscounts them.
+# Cancelling the picker (Esc) exits 0, which closes the widget block.
+
+set -eu
+
+if (( $# == 0 )); then
+    print -u2 "usage: wave-widget <command> [args...]"
+    exit 2
+fi
+
+root="${WAVE_WIDGET_ROOT:-$HOME/Developer}"
+
+# Internal: emit the rows for a single repo. Used to fan the `git worktree list` calls out
+# across cores (see the xargs call below) — serially they cost ~2.5s on this machine.
+if [[ $1 == --emit-rows ]]; then
+    emit_only=$2
+fi
+
+if [[ ! -d "$root" ]]; then
+    print -u2 "wave-widget: no such directory: $root"
+    exit 1
+fi
+
+if [[ -z "${emit_only:-}" ]]; then
+    # Repo roots only: a real clone has `.git` as a directory, a linked worktree has it as a
+    # file. The worktrees come from git itself, below.
+    repo_roots=$(fd --hidden --max-depth 6 --type d '^\.git$' "$root" --format '{//}' 2>/dev/null | sort -u)
+
+    if [[ -z "$repo_roots" ]]; then
+        print -u2 "wave-widget: no git repos under $root"
+        exit 1
+    fi
+fi
+
+# Emits, per worktree: <path>\t<branch>\t<is_linked>
+# `prunable` entries are stale registrations whose directory is gone — skipped.
+list_worktrees() {
+    local repo=$1
+    git -C "$repo" worktree list --porcelain 2>/dev/null | awk -v repo="$repo" '
+        function flush() {
+            if (wt != "" && !prunable)
+                print wt "\t" branch "\t" (wt == repo ? "0" : "1")
+            wt = ""; branch = "detached"; prunable = 0
+        }
+        /^worktree /  { flush(); wt = substr($0, 10); next }
+        /^branch /    { branch = substr($0, 8); sub(/^refs\/heads\//, "", branch); next }
+        /^prunable/   { prunable = 1; next }
+        END           { flush() }
+    '
+}
+
+# Plain (uncoloured) rows so the column padding below measures real characters:
+#   <repo>\t<0|1>\t<path>\t<kind>\t<name>\t<branch>\t<location>
+build_rows() {
+    # NOTE: never name a local `path` in zsh — it is tied to the $PATH array, and shadowing it
+    # blanks PATH for everything this function calls (awk, git, ...).
+    local repo wt branch linked
+    while IFS= read -r repo; do
+        [[ -n "$repo" ]] || continue
+        while IFS=$'\t' read -r wt branch linked; do
+            [[ -d "$wt" ]] || continue
+            if [[ $linked == 0 ]]; then
+                printf '%s\t0\t%s\trepo\t%s\t%s\t%s\n' \
+                    "$repo" "$wt" "${repo:t}" "$branch" "${repo#$root/}"
+            else
+                # Worktrees parked outside the root (throwaway /tmp review checkouts, etc.)
+                # are noise in the picker unless explicitly asked for.
+                [[ -n "${WAVE_WIDGET_ALL:-}" || $wt == $root/* ]] || continue
+                if [[ $wt == $repo/* ]]; then
+                    printf '%s\t1\t%s\twt\t%s\t%s\t%s\n' \
+                        "$repo" "$wt" "${wt:t}" "$branch" "${wt#$repo/}"
+                else
+                    printf '%s\t1\t%s\twt\t%s\t%s\t%s\n' \
+                        "$repo" "$wt" "${wt:t}" "$branch" "${wt#$root/}"
+                fi
+            fi
+        done < <(list_worktrees "$repo")
+    done
+}
+
+if [[ -n "${emit_only:-}" ]]; then
+    print -r -- "$emit_only" | build_rows
+    exit 0
+fi
+
+# One process per repo, 8 at a time; sorted by repo path then by the linked flag, so each repo
+# leads its own worktrees.
+rows=$(
+    print -r -- "$repo_roots" \
+        | xargs -P 8 -I{} "${0:A}" --emit-rows {} 2>/dev/null \
+        | sort -t$'\t' -k1,1 -k2,2
+)
+
+if [[ -z "$rows" ]]; then
+    print -u2 "wave-widget: no repos or worktrees found under $root"
+    exit 1
+fi
+
+# Colour is applied *after* padding, so the columns line up (ANSI bytes would otherwise be
+# counted as width). Field 3 is the real path handed back to the caller.
+selection=$(
+    print -r -- "$rows" \
+        | awk -F'\t' '
+            function clip(s, n) { return length(s) > n ? substr(s, 1, n - 1) "…" : s }
+            {
+                name = clip($5, 30); branch = clip($6, 30); loc = clip($7, 46)
+                if ($4 == "repo") { mark = "\033[1;36m●\033[0m"; col = "\033[1;36m" }
+                else              { mark = " \033[35m↳\033[0m";  col = "\033[35m"   }
+                # %-30s is applied to the *plain* name; the colour wraps the padded result.
+                printf "%s\t%s %s%-30s\033[0m \033[33m%-30s\033[0m \033[2m%s\033[0m\n", \
+                       $3, mark, col, name, branch, loc
+            }' \
+        | fzf --ansi --height=100% --reverse \
+              --delimiter=$'\t' --with-nth=2.. \
+              --prompt="${1}> " \
+              --header="● repo   ↳ worktree      enter: open in ${1}" \
+              --preview='git -C {1} log --oneline --decorate -12 2>/dev/null || ls -A {1}' \
+              --preview-window=right,50%,border-left
+) || exit 0
+
+dir=${selection%%$'\t'*}
+[[ -n "$dir" && -d "$dir" ]] || exit 0
+
+cd -- "$dir"
+exec "$@"

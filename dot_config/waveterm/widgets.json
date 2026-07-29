@@ -1,0 +1,250 @@
+{
+  "claude": {
+    "display:order": 1,
+    "icon": "sparkles",
+    "color": "#d97757",
+    "label": "claude",
+    "description": "Claude Code session - pick a repo with fzf on launch",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "/bin/zsh -lc 'wave-widget claude'",
+        "cmd:shell": true,
+        "cmd:clearonstart": true
+      }
+    }
+  },
+  "codex": {
+    "display:order": 2,
+    "icon": "robot",
+    "color": "#10a37f",
+    "label": "codex",
+    "description": "OpenAI Codex CLI session - pick a repo with fzf on launch",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "/bin/zsh -lc 'wave-widget codex'",
+        "cmd:shell": true,
+        "cmd:clearonstart": true
+      }
+    }
+  },
+  "opencode": {
+    "display:order": 3,
+    "icon": "code",
+    "color": "#f5c2e7",
+    "label": "opencode",
+    "description": "opencode CLI agent session - pick a repo with fzf on launch",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "/bin/zsh -lc 'wave-widget opencode'",
+        "cmd:shell": true,
+        "cmd:clearonstart": true
+      }
+    }
+  },
+  "agent-deck": {
+    "display:order": 4,
+    "icon": "layer-group",
+    "color": "#94e2d5",
+    "label": "agents",
+    "description": "agent-deck - AI agent session manager",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "/bin/zsh -lc 'agent-deck'",
+        "cmd:shell": true,
+        "cmd:clearonstart": true
+      }
+    }
+  },
+  "gh-dash": {
+    "display:order": 5,
+    "icon": "brands@github",
+    "color": "#8957e5",
+    "label": "prs",
+    "description": "gh dash - pull requests and issues dashboard",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "/bin/zsh -lc 'gh dash'",
+        "cmd:shell": true,
+        "cmd:clearonstart": true
+      }
+    }
+  },
+  "gh-notify": {
+    "display:order": 6,
+    "icon": "bell",
+    "color": "#e0b956",
+    "label": "notifs",
+    "description": "gh notify - GitHub notifications, CI noise filtered out",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "/bin/zsh -lc 'PATH=$HOME/.local/libexec/gh-nocolor:$PATH gh notify -w -e ci_activity'",
+        "cmd:shell": true,
+        "cmd:clearonstart": true
+      }
+    }
+  },
+  "lazygit": {
+    "display:order": 7,
+    "icon": "code-branch",
+    "color": "#f14e32",
+    "label": "git",
+    "description": "lazygit TUI - pick a repo with fzf on launch",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "/bin/zsh -lc 'wave-widget lazygit'",
+        "cmd:shell": true,
+        "cmd:clearonstart": true
+      }
+    }
+  },
+  "Redacted": {
+    "display:order": 8,
+    "icon": "briefcase",
+    "color": "#89b4fa",
+    "label": "work",
+    "description": "Redacted repos - file browser",
+    "blockdef": {
+      "meta": {
+        "view": "preview",
+        "file": "~/Developer/Work/Redacted"
+      }
+    }
+  },
+  "yazi": {
+    "display:order": 9,
+    "icon": "folder-tree",
+    "color": "#89b4fa",
+    "label": "yazi",
+    "description": "yazi file manager - pick a repo with fzf on launch",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "/bin/zsh -lc 'wave-widget yazi'",
+        "cmd:shell": true,
+        "cmd:clearonstart": true
+      }
+    }
+  },
+  "lazydocker": {
+    "display:order": 10,
+    "icon": "brands@docker",
+    "color": "#2671be",
+    "label": "docker",
+    "description": "lazydocker TUI",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "/bin/zsh -lc 'lazydocker'",
+        "cmd:shell": true,
+        "cmd:clearonstart": true
+      }
+    }
+  },
+  "defwidget@sysinfo": {
+    "display:order": 11,
+    "icon": "chart-line",
+    "color": "#a6e3a1",
+    "label": "sysinfo",
+    "description": "CPU + memory, 3 minute window",
+    "blockdef": {
+      "meta": {
+        "view": "sysinfo",
+        "sysinfo:type": "CPU + Mem",
+        "graph:numpoints": 180
+      }
+    }
+  },
+  "defwidget@processviewer": {
+    "display:order": 12,
+    "icon": "list-tree",
+    "color": "#a6adc8",
+    "label": "processes",
+    "description": "Process viewer - sortable, Cmd+F filter, signals via right-click",
+    "blockdef": {
+      "meta": {
+        "view": "processviewer"
+      }
+    }
+  },
+  "btop": {
+    "display:order": 13,
+    "icon": "gauge-high",
+    "color": "#a6e3a1",
+    "label": "btop",
+    "description": "btop resource monitor",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "/bin/zsh -lc 'btop'",
+        "cmd:shell": true,
+        "cmd:clearonstart": true
+      }
+    }
+  },
+  "dust": {
+    "display:order": 14,
+    "icon": "hard-drive",
+    "color": "#fab387",
+    "label": "dust",
+    "description": "dust - disk usage under ~/Developer",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "/bin/zsh -lc 'dust -d 3'",
+        "cmd:shell": true,
+        "cmd:cwd": "~/Developer",
+        "cmd:clearonstart": true
+      }
+    }
+  },
+  "hunk": {
+    "display:order": 15,
+    "icon": "code-compare",
+    "color": "#cba6f7",
+    "label": "hunk",
+    "description": "Hunk diff viewer - pick a repo or worktree and watch changes",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "/bin/zsh -lc 'wave-widget hunk diff --watch --mode auto --transparent-bg'",
+        "cmd:shell": true,
+        "cmd:clearonstart": true
+      }
+    }
+  },
+  "weathr": {
+    "display:order": 16,
+    "icon": "cloud-sun",
+    "color": "#f9e2af",
+    "label": "weather",
+    "description": "Animated local weather in metric units",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "/bin/zsh -lc 'weathr --metric --hide-location'",
+        "cmd:shell": true,
+        "cmd:clearonstart": true
+      }
+    }
+  }
+}

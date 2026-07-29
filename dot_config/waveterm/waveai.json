@@ -1,0 +1,24 @@
+{
+  "ollama-qwen14b": {
+    "display:name": "Ollama - Qwen2.5 14B",
+    "display:order": 1,
+    "display:icon": "microchip",
+    "display:description": "Local Qwen2.5 14B via Ollama (general purpose, tool calling)",
+    "ai:apitype": "openai-chat",
+    "ai:model": "qwen2.5:14b",
+    "ai:endpoint": "http://localhost:11434/v1/chat/completions",
+    "ai:apitoken": "ollama",
+    "ai:capabilities": ["tools"]
+  },
+  "ollama-qwen-coder": {
+    "display:name": "Ollama - Qwen2.5 Coder 3B",
+    "display:order": 2,
+    "display:icon": "code",
+    "display:description": "Local Qwen2.5 Coder 3B via Ollama (fast, code focused)",
+    "ai:apitype": "openai-chat",
+    "ai:model": "qwen2.5-coder:3b",
+    "ai:endpoint": "http://localhost:11434/v1/chat/completions",
+    "ai:apitoken": "ollama",
+    "ai:capabilities": ["tools"]
+  }
+}
