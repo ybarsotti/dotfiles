@@ -345,7 +345,7 @@ For databases and heavy services (PostgreSQL, Kafka, Spark, etc.), use Docker Co
 
 **Browsers:** Arc, Brave, Firefox
 
-**Development:** Apidog (API testing), Beekeeper Studio (SQL editor), cmux (Claude Code terminal session manager), Conductor (Claude Code + GitHub), Docker Desktop, Figma, Ghostty (terminal emulator), Visual Studio Code, P4Merge (visual merge tool)
+**Development:** Apidog (API testing), Beekeeper Studio (SQL editor), cmux (Claude Code terminal session manager), Conductor (Claude Code + GitHub), Docker Desktop, Figma, Ghostty (terminal emulator), Wave Terminal (block/widget terminal with local-LLM AI panel), Visual Studio Code, P4Merge (visual merge tool)
 
 **Productivity:** Alt-Tab (window switcher), Raycast (launcher), BetterDisplay, Stats (menu bar monitor), Slack, Notion
 
@@ -387,6 +387,9 @@ This repository includes a `Justfile` with convenient commands for common tasks.
 - **`just apply`** - Apply dotfiles to home directory
 - **`just update`** - Update from git and apply
 - **`just status`** - Check status of managed files
+- **`just update-gh-extensions`** - Upgrade all `gh` CLI extensions (the installer is `run_once_`, so
+  extensions otherwise stay pinned at their setup-time version — `gh dash` sat on v4.22.0, which
+  panics on startup under Wave). Also runs as part of `just full-update`.
 - **`just install-hooks`** - Install pre-commit hooks
 - **`just pre-commit`** - Run pre-commit hooks on all files
 - **`just test-deep-pipeline`** - Run the deep-plan / deep-execute / deep-review / cmux-orchestrator shell test suites (see "Deep-* Agent Pipeline" under Claude Code, below)
@@ -396,6 +399,22 @@ This repository includes a `Justfile` with convenient commands for common tasks.
 - **`just stats`** - Show repository statistics
 
 Run `just` to see the full list of available commands.
+
+## Homebrew Tap Trust
+
+Homebrew 6 refuses to load formulae or casks from a third-party tap until that tap is trusted, so
+`run_onchange_01_homebrew_taps.sh.tmpl` runs `brew trust --tap` on each one after tapping. Without
+it a fresh install taps everything and then fails on `agent-deck`, `peon-ping`, `oh-my-posh`,
+`borders` and `cmux`. Trust means Homebrew will load and run that tap's Ruby formula code; it is
+recorded in `~/.config/homebrew/trust.json` and reversed with `brew untrust <tap>`. The script
+guards on `brew trust --help`, so it stays a no-op on Homebrew 5 and earlier.
+
+`sst/tap` used to be in that list and was removed: SST renamed itself to Anomaly, so the name now
+only resolves through a GitHub 301 to `anomalyco/homebrew-tap`. Because the tap name no longer
+matched its remote, `brew trust` recorded the raw clone URL rather than a tap name — and
+`brew untrust` could not undo it, since the URL resolves back to the *name* `anomalyco/tap`, which
+was never in the list. The stale entry had to be edited out of `trust.json` by hand. Nothing here
+installs from that tap anyway; `opencode` ships in `homebrew/core` now.
 
 ## Configuration Files
 
@@ -435,6 +454,131 @@ Run `just` to see the full list of available commands.
   - Catppuccin theme
   - Plugin management (TPM)
   - Sensible defaults
+
+### Wave Terminal
+
+Config lives in `~/.config/waveterm/` (flat JSON, `:` as level separator). Docs: https://docs.waveterm.dev/config
+
+- **`~/.config/waveterm/settings.json`** - Global settings:
+  - Terminal: keeps Wave's stock look on purpose — **Hack 12px** (`--fixed-font`, bundled with the app)
+    and the **`default-dark`** theme at `term:transparency` 0.5. Neither `term:fontfamily`,
+    `term:fontsize`, `term:theme` nor `term:transparency` is set, so the defaults apply.
+  - Terminal behaviour: 10k scrollback, copy-on-select,
+    `term:shiftenternewline` (Shift+Enter inserts a newline for Claude Code / AI CLIs),
+    `term:macoptionismeta` (matches the Ghostty `macos-option-as-alt` setting)
+  - AI: `waveai:defaultmode` points at a local Ollama mode, cloud modes hidden, telemetry off
+  - Editor/preview/web/window tweaks (no minimap, word wrap, hidden files, external links)
+
+  To try a different look without editing the file, right-click a terminal header → Themes / Font Size,
+  or set it globally:
+  ```bash
+  wsh setconfig term:theme=catppuccin-mocha
+  wsh setconfig term:fontfamily="JetBrainsMono Nerd Font"
+  wsh setconfig term:fontsize=14
+  wsh setconfig term:transparency=0     # opaque background
+  ```
+  Revert to the stock look by deleting those keys from `settings.json`.
+- **`~/.config/waveterm/waveai.json`** - Wave AI modes (Local Models / BYOK). Configured for **Ollama**,
+  no API key needed:
+  - `ollama-qwen14b` — `qwen2.5:14b` (default mode)
+  - `ollama-qwen-coder` — `qwen2.5-coder:3b`
+  - Both hit `http://localhost:11434/v1/chat/completions` with `ai:capabilities: ["tools"]`
+- **`~/.config/waveterm/termthemes.json`** - Catppuccin Mocha / Macchiato / Latte, available as **options**
+  in the terminal header right-click → Themes menu. Not applied by default.
+- **`~/.config/waveterm/backgrounds.json`** - Six **semantic** tab backgrounds, on top of Wave's 13
+  decorative built-ins: `bg@work` (blue), `bg@personal` (green), `bg@agent` (mauve), `bg@review`
+  (peach), `bg@prod` (red, with diagonal hazard stripes) and `bg@scratch` (grey). The point is
+  telling parallel sessions apart at a glance — each also sets `bg:activebordercolor`, so the
+  focused block's border carries the same colour. Right-click a tab → Backgrounds to apply, or:
+  ```bash
+  wsh setbg bg@prod                    # current tab
+  wsh setconfig tab:background=bg@work # default for every new tab
+  wsh setbg --print "#ff0000"          # generate the JSON for a custom one
+  ```
+  No global default is set, so new tabs stay unstyled unless you ask.
+- **`~/.config/waveterm/widgets.json`** - Custom sidebar widgets, grouped by kind: AI agents
+  (claude, codex, opencode, agent-deck) → git/GitHub (`gh dash`, `gh notify`, lazygit) → files
+  (FilterBuy browser, yazi) → containers (lazydocker) → system (sysinfo, processes, btop, `dust`).
+  Wave's `defwidget@sysinfo` and `defwidget@processviewer` are redefined purely to move them out of
+  the built-in block at the top and into the system group. None open magnified — press
+  <kbd>Cmd+M</kbd> to magnify a block. Wave's own defaults (terminal, files, web, sysinfo, processes) stay —
+  set a `defwidget@*` key to `null` to drop one, or redefine it to change its behaviour.
+  `defwidget@sysinfo` is redefined here to plot `CPU + Mem` over a 180s window instead of CPU only over 100s.
+
+  Notes for adding your own:
+  - **Every command is wrapped in `/bin/zsh -lc '<cmd>'`** with `cmd:shell: true`. This is not
+    cosmetic: a widget block does not inherit the shell's environment, and Wave overwrites `PATH`
+    after applying `cmd:env` (it injects its own `wsh` directory). Without the login shell,
+    `~/.zprofile` never runs, `PATH` has no `/opt/homebrew/bin`, and anything with a
+    `#!/usr/bin/env node` shebang dies with `env: node: No such file or directory` — codex does
+    exactly this. The wrapper makes the block behave like a real terminal.
+    Use `-lc`, not `-lic`: login sources `~/.zprofile` (which sets `PATH`) without paying for the
+    interactive plugin load in `~/.zshrc`.
+  - `cmd:cwd` is **static** — a widget cannot ask where to start. `~/.local/bin/wave-widget` fills
+    that gap: it finds every repo under `~/Developer`, expands each one with `git worktree list`,
+    and shows the lot in `fzf` with a `git log` preview before `cd`-ing and `exec`-ing the real
+    command. claude, codex, opencode, lazygit and yazi use it; Esc closes the block.
+    Currently 30 repos + 155 worktrees, ~1.5s to build.
+
+    Why `git worktree list` and not a path scan: worktrees here live in at least four layouts
+    (`.claude/worktrees/` — where Claude Code puts them, `.worktrees/`, `.zorch/worktrees/`, and
+    plain siblings), and a linked worktree's `.git` is a **file**, not a directory, so `fd` alone
+    both misses them and double-counts repo roots. Rows are grouped as `● repo` followed by its
+    `↳ worktree`s, with the branch name alongside.
+
+    | Env | Effect |
+    |-----|--------|
+    | `WAVE_WIDGET_ROOT` | search root (default `~/Developer`) |
+    | `WAVE_WIDGET_ALL=1` | also list worktrees parked outside the root (throwaway `/tmp` review checkouts are hidden by default) |
+
+    Widgets that are not repo-scoped (gh dash, gh notify, lazydocker, agent-deck, btop)
+    keep a plain command and start in `$HOME`; `dust` starts in `~/Developer`.
+
+    Two zsh traps this script had to work around, worth remembering: **never declare `local path`**
+    (it is tied to the `$PATH` array — shadowing it blanks `PATH` for every command the function
+    calls), and `print -r` does **not** expand `\t`, so building tab-separated rows needs `printf`.
+  - `controller: "cmd"` also adds a refresh button to the block header, which is what makes one-shot
+    commands like `dust` useful as widgets. Use `controller: "shell"` for a real session.
+  - Non-terminal widgets need no controller: `view: "preview"` + `file:` for a file browser,
+    `view: "web"` + `url:`/`pinnedurl:`, `view: "sysinfo"` + `sysinfo:type:`
+    (`CPU`, `Mem`, `CPU + Mem`, `All CPU`), `view: "processviewer"`.
+  - The sysinfo widget only ever plots CPU and memory. Its collector
+    (`pkg/wshrpc/wshremote/sysinfo.go`) samples gopsutil's `cpu` and `mem` once a second and nothing
+    else — there is no disk, network, swap or temperature series to configure. Use btop for those.
+  - Icons are [Font Awesome](https://fontawesome.com/search) names without `fa-`; brand icons need the
+    `brands@` prefix (e.g. `brands@docker`).
+  - The notifications widget runs `gh notify -w -e ci_activity`. Without the exclusion it is unusable
+    here: 34 of 36 unread notifications were `ci_activity` (workflow-run-failed), burying the two
+    that were an actual PR comment and state change. `-w` opens the preview pane; plain
+    `gh notify` in any terminal still shows everything including CI.
+  - That widget also prepends `~/.local/libexec/gh-nocolor` to `PATH`. **`gh` writes
+    `\033]11;?` (OSC 11, background colour) and `\033[6n` (cursor position) on every single
+    invocation** — verified with `script -q /dev/null gh api user`. Wave answers both, and when gh
+    runs underneath a live TUI (gh-notify shells out to `gh api` while fzf is on screen) the
+    replies land in that TUI's stdin: `11;rgb:0000/0000/0000` typed into the fzf query box, and
+    previously a crash in gh-dash, which dereferenced a not-yet-loaded config on the resulting
+    phantom keypress. `NO_COLOR=1` makes gh skip the queries; the shim scopes it to gh alone,
+    because fzf honours `NO_COLOR` too and would go monochrome. gh-notify's own colours are
+    emitted by the script, so they are unaffected.
+
+**Useful commands:**
+```bash
+wsh editconfig                 # open settings.json in Wave's editor
+wsh editconfig waveai.json     # edit AI modes
+wsh setconfig term:fontsize=15 # change a single setting
+wsh secret set NAME=value      # store API keys in the OS keychain (not needed for Ollama)
+wsh ai main.go -m "find bugs"  # send files/prompts to the AI panel from the CLI
+wsh setbg "#1e1e2e"            # set the tab background
+wsh badge check --color '#58c142'  # set a tab badge (used by Claude Code hooks)
+```
+
+> **Note:** Wave rewrites `settings.json` when you change settings through its GUI, which makes the file
+> drift from chezmoi. After tweaking things in the UI, run `chezmoi add ~/.config/waveterm/settings.json`
+> to pull the change back into the repo.
+
+**Adding a cloud model (BYOK):** add a mode to `waveai.json` with `ai:provider` (`openai`, `openrouter`,
+`groq`, `google`, `nanogpt`, `azure`) and store the key with `wsh secret set OPENAI_KEY=...` — the
+provider resolves the endpoint and secret name automatically.
 
 ### Claude Code
 - **`~/.claude/settings.json`** - Claude Code settings with hooks and MCP servers
