@@ -15,16 +15,36 @@ fi
 echo "Updating Homebrew..."
 brew update
 
+third_party_taps=(
+    "asheshgoplani/tap"
+    "hashicorp/tap"
+    "jandedobbeleer/oh-my-posh"
+    # sst/tap removed: SST renamed to Anomaly, so the name only still resolves through a GitHub
+    # 301 to anomalyco/homebrew-tap — which made `brew trust` record an opaque URL instead of a
+    # tap name. Nothing here installs from it either; opencode now ships in homebrew/core.
+    "felixkratz/formulae"
+    "veirt/veirt"
+    "manaflow-ai/cmux"
+    "PeonPing/tap"
+)
+
 brew bundle --file=/dev/stdin <<EOF
-tap "asheshgoplani/tap"
-tap "hashicorp/tap"
-tap "jandedobbeleer/oh-my-posh"
-tap "sst/tap"
-tap "felixkratz/formulae"
-tap "veirt/veirt"
-tap "manaflow-ai/cmux"
-tap "PeonPing/tap"
+$(printf 'tap "%s"\n' "${third_party_taps[@]}")
 
 ## mas "MyScript Notes for Students", id: 1119601770
 EOF
+
+# Homebrew 6 refuses to load formulae/casks from a third-party tap until it is trusted, so
+# tapping alone is no longer enough — without this a fresh install taps everything and then
+# fails on agent-deck, peon-ping, oh-my-posh, borders, cmux and the hashicorp formulae.
+# Trusting means Homebrew will load and run each tap's Ruby formula code; that is the same
+# code these packages already install from. Reversible with `brew untrust <tap>`.
+# `brew trust` does not exist before Homebrew 6, hence the capability check.
+if brew trust --help &>/dev/null; then
+    for tap in "${third_party_taps[@]}"; do
+        brew trust --tap "$tap" || echo "⚠️  Failed to trust tap $tap. Continuing."
+    done
+else
+    echo "This Homebrew predates 'brew trust'; third-party taps need no trusting."
+fi
 {{ end -}}
