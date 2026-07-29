@@ -1,7 +1,7 @@
-# Graph Report - chezmoi  (2026-07-24)
+# Graph Report - chezmoi  (2026-07-29)
 
 ## Corpus Check
-- 16 files · ~71,991 words
+- 20 files · ~82,527 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `48afbe77`
+- Built from commit: `83c787b1`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -84,7 +84,7 @@ Nodes (6): cwdFor(), endSession(), postHook(), postPreCompact(), rememberCwd(), 
 
 ### Community 6 - "Code Structure"
 Cohesion: 0.4
-Nodes (5): applyMarkerParams(), readFileSync(), repoRootProject(), tomlFlag(), tomlKey()
+Nodes (5): captureConfig(), captureNormalize(), captureParseArray(), captureTrimComment(), readFileSync()
 
 ### Community 7 - "Code Structure"
 Cohesion: 0.5
@@ -92,7 +92,7 @@ Nodes (5): authHeaders(), drainHookQueue(), fetchHandoff(), sleep(), timeoutSign
 
 ### Community 8 - "Code Structure"
 Cohesion: 0.4
-Nodes (5): captureConfig(), captureNormalize(), captureParseArray(), captureTrimComment(), findMarker()
+Nodes (5): applyMarkerParams(), findMarker(), repoRootProject(), tomlFlag(), tomlKey()
 
 ### Community 14 - "Community 14"
 Cohesion: 0.67
