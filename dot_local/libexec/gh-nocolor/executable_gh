@@ -1,0 +1,18 @@
+#!/bin/sh
+# gh shim — suppress the terminal queries gh makes on every invocation.
+#
+# `gh` writes `\033]11;?\033\` (OSC 11, background colour) and `\033[6n` (cursor position)
+# each time it runs. Wave answers both, and when gh is invoked *underneath* a running TUI —
+# gh-notify calls `gh api` while fzf is on screen — those replies land in the TUI's stdin and
+# get typed into it, e.g. `11;rgb:0000/0000/0000` appearing in the fzf query box.
+#
+# NO_COLOR=1 makes gh skip the queries. It is scoped to this shim rather than exported for the
+# whole widget because fzf also honours NO_COLOR and would render monochrome; gh-notify's own
+# colours are emitted by the script itself, so they survive.
+#
+# Used by prepending this directory to PATH — see the notifications widget in
+# ~/.config/waveterm/widgets.json.
+
+NO_COLOR=1
+export NO_COLOR
+exec /opt/homebrew/bin/gh "$@"

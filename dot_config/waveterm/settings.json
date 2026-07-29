@@ -1,0 +1,48 @@
+{
+  "app:defaultnewblock": "term",
+  "app:confirmquit": false,
+  "app:focusfollowscursor": "term",
+
+  "autoupdate:enabled": true,
+  "autoupdate:channel": "latest",
+  "autoupdate:installonquit": true,
+
+  "waveai:defaultmode": "ollama-qwen14b",
+  "waveai:showcloudmodes": false,
+  "telemetry:enabled": false,
+
+  "term:scrollback": 10000,
+  "term:copyonselect": true,
+  "term:shiftenternewline": true,
+  "term:macoptionismeta": true,
+  "term:cursor": "block",
+  "term:cursorblink": false,
+  "term:bellindicator": true,
+  "term:bellsound": false,
+
+  "editor:minimapenabled": false,
+  "editor:stickyscrollenabled": true,
+  "editor:wordwrap": true,
+  "editor:fontsize": 13,
+
+  "preview:showhiddenfiles": true,
+  "preview:defaultsort": "modtime",
+
+  "markdown:fontsize": 14,
+  "markdown:fixedfontsize": 12,
+
+  "web:openlinksinternally": false,
+  "web:defaultsearch": "https://www.google.com/search?q={query}",
+  "web:defaulturl": "https://github.com/ybarsotti",
+
+  "conn:askbeforewshinstall": false,
+  "conn:localhostdisplayname": "local",
+
+  "window:savelastwindow": true,
+  "window:tilegapsize": 3,
+  "window:maxtabcachesize": 12,
+  "window:reducedmotion": false,
+
+  "tab:confirmclose": false,
+  "widget:showhelp": false
+}

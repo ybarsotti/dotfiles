@@ -1,0 +1,44 @@
+{
+  "bg@work": {
+    "display:name": "Work",
+    "display:order": -6,
+    "bg": "linear-gradient(160deg, rgba(137,180,250,0.55) 0%, rgba(137,180,250,0.10) 55%, rgba(30,30,46,0) 100%)",
+    "bg:opacity": 0.22,
+    "bg:activebordercolor": "rgba(137,180,250,0.9)"
+  },
+  "bg@personal": {
+    "display:name": "Personal",
+    "display:order": -5,
+    "bg": "linear-gradient(160deg, rgba(166,227,161,0.55) 0%, rgba(166,227,161,0.10) 55%, rgba(30,30,46,0) 100%)",
+    "bg:opacity": 0.22,
+    "bg:activebordercolor": "rgba(166,227,161,0.9)"
+  },
+  "bg@agent": {
+    "display:name": "Agent session",
+    "display:order": -4,
+    "bg": "linear-gradient(160deg, rgba(203,166,247,0.55) 0%, rgba(203,166,247,0.10) 55%, rgba(30,30,46,0) 100%)",
+    "bg:opacity": 0.22,
+    "bg:activebordercolor": "rgba(203,166,247,0.9)"
+  },
+  "bg@review": {
+    "display:name": "Review / PR",
+    "display:order": -3,
+    "bg": "linear-gradient(160deg, rgba(250,179,135,0.55) 0%, rgba(250,179,135,0.10) 55%, rgba(30,30,46,0) 100%)",
+    "bg:opacity": 0.22,
+    "bg:activebordercolor": "rgba(250,179,135,0.9)"
+  },
+  "bg@prod": {
+    "display:name": "Production — careful",
+    "display:order": -2,
+    "bg": "linear-gradient(160deg, rgba(243,139,168,0.70) 0%, rgba(243,139,168,0.18) 50%, rgba(30,30,46,0) 100%), repeating-linear-gradient(135deg, rgba(243,139,168,0.10) 0px, rgba(243,139,168,0.10) 12px, transparent 12px, transparent 26px)",
+    "bg:opacity": 0.3,
+    "bg:activebordercolor": "rgba(243,139,168,1.0)"
+  },
+  "bg@scratch": {
+    "display:name": "Scratch",
+    "display:order": -1,
+    "bg": "linear-gradient(160deg, rgba(147,153,178,0.45) 0%, rgba(147,153,178,0.08) 55%, rgba(30,30,46,0) 100%)",
+    "bg:opacity": 0.18,
+    "bg:activebordercolor": "rgba(147,153,178,0.8)"
+  }
+}
