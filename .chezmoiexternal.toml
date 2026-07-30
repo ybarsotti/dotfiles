@@ -46,3 +46,11 @@
     type = "file"
     url = "https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm"
     refreshPeriod = "168h"
+{{ if eq .chezmoi.os "darwin" }}
+["Applications/ZMK Studio.app"]
+    type = "archive"
+    url = "https://github.com/zmkfirmware/zmk-studio/releases/download/v0.3.1/ZMK.Studio_universal.app.tar.gz"
+    exact = true
+    stripComponents = 1
+    checksum.sha256 = "a8d4df69175f8a476fc79e345d1a972b28c34b04f4177dfc6e425901fa458475"
+{{ end }}
