@@ -2,13 +2,15 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "anthropic/claude-sonnet-5",
   "small_model": "openai/gpt-5.4-mini",
-  "autoupdate": true,
+  "autoupdate": false,
   "plugin": [
     "opencode-anthropic-oauth@latest",
     "@franlol/opencode-md-table-formatter@0.0.3",
     "@mohak34/opencode-notifier@latest",
     "@zenobius/opencode-skillful",
-    "@plannotator/opencode@latest",
+    // Removed 2026-07-22: fails to load with "Spread syntax requires
+    // ...iterable not be null or undefined". Re-add when upstream fixes it.
+    // "@plannotator/opencode@latest",
     "octto",
     "oh-my-openagent@latest"
   ],
@@ -69,6 +71,12 @@
       ],
       "enabled": true
     },
+    // Disabled 2026-07-22: same defect as `ai-memory` below — gitnexus'
+    // `api_impact` tool declares a top-level `anyOf`, which the Anthropic API
+    // rejects, 400ing EVERY opencode request while this server is enabled.
+    // opencode 1.14.30's `tools` config map does not filter MCP tools, so the
+    // whole server has to go. gitnexus remains available via Claude Code's own
+    // MCP config. Real fix is upstream: drop the top-level `anyOf`.
     "gitnexus": {
       "type": "local",
       "command": [
@@ -77,7 +85,7 @@
         "gitnexus@latest",
         "mcp"
       ],
-      "enabled": true
+      "enabled": false
     },
     "serena": {
       "type": "local",
@@ -98,10 +106,17 @@
       "url": "https://mcp.exa.ai/mcp",
       "enabled": true
     },
+    // Disabled 2026-07-22: this server's `memory_read_page` tool declares a
+    // top-level `anyOf` in its input schema. The Anthropic API rejects that
+    // outright ("tools.N.custom.input_schema: input_schema does not support
+    // oneOf, allOf, or anyOf at the top level"), so EVERY opencode request to
+    // an Anthropic model 400s while this server is enabled. opencode 1.14.30's
+    // `tools` config map does not filter MCP tools, so the whole server has to
+    // go. Real fix is upstream: drop the top-level `anyOf` from that schema.
     "ai-memory": {
       "type": "remote",
       "url": "http://127.0.0.1:49374/mcp",
-      "enabled": true
+      "enabled": false
     }
   }
 }

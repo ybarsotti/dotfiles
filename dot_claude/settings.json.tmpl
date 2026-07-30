@@ -1,6 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "includeCoAuthoredBy": false,
+  "model": "opus",
+  "agentPushNotifEnabled": true,
+  "inputNeededNotifEnabled": true,
   "permissions": {
     "defaultMode": "bypassPermissions"
   },
@@ -21,6 +24,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "agent-deck hook-handler"
+          },
+          {
+            "type": "command",
             "command": "notify-claude"
           },
           {
@@ -35,6 +42,28 @@
           {
             "type": "command",
             "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event stop --agent claude-code --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt|elicitation_dialog",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "agent-deck hook-handler"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "agent-deck hook-handler"
           }
         ]
       }
@@ -132,6 +161,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "agent-deck hook-handler"
+          },
+          {
+            "type": "command",
             "command": "node \"{{ .chezmoi.homeDir }}/.claude/hooks/caveman-activate.js\"",
             "timeout": 5,
             "statusMessage": "Loading caveman mode..."
@@ -165,6 +198,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "agent-deck hook-handler"
+          },
+          {
+            "type": "command",
             "command": "node \"{{ .chezmoi.homeDir }}/.claude/hooks/caveman-mode-tracker.js\"",
             "timeout": 5,
             "statusMessage": "Tracking caveman mode..."
@@ -192,6 +229,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "agent-deck hook-handler"
+          },
+          {
+            "type": "command",
             "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event pre-compact --agent claude-code --server-url http://127.0.0.1:49374 --project-strategy repo-root"
           }
         ]
@@ -201,6 +242,10 @@
       {
         "matcher": "",
         "hooks": [
+          {
+            "type": "command",
+            "command": "agent-deck hook-handler"
+          },
           {
             "type": "command",
             "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event session-end --agent claude-code --server-url http://127.0.0.1:49374 --project-strategy repo-root"

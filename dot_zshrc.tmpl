@@ -270,3 +270,10 @@ if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
         eval "$(oh-my-posh init zsh --config 'https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/refs/heads/main/themes/catppuccin_mocha.omp.json')"
     fi
 fi
+
+# LM Studio CLI. Written into ~/.zshrc by the `lms` installer, so it only ever existed in the
+# live file — captured here with $HOME instead of a hardcoded path so it survives `chezmoi apply`
+# and works on any machine. Guarded because lms is not installed everywhere.
+if [[ -d "$HOME/.lmstudio/bin" ]]; then
+    export PATH="$PATH:$HOME/.lmstudio/bin"
+fi
