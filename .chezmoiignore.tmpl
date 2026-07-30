@@ -36,6 +36,22 @@ README.md
 **/.DS_Store
 **/Thumbs.db
 
+# Claude Code runtime state, not configuration: usageCount, costUSD, cache token counters,
+# experiment ids, anonymousId and the path of every project ever opened. It is rewritten on
+# every launch, so managing it produced ~2000 lines of permanent, meaningless drift that hid
+# real divergence in `chezmoi status`.
+.claude.json
+
+# Generated code-intelligence artifacts (graph.json alone drifts by ~3300 lines). Rebuild them
+# with `npx gitnexus analyze` / `graphify update .` instead of syncing them between machines.
+graphify-out/
+
+# Holds `export CLAUDE_CODE_OAUTH_TOKEN=...`, which exists only in the live file — the template
+# has no such line. Without this rule `chezmoi apply` deletes the export, and because
+# dot_claude/settings.json.tmpl reads that token via `env`, the following apply then strips it
+# from ~/.claude/settings.json too, breaking authentication.
+.zsh_env_vars
+
 
 {{ if ne .chezmoi.os "darwin" }}
 .chezmoiscripts/darwin/**
