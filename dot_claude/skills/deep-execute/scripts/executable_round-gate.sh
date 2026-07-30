@@ -140,7 +140,13 @@ else
         if TEST_OUT=$(cd "$CWD" && sh -c "$TEST_CMD" 2>&1); then
           record "lane-tests" "lane-test:${lane}" "pass" "test_command succeeded: ${TEST_CMD}"
         else
-          record "lane-tests" "lane-test:${lane}" "fail" "test_command failed: ${TEST_CMD}: ${TEST_OUT}"
+          # Truncate to a bounded tail: a full failing suite's output (e.g.
+          # 1000+ pytest error lines) overflows ARG_MAX when passed to
+          # `jq --arg d`, which silently drops the whole record and makes the
+          # gate report "no result" instead of "failed". A tail is enough to
+          # diagnose; the full log is on the worker's own pane.
+          TEST_TAIL=$(printf '%s\n' "$TEST_OUT" | tail -40)
+          record "lane-tests" "lane-test:${lane}" "fail" "test_command failed: ${TEST_CMD}: ...(tail)... ${TEST_TAIL}"
           LANE_FAIL=1
         fi
       done < <(jq -r '.workers[]?.lane // empty' "$MANIFEST")
