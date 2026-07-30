@@ -5,6 +5,7 @@ python = "3.12"  # Will be managed by uv primarily
 lua = "5.1"
 go = "latest"
 zig = "latest"
+node = "lts"
 
 [settings]
 idiomatic_version_file_enable_tools = []
