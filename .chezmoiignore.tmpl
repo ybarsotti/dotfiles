@@ -46,6 +46,13 @@ README.md
 # with `npx gitnexus analyze` / `graphify update .` instead of syncing them between machines.
 graphify-out/
 
+# Vendor files, not configuration: the omo Codex plugin ships these agent definitions and
+# reinstalls them on every update, so the live copies are byte-identical to
+# ~/.codex/plugins/cache/sisyphuslabs/omo/<version>/components/ultrawork/agents/. Managing them
+# meant the repo pinned stale snapshots, and `chezmoi apply` would silently downgrade the agents
+# (gpt-5.6-* back to gpt-5.5, dynamic attempt-dir artifact paths back to fixed ones).
+.codex/agents/
+
 # Holds `export CLAUDE_CODE_OAUTH_TOKEN=...`, which exists only in the live file — the template
 # has no such line. Without this rule `chezmoi apply` deletes the export, and because
 # dot_claude/settings.json.tmpl reads that token via `env`, the following apply then strips it
