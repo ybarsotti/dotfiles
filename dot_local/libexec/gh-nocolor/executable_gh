@@ -15,4 +15,13 @@
 
 NO_COLOR=1
 export NO_COLOR
-exec /opt/homebrew/bin/gh "$@"
+
+# Resolve the real gh through PATH rather than hardcoding a prefix, so this works on Apple
+# Silicon (/opt/homebrew) and Intel (/usr/local) alike. This shim's own directory has to come
+# out of PATH first, otherwise `gh` resolves back to this script and recurses forever.
+# shellcheck disable=SC1007  # `CDPATH= cd` deliberately clears CDPATH for this command only
+self_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PATH=$(printf '%s' "$PATH" | tr ':' '\n' | grep -vxF "$self_dir" | paste -sd: -)
+export PATH
+
+exec gh "$@"
