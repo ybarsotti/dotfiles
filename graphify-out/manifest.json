@@ -16,8 +16,8 @@
     "hash": "52c4ad576c115d0d75aa111d9a2a1873"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_local/libexec/gh-nocolor/executable_gh": {
-    "mtime": 1785352701.4691663,
-    "hash": "acf23d2ae2c7feccb6e182ea6f64da06"
+    "mtime": 1785417307.146115,
+    "hash": "f69189adceb98c2d653df2318342e69b"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/keys.lua": {
     "mtime": 1771866079.22293,
@@ -96,12 +96,12 @@
     "hash": "ce5e275a67a9b17b5c09a2c3b7a678c1"
   },
   "/Users/barsotti/.local/share/chezmoi/AGENTS.md": {
-    "mtime": 1784917439.2197976,
-    "hash": "c51dd7265366402b993eafe43d72a562"
+    "mtime": 1785432364.4166663,
+    "hash": "bbe6da1e533eb8d7151b281dab0c9182"
   },
   "/Users/barsotti/.local/share/chezmoi/CLAUDE.md": {
-    "mtime": 1784917439.2211835,
-    "hash": "0a01209057182d26fb64103f5d8cc37c"
+    "mtime": 1785432364.4179604,
+    "hash": "27bc03398a12f85cecd696d428873739"
   },
   "/Users/barsotti/.local/share/chezmoi/docs/2026-07-26-journal-obsidian-design.md": {
     "mtime": 1785162322.9608605,
@@ -144,8 +144,8 @@
     "hash": "36700070fe4a01110786caf888dbb09c"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_config/yazi/flavors/catppuccin-macchiato.yazi/README.md": {
-    "mtime": 1771866079.2238894,
-    "hash": "b18e17913ffc37f3e73931126ac9b256"
+    "mtime": 1785431941.9271748,
+    "hash": "efa7f2075cc23d8ab59c0e557710238c"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_config/lazydocker/config.yml": {
     "mtime": 1784586245.5006838,
@@ -464,7 +464,7 @@
     "hash": "15b3a6e2b7165ea25fbe1c7aacac5730"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_config/yazi/flavors/catppuccin-macchiato.yazi/preview.png": {
-    "mtime": 1771866079.2257843,
+    "mtime": 1785431941.9281232,
     "hash": "f979579eabe6e1e177a282b0c832ce57"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/qa-test-plan/tests/fixtures/evidence/checkout.png": {
