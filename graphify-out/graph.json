@@ -27,7 +27,7 @@
       "source_file": "dot_config/wezterm/wezterm.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_wezterm_lua",
-      "community": 16,
+      "community": 15,
       "norm_label": "wezterm.lua"
     },
     {
@@ -54,7 +54,7 @@
       "source_file": "dot_config/wezterm/plugins/zen-mode-vim.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_plugins_zen_mode_vim_lua",
-      "community": 17,
+      "community": 16,
       "norm_label": "zen-mode-vim.lua"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "dot_config/wezterm/themes/melange_dark.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_themes_melange_dark_lua",
-      "community": 18,
+      "community": 17,
       "norm_label": "melange_dark.lua"
     },
     {
@@ -126,7 +126,7 @@
       "source_file": "dot_config/wezterm/themes/kanagawa-dragon.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_themes_kanagawa_dragon_lua",
-      "community": 19,
+      "community": 18,
       "norm_label": "kanagawa-dragon.lua"
     },
     {
@@ -135,7 +135,7 @@
       "source_file": "dot_config/wezterm/themes/cyberdream.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_themes_cyberdream_lua",
-      "community": 20,
+      "community": 19,
       "norm_label": "cyberdream.lua"
     },
     {
@@ -144,7 +144,7 @@
       "source_file": "dot_config/yazi/plugins/smart-tab.yazi/init.lua",
       "source_location": "L1",
       "id": "dot_config_yazi_plugins_smart_tab_yazi_init_lua",
-      "community": 21,
+      "community": 20,
       "norm_label": "init.lua"
     },
     {
@@ -522,7 +522,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L1",
       "id": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
-      "community": 3,
+      "community": 4,
       "norm_label": "report.py"
     },
     {
@@ -585,7 +585,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L79",
       "id": "qa_artifacts_lib_report_render_plan",
-      "community": 3,
+      "community": 4,
       "norm_label": "render_plan()"
     },
     {
@@ -594,7 +594,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L85",
       "id": "qa_artifacts_lib_report_render_report",
-      "community": 3,
+      "community": 4,
       "norm_label": "render_report()"
     },
     {
@@ -603,7 +603,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L100",
       "id": "qa_artifacts_lib_report_build_scenario_views",
-      "community": 3,
+      "community": 4,
       "norm_label": "_build_scenario_views()"
     },
     {
@@ -612,7 +612,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L135",
       "id": "qa_artifacts_lib_report_build_step_view",
-      "community": 3,
+      "community": 4,
       "norm_label": "_build_step_view()"
     },
     {
@@ -621,7 +621,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L156",
       "id": "qa_artifacts_lib_report_annotate_screenshot",
-      "community": 3,
+      "community": 4,
       "norm_label": "_annotate_screenshot()"
     },
     {
@@ -630,7 +630,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L203",
       "id": "qa_artifacts_lib_report_write_vtt",
-      "community": 3,
+      "community": 4,
       "norm_label": "_write_vtt()"
     },
     {
@@ -639,7 +639,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L225",
       "id": "qa_artifacts_lib_report_vtt_time",
-      "community": 3,
+      "community": 4,
       "norm_label": "_vtt_time()"
     },
     {
@@ -648,7 +648,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L233",
       "id": "qa_artifacts_lib_report_overall_status",
-      "community": 3,
+      "community": 4,
       "norm_label": "_overall_status()"
     },
     {
@@ -657,7 +657,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L244",
       "id": "qa_artifacts_lib_report_status_counts",
-      "community": 3,
+      "community": 4,
       "norm_label": "_status_counts()"
     },
     {
@@ -666,7 +666,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L251",
       "id": "qa_artifacts_lib_report_requirement_views",
-      "community": 3,
+      "community": 4,
       "norm_label": "_requirement_views()"
     },
     {
@@ -675,7 +675,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L274",
       "id": "qa_artifacts_lib_report_status_color",
-      "community": 3,
+      "community": 4,
       "norm_label": "_status_color()"
     },
     {
@@ -684,7 +684,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L278",
       "id": "qa_artifacts_lib_report_template_environment",
-      "community": 3,
+      "community": 4,
       "norm_label": "_template_environment()"
     },
     {
@@ -692,7 +692,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L1",
-      "community": 4,
+      "community": 3,
       "norm_label": "private_ai-memory.ts",
       "id": "dot_config_opencode_plugins_private_ai_memory_ts"
     },
@@ -710,7 +710,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L31",
-      "community": 6,
+      "community": 3,
       "norm_label": "capturetrimcomment()",
       "id": "plugins_private_ai_memory_capturetrimcomment"
     },
@@ -719,7 +719,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L32",
-      "community": 6,
+      "community": 3,
       "norm_label": "capturenormalize()",
       "id": "plugins_private_ai_memory_capturenormalize"
     },
@@ -728,7 +728,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L33",
-      "community": 4,
+      "community": 3,
       "norm_label": "capturejoin()",
       "id": "plugins_private_ai_memory_capturejoin"
     },
@@ -737,7 +737,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L34",
-      "community": 4,
+      "community": 3,
       "norm_label": "capturevalidglob()",
       "id": "plugins_private_ai_memory_capturevalidglob"
     },
@@ -746,7 +746,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L35",
-      "community": 6,
+      "community": 3,
       "norm_label": "captureparsearray()",
       "id": "plugins_private_ai_memory_captureparsearray"
     },
@@ -755,7 +755,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L36",
-      "community": 6,
+      "community": 3,
       "norm_label": "captureconfig()",
       "id": "plugins_private_ai_memory_captureconfig"
     },
@@ -764,7 +764,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L93",
-      "community": 15,
+      "community": 3,
       "norm_label": "captureglob()",
       "id": "plugins_private_ai_memory_captureglob"
     },
@@ -773,7 +773,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L94",
-      "community": 15,
+      "community": 3,
       "norm_label": "capturetool()",
       "id": "plugins_private_ai_memory_capturetool"
     },
@@ -782,7 +782,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L95",
-      "community": 15,
+      "community": 3,
       "norm_label": "capturepolicy()",
       "id": "plugins_private_ai_memory_capturepolicy"
     },
@@ -818,7 +818,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L126",
-      "community": 4,
+      "community": 8,
       "norm_label": "schedulehookflush()",
       "id": "plugins_private_ai_memory_schedulehookflush"
     },
@@ -827,7 +827,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L135",
-      "community": 4,
+      "community": 8,
       "norm_label": "requesthookdrain()",
       "id": "plugins_private_ai_memory_requesthookdrain"
     },
@@ -836,7 +836,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L145",
-      "community": 4,
+      "community": 8,
       "norm_label": "disposedraintimeout()",
       "id": "plugins_private_ai_memory_disposedraintimeout"
     },
@@ -845,7 +845,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L152",
-      "community": 4,
+      "community": 8,
       "norm_label": "drainhookqueuefordispose()",
       "id": "plugins_private_ai_memory_drainhookqueuefordispose"
     },
@@ -854,7 +854,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L156",
-      "community": 4,
+      "community": 8,
       "norm_label": "enqueuehook()",
       "id": "plugins_private_ai_memory_enqueuehook"
     },
@@ -872,7 +872,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L194",
-      "community": 8,
+      "community": 3,
       "norm_label": "findmarker()",
       "id": "plugins_private_ai_memory_findmarker"
     },
@@ -881,7 +881,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L207",
-      "community": 8,
+      "community": 6,
       "norm_label": "tomlkey()",
       "id": "plugins_private_ai_memory_tomlkey"
     },
@@ -890,7 +890,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L217",
-      "community": 8,
+      "community": 6,
       "norm_label": "reporootproject()",
       "id": "plugins_private_ai_memory_reporootproject"
     },
@@ -899,7 +899,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L238",
-      "community": 8,
+      "community": 6,
       "norm_label": "tomlflag()",
       "id": "plugins_private_ai_memory_tomlflag"
     },
@@ -908,7 +908,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L246",
-      "community": 8,
+      "community": 6,
       "norm_label": "applymarkerparams()",
       "id": "plugins_private_ai_memory_applymarkerparams"
     },
@@ -917,7 +917,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L286",
-      "community": 4,
+      "community": 3,
       "norm_label": "sessionid()",
       "id": "plugins_private_ai_memory_sessionid"
     },
@@ -926,7 +926,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L291",
-      "community": 4,
+      "community": 3,
       "norm_label": "textfromparts()",
       "id": "plugins_private_ai_memory_textfromparts"
     },
@@ -998,7 +998,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L381",
-      "community": 4,
+      "community": 3,
       "norm_label": "aimemoryhooks()",
       "id": "plugins_private_ai_memory_aimemoryhooks"
     },
@@ -1016,7 +1016,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/wezterm.lua",
       "source_location": "L1",
-      "community": 22,
+      "community": 21,
       "norm_label": "wezterm.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_wezterm_lua"
     },
@@ -1034,7 +1034,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/zen-mode-vim.lua",
       "source_location": "L1",
-      "community": 23,
+      "community": 22,
       "norm_label": "zen-mode-vim.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_zen_mode_vim_lua"
     },
@@ -1070,7 +1070,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/themes/melange_dark.lua",
       "source_location": "L1",
-      "community": 24,
+      "community": 23,
       "norm_label": "melange_dark.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_themes_melange_dark_lua"
     },
@@ -1079,7 +1079,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/themes/kanagawa-dragon.lua",
       "source_location": "L1",
-      "community": 25,
+      "community": 24,
       "norm_label": "kanagawa-dragon.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_themes_kanagawa_dragon_lua"
     },
@@ -1088,7 +1088,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/themes/cyberdream.lua",
       "source_location": "L1",
-      "community": 26,
+      "community": 25,
       "norm_label": "cyberdream.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_themes_cyberdream_lua"
     },
@@ -1097,7 +1097,7 @@
       "file_type": "code",
       "source_file": "dot_config/yazi/plugins/smart-tab.yazi/init.lua",
       "source_location": "L1",
-      "community": 27,
+      "community": 26,
       "norm_label": "init.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_yazi_plugins_smart_tab_yazi_init_lua"
     }
@@ -3479,5 +3479,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "83c787b174152cefa04ee7f0f065c3d77d7e2a8a"
+  "built_at_commit": "e48b6e22a23c61ee597f67c1a60154ff3acd710a"
 }
