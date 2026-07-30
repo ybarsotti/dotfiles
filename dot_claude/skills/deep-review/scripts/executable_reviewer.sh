@@ -58,12 +58,13 @@ trap 'rm -f "$INPUT_PIPE" "$LAST_MSG"' EXIT
 
 case "$RUNNER" in
   claude)
-    # Headless print mode. Reviewers always run on Sonnet; --max-turns 4 prevents runaway sessions.
+    # Headless print mode. Reviewers always run on Sonnet; --max-turns caps runaway sessions
+    # while leaving enough room to explore a real multi-file diff before rendering a verdict.
     run_with_timeout "$TIMEOUT" \
       claude -p \
         --model sonnet \
         --output-format text \
-        --max-turns 4 \
+        --max-turns "${DEEP_REVIEW_MAX_TURNS:-20}" \
         --dangerously-skip-permissions \
         < "$INPUT_PIPE"
     EXIT_CODE=$?
