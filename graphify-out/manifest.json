@@ -96,16 +96,20 @@
     "hash": "ce5e275a67a9b17b5c09a2c3b7a678c1"
   },
   "/Users/barsotti/.local/share/chezmoi/AGENTS.md": {
-    "mtime": 1785432364.4166663,
-    "hash": "bbe6da1e533eb8d7151b281dab0c9182"
+    "mtime": 1785533633.054007,
+    "hash": "9c389764cb5f96faf531b76365083b3b"
   },
   "/Users/barsotti/.local/share/chezmoi/CLAUDE.md": {
-    "mtime": 1785432364.4179604,
-    "hash": "27bc03398a12f85cecd696d428873739"
+    "mtime": 1785533633.0546865,
+    "hash": "81695612a81626b72adc4ae684bb98d7"
   },
   "/Users/barsotti/.local/share/chezmoi/docs/2026-07-26-journal-obsidian-design.md": {
     "mtime": 1785162322.9608605,
     "hash": "714f869768d6c5c707e76e34797c6002"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_codex/AGENTS.md": {
+    "mtime": 1785436164.1798143,
+    "hash": "e582bfdf128eaae76126685f265c796c"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_config/lazygit/config.yml": {
     "mtime": 1784586245.5008242,
