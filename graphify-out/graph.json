@@ -8,691 +8,691 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/keys.lua",
       "source_location": "L1",
-      "id": "dot_config_wezterm_keys_lua",
-      "community": 9,
-      "norm_label": "keys.lua"
+      "community": 10,
+      "norm_label": "keys.lua",
+      "id": "dot_config_wezterm_keys_lua"
     },
     {
       "label": "M.setup()",
       "file_type": "code",
       "source_file": "dot_config/wezterm/keys.lua",
       "source_location": "L19",
-      "id": "wezterm_keys_m_setup",
-      "community": 9,
-      "norm_label": "m.setup()"
+      "community": 10,
+      "norm_label": "m.setup()",
+      "id": "wezterm_keys_m_setup"
     },
     {
       "label": "wezterm.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/wezterm.lua",
       "source_location": "L1",
-      "id": "dot_config_wezterm_wezterm_lua",
       "community": 15,
-      "norm_label": "wezterm.lua"
+      "norm_label": "wezterm.lua",
+      "id": "dot_config_wezterm_wezterm_lua"
     },
     {
       "label": "fonts.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/fonts.lua",
       "source_location": "L1",
-      "id": "dot_config_wezterm_fonts_lua",
-      "community": 10,
-      "norm_label": "fonts.lua"
+      "community": 11,
+      "norm_label": "fonts.lua",
+      "id": "dot_config_wezterm_fonts_lua"
     },
     {
       "label": "M.setup()",
       "file_type": "code",
       "source_file": "dot_config/wezterm/fonts.lua",
       "source_location": "L5",
-      "id": "wezterm_fonts_m_setup",
-      "community": 10,
-      "norm_label": "m.setup()"
+      "community": 11,
+      "norm_label": "m.setup()",
+      "id": "wezterm_fonts_m_setup"
     },
     {
       "label": "zen-mode-vim.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/zen-mode-vim.lua",
       "source_location": "L1",
-      "id": "dot_config_wezterm_plugins_zen_mode_vim_lua",
       "community": 16,
-      "norm_label": "zen-mode-vim.lua"
+      "norm_label": "zen-mode-vim.lua",
+      "id": "dot_config_wezterm_plugins_zen_mode_vim_lua"
     },
     {
       "label": "workspace-switcher.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
       "source_location": "L1",
-      "id": "dot_config_wezterm_plugins_workspace_switcher_lua",
-      "community": 11,
-      "norm_label": "workspace-switcher.lua"
+      "community": 12,
+      "norm_label": "workspace-switcher.lua",
+      "id": "dot_config_wezterm_plugins_workspace_switcher_lua"
     },
     {
       "label": "M.setup()",
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
       "source_location": "L7",
-      "id": "plugins_workspace_switcher_m_setup",
-      "community": 11,
-      "norm_label": "m.setup()"
+      "community": 12,
+      "norm_label": "m.setup()",
+      "id": "plugins_workspace_switcher_m_setup"
     },
     {
       "label": "move_workspace.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
       "source_location": "L1",
-      "id": "dot_config_wezterm_plugins_move_workspace_lua",
-      "community": 12,
-      "norm_label": "move_workspace.lua"
+      "community": 13,
+      "norm_label": "move_workspace.lua",
+      "id": "dot_config_wezterm_plugins_move_workspace_lua"
     },
     {
       "label": "M.setup()",
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
       "source_location": "L5",
-      "id": "plugins_move_workspace_m_setup",
-      "community": 12,
-      "norm_label": "m.setup()"
+      "community": 13,
+      "norm_label": "m.setup()",
+      "id": "plugins_move_workspace_m_setup"
     },
     {
       "label": "bar.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/bar.lua",
       "source_location": "L1",
-      "id": "dot_config_wezterm_plugins_bar_lua",
-      "community": 13,
-      "norm_label": "bar.lua"
+      "community": 14,
+      "norm_label": "bar.lua",
+      "id": "dot_config_wezterm_plugins_bar_lua"
     },
     {
       "label": "M.setup()",
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/bar.lua",
       "source_location": "L5",
-      "id": "plugins_bar_m_setup",
-      "community": 13,
-      "norm_label": "m.setup()"
+      "community": 14,
+      "norm_label": "m.setup()",
+      "id": "plugins_bar_m_setup"
     },
     {
       "label": "melange_dark.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/themes/melange_dark.lua",
       "source_location": "L1",
-      "id": "dot_config_wezterm_themes_melange_dark_lua",
       "community": 17,
-      "norm_label": "melange_dark.lua"
+      "norm_label": "melange_dark.lua",
+      "id": "dot_config_wezterm_themes_melange_dark_lua"
     },
     {
       "label": "kanagawa-dragon.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/themes/kanagawa-dragon.lua",
       "source_location": "L1",
-      "id": "dot_config_wezterm_themes_kanagawa_dragon_lua",
       "community": 18,
-      "norm_label": "kanagawa-dragon.lua"
+      "norm_label": "kanagawa-dragon.lua",
+      "id": "dot_config_wezterm_themes_kanagawa_dragon_lua"
     },
     {
       "label": "cyberdream.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/themes/cyberdream.lua",
       "source_location": "L1",
-      "id": "dot_config_wezterm_themes_cyberdream_lua",
       "community": 19,
-      "norm_label": "cyberdream.lua"
+      "norm_label": "cyberdream.lua",
+      "id": "dot_config_wezterm_themes_cyberdream_lua"
     },
     {
       "label": "init.lua",
       "file_type": "code",
       "source_file": "dot_config/yazi/plugins/smart-tab.yazi/init.lua",
       "source_location": "L1",
-      "id": "dot_config_yazi_plugins_smart_tab_yazi_init_lua",
       "community": 20,
-      "norm_label": "init.lua"
+      "norm_label": "init.lua",
+      "id": "dot_config_yazi_plugins_smart_tab_yazi_init_lua"
     },
     {
       "label": "executable_qa_artifacts.py",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L1",
-      "id": "dot_claude_skills_qa_test_plan_scripts_executable_qa_artifacts_py",
       "community": 0,
-      "norm_label": "executable_qa_artifacts.py"
+      "norm_label": "executable_qa_artifacts.py",
+      "id": "dot_claude_skills_qa_test_plan_scripts_executable_qa_artifacts_py"
     },
     {
       "label": "validate_plan()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L44",
-      "id": "scripts_executable_qa_artifacts_validate_plan",
       "community": 0,
-      "norm_label": "validate_plan()"
+      "norm_label": "validate_plan()",
+      "id": "scripts_executable_qa_artifacts_validate_plan"
     },
     {
       "label": "render_plan()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L53",
-      "id": "scripts_executable_qa_artifacts_render_plan",
       "community": 0,
-      "norm_label": "render_plan()"
+      "norm_label": "render_plan()",
+      "id": "scripts_executable_qa_artifacts_render_plan"
     },
     {
       "label": "validate_results()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L65",
-      "id": "scripts_executable_qa_artifacts_validate_results",
       "community": 0,
-      "norm_label": "validate_results()"
+      "norm_label": "validate_results()",
+      "id": "scripts_executable_qa_artifacts_validate_results"
     },
     {
       "label": "render_report()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L75",
-      "id": "scripts_executable_qa_artifacts_render_report",
       "community": 0,
-      "norm_label": "render_report()"
+      "norm_label": "render_report()",
+      "id": "scripts_executable_qa_artifacts_render_report"
     },
     {
       "label": "write_schemas()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L87",
-      "id": "scripts_executable_qa_artifacts_write_schemas",
       "community": 0,
-      "norm_label": "write_schemas()"
+      "norm_label": "write_schemas()",
+      "id": "scripts_executable_qa_artifacts_write_schemas"
     },
     {
       "label": "Parse a QA plan and reject invalid or dangling references.",
       "file_type": "rationale",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L47",
-      "id": "scripts_executable_qa_artifacts_rationale_47",
       "community": 0,
-      "norm_label": "parse a qa plan and reject invalid or dangling references."
+      "norm_label": "parse a qa plan and reject invalid or dangling references.",
+      "id": "scripts_executable_qa_artifacts_rationale_47"
     },
     {
       "label": "Render human-readable Markdown from the structured QA plan.",
       "file_type": "rationale",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L57",
-      "id": "scripts_executable_qa_artifacts_rationale_57",
       "community": 0,
-      "norm_label": "render human-readable markdown from the structured qa plan."
+      "norm_label": "render human-readable markdown from the structured qa plan.",
+      "id": "scripts_executable_qa_artifacts_rationale_57"
     },
     {
       "label": "Parse results and prove complete scenario/step coverage against the plan.",
       "file_type": "rationale",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L69",
-      "id": "scripts_executable_qa_artifacts_rationale_69",
       "community": 0,
-      "norm_label": "parse results and prove complete scenario/step coverage against the plan."
+      "norm_label": "parse results and prove complete scenario/step coverage against the plan.",
+      "id": "scripts_executable_qa_artifacts_rationale_69"
     },
     {
       "label": "Render HTML, WebVTT captions, and annotated screenshots from a bound run.",
       "file_type": "rationale",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L80",
-      "id": "scripts_executable_qa_artifacts_rationale_80",
       "community": 0,
-      "norm_label": "render html, webvtt captions, and annotated screenshots from a bound run."
+      "norm_label": "render html, webvtt captions, and annotated screenshots from a bound run.",
+      "id": "scripts_executable_qa_artifacts_rationale_80"
     },
     {
       "label": "Write versioned JSON Schemas for QA plan and results contracts.",
       "file_type": "rationale",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L88",
-      "id": "scripts_executable_qa_artifacts_rationale_88",
       "community": 0,
-      "norm_label": "write versioned json schemas for qa plan and results contracts."
+      "norm_label": "write versioned json schemas for qa plan and results contracts.",
+      "id": "scripts_executable_qa_artifacts_rationale_88"
     },
     {
       "label": "models.py",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L1",
-      "id": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
-      "community": 2,
-      "norm_label": "models.py"
+      "community": 4,
+      "norm_label": "models.py",
+      "id": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py"
     },
     {
       "label": "_parse_relative_path()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L27",
-      "id": "qa_artifacts_lib_models_parse_relative_path",
-      "community": 2,
-      "norm_label": "_parse_relative_path()"
+      "community": 4,
+      "norm_label": "_parse_relative_path()",
+      "id": "qa_artifacts_lib_models_parse_relative_path"
     },
     {
       "label": "FrozenModel",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L41",
-      "id": "qa_artifacts_lib_models_frozenmodel",
-      "community": 2,
-      "norm_label": "frozenmodel"
+      "community": 5,
+      "norm_label": "frozenmodel",
+      "id": "qa_artifacts_lib_models_frozenmodel"
     },
     {
       "label": "BaseModel",
       "file_type": "code",
       "source_file": "",
       "source_location": "",
-      "id": "basemodel",
-      "community": 2,
-      "norm_label": "basemodel"
+      "community": 5,
+      "norm_label": "basemodel",
+      "id": "basemodel"
     },
     {
       "label": "ScreenshotPolicy",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L45",
-      "id": "qa_artifacts_lib_models_screenshotpolicy",
-      "community": 14,
-      "norm_label": "screenshotpolicy"
+      "community": 4,
+      "norm_label": "screenshotpolicy",
+      "id": "qa_artifacts_lib_models_screenshotpolicy"
     },
     {
       "label": "StrEnum",
       "file_type": "code",
       "source_file": "",
       "source_location": "",
-      "id": "strenum",
-      "community": 14,
-      "norm_label": "strenum"
+      "community": 4,
+      "norm_label": "strenum",
+      "id": "strenum"
     },
     {
       "label": "CapturePolicy",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L51",
-      "id": "qa_artifacts_lib_models_capturepolicy",
-      "community": 14,
-      "norm_label": "capturepolicy"
+      "community": 4,
+      "norm_label": "capturepolicy",
+      "id": "qa_artifacts_lib_models_capturepolicy"
     },
     {
       "label": "ResultStatus",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L57",
-      "id": "qa_artifacts_lib_models_resultstatus",
       "community": 1,
-      "norm_label": "resultstatus"
+      "norm_label": "resultstatus",
+      "id": "qa_artifacts_lib_models_resultstatus"
     },
     {
       "label": "Requirement",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L64",
-      "id": "qa_artifacts_lib_models_requirement",
       "community": 1,
-      "norm_label": "requirement"
+      "norm_label": "requirement",
+      "id": "qa_artifacts_lib_models_requirement"
     },
     {
       "label": "Persona",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L69",
-      "id": "qa_artifacts_lib_models_persona",
       "community": 1,
-      "norm_label": "persona"
+      "norm_label": "persona",
+      "id": "qa_artifacts_lib_models_persona"
     },
     {
       "label": "EvidencePolicy",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L75",
-      "id": "qa_artifacts_lib_models_evidencepolicy",
-      "community": 2,
-      "norm_label": "evidencepolicy"
+      "community": 5,
+      "norm_label": "evidencepolicy",
+      "id": "qa_artifacts_lib_models_evidencepolicy"
     },
     {
       "label": "QAStep",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L82",
-      "id": "qa_artifacts_lib_models_qastep",
       "community": 1,
-      "norm_label": "qastep"
+      "norm_label": "qastep",
+      "id": "qa_artifacts_lib_models_qastep"
     },
     {
       "label": "QAScenario",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L91",
-      "id": "qa_artifacts_lib_models_qascenario",
       "community": 1,
-      "norm_label": "qascenario"
+      "norm_label": "qascenario",
+      "id": "qa_artifacts_lib_models_qascenario"
     },
     {
       "label": "QAPlan",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L103",
-      "id": "qa_artifacts_lib_models_qaplan",
       "community": 1,
-      "norm_label": "qaplan"
+      "norm_label": "qaplan",
+      "id": "qa_artifacts_lib_models_qaplan"
     },
     {
       "label": "references_exist()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L114",
-      "id": "qa_artifacts_lib_models_references_exist",
-      "community": 2,
-      "norm_label": "references_exist()"
+      "community": 4,
+      "norm_label": "references_exist()",
+      "id": "qa_artifacts_lib_models_references_exist"
     },
     {
       "label": "QAEnvironment",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L129",
-      "id": "qa_artifacts_lib_models_qaenvironment",
-      "community": 2,
-      "norm_label": "qaenvironment"
+      "community": 5,
+      "norm_label": "qaenvironment",
+      "id": "qa_artifacts_lib_models_qaenvironment"
     },
     {
       "label": "HighlightBox",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L137",
-      "id": "qa_artifacts_lib_models_highlightbox",
-      "community": 2,
-      "norm_label": "highlightbox"
+      "community": 5,
+      "norm_label": "highlightbox",
+      "id": "qa_artifacts_lib_models_highlightbox"
     },
     {
       "label": "StepResult",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L144",
-      "id": "qa_artifacts_lib_models_stepresult",
       "community": 1,
-      "norm_label": "stepresult"
+      "norm_label": "stepresult",
+      "id": "qa_artifacts_lib_models_stepresult"
     },
     {
       "label": "interval_is_ordered()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L158",
-      "id": "qa_artifacts_lib_models_interval_is_ordered",
-      "community": 2,
-      "norm_label": "interval_is_ordered()"
+      "community": 4,
+      "norm_label": "interval_is_ordered()",
+      "id": "qa_artifacts_lib_models_interval_is_ordered"
     },
     {
       "label": "ScenarioResult",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L171",
-      "id": "qa_artifacts_lib_models_scenarioresult",
       "community": 1,
-      "norm_label": "scenarioresult"
+      "norm_label": "scenarioresult",
+      "id": "qa_artifacts_lib_models_scenarioresult"
     },
     {
       "label": "scenario_is_consistent()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L180",
-      "id": "qa_artifacts_lib_models_scenario_is_consistent",
-      "community": 2,
-      "norm_label": "scenario_is_consistent()"
+      "community": 4,
+      "norm_label": "scenario_is_consistent()",
+      "id": "qa_artifacts_lib_models_scenario_is_consistent"
     },
     {
       "label": "QAResults",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L200",
-      "id": "qa_artifacts_lib_models_qaresults",
-      "community": 2,
-      "norm_label": "qaresults"
+      "community": 5,
+      "norm_label": "qaresults",
+      "id": "qa_artifacts_lib_models_qaresults"
     },
     {
       "label": "run_is_consistent()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L211",
-      "id": "qa_artifacts_lib_models_run_is_consistent",
-      "community": 2,
-      "norm_label": "run_is_consistent()"
+      "community": 4,
+      "norm_label": "run_is_consistent()",
+      "id": "qa_artifacts_lib_models_run_is_consistent"
     },
     {
       "label": "BoundRun",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L223",
-      "id": "qa_artifacts_lib_models_boundrun",
       "community": 1,
-      "norm_label": "boundrun"
+      "norm_label": "boundrun",
+      "id": "qa_artifacts_lib_models_boundrun"
     },
     {
       "label": "_require_unique()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L228",
-      "id": "qa_artifacts_lib_models_require_unique",
-      "community": 2,
-      "norm_label": "_require_unique()"
+      "community": 4,
+      "norm_label": "_require_unique()",
+      "id": "qa_artifacts_lib_models_require_unique"
     },
     {
       "label": "_require_known()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L237",
-      "id": "qa_artifacts_lib_models_require_known",
-      "community": 2,
-      "norm_label": "_require_known()"
+      "community": 4,
+      "norm_label": "_require_known()",
+      "id": "qa_artifacts_lib_models_require_known"
     },
     {
       "label": "binding.py",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
       "source_location": "L1",
-      "id": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_binding_py",
       "community": 0,
-      "norm_label": "binding.py"
+      "norm_label": "binding.py",
+      "id": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_binding_py"
     },
     {
       "label": "load_plan()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
       "source_location": "L16",
-      "id": "qa_artifacts_lib_binding_load_plan",
       "community": 0,
-      "norm_label": "load_plan()"
+      "norm_label": "load_plan()",
+      "id": "qa_artifacts_lib_binding_load_plan"
     },
     {
       "label": "load_results()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
       "source_location": "L21",
-      "id": "qa_artifacts_lib_binding_load_results",
       "community": 0,
-      "norm_label": "load_results()"
+      "norm_label": "load_results()",
+      "id": "qa_artifacts_lib_binding_load_results"
     },
     {
       "label": "bind_run()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
       "source_location": "L25",
-      "id": "qa_artifacts_lib_binding_bind_run",
       "community": 0,
-      "norm_label": "bind_run()"
+      "norm_label": "bind_run()",
+      "id": "qa_artifacts_lib_binding_bind_run"
     },
     {
       "label": "report.py",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L1",
-      "id": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
-      "community": 4,
-      "norm_label": "report.py"
+      "community": 3,
+      "norm_label": "report.py",
+      "id": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py"
     },
     {
       "label": "StepView",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L31",
-      "id": "qa_artifacts_lib_report_stepview",
       "community": 1,
-      "norm_label": "stepview"
+      "norm_label": "stepview",
+      "id": "qa_artifacts_lib_report_stepview"
     },
     {
       "label": "ScenarioView",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L39",
-      "id": "qa_artifacts_lib_report_scenarioview",
       "community": 1,
-      "norm_label": "scenarioview"
+      "norm_label": "scenarioview",
+      "id": "qa_artifacts_lib_report_scenarioview"
     },
     {
       "label": "RequirementView",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L48",
-      "id": "qa_artifacts_lib_report_requirementview",
       "community": 1,
-      "norm_label": "requirementview"
+      "norm_label": "requirementview",
+      "id": "qa_artifacts_lib_report_requirementview"
     },
     {
       "label": "ReportView",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L55",
-      "id": "qa_artifacts_lib_report_reportview",
       "community": 1,
-      "norm_label": "reportview"
+      "norm_label": "reportview",
+      "id": "qa_artifacts_lib_report_reportview"
     },
     {
       "label": "ScreenshotAnnotation",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L64",
-      "id": "qa_artifacts_lib_report_screenshotannotation",
       "community": 1,
-      "norm_label": "screenshotannotation"
+      "norm_label": "screenshotannotation",
+      "id": "qa_artifacts_lib_report_screenshotannotation"
     },
     {
       "label": "ScenarioCaption",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L72",
-      "id": "qa_artifacts_lib_report_scenariocaption",
       "community": 1,
-      "norm_label": "scenariocaption"
+      "norm_label": "scenariocaption",
+      "id": "qa_artifacts_lib_report_scenariocaption"
     },
     {
       "label": "render_plan()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L79",
-      "id": "qa_artifacts_lib_report_render_plan",
-      "community": 4,
-      "norm_label": "render_plan()"
+      "community": 3,
+      "norm_label": "render_plan()",
+      "id": "qa_artifacts_lib_report_render_plan"
     },
     {
       "label": "render_report()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L85",
-      "id": "qa_artifacts_lib_report_render_report",
-      "community": 4,
-      "norm_label": "render_report()"
+      "community": 3,
+      "norm_label": "render_report()",
+      "id": "qa_artifacts_lib_report_render_report"
     },
     {
       "label": "_build_scenario_views()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L100",
-      "id": "qa_artifacts_lib_report_build_scenario_views",
-      "community": 4,
-      "norm_label": "_build_scenario_views()"
+      "community": 3,
+      "norm_label": "_build_scenario_views()",
+      "id": "qa_artifacts_lib_report_build_scenario_views"
     },
     {
       "label": "_build_step_view()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L135",
-      "id": "qa_artifacts_lib_report_build_step_view",
-      "community": 4,
-      "norm_label": "_build_step_view()"
+      "community": 3,
+      "norm_label": "_build_step_view()",
+      "id": "qa_artifacts_lib_report_build_step_view"
     },
     {
       "label": "_annotate_screenshot()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L156",
-      "id": "qa_artifacts_lib_report_annotate_screenshot",
-      "community": 4,
-      "norm_label": "_annotate_screenshot()"
+      "community": 3,
+      "norm_label": "_annotate_screenshot()",
+      "id": "qa_artifacts_lib_report_annotate_screenshot"
     },
     {
       "label": "_write_vtt()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L203",
-      "id": "qa_artifacts_lib_report_write_vtt",
-      "community": 4,
-      "norm_label": "_write_vtt()"
+      "community": 3,
+      "norm_label": "_write_vtt()",
+      "id": "qa_artifacts_lib_report_write_vtt"
     },
     {
       "label": "_vtt_time()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L225",
-      "id": "qa_artifacts_lib_report_vtt_time",
-      "community": 4,
-      "norm_label": "_vtt_time()"
+      "community": 3,
+      "norm_label": "_vtt_time()",
+      "id": "qa_artifacts_lib_report_vtt_time"
     },
     {
       "label": "_overall_status()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L233",
-      "id": "qa_artifacts_lib_report_overall_status",
-      "community": 4,
-      "norm_label": "_overall_status()"
+      "community": 3,
+      "norm_label": "_overall_status()",
+      "id": "qa_artifacts_lib_report_overall_status"
     },
     {
       "label": "_status_counts()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L244",
-      "id": "qa_artifacts_lib_report_status_counts",
-      "community": 4,
-      "norm_label": "_status_counts()"
+      "community": 3,
+      "norm_label": "_status_counts()",
+      "id": "qa_artifacts_lib_report_status_counts"
     },
     {
       "label": "_requirement_views()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L251",
-      "id": "qa_artifacts_lib_report_requirement_views",
-      "community": 4,
-      "norm_label": "_requirement_views()"
+      "community": 3,
+      "norm_label": "_requirement_views()",
+      "id": "qa_artifacts_lib_report_requirement_views"
     },
     {
       "label": "_status_color()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L274",
-      "id": "qa_artifacts_lib_report_status_color",
-      "community": 4,
-      "norm_label": "_status_color()"
+      "community": 3,
+      "norm_label": "_status_color()",
+      "id": "qa_artifacts_lib_report_status_color"
     },
     {
       "label": "_template_environment()",
       "file_type": "code",
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L278",
-      "id": "qa_artifacts_lib_report_template_environment",
-      "community": 4,
-      "norm_label": "_template_environment()"
+      "community": 3,
+      "norm_label": "_template_environment()",
+      "id": "qa_artifacts_lib_report_template_environment"
     },
     {
       "label": "private_ai-memory.ts",
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L1",
-      "community": 3,
+      "community": 2,
       "norm_label": "private_ai-memory.ts",
       "id": "dot_config_opencode_plugins_private_ai_memory_ts"
     },
@@ -701,7 +701,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L30",
-      "community": 6,
+      "community": 2,
       "norm_label": "readfilesync()",
       "id": "plugins_private_ai_memory_readfilesync"
     },
@@ -710,7 +710,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L31",
-      "community": 3,
+      "community": 2,
       "norm_label": "capturetrimcomment()",
       "id": "plugins_private_ai_memory_capturetrimcomment"
     },
@@ -719,7 +719,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L32",
-      "community": 3,
+      "community": 2,
       "norm_label": "capturenormalize()",
       "id": "plugins_private_ai_memory_capturenormalize"
     },
@@ -728,7 +728,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L33",
-      "community": 3,
+      "community": 2,
       "norm_label": "capturejoin()",
       "id": "plugins_private_ai_memory_capturejoin"
     },
@@ -737,7 +737,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L34",
-      "community": 3,
+      "community": 2,
       "norm_label": "capturevalidglob()",
       "id": "plugins_private_ai_memory_capturevalidglob"
     },
@@ -746,7 +746,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L35",
-      "community": 3,
+      "community": 2,
       "norm_label": "captureparsearray()",
       "id": "plugins_private_ai_memory_captureparsearray"
     },
@@ -755,7 +755,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L36",
-      "community": 3,
+      "community": 2,
       "norm_label": "captureconfig()",
       "id": "plugins_private_ai_memory_captureconfig"
     },
@@ -764,7 +764,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L93",
-      "community": 3,
+      "community": 2,
       "norm_label": "captureglob()",
       "id": "plugins_private_ai_memory_captureglob"
     },
@@ -773,7 +773,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L94",
-      "community": 3,
+      "community": 2,
       "norm_label": "capturetool()",
       "id": "plugins_private_ai_memory_capturetool"
     },
@@ -782,7 +782,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L95",
-      "community": 3,
+      "community": 2,
       "norm_label": "capturepolicy()",
       "id": "plugins_private_ai_memory_capturepolicy"
     },
@@ -818,7 +818,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L126",
-      "community": 8,
+      "community": 9,
       "norm_label": "schedulehookflush()",
       "id": "plugins_private_ai_memory_schedulehookflush"
     },
@@ -827,7 +827,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L135",
-      "community": 8,
+      "community": 9,
       "norm_label": "requesthookdrain()",
       "id": "plugins_private_ai_memory_requesthookdrain"
     },
@@ -836,7 +836,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L145",
-      "community": 8,
+      "community": 9,
       "norm_label": "disposedraintimeout()",
       "id": "plugins_private_ai_memory_disposedraintimeout"
     },
@@ -845,7 +845,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L152",
-      "community": 8,
+      "community": 9,
       "norm_label": "drainhookqueuefordispose()",
       "id": "plugins_private_ai_memory_drainhookqueuefordispose"
     },
@@ -854,7 +854,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L156",
-      "community": 8,
+      "community": 9,
       "norm_label": "enqueuehook()",
       "id": "plugins_private_ai_memory_enqueuehook"
     },
@@ -872,7 +872,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L194",
-      "community": 3,
+      "community": 8,
       "norm_label": "findmarker()",
       "id": "plugins_private_ai_memory_findmarker"
     },
@@ -881,7 +881,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L207",
-      "community": 6,
+      "community": 8,
       "norm_label": "tomlkey()",
       "id": "plugins_private_ai_memory_tomlkey"
     },
@@ -890,7 +890,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L217",
-      "community": 6,
+      "community": 8,
       "norm_label": "reporootproject()",
       "id": "plugins_private_ai_memory_reporootproject"
     },
@@ -899,7 +899,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L238",
-      "community": 6,
+      "community": 8,
       "norm_label": "tomlflag()",
       "id": "plugins_private_ai_memory_tomlflag"
     },
@@ -908,7 +908,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L246",
-      "community": 6,
+      "community": 8,
       "norm_label": "applymarkerparams()",
       "id": "plugins_private_ai_memory_applymarkerparams"
     },
@@ -917,7 +917,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L286",
-      "community": 3,
+      "community": 2,
       "norm_label": "sessionid()",
       "id": "plugins_private_ai_memory_sessionid"
     },
@@ -926,7 +926,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L291",
-      "community": 3,
+      "community": 2,
       "norm_label": "textfromparts()",
       "id": "plugins_private_ai_memory_textfromparts"
     },
@@ -935,7 +935,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L310",
-      "community": 5,
+      "community": 6,
       "norm_label": "cwdfor()",
       "id": "plugins_private_ai_memory_cwdfor"
     },
@@ -944,7 +944,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L314",
-      "community": 5,
+      "community": 6,
       "norm_label": "remembercwd()",
       "id": "plugins_private_ai_memory_remembercwd"
     },
@@ -953,7 +953,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L318",
-      "community": 5,
+      "community": 6,
       "norm_label": "startsession()",
       "id": "plugins_private_ai_memory_startsession"
     },
@@ -962,7 +962,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L330",
-      "community": 5,
+      "community": 6,
       "norm_label": "endsession()",
       "id": "plugins_private_ai_memory_endsession"
     },
@@ -971,7 +971,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L339",
-      "community": 5,
+      "community": 6,
       "norm_label": "postprecompact()",
       "id": "plugins_private_ai_memory_postprecompact"
     },
@@ -980,7 +980,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L349",
-      "community": 5,
+      "community": 6,
       "norm_label": "posthook()",
       "id": "plugins_private_ai_memory_posthook"
     },
@@ -998,7 +998,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L381",
-      "community": 3,
+      "community": 2,
       "norm_label": "aimemoryhooks()",
       "id": "plugins_private_ai_memory_aimemoryhooks"
     },
@@ -1007,7 +1007,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/keys.lua",
       "source_location": "L1",
-      "community": 9,
+      "community": 10,
       "norm_label": "keys.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_keys_lua"
     },
@@ -1025,7 +1025,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/fonts.lua",
       "source_location": "L1",
-      "community": 10,
+      "community": 11,
       "norm_label": "fonts.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_fonts_lua"
     },
@@ -1043,7 +1043,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
       "source_location": "L1",
-      "community": 11,
+      "community": 12,
       "norm_label": "workspace-switcher.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_workspace_switcher_lua"
     },
@@ -1052,7 +1052,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
       "source_location": "L1",
-      "community": 12,
+      "community": 13,
       "norm_label": "move_workspace.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_move_workspace_lua"
     },
@@ -1061,7 +1061,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/bar.lua",
       "source_location": "L1",
-      "community": 13,
+      "community": 14,
       "norm_label": "bar.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_bar_lua"
     },
@@ -3479,5 +3479,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "e48b6e22a23c61ee597f67c1a60154ff3acd710a"
+  "built_at_commit": "358ed1a7a7fed47c75596fb80be180748c46cc39"
 }

@@ -1,8 +1,7 @@
-# Graph Report - chezmoi  (2026-07-30)
+# Graph Report - .  (2026-07-31)
 
 ## Corpus Check
-- 20 files · ~82,601 words
-- Verdict: corpus is large enough that graph structure adds value.
+- cluster-only mode — file stats not available
 
 ## Summary
 - 122 nodes · 231 edges · 27 communities (22 shown, 5 thin omitted)
@@ -10,22 +9,22 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e48b6e22`
+- Built from commit: `358ed1a7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Code Structure|Code Structure]]
-- [[_COMMUNITY_Code Structure|Code Structure]]
-- [[_COMMUNITY_Code Structure|Code Structure]]
-- [[_COMMUNITY_Code Structure|Code Structure]]
-- [[_COMMUNITY_Code Structure|Code Structure]]
-- [[_COMMUNITY_Code Structure|Code Structure]]
-- [[_COMMUNITY_Code Structure|Code Structure]]
-- [[_COMMUNITY_Code Structure|Code Structure]]
-- [[_COMMUNITY_Code Structure|Code Structure]]
-- [[_COMMUNITY_Code Structure|Code Structure]]
-- [[_COMMUNITY_Code Structure|Code Structure]]
+- [[_COMMUNITY_Community 0|Community 0]]
+- [[_COMMUNITY_Community 1|Community 1]]
+- [[_COMMUNITY_Community 2|Community 2]]
+- [[_COMMUNITY_Community 3|Community 3]]
+- [[_COMMUNITY_Community 4|Community 4]]
+- [[_COMMUNITY_Community 5|Community 5]]
+- [[_COMMUNITY_Community 6|Community 6]]
+- [[_COMMUNITY_Community 7|Community 7]]
+- [[_COMMUNITY_Community 8|Community 8]]
+- [[_COMMUNITY_Community 9|Community 9]]
+- [[_COMMUNITY_Community 10|Community 10]]
 - [[_COMMUNITY_Community 11|Community 11]]
 - [[_COMMUNITY_Community 12|Community 12]]
 - [[_COMMUNITY_Community 13|Community 13]]
@@ -57,45 +56,45 @@
 
 ## Communities (27 total, 5 thin omitted)
 
-### Community 0 - "Code Structure"
+### Community 0 - "Community 0"
 Cohesion: 0.2
 Nodes (13): bind_run(), load_plan(), load_results(), Parse a QA plan and reject invalid or dangling references., Render human-readable Markdown from the structured QA plan., Parse results and prove complete scenario/step coverage against the plan., Render HTML, WebVTT captions, and annotated screenshots from a bound run., Write versioned JSON Schemas for QA plan and results contracts. (+5 more)
 
-### Community 1 - "Code Structure"
+### Community 1 - "Community 1"
 Cohesion: 0.51
 Nodes (15): BoundRun, Persona, QAPlan, QAScenario, QAStep, Requirement, ResultStatus, ScenarioResult (+7 more)
 
-### Community 2 - "Code Structure"
-Cohesion: 0.23
-Nodes (11): BaseModel, EvidencePolicy, FrozenModel, HighlightBox, QAEnvironment, QAResults, references_exist(), _require_known() (+3 more)
-
-### Community 3 - "Code Structure"
+### Community 2 - "Community 2"
 Cohesion: 0.22
-Nodes (8): captureConfig(), captureGlob(), captureNormalize(), captureParseArray(), capturePolicy(), captureTool(), captureTrimComment(), findMarker()
+Nodes (8): captureConfig(), captureGlob(), captureNormalize(), captureParseArray(), capturePolicy(), captureTool(), captureTrimComment(), readFileSync()
 
-### Community 4 - "Code Structure"
+### Community 3 - "Community 3"
 Cohesion: 0.29
 Nodes (12): _annotate_screenshot(), _build_scenario_views(), _build_step_view(), _overall_status(), render_plan(), render_report(), _requirement_views(), _status_color() (+4 more)
 
-### Community 5 - "Code Structure"
+### Community 4 - "Community 4"
+Cohesion: 0.27
+Nodes (8): CapturePolicy, references_exist(), _require_known(), _require_unique(), run_is_consistent(), scenario_is_consistent(), ScreenshotPolicy, StrEnum
+
+### Community 5 - "Community 5"
+Cohesion: 0.33
+Nodes (6): BaseModel, EvidencePolicy, FrozenModel, HighlightBox, QAEnvironment, QAResults
+
+### Community 6 - "Community 6"
 Cohesion: 0.47
 Nodes (6): cwdFor(), endSession(), postHook(), postPreCompact(), rememberCwd(), startSession()
 
-### Community 6 - "Code Structure"
-Cohesion: 0.4
-Nodes (5): applyMarkerParams(), readFileSync(), repoRootProject(), tomlFlag(), tomlKey()
-
-### Community 7 - "Code Structure"
+### Community 7 - "Community 7"
 Cohesion: 0.5
 Nodes (5): authHeaders(), drainHookQueue(), fetchHandoff(), sleep(), timeoutSignal()
 
-### Community 8 - "Code Structure"
+### Community 8 - "Community 8"
+Cohesion: 0.4
+Nodes (5): applyMarkerParams(), findMarker(), repoRootProject(), tomlFlag(), tomlKey()
+
+### Community 9 - "Community 9"
 Cohesion: 0.4
 Nodes (5): disposeDrainTimeout(), drainHookQueueForDispose(), enqueueHook(), requestHookDrain(), scheduleHookFlush()
-
-### Community 14 - "Community 14"
-Cohesion: 0.67
-Nodes (3): CapturePolicy, ScreenshotPolicy, StrEnum
 
 ## Knowledge Gaps
 - **5 isolated node(s):** `Parse a QA plan and reject invalid or dangling references.`, `Render human-readable Markdown from the structured QA plan.`, `Parse results and prove complete scenario/step coverage against the plan.`, `Render HTML, WebVTT captions, and annotated screenshots from a bound run.`, `Write versioned JSON Schemas for QA plan and results contracts.`
@@ -105,17 +104,17 @@ Nodes (3): CapturePolicy, ScreenshotPolicy, StrEnum
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `BoundRun` connect `Code Structure` to `Code Structure`, `Code Structure`?**
+- **Why does `BoundRun` connect `Community 1` to `Community 0`, `Community 4`?**
   _High betweenness centrality (0.095) - this node is a cross-community bridge._
-- **Why does `bind_run()` connect `Code Structure` to `Code Structure`?**
+- **Why does `bind_run()` connect `Community 0` to `Community 1`?**
   _High betweenness centrality (0.087) - this node is a cross-community bridge._
-- **Are the 9 inferred relationships involving `StepView` (e.g. with `BoundRun` and `Persona`) actually correct?**
+- **Are the 9 inferred relationships involving `StepView` (e.g. with `ResultStatus` and `Requirement`) actually correct?**
   _`StepView` has 9 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 9 inferred relationships involving `ScenarioView` (e.g. with `BoundRun` and `Persona`) actually correct?**
+- **Are the 9 inferred relationships involving `ScenarioView` (e.g. with `ResultStatus` and `Requirement`) actually correct?**
   _`ScenarioView` has 9 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 9 inferred relationships involving `RequirementView` (e.g. with `BoundRun` and `Persona`) actually correct?**
+- **Are the 9 inferred relationships involving `RequirementView` (e.g. with `ResultStatus` and `Requirement`) actually correct?**
   _`RequirementView` has 9 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 9 inferred relationships involving `ReportView` (e.g. with `BoundRun` and `Persona`) actually correct?**
+- **Are the 9 inferred relationships involving `ReportView` (e.g. with `ResultStatus` and `Requirement`) actually correct?**
   _`ReportView` has 9 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `Parse a QA plan and reject invalid or dangling references.`, `Render human-readable Markdown from the structured QA plan.`, `Parse results and prove complete scenario/step coverage against the plan.` to the rest of the system?**
   _5 weakly-connected nodes found - possible documentation gaps or missing edges._
