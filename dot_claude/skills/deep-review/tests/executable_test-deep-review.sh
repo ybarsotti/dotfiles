@@ -88,7 +88,7 @@ assert_eq "$NO_STEP_LIST" "yes" \
 # ever gets a chance to fix the mode. dispatch.sh itself is the direct
 # invocation target named in Phase 2 above.
 for script in "$DISPATCH" "$COLLECT_CONTEXT" "$REVIEWER" "$AGGREGATE"; do
-  MODE=$(stat -f '%Lp' "$script" 2>/dev/null || stat -c '%a' "$script")
+  MODE=$(stat -c '%a' "$script" 2>/dev/null || stat -f '%Lp' "$script")
   assert_eq "$MODE" "755" "$(basename "$script"): source-tree executable bit is 755"
 done
 
