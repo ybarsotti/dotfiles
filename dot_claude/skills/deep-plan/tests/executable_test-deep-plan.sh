@@ -377,8 +377,8 @@ assert_eq "$(jq -r '.[] | select(.item=="superpowers-ticks-have-receipts") | .st
 assert_contains "$(cat "${RECEIPT_RUN}/plan.md")" "- [x] grill-with-docs" \
   "superpowers-invoke.sh ticked the box"
 if command -v stat >/dev/null 2>&1; then
-  RECEIPT_PERM=$(stat -f '%Lp' "${RECEIPT_RUN}/superpowers-receipts.log" 2>/dev/null ||
-    stat -c '%a' "${RECEIPT_RUN}/superpowers-receipts.log")
+  RECEIPT_PERM=$(stat -c '%a' "${RECEIPT_RUN}/superpowers-receipts.log" 2>/dev/null ||
+    stat -f '%Lp' "${RECEIPT_RUN}/superpowers-receipts.log")
   assert_eq "$RECEIPT_PERM" 444 "receipt log is chmod 0444 after append"
 fi
 rm -rf "$RECEIPT_RUN"
@@ -494,7 +494,8 @@ rm -rf "$BADSHA_RUN"
 # ancestor, of HEAD) without touching any branch or the working tree.
 NONANCESTOR_RUN=$(mktemp -d)
 cp "$FIXTURE" "${NONANCESTOR_RUN}/plan.md"
-CHILD_SHA=$(git -C "$ROOT" commit-tree -p HEAD -m "scratch: non-ancestor receipt test (dangling, safe to gc)" "HEAD^{tree}")
+CHILD_SHA=$(git -C "$ROOT" -c user.name="deep-plan test" -c user.email=test@example.invalid \
+  commit-tree -p HEAD -m "scratch: non-ancestor receipt test (dangling, safe to gc)" "HEAD^{tree}")
 TS2="2026-07-20T00:00:01Z"
 HASH2=$(compute_receipt_hash "" "$TS2" "grill-with-docs" "$CHILD_SHA")
 printf '%s\t%s\t%s\t%s\n' "$TS2" "grill-with-docs" "$CHILD_SHA" "$HASH2" >>"${NONANCESTOR_RUN}/superpowers-receipts.log"
