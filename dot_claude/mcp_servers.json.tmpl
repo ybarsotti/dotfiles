@@ -4,7 +4,7 @@
 {{- $path := printf "%s/.claude/mcp_servers.json" .chezmoi.homeDir -}}
 {{- $rawExisting := output "sh" "-c" (printf "test -f %q && cat %q || printf '{}'" $path $path) -}}
 {{- $existingJson := $rawExisting | fromJson -}}
-{{- $existing := $existingJson.mcpServers | default dict -}}
+{{- $existing := get $existingJson "mcpServers" | default dict -}}
 {{- $managed := mergeOverwrite (dict) $shared $typed $peon -}}
 {{- $all := dict -}}
 {{- range $name, $config := $existing -}}
