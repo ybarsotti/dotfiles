@@ -35,12 +35,7 @@ jobs:
             | xargs -0 -r shellcheck
 
       - name: Shellcheck — .sh.tmpl files (strip Go template lines)
-        run: |
-          find . -name "*.sh.tmpl" -type f -not -path "*/.git/*" | while read -r f; do
-            echo "Checking $f ..."
-            # Strip lines that are pure Go template directives and feed the rest to shellcheck
-            grep -v '^\s*{{' "$f" | shellcheck -s bash --severity=error -
-          done
+        run: bash .github/test-scripts/test-shell-template-lint.sh
 
       - name: Deep pipeline shell tests
         run: just test-deep-pipeline
