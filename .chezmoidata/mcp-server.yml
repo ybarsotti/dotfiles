@@ -29,12 +29,6 @@ mcp_servers:
         - gitnexus@latest
         - mcp
 
-    caveman-shrink:
-      command: npx
-      args:
-        - -y
-        - caveman-shrink
-
     serena:
       command: uvx
       args:
