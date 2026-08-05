@@ -145,7 +145,7 @@ event_line_valid() {
     (.ts | type == "string") and (.ts | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$")) and
     (.lane | type == "string" and length > 0) and
     (.task | type == "string" and length > 0) and
-    (.type == "task_start" or .type == "task_done" or .type == "progress" or .type == "question" or .type == "waiting" or .type == "blocked" or .type == "done") and
+    (.type == "task_start" or .type == "task_done" or .type == "progress" or .type == "question" or .type == "waiting" or .type == "blocked" or .type == "done" or .type == "decision") and
     (.msg | type == "string") and (.msg | test("^[^\r\n]*$")) and (.msg | length <= 3000) and
     ((keys_unsorted - ["ts","lane","task","type","msg"]) == [])
   ' <<<"$1" >/dev/null 2>&1
@@ -154,8 +154,10 @@ event_line_valid() {
 # handle_line LINE — the one decision every event line goes through,
 # whether seen during backlog drain or the live follow loop: invalid line ->
 # invalid_event trigger; question/waiting/blocked/done -> that trigger;
-# task_start/task_done/progress -> not a trigger, falls through so the
-# caller keeps going.
+# task_start/task_done/progress/decision -> not a trigger, falls through so
+# the caller keeps going. `decision` is deliberately informational: a lane
+# recording why it chose something is for the run report to read afterwards,
+# not a reason to interrupt the orchestrator mid-round.
 handle_line() {
   local line="$1" lane_guess type l t m
   [ -z "$line" ] && return 0
@@ -246,7 +248,7 @@ while [ "$ELAPSED" -lt "$MAX_WAIT" ]; do
     LINE_NO=$((LINE_NO + 1))
     printf '%s' "$LINE_NO" >"$WATERMARK_FILE"
     handle_line "$line"
-    # An informational event (task_start/task_done/progress) isn't a
+    # An informational event (task_start/task_done/progress/decision) isn't a
     # trigger — loop again immediately. Only silence counts against
     # MAX_WAIT, so this costs nothing against the bound.
     continue

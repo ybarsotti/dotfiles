@@ -198,7 +198,7 @@ if [ -f "$EVENTS" ]; then
       (.ts | type == "string") and (.ts | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$")) and
       (.lane | type == "string" and length > 0) and
       (.task | type == "string" and length > 0) and
-      (.type == "task_start" or .type == "task_done" or .type == "progress" or .type == "question" or .type == "waiting" or .type == "blocked" or .type == "done") and
+      (.type == "task_start" or .type == "task_done" or .type == "progress" or .type == "question" or .type == "waiting" or .type == "blocked" or .type == "done" or .type == "decision") and
       (.msg | type == "string") and (.msg | test("^[^\r\n]*$")) and (.msg | length <= 3000) and
       ((keys_unsorted - ["ts","lane","task","type","msg"]) == [])
     ' <<<"$line" >/dev/null 2>&1 || SCHEMA_ISSUES="${SCHEMA_ISSUES}${SCHEMA_ISSUES:+, }line ${LINE_NO}"

@@ -35,10 +35,11 @@ be caught, whether or not you meant it.
 
    Use `--files` on the same call to append to your attribution log in one
    step. `TYPE` is one of `task_start`, `task_done`, `progress`, `question`,
-   `waiting`, `blocked`, `done` — nothing else. `MSG` must be a single line
-   (no embedded newline) and the whole event line must stay under 4096
-   bytes; `event.sh` rejects anything else rather than risk corrupting the
-   shared event log under concurrent writes.
+   `waiting`, `blocked`, `done` — nothing else (`decision` exists too, but
+   you emit it through `decision.sh`, never through `event.sh` by hand).
+   `MSG` must be a single line (no embedded newline) and the whole event
+   line must stay under 4096 bytes; `event.sh` rejects anything else rather
+   than risk corrupting the shared event log under concurrent writes.
 5. **Read run state only through `board.sh`.** Never parse `events.jsonl`
    yourself:
 
@@ -55,6 +56,32 @@ be caught, whether or not you meant it.
    writes to your `lanes/<lane>/reply.md`.
 7. **If you're blocked**, emit a `blocked` event naming exactly what you need
    and why, then stop the same way — don't guess past a real blocker.
+8. **Record every decision the plan did not already make for you**, at the
+   moment you make it, with `decision.sh`:
+
+   ```bash
+   decision.sh RUN_DIR LANE TASK --title "<one line>" \
+     [--kind decision|assumption] \
+     --rationale "<why this, in prose>" \
+     [--alternative "<option> — why it lost"]... \
+     [--tradeoff "<cost you knowingly accepted>"]...
+   ```
+
+   It writes the record to `lanes/<lane>/decisions/<NNN>.json` and emits the
+   `decision` event for you — that split exists because rationale and
+   alternatives are prose that would blow past the event log's single-line
+   size limit. Use `--kind assumption` when you proceeded on something you
+   believe but did not verify; say what would have to be true.
+
+   Record when you: pick between two viable implementations, name something
+   the plan left unnamed, work around a limitation the plan didn't
+   anticipate, deviate from what the plan said, or assume anything about a
+   lane you don't own. Do NOT record routine mechanics — a decision the
+   plan already made is not yours to re-record.
+
+   This is the ONLY channel that survives your session. The run report is
+   built from these records; a decision you keep in your head is a decision
+   nobody reviewing this work will ever see.
 
 ## Everyday flow
 
@@ -64,6 +91,8 @@ be caught, whether or not you meant it.
    `worker-<lane>.files.txt` as you go.
 4. Emit `progress` events at meaningful milestones — not every file, just
    enough that `board.sh` tells the truth about where you are.
-5. Run your lane's own test command yourself before declaring done.
-6. Emit `task_done` (task complete) or `done` (nothing left for this round),
+5. Call `decision.sh` as each non-obvious choice is made — while you still
+   remember the alternative you rejected, not reconstructed at the end.
+6. Run your lane's own test command yourself before declaring done.
+7. Emit `task_done` (task complete) or `done` (nothing left for this round),
    then stop and wait — never exit the session.

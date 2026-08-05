@@ -55,6 +55,15 @@ accepted. Call out anything a reviewer might otherwise question.>
 
 <how a reviewer confirms it works end-to-end: the behavior to exercise, the tests that
 cover it by intent (names/intent, NOT a file list).>
+
+## Evidence
+
+<UI changed: a GIF or recording of the flow working end to end, before/after screenshots for
+each changed screen, and a link to the QA evidence report plus the SHA it was captured
+against. Embed with `![alt](url)` only when a URL GitHub can fetch was supplied; otherwise
+list each asset by filename with one line on what it demonstrates and say the media is local.
+
+UI unchanged: write exactly `_no UI change — no visual evidence_`.>
 ```
 
 ## Hard rules — do NOT break these
@@ -68,6 +77,8 @@ cover it by intent (names/intent, NOT a file list).>
 - Reconcile every plan requirement with finished implementation. Use only `✅ Implemented`,
   `⚠️ Partial`, or `❌ Missing`; never copy `✅ Planned` as completion evidence.
 - Preserve supplied ticket/Slack links and important decisions. If absent, say so explicitly.
+- **NEVER** invent a screenshot, GIF, or evidence URL. Use only assets you were handed; when
+  none exist for a UI change, say so plainly instead of describing a picture that isn't there.
 
 ## Output format
 
@@ -105,6 +116,10 @@ flowchart TD
 ...
 
 ## Verification
+
+...
+
+## Evidence
 
 ...
 ```

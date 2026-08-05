@@ -1,5 +1,5 @@
 ---
-description: Generate + review a conventional-commit PR title/body with objective, ticket, Slack threads, requirements matrix, Mermaid, decisions and verification, then open/update PR
+description: Generate + review a conventional-commit PR title/body with objective, ticket, Slack threads, requirements matrix, Mermaid, decisions, verification and UI evidence (GIF/screenshots), then open/update PR
 ---
 
 # /pr-description
@@ -10,6 +10,10 @@ model review it, then open (or update) the PR assigned to you.
 - **Title** is a Conventional Commit (`feat`/`fix`/`refactor`/`perf`/`docs`/`test`/`chore` + optional scope), ≤ 70 chars.
 - **Body** states what change solves, linked ticket/Slack threads, requirement-by-requirement
   implementation status, **Mermaid** flow, rationale, key decisions, and verification.
+- **Evidence** — when the diff touches UI, an `## Evidence` section with a GIF/recording of the
+  flow working end to end, before/after screenshots for changed screens, and a link to the QA
+  report plus the SHA it was captured against. No UI change ⇒ an explicit
+  `_no UI change — no visual evidence_`, never a silent omission.
 - **Body never** lists changed files or file/line counts — it is about *what we solve*, not *what moved*.
 - A **claude Sonnet** agent writes it; a **codex** agent reviews it. The PR is assigned to you (`@me`).
 
@@ -23,6 +27,7 @@ model review it, then open (or update) the PR assigned to you.
 FLAGS
   --plan <path>       deep-plan plan.md to source context, requirements, links, flow and decisions
   --ticket KEY-123    explicit ticket key (else auto-detected from branch/commit)
+  --evidence <path>   QA evidence dir or index.html (screenshots/recordings); repeatable
   --update <pr-number> update an existing PR instead of creating one
   --draft             open the PR as a draft
   --no-codex          skip the codex reviewer (Sonnet self-review only)

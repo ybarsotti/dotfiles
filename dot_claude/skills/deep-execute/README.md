@@ -34,6 +34,8 @@ scripts/reply.sh           — writes lanes/<lane>/reply.md and wakes the pane
 scripts/validate-contract.sh   — sha256 / version / lint check on the contract
 scripts/validate-run-state.sh  — schema + boundary checks (the union guarantee lives here)
 scripts/round-gate.sh      — lane-tests → contract → run-state → light review, in that order
+scripts/decision.sh        — records one lane decision/assumption, then announces it on the log
+scripts/build-run-report.sh — renders the run's HTML report from the run directory alone
 ```
 
 `init-run.sh` points cmux at `RUN_DIR/cmux/` as its own run directory (a different manifest
@@ -62,10 +64,12 @@ Workers never talk to the orchestrator except through two scripts:
 
 - **`event.sh RUN_DIR LANE TASK TYPE MSG [--files PATH...]`** — the only way to write to
   `events.jsonl`. `TYPE` is one of `task_start`, `task_done`, `progress`, `question`,
-  `waiting`, `blocked`, `done`. `--files` appends to that lane's `worker-<lane>.files.txt`
-  attribution log in the same call.
+  `waiting`, `blocked`, `done` (plus `decision`, which only `decision.sh` emits). `--files`
+  appends to that lane's `worker-<lane>.files.txt` attribution log in the same call.
 - **`board.sh RUN_DIR [--lane LANE]`** — the only way a worker reads run state; folds the
   log to the latest event per (lane, task) as a Markdown table.
+- **`decision.sh RUN_DIR LANE TASK --title T --rationale R [--kind decision|assumption]
+  [--alternative A]... [--tradeoff T]...`** — records one non-obvious choice.
 
 A lane that finishes its assigned work emits `waiting` and **stops** — it does not poll. The
 orchestrator's `Monitor` sits on `monitor-events.sh RUN_DIR`, which blocks until exactly one
@@ -132,6 +136,40 @@ independent of anything a worker claims about itself. Everything else attributio
 advisory diagnostic that a forged or missing log entry can defeat; treat its `warn`/`fail` as
 a signal worth investigating, never as proof.
 
+## Decision records and the run report
+
+An approved plan carries the reasoning behind the decisions taken *before* any code was
+written. Everything decided *during* the run — which of two viable implementations a lane
+picked, what it assumed about a lane it doesn't own, where it worked around something the plan
+didn't anticipate — lives only in that worker's session, and dies with it. `decision.sh` is the
+one channel that outlives the pane:
+
+```bash
+decision.sh RUN_DIR LANE TASK --title "Materialized view for the totals" \
+  --rationale "The plan left the aggregation strategy open; a view keeps reads to one query." \
+  --alternative "Compute in the API layer — N+1 across three tables" \
+  --tradeoff "Up to 60s of refresh lag on the totals"
+```
+
+It writes `lanes/<lane>/decisions/<NNN>.json` and emits a `decision` event carrying only the
+headline. The split is not cosmetic: an `events.jsonl` line has to stay single-line and under
+`PIPE_BUF` for concurrent appends to be atomic, and rationale is prose. `decision` events are
+deliberately **not** monitor triggers — they are for the report to read, not a reason to
+interrupt a round.
+
+`build-run-report.sh RUN_DIR [--final-sha SHA] [--review report.md] [--qa index.html]` then
+renders `RUN_DIR/report/index.html`: what was built (git diffstat, baseline → frozen SHA), the
+lane table with `owns`/`depends_on`, every recorded decision with its alternatives and
+tradeoffs, the plan's own pre-implementation rationale, drift (contract version moved, extra
+rounds, blocked lanes), the final board plus the full event timeline, and the review and QA
+evidence. Self-contained HTML, light and dark, no external assets.
+
+Every claim on that page comes from a file in the run directory — it is never written or
+padded from a model's memory of the run. The honest consequence: a decision no lane recorded
+is absent from it, and the page says that rather than implying no decisions were made. The
+same caveat as attribution applies — a decision record is the lane's own account of its
+reasoning, which is the best account anyone will get and still not an audit trail.
+
 ## Artifacts produced
 
 ```
@@ -140,11 +178,14 @@ RUN_DIR/
 ├── events.jsonl                   # append-only event log
 ├── worker-<lane>.files.txt        # per-lane attribution log (self-declared, see above)
 ├── lanes/<lane>/reply.md          # the orchestrator's current instruction for that lane
+├── lanes/<lane>/decisions/NNN.json # decisions/assumptions that lane recorded mid-run
 ├── light-review/round-<N>/        # round-gate.sh's own reviewer transcript per round
+├── report/index.html              # the run report (build-run-report.sh)
 └── cmux/
     ├── manifest.json              # cmux's own run bookkeeping (surface_ref, pane_ref)
     └── worker-<lane>.prompt.md    # the prompt each lane pane was launched with
 ```
 
-At the end of a successful run, one full `/deep-review` pass runs over the whole diff, and
-the cmux panes are left alive — teardown is a separate, human-confirmed step.
+At the end of a successful run, one full `/deep-review` pass runs over the whole diff, the run
+report is built, and the cmux panes are left alive — teardown is a separate, human-confirmed
+step.

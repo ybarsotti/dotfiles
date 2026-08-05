@@ -12,9 +12,29 @@ assert_exit 0 jq -e '
   .["$schema"] == "https://json-schema.org/draft/2020-12/schema" and
   (.properties.manifest.required | index("baseline_commit")) != null and
   .properties.event.properties.type.enum == [
-    "task_start", "task_done", "progress", "question", "waiting", "blocked", "done"
-  ]
+    "task_start", "task_done", "progress", "question", "waiting", "blocked", "done",
+    "decision"
+  ] and
+  (.properties.decision.required | index("rationale")) != null and
+  .properties.decision.properties.kind.enum == ["decision", "assumption"]
 ' "$SCHEMA"
+
+# The event-type enum lives in FOUR places that are kept in sync by hand — this
+# schema, event.sh's `case`, monitor-events.sh's `event_line_valid`, and
+# validate-run-state.sh's `events-schema-valid` check. The pin above catches a
+# schema-side edit; these catch the three copies drifting away from it, which is
+# the failure that actually bites (an event type a worker can write but the
+# validator rejects, or vice versa).
+# Matched against each copy's own syntax, not a bare word — "decision" appears
+# in prose in all three files, so a loose grep would pass even with the enum
+# member missing.
+assert_exit 0 grep -qF '| done | decision)' \
+  "${ROOT}/dot_claude/skills/deep-execute/scripts/executable_event.sh"
+for JQ_COPY in \
+  "${ROOT}/dot_claude/skills/deep-execute/scripts/executable_monitor-events.sh" \
+  "${ROOT}/dot_claude/skills/deep-execute/scripts/executable_validate-run-state.sh"; do
+  assert_exit 0 grep -qF '.type == "decision"' "$JQ_COPY"
+done
 
 ALLOW="${ROOT}/dot_claude/skills/deep-execute/agents.allowlist"
 assert_exit 0 test -f "$ALLOW"

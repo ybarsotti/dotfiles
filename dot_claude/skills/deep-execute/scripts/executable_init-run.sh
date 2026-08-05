@@ -186,6 +186,12 @@ mkdir -p "$CMUX_DIR"
 [ -f "${RUN_DIR}/events.jsonl" ] || : >"${RUN_DIR}/events.jsonl"
 for lane in "${WORKER_LANES[@]}"; do
   mkdir -p "${RUN_DIR}/lanes/${lane}"
+  # decision.sh mkdir -p's this itself, but scaffolding it here means a lane
+  # that recorded nothing is visibly an empty directory rather than an absent
+  # one — build-run-report.sh reports "no records" either way, and a human
+  # poking at the run dir can tell the difference between "never wrote one"
+  # and "this run predates decision records".
+  mkdir -p "${RUN_DIR}/lanes/${lane}/decisions"
   [ -f "${RUN_DIR}/lanes/${lane}/reply.md" ] || : >"${RUN_DIR}/lanes/${lane}/reply.md"
   [ -f "${RUN_DIR}/worker-${lane}.files.txt" ] || : >"${RUN_DIR}/worker-${lane}.files.txt"
 done

@@ -18,6 +18,8 @@ MONITOR="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_monitor-event
 REPLY="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_reply.sh"
 VALIDATE_CONTRACT="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_validate-contract.sh"
 ROUND_GATE="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_round-gate.sh"
+DECISION="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_decision.sh"
+BUILD_REPORT="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_build-run-report.sh"
 WORKER_PROMPT="${ROOT}/dot_claude/skills/deep-execute/templates/worker-system-prompt.txt"
 FIXTURE_PLAN="${ROOT}/dot_claude/skills/deep-execute/tests/fixtures/init-run-plan.md"
 SKILL_MD="${ROOT}/dot_claude/skills/deep-execute/SKILL.md"
@@ -32,6 +34,8 @@ assert_exit 0 test -f "$MONITOR"
 assert_exit 0 test -f "$REPLY"
 assert_exit 0 test -f "$VALIDATE_CONTRACT"
 assert_exit 0 test -f "$ROUND_GATE"
+assert_exit 0 test -f "$DECISION"
+assert_exit 0 test -f "$BUILD_REPORT"
 assert_exit 0 test -f "$WORKER_PROMPT"
 assert_exit 0 test -f "$FIXTURE_PLAN"
 
@@ -115,6 +119,16 @@ assert_contains "$PROMPT_TEXT" 'Never run `git`' "prompt forbids git"
 assert_contains "$PROMPT_TEXT" 'worker-<lane>.files.txt' "prompt names the attribution log"
 assert_contains "$PROMPT_TEXT" 'event.sh RUN_DIR LANE TASK TYPE MSG' "prompt gives the event.sh interface"
 assert_contains "$PROMPT_TEXT" 'board.sh RUN_DIR [--lane LANE]' "prompt gives the board.sh interface"
+assert_contains "$PROMPT_TEXT" 'decision.sh RUN_DIR LANE TASK --title' "prompt gives the decision.sh interface"
+assert_contains "$PROMPT_TEXT" '--alternative' "prompt tells the worker to record rejected alternatives"
+assert_contains "$PROMPT_TEXT" '--tradeoff' "prompt tells the worker to record accepted tradeoffs"
+assert_contains "$PROMPT_TEXT" 'kind assumption' "prompt distinguishes an assumption from a decision"
+# A worker's reasoning dies with its session unless it is written down; the
+# prompt has to say so, or "record decisions" reads as optional bookkeeping.
+assert_contains "$PROMPT_TEXT" 'ONLY channel that survives your session' \
+  "prompt states why decisions must be recorded, not just that they should be"
+assert_contains "$PROMPT_TEXT" 'Do NOT record routine mechanics' \
+  "prompt bounds what is worth recording, so the log doesn't fill with noise"
 # shellcheck disable=SC2016 # literal backticked text being matched, not a command substitution
 assert_contains "$PROMPT_TEXT" 'emit `waiting` and STOP' "prompt states finishing-early behavior"
 assert_contains "$PROMPT_TEXT" 'Do not poll' "prompt forbids polling"
@@ -936,6 +950,162 @@ assert_eq "$(jq -r '[.[] | select(.status=="skipped")] | length' <<<"$RG_JSON_R4
   "round-gate.sh: all 4 later stages (lane-tests, contract, run-state, review) are skipped, none silently omitted"
 
 # ═══════════════════════════════════════════════════════════════════════════
+# decision.sh
+# ═══════════════════════════════════════════════════════════════════════════
+
+D1=$(mktemp -d)
+: >"${D1}/events.jsonl"
+
+assert_exit 0 "$DECISION" "$D1" backend "Task 1" \
+  --title "Materialized view for totals" \
+  --rationale "The plan left the aggregation strategy open." \
+  --alternative "Compute in the API layer — N+1 across three tables" \
+  --tradeoff "Up to 60s of refresh lag"
+
+D1_REC="${D1}/lanes/backend/decisions/001.json"
+assert_exit 0 test -f "$D1_REC"
+assert_eq "$(jq -r '.kind' "$D1_REC")" decision "decision.sh: defaults kind to 'decision'"
+assert_eq "$(jq -r '.id' "$D1_REC")" 001 "decision.sh: the first record in a lane is 001"
+assert_eq "$(jq -r '.alternatives | length' "$D1_REC")" 1 "decision.sh: records the rejected alternative"
+assert_eq "$(jq -r '.tradeoffs[0]' "$D1_REC")" "Up to 60s of refresh lag" "decision.sh: records the accepted tradeoff"
+
+# The record's prose lands in the file; only a headline goes on the event log,
+# and it names the record so build-run-report.sh (and a human) can find it.
+D1_EVENT=$(tail -n1 "${D1}/events.jsonl")
+assert_eq "$(jq -r '.type' <<<"$D1_EVENT")" decision "decision.sh: emits a 'decision' event"
+assert_contains "$(jq -r '.msg' <<<"$D1_EVENT")" "lanes/backend/decisions/001.json" \
+  "decision.sh: the event headline names the record file"
+
+# ─── Sequence: the SECOND record in a lane must not clobber the first ─────
+# Regression guard. `set -f` (the `f` in this skill's standard
+# `set -eufo pipefail`) disables pathname expansion, so a glob-based "highest
+# existing NNN" scan silently matches nothing, leaves the sequence at 1, and
+# every later record overwrites the lane's first one — losing exactly the
+# reasoning this mechanism exists to keep.
+assert_exit 0 "$DECISION" "$D1" backend "Task 1" --title "Second decision" --rationale "why"
+assert_exit 0 test -f "${D1}/lanes/backend/decisions/002.json"
+assert_exit 0 test -f "$D1_REC"
+assert_eq "$(jq -r '.title' "$D1_REC")" "Materialized view for totals" \
+  "decision.sh: a second record never overwrites the lane's first one"
+
+# Kinds, required fields, and the single-line title the event headline needs.
+assert_exit 0 "$DECISION" "$D1" frontend "Task 2" --kind assumption --title "Nullable price means zero" --rationale "unverified"
+assert_eq "$(jq -r '.kind' "${D1}/lanes/frontend/decisions/001.json")" assumption "decision.sh: --kind assumption is accepted"
+assert_exit 1 "$DECISION" "$D1" backend "Task 1" --kind guess --title t --rationale r
+assert_exit 1 "$DECISION" "$D1" backend "Task 1" --title t
+assert_exit 1 "$DECISION" "$D1" backend "Task 1" --rationale r
+assert_exit 1 "$DECISION" "$D1" backend "Task 1" --title "$(printf 'a\nb')" --rationale r
+assert_exit 2 "$DECISION" "$D1" backend "Task 1" --title t --rationale r --bogus x
+
+# `--rationale -` reads stdin, so a worker can pipe in multi-line prose that
+# would never fit on an event line.
+printf 'line one\nline two\n' | "$DECISION" "$D1" backend "Task 1" --title "From stdin" --rationale - >/dev/null
+assert_contains "$(jq -r '.rationale' "${D1}/lanes/backend/decisions/003.json")" "line two" \
+  "decision.sh: --rationale - reads multi-line prose from stdin"
+
+# A decision event must survive the same schema check every other event faces.
+D1_STATE=$("$VALIDATE_STATE" "$D1" --json 2>/dev/null || true)
+assert_eq "$(status_of "$D1_STATE" events-schema-valid)" pass \
+  "validate-run-state.sh: 'decision' events pass the event schema check"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# build-run-report.sh
+# ═══════════════════════════════════════════════════════════════════════════
+
+BR_RUN=$(mktemp -d)
+BR_PROJ="${BR_RUN}/proj"
+mkdir -p "$BR_PROJ"
+git -C "$BR_PROJ" init -q .
+git -C "$BR_PROJ" config user.email t@example.com
+git -C "$BR_PROJ" config user.name tester
+echo base >"${BR_PROJ}/a.txt"
+git -C "$BR_PROJ" add -A
+git -C "$BR_PROJ" commit -qm base
+BR_BASE=$(git -C "$BR_PROJ" rev-parse HEAD)
+printf 'one\ntwo\n' >"${BR_PROJ}/a.txt"
+echo new >"${BR_PROJ}/b.txt"
+git -C "$BR_PROJ" add -A
+git -C "$BR_PROJ" commit -qm work
+BR_FINAL=$(git -C "$BR_PROJ" rev-parse HEAD)
+
+: >"${BR_RUN}/events.jsonl"
+jq -n --arg b "$BR_BASE" --arg cwd "$BR_PROJ" --arg sha "$(printf '0%.0s' {1..64})" '{
+  schema_version:"1.0.0", run_id:"run-report-test", plan_path:"/absent/plan.md", cwd:$cwd,
+  baseline_commit:$b, round:2, max_rounds:3, orchestrator_surface:"s:0",
+  contract:{version:"1.1.0", path:"api/contract.ts", kind:"typescript",
+            validation_command:"tsc --noEmit", sha256:$sha},
+  shared_read_only:["api/contract.ts"],
+  workers:[{id:"backend",lane:"backend",task:"Totals",runner:"claude",effort:"high",status:"done"}]
+}' >"${BR_RUN}/manifest.json"
+
+"$EVENT" "$BR_RUN" backend "Task 1" blocked "contract has no currency field" >/dev/null
+"$EVENT" "$BR_RUN" backend "Task 1" "done" "lane complete" >/dev/null
+# A title carrying HTML metacharacters — the report is a web page, and a
+# lane's own prose is the one input to it that nobody reviewed first.
+"$DECISION" "$BR_RUN" backend "Task 1" \
+  --title "Chose <script> escaping over & sanitizing" \
+  --rationale "Injection check" \
+  --alternative "alt <b>one</b>" --tradeoff "trade & off" >/dev/null
+
+BR_REVIEW="${BR_RUN}/review.md"
+printf '# Review\n\nVerdict: approved with nits\n' >"$BR_REVIEW"
+BR_OUT="${BR_RUN}/report/index.html"
+assert_exit 0 "$BUILD_REPORT" "$BR_RUN" --final-sha "$BR_FINAL" --review "$BR_REVIEW"
+assert_exit 0 test -f "$BR_OUT"
+BR_HTML=$(cat "$BR_OUT")
+
+assert_contains "$BR_HTML" "<!doctype html>" "build-run-report.sh: emits a complete HTML document"
+assert_contains "$BR_HTML" "run-report-test" "build-run-report.sh: names the run"
+assert_contains "$BR_HTML" "prefers-color-scheme" "build-run-report.sh: the page styles both light and dark"
+assert_eq "$(printf '%s' "$BR_HTML" | grep -c 'src="http\|href="http' || true)" "0" \
+  "build-run-report.sh: the page is self-contained — no external assets to fetch"
+
+# What was built: the diff is computed from git between baseline and final SHA,
+# not restated from anything a worker claimed.
+assert_contains "$BR_HTML" "Files changed" "build-run-report.sh: reports what was built"
+assert_contains "$BR_HTML" ">2<" "build-run-report.sh: counts both changed files"
+assert_contains "$BR_HTML" "b.txt" "build-run-report.sh: lists the per-file diffstat"
+
+# Decisions, alternatives, tradeoffs — escaped, because the page renders prose
+# no reviewer vetted.
+assert_contains "$BR_HTML" "&lt;script&gt;" "build-run-report.sh: escapes HTML in a decision title"
+assert_contains "$BR_HTML" "alt &lt;b&gt;one&lt;/b&gt;" "build-run-report.sh: escapes HTML in an alternative"
+assert_contains "$BR_HTML" "trade &amp; off" "build-run-report.sh: escapes ampersands in a tradeoff"
+assert_contains "$BR_HTML" "Alternatives considered and rejected" "build-run-report.sh: has an alternatives section"
+assert_contains "$BR_HTML" "Tradeoffs accepted" "build-run-report.sh: has a tradeoffs section"
+
+# Drift: extra rounds and blocked lanes are the run disagreeing with its plan.
+assert_contains "$BR_HTML" "Drift from the approved plan" "build-run-report.sh: has a drift section"
+assert_contains "$BR_HTML" "2 rounds" "build-run-report.sh: names the extra rounds as drift"
+assert_contains "$BR_HTML" "contract has no currency field" "build-run-report.sh: lists what a lane was blocked on"
+assert_contains "$BR_HTML" "approved with nits" "build-run-report.sh: embeds the review report"
+
+# Honest about its own limits — same framing the skill uses for attribution.
+assert_contains "$BR_HTML" "not authenticated" "build-run-report.sh: states that lane-written records are unauthenticated"
+for FORBIDDEN in "proves who wrote" "complete record of every decision"; do
+  assert_eq "$(printf '%s' "$BR_HTML" | grep -c -F "$FORBIDDEN" || true)" "0" \
+    "build-run-report.sh: never overclaims with '${FORBIDDEN}'"
+done
+
+# ─── Degenerate inputs: a report that can't be complete says so, in place ──
+# of the section it can't fill, rather than failing or quietly omitting it.
+
+BR_BARE=$(mktemp -d)
+: >"${BR_BARE}/events.jsonl"
+jq '.cwd="/nonexistent/gone" | .round=1 | .workers=[]' "${BR_RUN}/manifest.json" >"${BR_BARE}/manifest.json"
+assert_exit 0 "$BUILD_REPORT" "$BR_BARE"
+BR_BARE_HTML=$(cat "${BR_BARE}/report/index.html")
+assert_contains "$BR_BARE_HTML" "diff omitted" "build-run-report.sh: says the diff is missing when the repo is unreachable"
+assert_contains "$BR_BARE_HTML" "No events were recorded" "build-run-report.sh: says so when there are no events"
+assert_contains "$BR_BARE_HTML" "absence of records, not evidence" \
+  "build-run-report.sh: an empty decisions section is framed as missing records, not as no decisions made"
+assert_contains "$BR_BARE_HTML" "no longer at /absent/plan.md" \
+  "build-run-report.sh: says so when the approved plan is gone"
+
+BR_NOMANI=$(mktemp -d)
+assert_exit 1 "$BUILD_REPORT" "$BR_NOMANI"
+
+# ═══════════════════════════════════════════════════════════════════════════
 # Task 11: SKILL.md, README.md, /deep-execute command
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -952,9 +1122,19 @@ assert_contains "$SKILL_MD_TEXT" "description:" "SKILL.md: frontmatter has a des
 # ─── Every mechanism script is referenced by name ──────────────────────────
 
 for script in init-run.sh monitor-events.sh reply.sh round-gate.sh board.sh \
-  validate-contract.sh validate-run-state.sh; do
+  validate-contract.sh validate-run-state.sh decision.sh build-run-report.sh; do
   assert_contains "$SKILL_MD_TEXT" "$script" "SKILL.md: references ${script}"
 done
+
+# ─── The run report is built from disk, never written from memory ─────────
+# The whole point of Phase 5 is that a report assembled by a model at the end
+# of a long run is a report of what the model remembers, not what happened.
+
+assert_contains "$SKILL_MD_TEXT" "Do not hand-write or supplement this page from" \
+  "SKILL.md: rule survives — the run report is never hand-written or supplemented from memory"
+assert_contains "$SKILL_MD_TEXT" "never written by" \
+  "SKILL.md: the report is stated to be built by script, not by hand"
+assert_contains "$SKILL_MD_TEXT" "report/index.html" "SKILL.md: names where the run report lands"
 
 # ─── Required strings (brief step 1) ───────────────────────────────────────
 

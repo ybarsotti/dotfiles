@@ -225,8 +225,14 @@ the deep-plan loop before continuing. Set `cmux set-progress 0.30 --label "Plan 
 
 ## 3. Execute approved plan
 
-Check the approved plan's `## Execution shape` section — its `Mode:` line (plus lane count)
-decides which path applies. `/deep-execute` itself refuses to start on anything but
+deep-plan's last phase already recommended an execution mode and had the user pick one —
+read `~/.claude/deep-plan-runs/<RUN_ID>/execution-recommendation.md` and follow the `## Chosen`
+option rather than re-deciding here. Options **A** (`/deep-execute`), **C** (Claude `Workflow`)
+and **D** (Codex implementer) all keep you in the orchestrator seat; only **B** authorizes this
+session to write the code itself, and only because the user asked for it.
+
+If that file is missing (an older run), fall back to the plan's `## Execution shape` — its
+`Mode:` line plus lane count decides. `/deep-execute` itself refuses to start on anything but
 `Mode: parallel`, so don't hand it a serial plan.
 
 **`Mode: parallel` with 2+ lanes → delegate to `/deep-execute`:**
@@ -253,13 +259,29 @@ end of its last round. See `dot_claude/skills/deep-execute/SKILL.md` (and
 - **Bug/regression ticket?** Drive the fix through `superpowers:systematic-debugging`
   (reproduce → minimise → hypothesise → instrument → fix → regression-test) before writing
   the fix.
-- Then `/simplify` ×2 (re-run tests after each pass) and `/deep-review` (the fixed-roster
-  panel); `Skill(skill="superpowers:receiving-code-review")` before applying its findings,
-  then address every actionable one with a small TDD cycle.
+- Then `/simplify` ×2 (re-run tests after each pass) and
+  `/deep-review default --reviewers 6 --ratio 3:3`;
+  `Skill(skill="superpowers:receiving-code-review")` before applying its findings, then address
+  every actionable one with a small TDD cycle.
+- Record what was built and what the review changed — that account is what the PR and the final
+  report are written from.
+- Dispatch a **QA agent** over every flow and screen the plan touched, driving `agent-browser`
+  against the running app and capturing screenshots and recordings —
+  `Skill(skill="qa-testing")` in EXECUTE mode when `~/.claude/skills/qa-testing/SKILL.md`
+  exists on this machine, a plain browser agent when it doesn't. Then hand its gaps to a
+  **different** agent to fix, and let the QA agent re-verify. The tester never fixes its own
+  findings.
 
 **Either path:** `Skill(skill="superpowers:verification-before-completion")` once execution
 reports complete, before any PR work. Set `cmux set-progress 0.75 --label "Plan executed"`
 when tests are green and (for the parallel path) `/deep-review` came back clean.
+
+**Don't stop between these steps.** Build → review → record → QA → gap fixes → PR runs
+straight through; pause only for a blocker no agent can settle alone (an ambiguous product
+decision, a missing credential, a gate that survived a fix attempt). Open `/goal` (built into
+Claude Code and Codex) before the build starts, with the objective stated as the finished
+state — reviewed, QA-green, PR open — so the run keeps driving there. `/deep-execute` opens
+its own; on the serial path you open it here.
 
 ## 4. QA test plan (only if flows/screens changed)
 
@@ -304,12 +326,14 @@ hand-write the PR body here:
 git push -u origin HEAD
 ```
 ```
-/pr-description --ticket <CODE> --plan ~/.claude/deep-plan-runs/<RUN_ID>/plan.md
+/pr-description --ticket <CODE> --plan ~/.claude/deep-plan-runs/<RUN_ID>/plan.md \
+  --evidence <qa-report-index.html>
 ```
 
 `/pr-description` produces a Conventional-Commit title `<type>(<scope>): <summary> (<CODE>)`
 and an **objective** body — what it solves + ticket/Slack links + reconciled requirements
-matrix + Mermaid + rationale/key decisions. It contains **no file list and no counts**.
+matrix + Mermaid + rationale/key decisions + **evidence** (a GIF or recording of the flow and
+before/after screenshots when the UI changed). It contains **no file list and no counts**.
 A codex agent reviews the draft,
 the PR is opened **assigned to you** (`--assignee @me`), and CODEOWNERS reviewers are added.
 

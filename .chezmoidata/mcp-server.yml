@@ -29,6 +29,17 @@ mcp_servers:
         - gitnexus@latest
         - mcp
 
+    caveman-shrink:
+      command: npx
+      args:
+        - -y
+        - caveman-shrink
+
+    peon-ping:
+      command: node
+      args:
+        - /Users/barsotti/.claude/hooks/peon-ping/mcp/peon-mcp.js
+
     serena:
       command: uvx
       args:
