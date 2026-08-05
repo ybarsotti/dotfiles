@@ -129,7 +129,8 @@
             "question",
             "waiting",
             "blocked",
-            "done"
+            "done",
+            "decision"
           ]
         },
         "msg": {
@@ -139,6 +140,69 @@
         }
       },
       "required": ["ts", "lane", "task", "type", "msg"],
+      "additionalProperties": false
+    },
+    "decision": {
+      "type": "object",
+      "description": "One decision or assumption a lane recorded mid-run, written by decision.sh to lanes/<lane>/decisions/<NNN>.json. The matching `decision` event only carries the headline; the prose lives here because an events.jsonl line must stay single-line and under PIPE_BUF.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9]{3}$"
+        },
+        "ts": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lane": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["decision", "assumption"]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^\r\n]*$"
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alternatives": {
+          "type": "array",
+          "description": "Options considered and rejected, each with why it lost.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "tradeoffs": {
+          "type": "array",
+          "description": "Costs knowingly accepted by taking this option.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "id",
+        "ts",
+        "lane",
+        "task",
+        "kind",
+        "title",
+        "rationale",
+        "alternatives",
+        "tradeoffs"
+      ],
       "additionalProperties": false
     },
     "reply": {

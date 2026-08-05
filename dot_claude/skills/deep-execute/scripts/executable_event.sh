@@ -31,12 +31,18 @@ MSG="$5"
 shift 5
 
 case "$TYPE" in
-  task_start | task_done | progress | question | waiting | blocked | done) ;;
+  task_start | task_done | progress | question | waiting | blocked | done | decision) ;;
   *)
-    printf 'event.sh: unknown event type "%s" (want one of: task_start task_done progress question waiting blocked done)\n' "$TYPE" >&2
+    printf 'event.sh: unknown event type "%s" (want one of: task_start task_done progress question waiting blocked done decision)\n' "$TYPE" >&2
     exit 1
     ;;
 esac
+
+# `decision` is emitted by decision.sh, never by hand: the prose that makes a
+# decision worth recording (rationale, rejected alternatives, tradeoffs) does
+# not fit in a single sub-PIPE_BUF line, so it lives in its own record file and
+# only the headline lands here. A hand-written `decision` event announces a
+# record that does not exist, which build-run-report.sh cannot render.
 
 case "$MSG" in
   *$'\n'* | *$'\r'*)

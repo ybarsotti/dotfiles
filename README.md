@@ -590,6 +590,9 @@ provider resolves the endpoint and secret name automatically.
   - `/deep-plan` - Multi-agent planning pipeline (see below)
   - `/deep-execute` - Runs an approved deep-plan parallel plan as lane workers (see below)
   - `/deep-review` - Multi-persona peer review of a diff
+  - `/pr-description` - Conventional-commit PR title/body with requirements matrix, Mermaid,
+    decisions and **UI evidence** (flow GIF/recording + before/after screenshots), then opens
+    the PR assigned to you
 
 #### Deep-* Agent Pipeline
 
@@ -598,16 +601,83 @@ Three slash commands chain together for planning and parallel execution of non-t
 - **`/deep-plan`** - Multi-agent planning pipeline (Opus + Codex draft, a 5-persona review
   loop, a Plannotator approval gate). Plan captures ticket/Slack sources, requirements
   coverage, applicable user journey, data-column population, and substantial-UI design
-  handoff. Stops at an **approved plan** — it never builds or reviews code itself.
+  handoff. Stops at an **approved plan** — it never builds or reviews code itself. Its last
+  phase is an **execution recommendation** (below).
 - **`/deep-execute <plan.md>`** - Runs an approved parallel plan as lane workers sharing ONE
   git worktree, in parallel cmux panes (via `cmux-orchestrator`). Coordinates fan-out, an
   event/reply protocol (`event.sh` / `board.sh` / `monitor-events.sh` / `reply.sh`),
   contract-drift handling, per-round gating (`round-gate.sh`: lane tests → contract →
-  run-state → one light review, in that order), a 3-round cap with escalation, and one full
-  `/deep-review` pass at the end. The orchestrator is the sole `git` committer between
+  run-state → one light review, in that order), a 3-round cap with escalation, then the
+  unattended tail: `/deep-review default --reviewers 6 --ratio 3:3` + fixes → record what was
+  built and what review changed → a **QA agent** running `/qa-testing` through `agent-browser`
+  → a **different** agent fixing the gaps it found → frozen SHA → `/pr-description` with
+  evidence → the **run report** (below). The orchestrator is the sole `git` committer between
   rounds; lane workers never run `git` themselves.
 - **`/deep-review`** - Multi-persona peer review of a diff (Claude + Codex headless
   reviewers), invoked once per `/deep-execute` run and usable standalone.
+
+##### Execution recommendation (how the plan gets built)
+
+The approved plan says *what* to build; how it gets built is a separate call, and it is yours.
+deep-plan's last phase reads the plan's `## Execution shape`, recommends one of four modes and
+asks you to confirm via `AskUserQuestion`, writing the choice to
+`$RUN_DIR/execution-recommendation.md`:
+
+| | Option | Fits when |
+|---|---|---|
+| **A** | `/deep-execute` — parallel lane workers, one shared worktree | `Mode: parallel`, ≥ 2 disjoint lanes, a real contract |
+| **B** | Sequential in the planning session (`superpowers:executing-plans`) | serial plan, one lane, or lanes too coupled for a contract |
+| **C** | Claude `Workflow` — deterministic script fan-out | many uniform mechanical slices (migration, codemod, sweep) |
+| **D** | Codex-only implementer, Claude orchestrates and reviews | one coherent slice for a second model to write |
+
+**The planning session orchestrates; it does not implement.** It directs workers, answers their
+questions, gates rounds, routes review and QA findings back to the owning agent, and commits.
+**Option B is the only opt-out**, and only when *you* pick it — never because the session judged
+the change small enough to just do itself.
+
+Whichever mode runs, the tail is the same and runs **end to end without checking in** — it
+halts only on a blocker no agent can settle alone. The run is wrapped in **`/goal`** (built
+into Claude Code and Codex) with the objective stated as the finished state — reviewed,
+QA-green, PR open — which is what keeps it driving there instead of stopping at the first
+natural pause; `/deep-execute` opens its own in Phase 0, and under B, C and D the planning
+session opens it. The self-contained HTML run report is a `/deep-execute` artifact — under
+B, C and D you get the QA evidence report and the PR body instead.
+
+QA adapts to the machine: `qa-testing` in EXECUTE mode when that skill is installed, the plan's
+`qa-plan.yaml` through `/qa-test-plan` when it names one, and a plain `agent-browser` agent
+otherwise. A missing skill downgrades the evidence; it never cancels the QA step.
+
+##### Run report (what was built, and why)
+
+The approved plan records the decisions taken *before* code was written. Decisions taken
+*during* the run — which of two viable implementations a lane picked, what it assumed about a
+lane it doesn't own, where it worked around something the plan missed — otherwise die with the
+worker's session. `decision.sh` is the channel that outlives the pane:
+
+```bash
+decision.sh RUN_DIR LANE TASK --title "Materialized view for the totals" \
+  --rationale "The plan left the aggregation strategy open; a view keeps reads to one query." \
+  --alternative "Compute in the API layer — N+1 across three tables" \
+  --tradeoff "Up to 60s of refresh lag on the totals"
+```
+
+It writes `lanes/<lane>/decisions/NNN.json` and emits a `decision` event carrying only the
+headline — an `events.jsonl` line must stay single-line and under `PIPE_BUF` for concurrent
+appends to be atomic, and rationale is prose. `decision` events are deliberately not monitor
+triggers; they are for the report, not an interruption mid-round.
+
+After the final review, the frozen SHA, QA and the opened PR, `build-run-report.sh RUN_DIR
+[--final-sha SHA] [--review report.md] [--qa index.html] [--pr URL]` renders
+`RUN_DIR/report/index.html`: what was built (git diffstat, baseline → frozen SHA), the lane
+table with `owns`/`depends_on`, every recorded decision with its rejected alternatives and
+accepted tradeoffs, the plan's own pre-implementation rationale, drift (contract version moved,
+extra rounds, blocked lanes), the final board plus full event timeline, the review/QA evidence
+(screenshots and recordings live in the linked QA report), and the pull request. Self-contained
+HTML, light and dark, no external assets.
+
+Every claim on that page comes from a file in the run directory — it is never written or padded
+from a model's memory of the run. So a decision no lane recorded is simply absent, and the page
+says so rather than implying none were made.
 
 An approved plan for `/deep-execute` extends deep-plan's normal plan format with an
 **Execution shape** (`Mode: parallel`, exactly one `orchestrator` lane, a lane table of

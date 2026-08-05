@@ -17,7 +17,8 @@ its concrete fixes, and open/update the PR.
 
 - **Title = Conventional Commit**: `type(scope): summary`, `type` ∈ `feat` `fix` `refactor` `perf` `docs` `test` `chore`, ≤ 70 chars.
 - **Body contains**: what it solves, **Mermaid**, ticket, Slack threads, requirements matrix,
-  rationale/key decisions, verification.
+  rationale/key decisions, verification, and — whenever the change touches UI — an
+  **`## Evidence`** section (see Phase 2.5).
 - **Body must NOT contain**: a changed-file list, file paths as an inventory, or file/line counts. Objective about *what we solve*, not *what moved*.
 - **Writer is claude Sonnet. Reviewer is codex.** Any additional reviewers on the claude side are Sonnet; the codex reviewer stays codex.
 - **PR is assigned to the user**: `--assignee @me` on create, `--add-assignee @me` on update.
@@ -31,6 +32,10 @@ Read `$ARGUMENTS`. Extract:
 - `--update <pr-number>` — update this PR instead of creating (else create)
 - `--draft` — open as draft (create only)
 - `--no-codex` — skip the codex reviewer, Sonnet self-review only
+- `--evidence <path>` — a QA evidence dir or `index.html` (screenshots, recordings) to source
+  the `## Evidence` section from. Repeatable. When omitted, look for the newest
+  `.qa-reports/*/execute/*/index.html` and the calling run's `--qa` artifact before concluding
+  there is none.
 - `--dry-run` — print the drafted title + body, do not open/update
 
 Set `RUN_DIR=~/.claude/pr-description-runs/$(date +%Y%m%d-%H%M%S)-$(git rev-parse --short HEAD 2>/dev/null)`. Create it with `mkdir -p`. Drafts, the review, and the final body live there.
@@ -111,11 +116,48 @@ The reviewer validates, returning concrete fixes:
 - **Slack threads present** (linked when supplied, or explicit `_none found_`)?
 - **Requirements matrix complete** and statuses supported by diff/test evidence?
 - **Key decisions preserved** from plan/ticket context?
+- **Evidence present** — when the diff touches UI, an `## Evidence` section with a flow
+  GIF/recording (and before/after for changed screens) or an honest local-asset list; when it
+  does not, the explicit `_no UI change — no visual evidence_`?
 - Body is objective about *what we solve* (not a changelog of the diff)?
 
 Read `$RUN_DIR/review.md` and **apply every concrete fix** to the title / `pr-body.md`.
 If the reviewer flags the file-list or ticket rules, those are blocking — re-run Phase 1
 targeting the specific fix, then re-review once. Cap: 2 review iterations.
+
+## Phase 2.5 — EVIDENCE (UI changes)
+
+**A UI change without a picture is not reviewable.** Decide first whether this diff changes
+anything a user sees — a new screen, an altered layout, new copy, a changed interaction or
+state. `git diff --name-only main...HEAD` hitting component/template/style/page paths is the
+signal; when it is ambiguous, assume it does.
+
+If it does not, write exactly `_no UI change — no visual evidence_` under `## Evidence` and
+move on. Never leave the section out and never invent a screenshot.
+
+If it does, the section carries, in this order:
+
+1. **A GIF or recording of the flow working end to end** — the whole path a user takes, not a
+   still of the end state. New screen or changed flow ⇒ this is required.
+2. **Before / after screenshots** for anything that changed on an existing screen.
+3. **A link to the QA evidence report** (`index.html`) that these came from, plus the commit
+   SHA it was captured against.
+
+Source them, in order of preference: the `--evidence` artifacts; the QA run this PR follows
+(`/qa-testing` and `/qa-execute` already capture annotated screenshots and WebVTT-captioned
+videos); a fresh `agent-browser` pass over the changed flow if neither exists and the app runs
+locally.
+
+**Embedding.** Inline the asset with `![alt](url)` when a URL that GitHub can actually fetch
+exists — an asset committed on the branch of a public repo, or an already-hosted report. When
+one does not (private repo, local-only artifacts), do **not** fake it: list each asset by
+filename with a one-line description of what it demonstrates, link the QA report path, and say
+plainly that the media is local. Then attach the same list as a `gh pr comment` so the
+reviewer sees it on the PR, and tell the user in Phase 4 which files to drag in if they want
+them rendered inline.
+
+Evidence is captured against the frozen SHA. If the branch moved after the capture, say so
+rather than presenting stale media as current.
 
 If `--dry-run`: print the final title + body and **stop here**. Do not open/update.
 
@@ -174,6 +216,9 @@ Verify each and report the state to the user:
 - [ ] `slack-linked-or-n/a` — relevant threads linked, or explicit `_none found_`
 - [ ] `requirements-reconciled` — every requirement maps to implementation evidence and status
 - [ ] `key-decisions-present` — important decisions and trade-offs are preserved
+- [ ] `evidence-attached` — UI change ⇒ `## Evidence` carries a flow GIF/recording, before/after
+      screenshots for changed screens, and a link to the QA report + its SHA; no UI change ⇒ the
+      explicit `_no UI change — no visual evidence_`
 - [ ] `assigned-to-me` — PR assignee includes `@me`
 - [ ] `codex-review-applied` — codex reviewer ran and its fixes were applied (or `--no-codex` was set)
 

@@ -24,7 +24,9 @@ approved plan — deep-plan does NOT build, review, or open the PR itself. It ha
 6. **Present** — `finalize-plan.sh` validate/repair/tick gate, then **Plannotator**:
    `plannotator annotate <plan> --gate` for the full plan, then `ExitPlanMode` (its hook
    re-opens the UI for final approval).
-7. **Handoff** — print `/deep-execute "$RUN_DIR/plan.md"` and stop.
+7. **Execution recommendation** — recommend one of four ways to build it and let the user
+   pick via `AskUserQuestion` (see below).
+8. **Handoff** — print the entry point for the chosen option and stop.
 
 **Arguments:** `$ARGUMENTS`
 
@@ -55,20 +57,44 @@ its evidence (for example, `path/to/file:line`, command output, test result, tra
 field). If evidence is missing, label the claim **unknown** and add an investigation step; never
 present an assumption as fact or approve a plan that depends on an unverified claim.
 
-## Handoff (what runs after the plan is approved)
+## Execution recommendation (Phase 7)
 
-deep-plan prints `/deep-execute "$RUN_DIR/plan.md"` and stops — it does not run any of this
-itself. `/deep-execute` drives the full superpowers execution workflow from the approved plan:
+deep-plan reads the approved plan's `## Execution shape` and recommends **one** of these,
+then asks you to confirm with `AskUserQuestion`:
+
+| | Option | Fits when |
+|---|---|---|
+| **A** | `/deep-execute "$RUN_DIR/plan.md"` — parallel lane workers, one shared worktree | `Mode: parallel`, ≥ 2 disjoint lanes, a real contract |
+| **B** | Sequential in **this** session (`superpowers:executing-plans`) | serial plan, one lane, or lanes too coupled for a contract |
+| **C** | Claude `Workflow` — deterministic script fan-out | many uniform mechanical slices (migration, codemod, sweep) |
+| **D** | Codex-only implementer, this session orchestrates and reviews | one coherent slice you want a second model to write |
+
+**The planning session orchestrates; it does not implement.** It directs workers, answers
+their questions, gates rounds, routes review findings back to the owning agent, and commits.
+**Option B is the only opt-out**, and it only counts when *you* pick it — never when the
+session decides the change looks small enough to just do.
+
+## What runs after the plan is approved
+
+Same chain regardless of which option you pick — `/deep-execute` runs it itself; for B, C and
+D the planning session drives it. It is wrapped in **`/goal`** (built into Claude Code and
+Codex) with the objective stated as the finished state, so it runs **end to end without
+stopping** and halts only on a blocker no agent can decide alone:
 
 1. `superpowers:using-git-worktrees` → isolate.
-2. `superpowers:subagent-driven-development` (or `executing-plans`) → build with strict TDD
-   (mock only outermost boundaries; inner services/repos run real).
+2. Build with strict TDD (mock only outermost boundaries; inner services/repos run real).
 3. `/simplify` ×2.
-4. `/deep-review` plus fixes → `superpowers:verification-before-completion`.
-5. Freeze final commit SHA.
-6. `/qa-execute` consumes approved QA plan against exact SHA when flows/screens changed.
-7. `/pr-description` — title + ticket/Slack + requirements + Mermaid + decisions, assigned to you.
-8. CI + Copilot watch → `superpowers:finishing-a-development-branch`.
+4. `/deep-review default --reviewers 6 --ratio 3:3` + fixes → `superpowers:verification-before-completion`.
+5. Record what was built and what the review changed.
+6. A QA agent drives `agent-browser` against a live env — `/qa-testing` (EXECUTE) when that
+   skill is installed, `/qa-execute` for a plan's `qa-plan.yaml`, a plain browser agent otherwise.
+7. A **separate, non-tester** agent fixes every gap QA found; QA re-runs on the fix.
+8. Freeze final commit SHA; `/qa-execute` for the approved QA plan when one exists.
+9. `/pr-description` — title + ticket/Slack + requirements + Mermaid + decisions + **evidence**
+   (screenshots/GIF when UI changed), assigned to you.
+10. HTML run report: what was built, decisions, trade-offs, assumptions, tests, screenshots,
+    recordings, PR link.
+11. CI + Copilot watch → `superpowers:finishing-a-development-branch`.
 
 ### Quick examples
 

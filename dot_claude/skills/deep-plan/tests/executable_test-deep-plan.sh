@@ -1282,10 +1282,27 @@ rm -rf "$FIN_STUB_DIR"
 
 # ─── Task 6: SKILL.md was slimmed and the Phase 4 handoff retargeted ───────
 
-assert_eq "$([ "$(wc -l <"$SKILL_MD" | tr -d ' ')" -lt 346 ] && echo yes || echo no)" yes \
-  "SKILL.md: line count is under the pre-slimming baseline of 346"
+# Baseline raised from 346 when Phase 3.5 (execution recommendation + the
+# orchestrator-never-implementer rule) was added — that content is the point of
+# the phase, not slack to slim away.
+assert_eq "$([ "$(wc -l <"$SKILL_MD" | tr -d ' ')" -lt 430 ] && echo yes || echo no)" yes \
+  "SKILL.md: line count is under the baseline of 430"
 assert_contains "$(cat "$SKILL_MD")" "/deep-execute" \
   "SKILL.md: Phase 4 handoff points at /deep-execute"
+
+# Phase 3.5 must keep offering all four execution modes and must keep the
+# planning session out of the implementer seat by default.
+assert_contains "$(cat "$SKILL_MD")" "Execution recommendation" \
+  "SKILL.md: Phase 3.5 execution recommendation survives"
+assert_contains "$(cat "$SKILL_MD")" "superpowers:executing-plans" \
+  "SKILL.md: option B (sequential in this session) survives"
+# shellcheck disable=SC2016 # literal backticked markdown, not a command substitution
+assert_contains "$(cat "$SKILL_MD")" 'Claude `Workflow`' \
+  "SKILL.md: option C (Claude Workflow) survives"
+assert_contains "$(cat "$SKILL_MD")" "Codex-only implementer" \
+  "SKILL.md: option D (Codex-only implementer) survives"
+assert_contains "$(cat "$SKILL_MD")" "orchestrator, not an implementer" \
+  "SKILL.md: the planning session stays an orchestrator by default"
 
 # ─── Fix: must-survive rules pinned so the line-count metric can't be ──────
 # satisfied by deleting load-bearing prose instead of restating it tighter.
