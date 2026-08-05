@@ -1,5 +1,5 @@
 ---
-description: Executes approved deep-plan lanes, reviews/fixes final diff, freezes SHA, then runs approved QA plan with HTML evidence
+description: Executes approved deep-plan lanes, runs /deep-review 3:3 plus fixes, QA-tests with a browser agent, fixes the gaps with a different agent, freezes SHA, opens the PR with evidence, then builds the run's HTML decision report
 ---
 
 # /deep-execute
@@ -28,8 +28,28 @@ directory, launch workers, or parse events by hand. The skill lives at
 the worktree, confirm each lane's agent via `AskUserQuestion` against `agents.allowlist`,
 commit the contract and shared files before fanout, scaffold and launch the lanes, hold the
 `Monitor` on the run's event stream, and gate every round before advancing.
-After final `/deep-review` and verification, freeze commit SHA. If plan references a QA artifact,
-run `/qa-execute` against environment serving that SHA before reporting completion.
+
+**You orchestrate; you never write lane code.** And the run does not pause to check in — Phase 0
+opens `/goal` on the finished state, so it goes end to end and stops only on a blocker no agent
+can settle alone.
+
+Once the lanes are done, the tail runs back to back:
+
+1. `/deep-review default --reviewers 6 --ratio 3:3`, fixes routed back to the owning lane.
+2. Record what was built and what the review changed, through `decision.sh`.
+3. A **QA agent** drives `agent-browser` against the live env, capturing screenshots and
+   recordings — `/qa-testing` (EXECUTE) when that skill is on the machine, `/qa-execute` when
+   the plan carries a `qa-plan.yaml`, a plain browser agent otherwise.
+4. A **different** agent fixes every gap QA found; QA re-verifies. The tester never fixes.
+5. Freeze the commit SHA.
+6. `/pr-description` opens the PR with the evidence attached.
+7. Build the run report — a self-contained HTML page covering what was built, every decision and
+   assumption the lanes recorded (alternatives rejected, tradeoffs accepted), drift from the
+   approved plan, tests, the review and QA evidence, and the PR. Assembled from the run directory
+   by script; never written or extended from your own memory of the run.
+
+Documentation the change makes stale is part of done, and lanes use Serena / GitNexus / Graphify
+rather than raw `grep`.
 
 ### Quick examples
 
