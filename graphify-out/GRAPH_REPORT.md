@@ -1,16 +1,16 @@
-# Graph Report - chezmoi  (2026-08-04)
+# Graph Report - chezmoi  (2026-08-05)
 
 ## Corpus Check
-- 21 files · ~87,698 words
+- 20 files · ~90,159 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 123 nodes · 231 edges · 27 communities (22 shown, 5 thin omitted)
+- 123 nodes · 231 edges · 29 communities (24 shown, 5 thin omitted)
 - Extraction: 73% EXTRACTED · 27% INFERRED · 0% AMBIGUOUS · INFERRED: 63 edges (avg confidence: 0.54)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ad082458`
+- Built from commit: `ca87df56`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -29,6 +29,8 @@
 - [[_COMMUNITY_Community 11|Community 11]]
 - [[_COMMUNITY_Community 12|Community 12]]
 - [[_COMMUNITY_Community 13|Community 13]]
+- [[_COMMUNITY_Community 14|Community 14]]
+- [[_COMMUNITY_Community 15|Community 15]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `FrozenModel` - 13 edges
@@ -54,7 +56,7 @@
 - `validate_results()` --calls--> `load_plan()`  [INFERRED]
   dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py → dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py
 
-## Communities (27 total, 5 thin omitted)
+## Communities (29 total, 5 thin omitted)
 
 ### Community 0 - "Code Structure"
 Cohesion: 0.2
@@ -77,20 +79,28 @@ Cohesion: 0.25
 Nodes (5): disposeDrainTimeout(), drainHookQueueForDispose(), enqueueHook(), requestHookDrain(), scheduleHookFlush()
 
 ### Community 5 - "Code Structure"
-Cohesion: 0.22
-Nodes (10): applyMarkerParams(), captureConfig(), captureNormalize(), captureParseArray(), captureTrimComment(), findMarker(), readFileSync(), repoRootProject() (+2 more)
+Cohesion: 0.47
+Nodes (6): cwdFor(), endSession(), postHook(), postPreCompact(), rememberCwd(), startSession()
 
 ### Community 6 - "Code Structure"
-Cohesion: 0.28
-Nodes (9): captureGlob(), capturePolicy(), captureTool(), cwdFor(), endSession(), postHook(), postPreCompact(), rememberCwd() (+1 more)
+Cohesion: 0.4
+Nodes (5): applyMarkerParams(), readFileSync(), repoRootProject(), tomlFlag(), tomlKey()
 
 ### Community 7 - "Code Structure"
 Cohesion: 0.5
 Nodes (5): authHeaders(), drainHookQueue(), fetchHandoff(), sleep(), timeoutSignal()
 
-### Community 13 - "Community 13"
+### Community 8 - "Code Structure"
+Cohesion: 0.4
+Nodes (5): captureConfig(), captureNormalize(), captureParseArray(), captureTrimComment(), findMarker()
+
+### Community 14 - "Community 14"
 Cohesion: 0.67
 Nodes (3): CapturePolicy, ScreenshotPolicy, StrEnum
+
+### Community 15 - "Community 15"
+Cohesion: 0.67
+Nodes (3): captureGlob(), capturePolicy(), captureTool()
 
 ## Knowledge Gaps
 - **5 isolated node(s):** `Parse a QA plan and reject invalid or dangling references.`, `Render human-readable Markdown from the structured QA plan.`, `Parse results and prove complete scenario/step coverage against the plan.`, `Render HTML, WebVTT captions, and annotated screenshots from a bound run.`, `Write versioned JSON Schemas for QA plan and results contracts.`

@@ -1,8 +1,4 @@
 {
-  "/Users/barsotti/.local/share/chezmoi/test.rs": {
-    "mtime": 1785518521.3691437,
-    "hash": "d41d8cd98f00b204e9800998ecf8427e"
-  },
   "/Users/barsotti/.local/share/chezmoi/dot_local/bin/executable_journal": {
     "mtime": 1785172226.5718482,
     "hash": "1ddb8d1cd2d00e9049a3535f481d329a"
@@ -96,24 +92,24 @@
     "hash": "5a56d9dc1f920277b1b4e8198f2c9003"
   },
   "/Users/barsotti/.local/share/chezmoi/README.md": {
-    "mtime": 1785885104.4812105,
-    "hash": "dc784bb73af69938b5ebd374bc7b680e"
+    "mtime": 1785957934.4375682,
+    "hash": "891be2d1cd28b50ecb6f384ba53bfed6"
   },
   "/Users/barsotti/.local/share/chezmoi/AGENTS.md": {
-    "mtime": 1785789407.1507192,
-    "hash": "4db8aecd11eb7ecfd8a06fb20f1a7967"
+    "mtime": 1785957960.993563,
+    "hash": "e7a19001e0da03b54819f544c242f2fd"
   },
   "/Users/barsotti/.local/share/chezmoi/CLAUDE.md": {
-    "mtime": 1785789407.1509285,
-    "hash": "940f9efee5b974c908fc3ab5763599d2"
+    "mtime": 1785957960.9938817,
+    "hash": "887844d19d3bc4b71ba6e699ab416dc1"
   },
   "/Users/barsotti/.local/share/chezmoi/docs/2026-07-26-journal-obsidian-design.md": {
     "mtime": 1785162322.9608605,
     "hash": "714f869768d6c5c707e76e34797c6002"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_codex/AGENTS.md": {
-    "mtime": 1785436164.1798143,
-    "hash": "e582bfdf128eaae76126685f265c796c"
+    "mtime": 1785951756.6657755,
+    "hash": "59bda0c38d20616a625638ed62b9bf1e"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_config/lazygit/config.yml": {
     "mtime": 1784586245.5008242,
@@ -160,15 +156,15 @@
     "hash": "083deb747279251552b9d96e5d1d25fd"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_config/opencode/AGENTS.md": {
-    "mtime": 1782928223.0685546,
-    "hash": "0ef1be15257a2faa402b2af85d6fe95f"
+    "mtime": 1785951756.6660254,
+    "hash": "67a8d795ec08dce4cbea34ea5974968f"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/RTK.md": {
     "mtime": 1777991614.4850304,
     "hash": "e5c0084e0dd62f39beb77640ef022d26"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/pr-description.md": {
-    "mtime": 1785884987.3787758,
+    "mtime": 1785951756.6607187,
     "hash": "a4ca216896905d3dd1bfc93ef9aceb08"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/qa-test-plan.md": {
@@ -176,12 +172,12 @@
     "hash": "3e5e47827904c165a0cf33a8493e7dda"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/deep-plan.md": {
-    "mtime": 1785884853.1044214,
-    "hash": "c708b350dca7ff16dc68037da206eb44"
+    "mtime": 1785951756.6604538,
+    "hash": "c41a0d861f196abf7fc0f2dd65941719"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/deep-review.md": {
-    "mtime": 1784566871.479304,
-    "hash": "30af2d2391bcb777a04e1940881c23a3"
+    "mtime": 1785957785.5385356,
+    "hash": "7b942ec499e5c75b2e3296f13c49ae84"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/anki.md": {
     "mtime": 1773060823.7624447,
@@ -192,8 +188,8 @@
     "hash": "cac89dad7d7cd04663afa8983d50dfe0"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/deep-execute.md": {
-    "mtime": 1785884926.379162,
-    "hash": "7e68c3ef55eec904be132850c55de63c"
+    "mtime": 1785951756.6601915,
+    "hash": "3680903da567bb381170cd09e6b7aa77"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/simplify.md": {
     "mtime": 1783969881.322273,
@@ -228,12 +224,12 @@
     "hash": "1ae70aaadb743fc0dee5d479b395cba3"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/README.md": {
-    "mtime": 1785780961.3173537,
+    "mtime": 1785951756.6612566,
     "hash": "7ae8a5fa42b303ecc4deb9af88fdf495"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/SKILL.md": {
-    "mtime": 1785885327.1450489,
-    "hash": "a4638c5cf69e969837de175aad3e2332"
+    "mtime": 1785951756.6615095,
+    "hash": "3967ff62045c1ab8e3b5ce5141cbece8"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/tests/fixtures/init-run-plan.md": {
     "mtime": 1784913255.3776593,
@@ -256,7 +252,7 @@
     "hash": "62fa559adaa060ae3af06d11b96d6da5"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/templates/worker-system-prompt.txt": {
-    "mtime": 1785780439.4200761,
+    "mtime": 1785951756.6633456,
     "hash": "22180482d95866965c5a2e2ab48ee1d6"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/plan/SKILL.md": {
@@ -272,8 +268,8 @@
     "hash": "2e996859e2958753717b3eeeab28479f"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/SKILL.md": {
-    "mtime": 1785885061.745459,
-    "hash": "645bebe08a537a6db90a45338062fc56"
+    "mtime": 1785951756.6644845,
+    "hash": "79b2b458de9ade54fe16b1b0920117f6"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/tests/fixtures/lane-unescaped-pipe.md": {
     "mtime": 1784660236.7826335,
@@ -372,24 +368,24 @@
     "hash": "3b0326ab8c1c993686823b2a0d1f4e56"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/pr-description/SKILL.md": {
-    "mtime": 1785884973.5750146,
+    "mtime": 1785951756.6653483,
     "hash": "f39de8538ef52322a5ca42e1870cbc3e"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/pr-description/personas/pr-writer.md": {
-    "mtime": 1785885006.4602673,
+    "mtime": 1785951756.6655679,
     "hash": "da24635bd1cd8a87c27a49b21a84c510"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/README.md": {
-    "mtime": 1784566593.2098978,
-    "hash": "679a7c7a6d57858d05d8480e8929b88b"
+    "mtime": 1785957766.5003548,
+    "hash": "00cffc0b4728edd5d128af2c2e2f464c"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/SKILL.md": {
     "mtime": 1784660236.784153,
     "hash": "6ae5a955ca73099a1c5fd56500e7db3d"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/variants/default.yml": {
-    "mtime": 1784586245.4993455,
-    "hash": "170dcf5e99d0f1c9906812ea59523b04"
+    "mtime": 1785957916.136261,
+    "hash": "ef224da338152e0ddb33857dab4e9fd5"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/variants/stress-test.yml": {
     "mtime": 1783969881.3372653,
@@ -427,6 +423,10 @@
     "mtime": 1783969881.3318255,
     "hash": "b80a6e4da43e25e39b547b752dc36df4"
   },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/type-precision.md": {
+    "mtime": 1785957731.789486,
+    "hash": "6b04c9f5f26a64643067d78a502b612b"
+  },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/scope-completeness.md": {
     "mtime": 1783969881.3331003,
     "hash": "5343b608fc859ab80311aa1cb794750a"
@@ -446,6 +446,10 @@
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/error-handling-observability.md": {
     "mtime": 1783969881.332491,
     "hash": "24f9a47616477da4e8ec81ac124b561f"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/code-reuse.md": {
+    "mtime": 1785957710.8156116,
+    "hash": "57daa190e48fa3a2a1eaec11e08c3a96"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/senior-backend.md": {
     "mtime": 1783969881.3336394,
@@ -472,8 +476,8 @@
     "hash": "a26804b60736a669cfdd149e1e30e0ef"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/jira-workflow/SKILL.md": {
-    "mtime": 1785885045.88437,
-    "hash": "0002c8fb7079b60c43ea29c49f6ac9ff"
+    "mtime": 1785951756.6650167,
+    "hash": "87282b64ca6618b73ad98db853088730"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_config/yazi/flavors/catppuccin-macchiato.yazi/preview.png": {
     "mtime": 1785431941.9281232,
