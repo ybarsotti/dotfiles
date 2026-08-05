@@ -29,11 +29,6 @@ mcp_servers:
         - gitnexus@latest
         - mcp
 
-    peon-ping:
-      command: node
-      args:
-        - /Users/barsotti/.claude/hooks/peon-ping/mcp/peon-mcp.js
-
     serena:
       command: uvx
       args:
