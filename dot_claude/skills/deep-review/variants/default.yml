@@ -1,5 +1,5 @@
 name: default
-description: Multi-perspective review — 10 distinct personas covering security, correctness, scope, edges, tests, perf, architecture, observability, and simplicity.
+description: Multi-perspective review — 15 distinct personas covering security, correctness, scope, edges, tests, perf, architecture, observability, simplicity, code reuse, and type precision.
 
 # Output schema every reviewer must produce on stdout (single fenced YAML block).
 output_schema: |
@@ -166,6 +166,37 @@ personas:
       Every error path wrapped with context? User messages distinct from internal
       details? Logs structured and at the right level? Metrics emitted for
       important events? Tracing spans for new code paths? Flag every gap.
+
+  - id: code-reuse
+    role: Code-reuse reviewer (duplication and reinvention detector)
+    focus: |
+      Every symbol the diff ADDS, checked against what the codebase already has: a helper
+      that already exists in a utils module or base class, a hand-rolled standard-library
+      function (grouping, chunking, deep-merge, retry, date math, debounce), a near-copy of
+      a sibling file, a new dependency for what an installed one already does, a second
+      module for a concern that already has an owner, a constant/enum/type redeclared
+      instead of imported. Searches with Serena find_symbol / find_referencing_symbols,
+      gitnexus query + context, and graphify query — never raw grep, because the duplicate
+      rarely shares the name you would guess. Reports the existing symbol as path:line.
+      Declines to force reuse across a real boundary, on a second occurrence with no third
+      in sight, or onto a candidate whose edge-case semantics differ.
+    runner: any
+
+  - id: type-precision
+    role: Type-precision reviewer (loose annotations and primitive obsession)
+    focus: |
+      Signatures that do not say what the value is: unparameterized containers (bare dict /
+      list / Any / object, TS any / Record<string, any>, Go interface{} / map[string]any,
+      raw List / Dictionary<string, object>), missing return types on public functions,
+      malformed generics such as list[str, str], unions grown into "anything", and
+      primitive obsession — str for ids/emails/currency codes, float for money, int for
+      durations with the unit only in the name, adjacent same-typed parameters a caller can
+      swap. Recommends the idiom already present in the repo (NewType, dataclass,
+      NamedTuple, enum, branded type, named type) over inventing one. Demands precision at
+      contracts (exports, public methods, API and serialization boundaries), not on private
+      locals. Leaves "this boundary needs a domain record" to `architecture` and repo rule
+      conflicts to `project-patterns`.
+    runner: any
 
   - id: simplicity
     role: Simplicity advocate (over-engineering detector)

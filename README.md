@@ -614,7 +614,13 @@ Three slash commands chain together for planning and parallel execution of non-t
   evidence → the **run report** (below). The orchestrator is the sole `git` committer between
   rounds; lane workers never run `git` themselves.
 - **`/deep-review`** - Multi-persona peer review of a diff (Claude + Codex headless
-  reviewers), invoked once per `/deep-execute` run and usable standalone.
+  reviewers), invoked once per `/deep-execute` run and usable standalone. The `default`
+  roster runs 15 lenses; two of them guard against the failure modes an agent writing code
+  falls into most: **`code-reuse`** asks whether the repo already does what the diff just
+  added, searching by concept through Serena, gitnexus and graphify rather than by guessed
+  name; **`type-precision`** flags loose annotations (bare `dict`, `any`,
+  `map[string]interface{}`, missing return types, `list[str, str]`) and primitive obsession
+  (`str` for an id, `float` for money, swappable same-typed parameters).
 
 ##### Execution recommendation (how the plan gets built)
 
