@@ -258,6 +258,12 @@ Confirm the plan includes, at minimum:
   reads. No separate flag — the schema answer is the flag.
 - A **`## State diagram`** when the change introduces or alters a state machine; `Applies: no`
   + a reason otherwise.
+
+> Every diagram check above is a regex — it proves a diagram is present and roughly shaped
+> right, never that it renders. `validate-plan.sh` adds `mermaid-parses`, which runs the real
+> parser, but only when `mermaid-validate` is on PATH; without it the item records **skip**,
+> never pass. Install it once so broken syntax fails here instead of reaching Plannotator and
+> the PR as a blank box: `npm i -g @zabaca/mermaid-validate`.
 - A **Rationale & key decisions** section (fed by grill-with-docs + brainstorming).
 - **Ticket + Slack context** and a point-by-point **Requirements matrix**.
 - A sequenced **User journey** when applicable; otherwise an explicit reason.

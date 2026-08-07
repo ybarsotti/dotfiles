@@ -1266,6 +1266,28 @@ done
 assert_eq "$(jq -r '.[] | select(.item == "er-diagram-when-schema-changes") | .status' <<<"$APPLICABLE_JSON")" \
   pass "er-diagram-when-schema-changes: passes with a relationship and a table block"
 
+# mermaid-parses is the only check that proves a diagram RENDERS; every other
+# one is a regex that a broken diagram satisfies. Its three states all matter,
+# and the skip states matter most: an absent validator or an unfilled template
+# must never look like a passing parse.
+MM_PLAN="${FIN_PASS_RUN}/applicable-sections.md"
+MM_STATUS() {
+  jq -r '.[] | select(.item == "mermaid-parses") | .status' <<<"$("$VALIDATE" "$1" --json)"
+}
+if command -v mermaid-validate >/dev/null 2>&1; then
+  assert_eq "$(MM_STATUS "$MM_PLAN")" pass \
+    "mermaid-parses: a plan whose diagrams parse passes"
+  perl -0pe 's/->>/->>>/' "$MM_PLAN" >"${FIN_PASS_RUN}/mermaid-broken.md"
+  assert_eq "$(MM_STATUS "${FIN_PASS_RUN}/mermaid-broken.md")" fail \
+    "mermaid-parses: a broken arrow fails"
+else
+  assert_eq "$(MM_STATUS "$MM_PLAN")" skip \
+    "mermaid-parses: skips, never passes, when the validator is absent"
+fi
+perl -0pe 's/^```mermaid$/```text/gm' "$MM_PLAN" >"${FIN_PASS_RUN}/mermaid-none.md"
+assert_eq "$(MM_STATUS "${FIN_PASS_RUN}/mermaid-none.md")" skip \
+  "mermaid-parses: zero blocks is a skip, not a vacuous pass"
+
 # An erDiagram carrying only relationship lines shows the topology but not the change.
 # Strip the attribute block and the same plan must fail — otherwise the block requirement
 # is advice rather than a gate.
