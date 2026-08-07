@@ -1263,6 +1263,17 @@ for item in user-journey-documented data-model-documented product-design-handoff
   assert_eq "$(jq -r --arg item "$item" '.[] | select(.item == $item) | .status' <<<"$APPLICABLE_JSON")" \
     pass "finalize-plan.sh: ${item} passes when applicable"
 done
+assert_eq "$(jq -r '.[] | select(.item == "er-diagram-when-schema-changes") | .status' <<<"$APPLICABLE_JSON")" \
+  pass "er-diagram-when-schema-changes: passes with a relationship and a table block"
+
+# An erDiagram carrying only relationship lines shows the topology but not the change.
+# Strip the attribute block and the same plan must fail — otherwise the block requirement
+# is advice rather than a gate.
+perl -0pe 's/  widgets \{\n    uuid id PK\n    text name\n  \}\n//' \
+  "${FIN_PASS_RUN}/applicable-sections.md" >"${FIN_PASS_RUN}/er-no-columns.md"
+assert_eq "$(jq -r '.[] | select(.item == "er-diagram-when-schema-changes") | .status' \
+  <<<"$("$VALIDATE" "${FIN_PASS_RUN}/er-no-columns.md" --root --json)")" \
+  fail "er-diagram-when-schema-changes: fails when the diagram lists no columns"
 rm -rf "$FIN_PASS_RUN"
 
 # Failing case: root + one good subplan + one permanently-broken subplan.

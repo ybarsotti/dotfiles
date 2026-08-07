@@ -53,15 +53,40 @@
 | <create|alter> | `<table>` | `<column>` | `<type>` | <rule> | <request/event/derived source> | <migration/write/update rule> |
 
 <!-- Required whenever Schema changes is yes — no separate flag, the answer above is the flag.
-     The table says where each value COMES FROM; this says how the tables RELATE. Include the
-     untouched tables the changed ones point at, so cardinality is readable. Delete the fence
-     entirely when Schema changes is no. -->
+     The table above says where each value COMES FROM, one row at a time. This diagram is the
+     shape: which tables the feature touches, which columns it ADDS, and how they relate.
+
+     Rules that make it readable at a glance:
+     - Every table listed in the `action` column above gets an attribute block here. A diagram
+       with only relationship lines and no columns does not show the change.
+     - Mark each new or altered column with a trailing `"new"` or `"altered"` comment. The
+       reader must be able to tell what this feature adds from what was already there, without
+       diffing against the table above.
+     - Include the untouched tables the changed ones point at, and give them an attribute
+       block holding only their key columns. Cardinality is unreadable without both ends.
+     - Label every relationship with the verb the domain uses, not "has" — `places`, `bills`,
+       `supersedes`. The label is the part a reviewer can disagree with.
+     - Cardinality is the claim most often wrong: `||--o{` (one to zero-or-many),
+       `||--|{` (one to one-or-many), `}o--o{` (many to many). Pick deliberately.
+
+     Delete the fence entirely when Schema changes is no. -->
 ```mermaid
 erDiagram
-  <EXISTING_TABLE> ||--o{ <CHANGED_TABLE> : "<relationship>"
+  <EXISTING_TABLE> ||--o{ <CHANGED_TABLE> : "<domain verb>"
+  <CHANGED_TABLE> }o--|| <LOOKUP_TABLE> : "<domain verb>"
+
+  <EXISTING_TABLE> {
+    <type> id PK
+  }
   <CHANGED_TABLE> {
-    <type> <column> PK "<note — mark the new ones>"
-    <type> <fk_column> FK
+    <type> id PK
+    <type> <existing_fk> FK
+    <type> <new_column> "new — <where it comes from>"
+    <type> <altered_column> "altered — <what changed>"
+  }
+  <LOOKUP_TABLE> {
+    <type> id PK
+    <type> <label_column>
   }
 ```
 
