@@ -246,7 +246,16 @@ of `scripts/superpowers-invoke.sh` for the full guarantee.
 
 Confirm the plan includes, at minimum:
 - The **`superpowers:writing-plans` document header** + an **`## Implementation tasks`** section in that skill's exact task format (`### Task N:` + Files + Interfaces + bite-sized checkbox steps with real code).
-- A **Mermaid flow diagram** (sequence or flowchart) — required.
+- A **Mermaid flow diagram** (sequence or flowchart) under `## Flow diagram` — required. It
+  shows the runtime path.
+- An **`## Architecture diagram`** (`classDiagram` or `C4Component`) whenever the change adds
+  or reshapes a type, module, service or boundary — the structure the flow diagram cannot
+  show. `Applies: no` + a reason when the change stays inside existing functions.
+- An **`erDiagram`** under `## Data model` whenever `Schema changes: yes`. The column table
+  says where each value comes from; the diagram says how the tables relate. No separate flag —
+  the schema answer is the flag.
+- A **`## State diagram`** when the change introduces or alters a state machine; `Applies: no`
+  + a reason otherwise.
 - A **Rationale & key decisions** section (fed by grill-with-docs + brainstorming).
 - **Ticket + Slack context** and a point-by-point **Requirements matrix**.
 - A sequenced **User journey** when applicable; otherwise an explicit reason.

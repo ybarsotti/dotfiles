@@ -1004,6 +1004,14 @@ _no ambiguity_
 - Schema changes: no
 - None: refactor does not touch persistent storage
 
+## Architecture diagram
+- Applies: no
+- Not applicable: refactor stays inside existing functions and adds no type
+
+## State diagram
+- Applies: no
+- Not applicable: refactor introduces no state machine
+
 ## Product design handoff prompt
 - Needed: no
 - Not needed: refactor has no interface changes
@@ -1247,7 +1255,7 @@ sed '/^- Not needed:/d' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/missing-desi
 expect_fail_item "product-design-handoff-documented" "${FIN_PASS_RUN}/missing-design-reason.md"
 perl -0pe '
   s/- Applies: no\n- Not applicable: internal refactor has no user interaction flow/- Applies: yes\n1. User opens widget settings\n2. System saves and confirms widget settings/;
-  s/- Schema changes: no\n- None: refactor does not touch persistent storage/- Schema changes: yes\n| create | `widgets` | `name` | `text` | required | request payload | written on create |/;
+  s/- Schema changes: no\n- None: refactor does not touch persistent storage/- Schema changes: yes\n| create | `widgets` | `name` | `text` | required | request payload | written on create |\n\n```mermaid\nerDiagram\n  users ||--o{ widgets : owns\n  widgets {\n    uuid id PK\n    text name\n  }\n```/;
   s/- Needed: no\n- Not needed: refactor has no interface changes/- Needed: yes\n> Page\/screen: Widget settings\n>\n> Interactions: Edit and save widget name\n>\n> Behavior and states: Loading, validation error, saving and success/;
 ' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/applicable-sections.md"
 APPLICABLE_JSON=$("$VALIDATE" "${FIN_PASS_RUN}/applicable-sections.md" --root --json)
@@ -1283,10 +1291,11 @@ rm -rf "$FIN_STUB_DIR"
 # ─── Task 6: SKILL.md was slimmed and the Phase 4 handoff retargeted ───────
 
 # Baseline raised from 346 when Phase 3.5 (execution recommendation + the
-# orchestrator-never-implementer rule) was added — that content is the point of
-# the phase, not slack to slim away.
-assert_eq "$([ "$(wc -l <"$SKILL_MD" | tr -d ' ')" -lt 430 ] && echo yes || echo no)" yes \
-  "SKILL.md: line count is under the baseline of 430"
+# orchestrator-never-implementer rule) was added, then to 445 for the diagram
+# requirements (architecture / ER / state). Both are the point of their phase,
+# not slack to slim away.
+assert_eq "$([ "$(wc -l <"$SKILL_MD" | tr -d ' ')" -lt 445 ] && echo yes || echo no)" yes \
+  "SKILL.md: line count is under the baseline of 445"
 assert_contains "$(cat "$SKILL_MD")" "/deep-execute" \
   "SKILL.md: Phase 4 handoff points at /deep-execute"
 
