@@ -327,6 +327,10 @@ if [ "$MODE" = "root" ]; then
   # yes/no to disagree with the one right above it is a bug waiting to happen.
   ER_BODY=$(section_mermaid "Data model")
   ER_RELATIONS=$(printf '%s\n' "$ER_BODY" | grep -cE '\|\|--|\}o--|\|o--|--o\{|--\|\{')
+  # An attribute block is what makes the diagram show the CHANGE rather than just the
+  # topology. Relationship lines alone answer "what points at what"; only the block
+  # answers "which columns does this feature add". Detected as a `TABLE {` opener.
+  ER_BLOCKS=$(printf '%s\n' "$ER_BODY" | grep -cE '^[[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*\{[[:space:]]*$')
   if [ "$SCHEMA_CHANGES" = "no" ]; then
     record "er-diagram-when-schema-changes" "pass" "no schema change — ER diagram not required"
   elif [ -z "$SCHEMA_CHANGES" ]; then
@@ -335,10 +339,11 @@ if [ "$MODE" = "root" ]; then
     # the wrong thing; data-model-documented already owns the missing section.
     record "er-diagram-when-schema-changes" "fail" "no '- Schema changes: yes|no' line — fix data-model-documented first"
   elif printf '%s\n' "$ER_BODY" | grep -q 'erDiagram' && [ "$ER_RELATIONS" -ge 1 ] &&
+    [ "$ER_BLOCKS" -ge 1 ] &&
     ! printf '%s\n' "$ER_BODY" | grep -qE '<[^>]+>'; then
-    record "er-diagram-when-schema-changes" "pass" "$ER_RELATIONS relationship(s)"
+    record "er-diagram-when-schema-changes" "pass" "$ER_RELATIONS relationship(s), $ER_BLOCKS table block(s)"
   else
-    record "er-diagram-when-schema-changes" "fail" "Schema changes yes needs an erDiagram under ## Data model with ≥1 relationship and no placeholders"
+    record "er-diagram-when-schema-changes" "fail" "Schema changes yes needs an erDiagram under ## Data model with ≥1 relationship, ≥1 table attribute block listing the columns (mark new ones \"new\"), and no placeholders"
   fi
 
   # Structure, not runtime path. The flow diagram cannot answer "do the

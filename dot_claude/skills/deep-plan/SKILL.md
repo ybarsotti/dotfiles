@@ -252,8 +252,10 @@ Confirm the plan includes, at minimum:
   or reshapes a type, module, service or boundary — the structure the flow diagram cannot
   show. `Applies: no` + a reason when the change stays inside existing functions.
 - An **`erDiagram`** under `## Data model` whenever `Schema changes: yes`. The column table
-  says where each value comes from; the diagram says how the tables relate. No separate flag —
-  the schema answer is the flag.
+  says where each value comes from, row by row; the diagram is the shape. Every table in the
+  table's `action` column needs an attribute block listing its columns, each new or altered
+  one marked `"new"` / `"altered"`, plus the untouched tables it points at so the cardinality
+  reads. No separate flag — the schema answer is the flag.
 - A **`## State diagram`** when the change introduces or alters a state machine; `Applies: no`
   + a reason otherwise.
 - A **Rationale & key decisions** section (fed by grill-with-docs + brainstorming).
