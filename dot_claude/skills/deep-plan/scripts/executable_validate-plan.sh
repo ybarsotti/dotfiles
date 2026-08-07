@@ -56,17 +56,46 @@ section_body() {
   ' "$PLAN"
 }
 
+# section_mermaid HEADING — the contents of the ```mermaid fences that live
+# INSIDE a `## HEADING` section. `section_body` cannot do this: it strips
+# fenced content by design. Scoping matters — the plan now carries several
+# mermaid blocks (flow, architecture, state, ER), and a whole-file grep would
+# let any one of them satisfy a check meant for another.
+section_mermaid() {
+  awk -v h="$1" '
+    /^```/ {
+      if (fence) { fence=0; inm=0 }
+      else { fence=1; if (insection && $0 == "```mermaid") inm=1 }
+      next
+    }
+    inm { print; next }
+    fence { next }
+    $0 ~ "^## " h "$" { insection=1; next }
+    /^## / { insection=0 }
+  ' "$PLAN"
+}
+
+# applies_flag HEADING — the yes/no on a section's `- Applies:` line.
+applies_flag() {
+  section_body "$1" | grep -iE '^- Applies:' | head -1 |
+    sed -E 's/^- Applies:[[:space:]]*//I' | tr '[:upper:]' '[:lower:]' | tr -d '`* '
+}
+
 # ─── Universal checks (both root and subplan) ─────────────────────────────
 
-# 1. Mermaid present
-if grep -q '^```mermaid' "$PLAN"; then
-  record "mermaid-present" "pass" "mermaid block found"
+# 1. Flow diagram present (scoped to its own section, not any mermaid anywhere).
+# `## Flow` is accepted alongside the template's `## Flow diagram`: plans written
+# before this check was scoped use the short heading, and the old whole-file grep
+# never cared which one they picked.
+MERMAID=$(section_mermaid "Flow diagram")
+[ -n "$MERMAID" ] || MERMAID=$(section_mermaid "Flow")
+if [ -n "$MERMAID" ]; then
+  record "mermaid-present" "pass" "mermaid block found under ## Flow diagram"
 else
-  record "mermaid-present" "fail" "no \`\`\`mermaid block in plan"
+  record "mermaid-present" "fail" "no \`\`\`mermaid block under ## Flow diagram"
 fi
 
 # 2. Mermaid has entry + exit (heuristic: ≥2 actors/participants + ≥3 arrows)
-MERMAID=$(awk '/^```mermaid$/{flag=1; next} /^```$/{flag=0} flag' "$PLAN")
 ACTORS=$(echo "$MERMAID" | grep -cE '(participant |actor |->|-->|==>)')
 ARROWS=$(echo "$MERMAID" | grep -cE '(->|-->)')
 if [ "$ACTORS" -ge 2 ] && [ "$ARROWS" -ge 3 ]; then
@@ -290,6 +319,56 @@ if [ "$MODE" = "root" ]; then
     record "data-model-documented" "pass" "no schema change with reason"
   else
     record "data-model-documented" "fail" "set Schema changes yes + column rows, or no + filled None reason"
+  fi
+
+  # ER diagram rides on the answer above — a plan that changes the schema owes a
+  # picture of how the tables relate. The column table says where each value comes
+  # from; it cannot show cardinality. No separate Applies flag on purpose: one more
+  # yes/no to disagree with the one right above it is a bug waiting to happen.
+  ER_BODY=$(section_mermaid "Data model")
+  ER_RELATIONS=$(printf '%s\n' "$ER_BODY" | grep -cE '\|\|--|\}o--|\|o--|--o\{|--\|\{')
+  if [ "$SCHEMA_CHANGES" = "no" ]; then
+    record "er-diagram-when-schema-changes" "pass" "no schema change — ER diagram not required"
+  elif [ -z "$SCHEMA_CHANGES" ]; then
+    # finalize-plan.sh feeds these details to a repair agent. Saying "Schema
+    # changes yes needs an erDiagram" when the line is absent sends it to fix
+    # the wrong thing; data-model-documented already owns the missing section.
+    record "er-diagram-when-schema-changes" "fail" "no '- Schema changes: yes|no' line — fix data-model-documented first"
+  elif printf '%s\n' "$ER_BODY" | grep -q 'erDiagram' && [ "$ER_RELATIONS" -ge 1 ] &&
+    ! printf '%s\n' "$ER_BODY" | grep -qE '<[^>]+>'; then
+    record "er-diagram-when-schema-changes" "pass" "$ER_RELATIONS relationship(s)"
+  else
+    record "er-diagram-when-schema-changes" "fail" "Schema changes yes needs an erDiagram under ## Data model with ≥1 relationship and no placeholders"
+  fi
+
+  # Structure, not runtime path. The flow diagram cannot answer "do the
+  # dependencies point the right way" — the architecture reviewer needs this one.
+  ARCH_APPLIES=$(applies_flag "Architecture diagram")
+  ARCH_BODY=$(section_mermaid "Architecture diagram")
+  ARCH_EDGES=$(printf '%s\n' "$ARCH_BODY" | grep -cE '(-->|\.\.>|--\|>|\*--|o--|--)')
+  if [ "$ARCH_APPLIES" = "yes" ] &&
+    printf '%s\n' "$ARCH_BODY" | grep -qE 'classDiagram|C4Component' && [ "$ARCH_EDGES" -ge 1 ] &&
+    ! printf '%s\n' "$ARCH_BODY" | grep -qE '<[^>]+>'; then
+    record "architecture-diagram-documented" "pass" "$ARCH_EDGES relation(s)"
+  elif [ "$ARCH_APPLIES" = "no" ] &&
+    section_body "Architecture diagram" | grep -qE '^- Not applicable: [^<[:space:]]'; then
+    record "architecture-diagram-documented" "pass" "not applicable with reason"
+  else
+    record "architecture-diagram-documented" "fail" "set Applies yes + a classDiagram/C4Component with ≥1 relation and no placeholders, or no + filled Not applicable reason"
+  fi
+
+  STATE_APPLIES=$(applies_flag "State diagram")
+  STATE_BODY=$(section_mermaid "State diagram")
+  STATE_TRANSITIONS=$(printf '%s\n' "$STATE_BODY" | grep -cE '\-\->')
+  if [ "$STATE_APPLIES" = "yes" ] &&
+    printf '%s\n' "$STATE_BODY" | grep -qE 'stateDiagram' && [ "$STATE_TRANSITIONS" -ge 2 ] &&
+    ! printf '%s\n' "$STATE_BODY" | grep -qE '<[^>]+>'; then
+    record "state-diagram-documented" "pass" "$STATE_TRANSITIONS transition(s)"
+  elif [ "$STATE_APPLIES" = "no" ] &&
+    section_body "State diagram" | grep -qE '^- Not applicable: [^<[:space:]]'; then
+    record "state-diagram-documented" "pass" "not applicable with reason"
+  else
+    record "state-diagram-documented" "fail" "set Applies yes + a stateDiagram with ≥2 transitions and no placeholders, or no + filled Not applicable reason"
   fi
 
   DESIGN_BODY=$(section_body "Product design handoff prompt")

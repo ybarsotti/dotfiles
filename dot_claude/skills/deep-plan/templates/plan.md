@@ -52,6 +52,19 @@
 |---|---|---|---|---|---|---|
 | <create|alter> | `<table>` | `<column>` | `<type>` | <rule> | <request/event/derived source> | <migration/write/update rule> |
 
+<!-- Required whenever Schema changes is yes — no separate flag, the answer above is the flag.
+     The table says where each value COMES FROM; this says how the tables RELATE. Include the
+     untouched tables the changed ones point at, so cardinality is readable. Delete the fence
+     entirely when Schema changes is no. -->
+```mermaid
+erDiagram
+  <EXISTING_TABLE> ||--o{ <CHANGED_TABLE> : "<relationship>"
+  <CHANGED_TABLE> {
+    <type> <column> PK "<note — mark the new ones>"
+    <type> <fk_column> FK
+  }
+```
+
 ## Product design handoff prompt
 <!-- Needed=yes for multiple screens, a new workflow, or a substantial interaction/layout change.
      This is a design-only prompt for claude.design or Codex Product Design. It is NOT an
@@ -96,6 +109,48 @@ sequenceDiagram
   Repo-->>Service: <response>
   Service-->>Entry: <response>
   Entry-->>User: <result>
+```
+
+## Architecture diagram
+<!-- Applies=yes when the change adds or reshapes a type, module, service or boundary. The flow
+     diagram above shows the runtime path; this one shows the STRUCTURE the reviewers judge:
+     what exists, what depends on what, and what the public surface is. Use `classDiagram` for
+     types and their relations, or `C4Component` when the change is about services and
+     boundaries rather than classes. Mark new elements — a diagram that does not distinguish
+     what this plan ADDS from what already exists is not reviewable.
+     Applies=no for a change contained inside existing functions. Say so and delete the fence. -->
+- Applies: <yes|no>
+- Not applicable: <reason, only when Applies is no>
+
+```mermaid
+classDiagram
+  class <ExistingType> {
+    +<existingMethod>()
+  }
+  class <NewType> {
+    <<new>>
+    +<field>: <Type>
+    +<method>(<arg>: <Type>) <Return>
+  }
+  <NewType> ..> <ExistingType> : <uses / depends on>
+  <Caller> --> <NewType> : <owns / calls>
+```
+
+## State diagram
+<!-- Applies=yes when the change introduces or alters a state machine: an order/subscription
+     status, an approval workflow, a retry/backoff lifecycle, a feature-flag rollout.
+     Enumerate every state and every legal transition, including the terminal and error ones.
+     Applies=no otherwise. Say so and delete the fence. -->
+- Applies: <yes|no>
+- Not applicable: <reason, only when Applies is no>
+
+```mermaid
+stateDiagram-v2
+  [*] --> <initial>
+  <initial> --> <next> : <event / guard>
+  <next> --> <terminal> : <event>
+  <next> --> <failed> : <error condition>
+  <terminal> --> [*]
 ```
 
 ## Affected files
@@ -224,6 +279,9 @@ docs). Use `### Q:` / `### A:` headers. If `--skip-grill` was passed, write exac
 - [ ] clarifying-questions-asked
 - [ ] mermaid-present
 - [ ] mermaid-has-entry-and-exit
+- [ ] architecture-diagram-documented
+- [ ] state-diagram-documented
+- [ ] er-diagram-when-schema-changes
 - [ ] writing-plans-header
 - [ ] global-constraints-present
 - [ ] tasks-≥1

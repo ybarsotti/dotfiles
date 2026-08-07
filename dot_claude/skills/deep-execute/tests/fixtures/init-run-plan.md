@@ -37,12 +37,22 @@ _no ambiguity_
 - Schema changes: no
 - None: fixture uses files only
 
+## Architecture diagram
+
+- Applies: no
+- Not applicable: fixture declares lanes only and adds no type or module
+
+## State diagram
+
+- Applies: no
+- Not applicable: fixture has no state machine
+
 ## Product design handoff prompt
 
 - Needed: no
 - Not needed: frontend lane is synthetic and has no real interface
 
-## Overview
+## Flow diagram
 
 ```mermaid
 sequenceDiagram

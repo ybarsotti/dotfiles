@@ -175,6 +175,16 @@ _no ambiguity_
 - Schema changes: no
 - None: integration fixture does not use a database
 
+## Architecture diagram
+
+- Applies: no
+- Not applicable: fixture exercises existing scripts and adds no type or module
+
+## State diagram
+
+- Applies: no
+- Not applicable: fixture has no state machine
+
 ## Product design handoff prompt
 
 - Needed: no
