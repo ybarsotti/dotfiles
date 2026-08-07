@@ -104,6 +104,49 @@ else
   record "mermaid-has-entry-and-exit" "fail" "actors=$ACTORS arrows=$ARROWS (need ≥2 actors, ≥3 arrows)"
 fi
 
+# 2b. Every mermaid block actually parses.
+#
+# Every check above is a regex: they prove a diagram is PRESENT and has roughly
+# the right shape. None of them proves it RENDERS. A diagram with a broken arrow
+# or an unclosed attribute block satisfies all of them and then reaches
+# Plannotator and the pull request as a blank box.
+#
+# Ordering is deliberate: a plan still carrying <PLACEHOLDER> text is skipped
+# here, because a placeholder is not valid mermaid and would be reported twice —
+# once truthfully by the placeholder checks, once misleadingly as a syntax error
+# pointing at a line the author never wrote.
+#
+# The validator is optional and its absence is recorded as `skip`, never as
+# `pass`. Only "fail" blocks finalize-plan.sh, so a missing tool cannot wedge the
+# gate — but it must not be able to look like a passing one either.
+MERMAID_PLACEHOLDERS=$(awk '
+  /^```mermaid$/ { inm = 1; next }
+  /^```/ { inm = 0 }
+  inm && /<[A-Za-z_][^>]*>/ { n++ }
+  END { print n + 0 }
+' "$PLAN")
+
+MERMAID_BLOCKS=$(grep -c '^```mermaid$' "$PLAN" || true)
+
+if [ "$MERMAID_BLOCKS" -eq 0 ]; then
+  # Vacuous truth is not a pass. mermaid-present already fails this plan; saying
+  # "every block parses" about zero blocks would just be a second, softer lie.
+  record "mermaid-parses" "skip" "no mermaid block to parse"
+elif [ "$MERMAID_PLACEHOLDERS" -gt 0 ]; then
+  record "mermaid-parses" "skip" "$MERMAID_PLACEHOLDERS placeholder line(s) inside mermaid blocks — fill them first, the parser cannot read <...>"
+elif ! command -v mermaid-validate >/dev/null 2>&1; then
+  record "mermaid-parses" "skip" "mermaid-validate not installed — syntax unchecked (npm i -g @zabaca/mermaid-validate)"
+else
+  MERMAID_OUT=$(mermaid-validate "$PLAN" 2>&1) && MERMAID_RC=0 || MERMAID_RC=$?
+  if [ "$MERMAID_RC" -eq 0 ]; then
+    record "mermaid-parses" "pass" "$MERMAID_BLOCKS mermaid block(s) parse"
+  else
+    # Keep the parser's own message: it names the block and the token it choked
+    # on, which is the only actionable part for the repair agent.
+    record "mermaid-parses" "fail" "$(printf '%s' "$MERMAID_OUT" | sed 's/\x1b\[[0-9;]*m//g' | grep -viE '^\s*$' | tail -3 | tr '\n' ' ')"
+  fi
+fi
+
 # 3. TDD test list ≥3 bullets
 TDD_BULLETS=$(section_body "TDD test list" | grep -cE '^- ')
 if [ "$TDD_BULLETS" -ge 3 ]; then
