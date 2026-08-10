@@ -80,3 +80,11 @@ Library
 {{ if eq .machine.purpose "work" }}
 .config/qmd/
 {{ end }}
+
+# The journal LaunchAgent (07:00 weekday "ensure-today") is a work-only routine.
+# On personal machines skip both the plist and its bootstrap script so the daemon
+# never loads. The manual journal CLI and /log, /plan, /retro skills still work.
+{{ if ne .machine.purpose "work" }}
+Library/LaunchAgents/com.barsotti.journal.plist
+.chezmoiscripts/12_setup_journal.sh
+{{ end }}
