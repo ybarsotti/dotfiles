@@ -10,9 +10,6 @@ network_access = "enabled"
 [projects."/Users/barsotti"]
 trust_level = "trusted"
 
-[projects."/Users/barsotti/Developer/Work/Redacted"]
-trust_level = "trusted"
-
 [projects."/Users/barsotti/.local/share/chezmoi"]
 trust_level = "trusted"
 
@@ -22,16 +19,10 @@ trust_level = "trusted"
 [projects."/Users/barsotti/Developer/Lab/paperclip-sandbox"]
 trust_level = "trusted"
 
-[projects."/Users/barsotti/Developer/Work/Redacted/redacted"]
-trust_level = "trusted"
-
 [projects."/Users/barsotti/Developer/Learning/Courses/Anthropic Academy"]
 trust_level = "trusted"
 
 [projects."/Users/barsotti/.config/opencode"]
-trust_level = "trusted"
-
-[projects."/Users/barsotti/Developer/Work/Redacted"]
 trust_level = "trusted"
 
 [notice.model_migrations]
