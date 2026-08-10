@@ -498,7 +498,7 @@ Config lives in `~/.config/waveterm/` (flat JSON, `:` as level separator). Docs:
   No global default is set, so new tabs stay unstyled unless you ask.
 - **`~/.config/waveterm/widgets.json`** - Custom sidebar widgets, grouped by kind: AI agents
   (claude, codex, opencode, agent-deck) → git/GitHub (`gh dash`, `gh notify`, lazygit) → files
-  (Redacted browser, yazi) → containers (lazydocker) → system (sysinfo, processes, btop, `dust`).
+  (yazi) → containers (lazydocker) → system (sysinfo, processes, btop, `dust`).
   Wave's `defwidget@sysinfo` and `defwidget@processviewer` are redefined purely to move them out of
   the built-in block at the top and into the system group. None open magnified — press
   <kbd>Cmd+M</kbd> to magnify a block. Wave's own defaults (terminal, files, web, sysinfo, processes) stay —

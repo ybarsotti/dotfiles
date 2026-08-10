@@ -111,19 +111,6 @@
       }
     }
   },
-  "Redacted": {
-    "display:order": 8,
-    "icon": "briefcase",
-    "color": "#89b4fa",
-    "label": "work",
-    "description": "Redacted repos - file browser",
-    "blockdef": {
-      "meta": {
-        "view": "preview",
-        "file": "~/Developer/Work/Redacted"
-      }
-    }
-  },
   "yazi": {
     "display:order": 9,
     "icon": "folder-tree",
