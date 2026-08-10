@@ -60,6 +60,14 @@ graphify-out/
 .zsh_env_vars
 
 
+# The notetaker LaunchAgent points at a machine-specific project checkout
+# (~/Developer/Pers/notetaker/.venv). On a machine without that checkout the
+# plist would fail-loop under KeepAlive, so only manage it where the binary
+# exists.
+{{ if not (stat (joinPath .chezmoi.homeDir "Developer/Pers/notetaker/.venv/bin/notetaker")) }}
+Library/LaunchAgents/com.barsotti.notetaker.plist
+{{ end }}
+
 {{ if ne .chezmoi.os "darwin" }}
 .chezmoiscripts/darwin/**
 .config/homebrew
