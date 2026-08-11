@@ -50,6 +50,39 @@
           }
         }
       }
+    },
+    // Local models through Ollama. Added so Paperclip's opencode_local agents can
+    // run open-weight and stay off the Claude and Codex subscriptions. This block
+    // is purely additive: `model` above still points at anthropic/claude-sonnet-5,
+    // so interactive opencode is unchanged. Pick ollama/* explicitly to go local.
+    // 127.0.0.1 rather than localhost: Ollama binds IPv4 only here, and localhost
+    // resolves to ::1 first on macOS.
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://127.0.0.1:11434/v1"
+      },
+      // `cost` here is NOT a price. Ollama bills nothing, so opencode would report
+      // cost 0, Paperclip's spentMonthlyCents would never move, and a budget cap
+      // would be decoration. Declaring a synthetic rate turns that budget into a
+      // real stop condition — a token meter that happens to be denominated in
+      // cents, which is the only unit Paperclip counts in.
+      //
+      // The rate is chosen so the arithmetic is legible, not so it matches any
+      // vendor: at input 1.0 / output 5.0 USD per 1M tokens,
+      //     1 cent = 10k input tokens, or 2k output tokens.
+      // Output is weighted 5x on purpose: runaway generation is the failure mode
+      // a cap exists to stop, so it should burn the budget faster.
+      "models": {
+        "qwen3-coder:30b": {
+          "name": "Qwen3 Coder 30B (local)",
+          "cost": { "input": 1.0, "output": 5.0 }
+        },
+        "qwen2.5:14b": {
+          "name": "Qwen2.5 14B (local)",
+          "cost": { "input": 1.0, "output": 5.0 }
+        }
+      }
     }
   },
   "mcp": {
