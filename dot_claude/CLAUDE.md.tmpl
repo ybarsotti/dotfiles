@@ -83,6 +83,44 @@ Use these project-aware code-intelligence tools when they are available. Do not 
 - Exact symbol reads/edits: Serena first.
 - Project-specific `CLAUDE.md` instructions override this global fallback when they are more specific.
 
+# Showing the Diff — Hunk in Wave
+
+The user works in Wave Terminal and follows changes in a Hunk pane beside the session.
+
+- `~/.local/bin/wave-hunk [worktree] [base-ref]` opens that pane, or reuses a live session for
+  the same worktree. `/hunk-watch` runs it and then annotates the diff.
+- It defaults to the merge base with the branch you forked from, and `hunk diff <ref>` compares
+  a ref to the **working tree**. So the pane holds your commits and your uncommitted edits
+  together. Keep committing in small steps; the work stays on screen.
+- Add one note per commit you make, naming what that commit closed. The user sees one
+  cumulative diff, so the commit boundary is invisible without it.
+- **Never run `hunk diff` or `hunk show` yourself.** Those own the user's screen. Drive a live
+  pane with `hunk session ...` and the `hunk-review` skill.
+- Write notes that explain the why, the rejected alternative, and the assumption a reviewer must
+  confirm. The user already sees the lines, so a note that restates them wastes the space.
+- Read `hunk session comment list --repo <worktree> --type user` before answering a question
+  about the diff. Those notes are the user's review feedback.
+
+# Browser and Web Navigation
+
+Three browser tools serve three targets. Pick by where the page lives.
+
+- **`kitesurf` MCP — the public web.** Cloudflare's remote headless browser for agents. It runs
+  on Cloudflare Workers, so this machine installs no browser and the request leaves from
+  Cloudflare. Use it to open a public URL, read a page, fill a form, click an element, take a
+  screenshot, or scrape. It reads `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` from the
+  environment. If it fails to authenticate, report the missing variable and stop.
+  Docs: https://developers.cloudflare.com/browser-run/kitesurf/
+- **`obscura` MCP — this machine's network.** A local headless browser written in Rust, with no
+  Chrome. Use it for a `localhost` dev server, a private address, or any page kitesurf cannot
+  reach from Cloudflare. `obscura serve --port 9222` also exposes a CDP endpoint that Playwright
+  and Puppeteer connect to. Docs: https://github.com/h4ckf0r0day/obscura
+- **`agent-browser` skill — a real browser.** Use it when the task needs the user's logged-in
+  profile, an Electron application, or QA evidence. The `/qa-testing` and `/qa-test-plan` skills
+  record screenshots and video through it, so QA stays there.
+
+Prefer `kitesurf` for a public page. It costs this machine nothing and starts fastest.
+
 # graphify
 - **graphify** (`~/.claude/skills/graphify/SKILL.md`) - any input to knowledge graph. Trigger: `/graphify`
 When the user types `/graphify`, invoke the Skill tool with `skill: "graphify"` before doing anything else.
