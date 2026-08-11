@@ -148,11 +148,17 @@ test-all: test-fresh test-idempotency
 # xargs (not `find -exec ... \;`) invocation: `find -exec cmd {} \;` always
 # returns 0 regardless of cmd's exit status, so it silently swallowed every
 # shellcheck finding here while CI's `xargs` correctly failed the job.
+#
+# The template step calls CI's own script rather than repeating it. The copy that used
+# to live here dropped every line starting with `{{`, which cut the closing line out of
+# a multi-line assignment such as JOURNAL_ALIASES and left shellcheck an unterminated
+# string (SC1073). The script strips each `{{ ... }}` in place instead, so the quotes
+# still balance.
 lint:
     @echo "Running shellcheck on .sh files..."
     @find . -name "*.sh" -type f -not -path "*/.git/*" -print0 | xargs -0 -r shellcheck
     @echo "Running shellcheck on .sh.tmpl files..."
-    @find . -name "*.sh.tmpl" -type f -not -path "*/.git/*" -print0 | xargs -0 -r -n1 sh -c 'grep -v "^\s*{{"{{"}}" "$1" | shellcheck -s bash --severity=error -' _
+    @bash .github/test-scripts/test-shell-template-lint.sh
     @echo "Running yamllint..."
     @yamllint -d relaxed .chezmoidata/packages.yaml
     @echo "Running gitleaks..."
