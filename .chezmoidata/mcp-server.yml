@@ -29,6 +29,40 @@ mcp_servers:
         - gitnexus@latest
         - mcp
 
+    # Cloudflare Kitesurf — a remote headless browser built for agents (Browser Run).
+    # Nothing installs locally: the browser runs on Cloudflare Workers, and the only local
+    # part is the chrome-devtools-mcp bridge that npx fetches on demand.
+    # Set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN (Browser Rendering: Edit) in the
+    # environment, for example in ~/.zsh_env_vars. The `sh -c` wrapper reads them at launch,
+    # so the token never enters this repo.
+    # Docs: https://developers.cloudflare.com/browser-run/kitesurf/
+    kitesurf:
+      command: sh
+      args:
+        - -c
+        - >-
+          EP="wss://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/browser-run/devtools/browser";
+          exec npx -y chrome-devtools-mcp@latest
+          "--wsEndpoint=$EP?browser=kitesurf"
+          "--wsHeaders={\"Authorization\":\"Bearer $CLOUDFLARE_API_TOKEN\"}"
+
+    # Obscura — a local headless browser for agents, written in Rust, with no Chrome and no
+    # Node. `.chezmoiexternal.toml` installs it into ~/.local/share/obscura and symlinks the
+    # binary into ~/.local/bin. It complements kitesurf: it runs here, so it reaches this
+    # machine. Docs: https://github.com/h4ckf0r0day/obscura
+    #
+    # SECURITY: `--allow-private-network` turns OFF obscura's default block on loopback,
+    # RFC1918 and link-local addresses. That block is an SSRF guard. The flag is set on
+    # purpose, because reaching a localhost dev server is the reason this server exists and
+    # is exactly what kitesurf cannot do. The cost is real: a page obscura loads can redirect
+    # it to an address on this network. Remove the flag to restore the guard, and obscura
+    # then reaches the public internet only.
+    obscura:
+      command: sh
+      args:
+        - -c
+        - exec "$HOME/.local/share/obscura/obscura" mcp --allow-private-network
+
     serena:
       command: uvx
       args:
