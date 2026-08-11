@@ -58,12 +58,8 @@ inside the SAME shared worktree. You commit, you gate, you reply — you don't e
 4. Launch every non-orchestrator lane in the same worktree with the confirmed agent specs,
    via cmux-orchestrator's `launch-workers.sh RUN_DIR/cmux CWD SPEC...` (grammar
    `name:runner:model@effort`; bare `name` means `claude:sonnet`).
-5. **Open the diff pane.** Run `~/.local/bin/wave-hunk CWD <baseline_commit>`. It opens a Hunk
-   block in Wave beside this session, showing everything the lanes add on top of the baseline,
-   and it prints the session id. Pass the baseline ref, never the bare working tree — you
-   commit between rounds, and a working-tree diff empties on every commit. `wsh not found`
-   means this run is not inside Wave: say so in one line and carry on, because the pane is
-   for the human, and its absence never blocks a lane.
+5. **Open the diff pane** for the human: `wave-hunk CWD <baseline_commit>`. Pass the baseline,
+   never the bare working tree — you commit between rounds. A failure here never blocks a lane.
 
 ## Phase 2 — Monitor and react
 
@@ -123,20 +119,10 @@ Once a round passes, commit it (`git add -A && git commit`) — workers never ru
 orchestrator is the sole committer, between rounds. Then bump `manifest.json`'s `round` and
 either start the next round (more tasks remain) or move to Phase 4.
 
-**Refresh the diff pane after that commit**, when Phase 1 opened one. Reload it against the
-baseline, re-read the structure, then annotate the round:
-
-```bash
-hunk session reload --repo CWD -- diff <baseline_commit>
-hunk session review --repo CWD --json     # line numbers moved; re-anchor before commenting
-printf '%s' "$JSON" | hunk session comment apply --repo CWD --stdin
-```
-
-Turn this round's `decision.sh` entries into those notes — the rationale, the rejected
-alternative and the accepted tradeoff are already written, and the pane is where the human
-reads them while the next round runs. One note per decision, on the line it produced. The
-`hunk-review` skill holds the full command reference. Never run `hunk diff` or `hunk show`
-yourself; those own the user's screen.
+**Annotate the diff pane after that commit**, when Phase 1 opened one. Turn this round's
+`decision.sh` entries into inline notes, one per decision, on the line it produced — the human
+reads them while the next round runs. The `hunk-review` skill holds the commands; re-anchor
+against a fresh `hunk session review` first, because a commit moves line numbers.
 
 **After three rounds, stop and `AskUserQuestion`.** `round-gate.sh RUN_DIR 4` (or whatever
 exceeds `max_rounds`) already refuses outright with its own escalation record instead of
