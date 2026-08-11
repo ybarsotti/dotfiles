@@ -1,0 +1,104 @@
+#!/bin/sh
+# wave-hunk — open, or refresh, a Hunk diff pane in Wave Terminal for a git worktree.
+#
+#   wave-hunk                            # whole branch of the current repo
+#   wave-hunk /path/to/worktree          # whole branch of another worktree
+#   wave-hunk /path/to/worktree abc123   # everything since commit abc123
+#   wave-hunk /path/to/worktree HEAD     # uncommitted changes only
+#
+# The default base is the merge base with the upstream branch, or with the remote
+# default branch. This matters because agents commit as they work: `hunk diff` with no
+# ref compares the index to the working tree, so it goes empty on every commit and the
+# work disappears from the pane. `hunk diff <ref>` compares that ref to the WORKING
+# TREE, so one base ref holds the committed and the uncommitted change together, and
+# the pane survives each commit.
+#
+# Pass a ref to override the base. `HEAD` gives the uncommitted-only view back.
+#
+# A Wave block does not inherit the shell environment, so the pane runs through
+# `/bin/zsh -lc`. Without the login shell the block has no /opt/homebrew/bin and
+# cannot find hunk. The same rule governs the widgets in
+# ~/.config/waveterm/widgets.json.
+#
+# The script prints the session id. Drive the live pane with `hunk session ...`
+# and the hunk-review skill.
+#
+# `--exec` runs hunk in THIS terminal instead of opening a Wave block. The `hunk`
+# widget uses it, so the widget resolves the base ref the same way this script does
+# rather than carrying a second copy of the rule.
+set -eu
+
+inline=""
+if [ "${1:-}" = "--exec" ]; then
+	inline=1
+	shift
+fi
+
+dir=${1:-.}
+if [ $# -gt 0 ]; then shift; fi
+
+if ! root=$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null); then
+	echo "wave-hunk: $dir is not inside a git worktree" >&2
+	exit 1
+fi
+
+session_id() {
+	hunk session list --json 2>/dev/null |
+		jq -r --arg r "$root" 'first(.sessions[]? | select(.repoRoot == $r) | .sessionId)' 2>/dev/null
+}
+
+# The merge base with the branch this work forks from. Empty when nothing resolves, which
+# leaves the plain index-to-working-tree view.
+default_base() {
+	for ref in "@{u}" "origin/HEAD" "origin/main" "origin/master" "main" "master"; do
+		if git -C "$root" rev-parse --verify --quiet "$ref" >/dev/null 2>&1; then
+			git -C "$root" merge-base HEAD "$ref" 2>/dev/null && return 0
+		fi
+	done
+	return 1
+}
+
+# Prepend the default base unless the caller already named a target. A leading option is not
+# a target, so `wave-hunk . --mode auto` still gets the base; only `wave-hunk . HEAD` overrides it.
+case "${1:-}" in
+-* | "")
+	base=$(default_base) || base=""
+	if [ -n "$base" ]; then
+		set -- "$base" "$@"
+	fi
+	;;
+esac
+
+if [ -n "$inline" ]; then
+	exec hunk diff --watch "$@"
+fi
+
+id=$(session_id) || id=""
+if [ -n "$id" ]; then
+	hunk session reload --repo "$root" -- diff "$@"
+	echo "wave-hunk: reloaded session $id for $root"
+	exit 0
+fi
+
+if ! command -v wsh >/dev/null 2>&1; then
+	echo "wave-hunk: wsh not found. Run 'hunk diff --watch' yourself in $root" >&2
+	exit 1
+fi
+
+wsh run --cwd "$root" -- /bin/zsh -lc 'exec hunk diff --watch "$@"' wave-hunk "$@"
+
+# The daemon registers the session a moment after the block starts. Wait for it, so the
+# caller can drive `hunk session` right away.
+i=0
+while [ "$i" -lt 20 ]; do
+	id=$(session_id) || id=""
+	if [ -n "$id" ]; then
+		echo "wave-hunk: opened session $id for $root"
+		exit 0
+	fi
+	sleep 0.5
+	i=$((i + 1))
+done
+
+echo "wave-hunk: opened a pane for $root, but no session registered after 10s" >&2
+exit 1

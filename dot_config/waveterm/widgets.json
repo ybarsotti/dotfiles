@@ -1,4 +1,18 @@
 {
+  "glance": {
+    "display:order": 0,
+    "icon": "gauge",
+    "color": "#74c7ec",
+    "label": "glance",
+    "description": "Dashboard - servicos locais, monitores e feeds",
+    "blockdef": {
+      "meta": {
+        "view": "web",
+        "url": "http://glance.test",
+        "pinnedurl": "http://glance.test"
+      }
+    }
+  },
   "claude": {
     "display:order": 1,
     "icon": "sparkles",
@@ -207,12 +221,12 @@
     "icon": "code-compare",
     "color": "#cba6f7",
     "label": "hunk",
-    "description": "Hunk diff viewer - pick a repo or worktree and watch changes",
+    "description": "Hunk diff viewer - pick a repo or worktree and watch the whole branch, commits included",
     "blockdef": {
       "meta": {
         "view": "term",
         "controller": "cmd",
-        "cmd": "/bin/zsh -lc 'wave-widget hunk diff --watch --mode auto --transparent-bg'",
+        "cmd": "/bin/zsh -lc 'wave-widget wave-hunk --exec . --mode auto --transparent-bg'",
         "cmd:shell": true,
         "cmd:clearonstart": true
       }
