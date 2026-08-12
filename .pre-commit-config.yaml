@@ -41,12 +41,20 @@ repos:
 
   - repo: local
     hooks:
+      # pre-push, not pre-commit. This job takes ~15 minutes in Docker and clones the actions
+      # from GitHub on every run, so as a commit hook it made every one-line change depend on a
+      # network round trip: three commits were rejected in a row by a transient
+      # `git clone: some refs were not updated`, with the code itself clean each time. It also
+      # stashes and restores the working tree per attempt, which silently reverted an edit made
+      # while it was running. Once per push keeps the same guarantee — nothing reaches the
+      # remote unreviewed by local CI — without standing between you and every commit.
       - id: act-lint
         name: GitHub Actions — Lint job (act)
         language: system
         entry: bash -c 'export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH" && act push -j lint --container-architecture linux/amd64 -P ubuntu-latest=catthehacker/ubuntu:act-latest'
         pass_filenames: false
         always_run: true
+        stages: [pre-push]
 
 exclude: |
   (?x)^(
