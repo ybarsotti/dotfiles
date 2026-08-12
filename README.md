@@ -652,7 +652,12 @@ Three slash commands chain together for planning and parallel execution of non-t
   handoff. Stops at an **approved plan** — it never builds or reviews code itself. Its last
   phase is an **execution recommendation** (below).
 - **`/deep-execute <plan.md>`** - Runs an approved parallel plan as lane workers sharing ONE
-  git worktree, in parallel cmux panes (via `cmux-orchestrator`). Coordinates fan-out, an
+  git worktree, in parallel **Wave Terminal blocks** (`wave-launch.sh`). Wave has no way to
+  type into a live block — there is no `wsh send`, which cmux provided — so each lane runs
+  `worker-loop.sh`: it takes its first prompt as an argument and every later one from
+  `lanes/<lane>/reply.md`, and the write of that file is the wake. Each lane is pinned to its
+  own `claude --session-id` UUID, because all lanes share one worktree and resuming "the last
+  session" would cross them. Coordinates fan-out, an
   event/reply protocol (`event.sh` / `board.sh` / `monitor-events.sh` / `reply.sh`),
   contract-drift handling, per-round gating (`round-gate.sh`: lane tests → contract →
   run-state → one light review, in that order), a 3-round cap with escalation, then the
@@ -675,7 +680,16 @@ Three slash commands chain together for planning and parallel execution of non-t
 The approved plan says *what* to build; how it gets built is a separate call, and it is yours.
 deep-plan's last phase reads the plan's `## Execution shape`, recommends one of four modes and
 asks you to confirm via `AskUserQuestion`, writing the choice to
-`$RUN_DIR/execution-recommendation.md`:
+`$RUN_DIR/execution-recommendation.md`.
+
+Before it offers those options it **re-runs `validate-plan.sh --root` from the project root** —
+the exact check `/deep-execute`'s `init-run.sh` will run. Phase 3 already validated before
+presenting the plan, but Plannotator's second pass can edit it afterwards, so a shape failure
+would otherwise surface only once you asked to build. It now fails at the recommendation instead.
+Whichever mode wins, the session also opens a Hunk pane with `wave-hunk` so you watch the build
+land; option A does it in its own Phase 1.
+
+The four modes:
 
 | | Option | Fits when |
 |---|---|---|

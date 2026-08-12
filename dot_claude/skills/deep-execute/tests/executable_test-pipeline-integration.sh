@@ -44,7 +44,7 @@ assert_exit 0 grep -qx 'codex gpt-5.6-terra high' "$ALLOW"
 # ─── End-to-end handoff: fixture parallel plan through validate-plan.sh, ───
 # init-run.sh, validate-contract.sh and validate-run-state.sh — the same
 # chain a real /deep-execute run walks before any worker launches. No real
-# agent may launch here: cmux/claude/codex/reviewer are stubbed on PATH and
+# agent may launch here: wsh/claude/codex/reviewer are stubbed on PATH and
 # the stub call log is asserted empty at the end, so a future change that
 # accidentally starts eagerly invoking one of them fails this test instead
 # of silently starting a real agent.
@@ -68,7 +68,7 @@ assert_exit 0 test -f "$CODEINTEL_FIXTURE"
 STUB_BIN=$(mktemp -d)
 STUB_LOG="${STUB_BIN}/calls.log"
 : >"$STUB_LOG"
-for stub in cmux claude codex reviewer; do
+for stub in wsh claude codex reviewer; do
   cat >"${STUB_BIN}/${stub}" <<STUBEOF
 #!/usr/bin/env bash
 echo "${stub} \$*" >>"${STUB_LOG}"
@@ -274,7 +274,7 @@ assert_eq "$(jq -r '.contract.path' "${RUN_DIR}/manifest.json")" "src/shared/con
   "manifest carries the fixture's contract path"
 assert_eq "$(jq -r '.baseline_commit' "${RUN_DIR}/manifest.json")" "$(git -C "$REPO" rev-parse HEAD)" \
   "manifest baseline_commit == the throwaway repo's HEAD at init time"
-assert_exit 0 test -f "${RUN_DIR}/cmux/worker-planning.prompt.md"
+assert_exit 0 test -f "${RUN_DIR}/wave/worker-planning.prompt.md"
 
 # ─── Step 1d: the contract validates against what init-run.sh wrote ───────
 
@@ -299,6 +299,6 @@ assert_eq "$(jq -r '.[] | select(.item=="changed-files-within-union") | .status'
 # ─── Step 1f: no real agent binary was ever invoked ────────────────────────
 
 assert_eq "$(wc -l <"$STUB_LOG" | tr -d ' ')" 0 \
-  "cmux/claude/codex/reviewer were never invoked by plan validation, init-run, or contract/state validation"
+  "wsh/claude/codex/reviewer were never invoked by plan validation, init-run, or contract/state validation"
 
 assert_summary

@@ -1,6 +1,6 @@
 ---
 name: deep-execute
-description: Runs an approved deep-plan parallel plan as lane workers in one shared cmux worktree. Use when invoked via /deep-execute, or when the user has an approved plan whose Execution shape declares disjoint lanes and an API contract and wants it built by parallel agents instead of one session. Coordinates fan-out, the event/reply protocol, round gating, contract drift and escalation — it does not write plans (deep-plan) or review code itself (deep-review, invoked once per run at the end).
+description: Runs an approved deep-plan parallel plan as lane workers in one shared git worktree. Use when invoked via /deep-execute, or when the user has an approved plan whose Execution shape declares disjoint lanes and an API contract and wants it built by parallel agents instead of one session. Coordinates fan-out, the event/reply protocol, round gating, contract drift and escalation — it does not write plans (deep-plan) or review code itself (deep-review, invoked once per run at the end).
 ---
 
 # deep-execute
@@ -12,7 +12,7 @@ gating — is a script call. Your job is the judgement around those calls: which
 whether a `blocked` event is real contract drift or a question you can answer yourself,
 whether a round's failures are worth re-running or worth waking a human for.
 
-**You never write lane code.** Lane workers do that, in parallel, in their own cmux panes,
+**You never write lane code.** Lane workers do that, in parallel, in their own Wave blocks,
 inside the SAME shared worktree. You commit, you gate, you reply — you don't edit their files.
 
 ## Phase 0 — Preflight
@@ -51,13 +51,15 @@ inside the SAME shared worktree. You commit, you gate, you reply — you don't e
 2. Run `init-run.sh PLAN RUN_DIR CWD ORCH_SURFACE`. It re-validates the plan, records
    `baseline_commit` as the current `HEAD`, writes the schema-conformant `RUN_DIR/manifest.json`
    (contract, workers, `max 3 rounds` by default), and scaffolds `events.jsonl`,
-   `lanes/<lane>/reply.md`, `worker-<lane>.files.txt` and cmux's own `RUN_DIR/cmux/manifest.json`.
+   `lanes/<lane>/reply.md`, `worker-<lane>.files.txt` and the launch manifest `RUN_DIR/wave/`.
 3. If the user passed `--max-rounds N` and `N` differs from the default, patch
    `RUN_DIR/manifest.json`'s `max_rounds` field now — `round-gate.sh` reads that field, never a
    hardcoded number, so this is the only place the override needs to land.
 4. Launch every non-orchestrator lane in the same worktree with the confirmed agent specs,
-   via cmux-orchestrator's `launch-workers.sh RUN_DIR/cmux CWD SPEC...` (grammar
-   `name:runner:model@effort`; bare `name` means `claude:sonnet`).
+   via `wave-launch.sh RUN_DIR/wave CWD SPEC...` (grammar `name:runner:model@effort`; bare
+   `name` means `claude:sonnet`). Each lane is a Wave block running `worker-loop.sh`, which
+   takes its first prompt as an argument and every later one from `lanes/<lane>/reply.md` —
+   Wave cannot type into a live block, so the reply file is the wake.
 5. **Open the diff pane** for the human: `wave-hunk CWD <baseline_commit>`. Pass the baseline,
    never the bare working tree — you commit between rounds. A failure here never blocks a lane.
 
@@ -192,7 +194,7 @@ recorded through `decision.sh` is one this report legitimately does not have.
 
 Report run directory, final `board.sh` table, contract version, round count, final SHA, QA
 verdict, the PR URL, and **both** HTML paths — the QA evidence report and this run report.
-**Leave panes alive** — success does not tear down cmux state.
+**Leave the blocks alive** — success does not tear down the run's Wave state.
 
 ## Resume (`--resume RUN_DIR`)
 

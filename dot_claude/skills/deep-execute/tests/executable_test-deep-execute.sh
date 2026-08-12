@@ -201,8 +201,8 @@ assert_eq "$(jq -r '.baseline_commit' "${RUN_HAPPY}/manifest.json")" "$(git -C "
 assert_exit 0 test -f "${RUN_HAPPY}/events.jsonl"
 assert_exit 0 test -f "${RUN_HAPPY}/worker-backend.files.txt"
 assert_exit 0 test -f "${RUN_HAPPY}/lanes/backend/reply.md"
-assert_exit 0 test -f "${RUN_HAPPY}/cmux/manifest.json"
-assert_exit 0 test -f "${RUN_HAPPY}/cmux/worker-backend.prompt.md"
+assert_exit 0 test -f "${RUN_HAPPY}/wave/manifest.json"
+assert_exit 0 test -f "${RUN_HAPPY}/wave/worker-backend.prompt.md"
 
 HAPPY_JSON=$("$VALIDATE_STATE" "$RUN_HAPPY" --json)
 assert_exit 0 "$VALIDATE_STATE" "$RUN_HAPPY" --json
@@ -424,15 +424,15 @@ mon_run() {
   printf '%s' "$d"
 }
 
-# mon_run_with_surface — same, plus a cmux/manifest.json giving lane
-# "backend" a real surface_ref, for the pane-health (vanished-pane /
+# mon_run_with_surface — same, plus a wave/manifest.json giving lane
+# "backend" a real block_ref, for the block-health (vanished-pane /
 # fatal-signature) triggers.
 mon_run_with_surface() {
   local d
   d=$(mktemp -d)
-  mkdir -p "${d}/cmux"
+  mkdir -p "${d}/wave"
   printf '{"workers":[{"lane":"backend"}]}\n' >"${d}/manifest.json"
-  printf '{"workers":[{"name":"backend","surface_ref":"surface:1"}]}\n' >"${d}/cmux/manifest.json"
+  printf '{"workers":[{"name":"backend","block_ref":"block:1"}]}\n' >"${d}/wave/manifest.json"
   : >"${d}/events.jsonl"
   printf '%s' "$d"
 }
@@ -545,34 +545,34 @@ assert_eq "$(jq -r '.type' <<<"$TRIGGER_RACE")" blocked \
 assert_eq "$(jq -r '.msg' <<<"$TRIGGER_RACE")" "landed during the pre-tail delay" \
   "monitor-events.sh: the startup-race trigger carries the event's own message, proving it was genuinely read (not a stale/default value)"
 
-# ─── Vanished pane: capture-pane fails for the lane's surface_ref ──────────
+# ─── Vanished block: termscrollback fails for the lane's block_ref ─────────
 
 MON_VANISHED=$(mon_run_with_surface)
 CMUX_BIN_CRASH=$(mktemp -d)
-cat >"${CMUX_BIN_CRASH}/cmux" <<'STUB'
+cat >"${CMUX_BIN_CRASH}/wsh" <<'STUB'
 #!/usr/bin/env bash
 exit 1
 STUB
-chmod +x "${CMUX_BIN_CRASH}/cmux"
+chmod +x "${CMUX_BIN_CRASH}/wsh"
 TRIGGER_VANISHED=$(PATH="${CMUX_BIN_CRASH}:${PATH}" MONITOR_LIVENESS_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "$MON_VANISHED")
-assert_eq "$(jq -r '.type' <<<"$TRIGGER_VANISHED")" vanished_pane "monitor-events.sh: capture-pane failing produces a vanished_pane trigger"
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_VANISHED")" vanished_pane "monitor-events.sh: termscrollback failing produces a vanished_pane trigger"
 assert_eq "$(jq -r '.lane' <<<"$TRIGGER_VANISHED")" backend "monitor-events.sh: vanished_pane trigger names the lane"
-assert_contains "$(jq -r '.msg' <<<"$TRIGGER_VANISHED")" "surface:1" "monitor-events.sh: vanished_pane trigger names the surface that failed"
+assert_contains "$(jq -r '.msg' <<<"$TRIGGER_VANISHED")" "block:1" "monitor-events.sh: vanished_pane trigger names the block that failed"
 
-# ─── Fatal signature: capture-pane succeeds but the NEW pane output ────────
+# ─── Fatal signature: termscrollback succeeds but the NEW block output ─────
 # contains a known-fatal signature.
 
 MON_FATAL=$(mon_run_with_surface)
 CMUX_BIN_FATAL=$(mktemp -d)
-cat >"${CMUX_BIN_FATAL}/cmux" <<'STUB'
+cat >"${CMUX_BIN_FATAL}/wsh" <<'STUB'
 #!/usr/bin/env bash
 echo "some ordinary output"
 echo "panic: something exploded"
 exit 0
 STUB
-chmod +x "${CMUX_BIN_FATAL}/cmux"
+chmod +x "${CMUX_BIN_FATAL}/wsh"
 TRIGGER_FATAL=$(PATH="${CMUX_BIN_FATAL}:${PATH}" MONITOR_LIVENESS_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "$MON_FATAL")
-assert_eq "$(jq -r '.type' <<<"$TRIGGER_FATAL")" fatal_signature "monitor-events.sh: a fatal signature in fresh pane output produces a fatal_signature trigger"
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_FATAL")" fatal_signature "monitor-events.sh: a fatal signature in fresh block output produces a fatal_signature trigger"
 assert_eq "$(jq -r '.lane' <<<"$TRIGGER_FATAL")" backend "monitor-events.sh: fatal_signature trigger names the lane"
 assert_contains "$(jq -r '.msg' <<<"$TRIGGER_FATAL")" "panic: something exploded" "monitor-events.sh: fatal_signature trigger quotes the matched line"
 
@@ -593,33 +593,36 @@ assert_eq "$TIMEOUT_RC" 1 "monitor-events.sh: the bound-exhausted timeout is the
 # reply.sh
 # ═══════════════════════════════════════════════════════════════════════════
 
-# reply_run — a 3-lane RUN_DIR (backend, frontend get a real surface_ref;
+# reply_run — a 3-lane RUN_DIR (backend, frontend get a real block_ref;
 # review does not) wired entirely by hand — reply.sh only reads
-# manifest.json's .contract.version/.workers[].lane and cmux/manifest.json's
-# .workers[].name/.surface_ref, so it doesn't need a full init-run.sh run.
+# manifest.json's .contract.version/.workers[].lane and wave/manifest.json's
+# .workers[].name/.block_ref, so it doesn't need a full init-run.sh run.
 reply_run() {
   local d
   d=$(mktemp -d)
-  mkdir -p "${d}/cmux" "${d}/lanes/backend" "${d}/lanes/frontend" "${d}/lanes/review"
+  mkdir -p "${d}/wave" "${d}/lanes/backend" "${d}/lanes/frontend" "${d}/lanes/review"
   : >"${d}/lanes/backend/reply.md"
   : >"${d}/lanes/frontend/reply.md"
   : >"${d}/lanes/review/reply.md"
   printf '{"contract":{"version":"1.0.1"},"workers":[{"lane":"backend"},{"lane":"frontend"},{"lane":"review"}]}\n' >"${d}/manifest.json"
-  printf '{"workers":[{"name":"backend","surface_ref":"surface:1"},{"name":"frontend","surface_ref":"surface:2"},{"name":"review","surface_ref":null}]}\n' >"${d}/cmux/manifest.json"
+  printf '{"workers":[{"name":"backend","block_ref":"block:1"},{"name":"frontend","block_ref":"block:2"},{"name":"review","block_ref":null}]}\n' >"${d}/wave/manifest.json"
   printf '%s' "$d"
 }
 
-# cmux stub for the "every wake succeeds" side of the run — logs argv,
-# always exits 0 (send-task.sh's own `cmux send` call succeeds).
+# wsh stub for the "every lane is alive" side of the run — `wsh blocks list`
+# lists both launched blocks, so reply.sh finds a loop still watching each file.
 CMUX_BIN_OK=$(mktemp -d)
-cat >"${CMUX_BIN_OK}/cmux" <<'STUB'
+cat >"${CMUX_BIN_OK}/wsh" <<'STUB'
 #!/usr/bin/env bash
-echo "cmux-stub: $*" >&2
+if [ "${1:-}" = "blocks" ]; then
+  echo "1"
+  echo "2"
+fi
 exit 0
 STUB
-chmod +x "${CMUX_BIN_OK}/cmux"
+chmod +x "${CMUX_BIN_OK}/wsh"
 
-# ─── --all across 3 lanes: two wake, one has no surface_ref (reported, ─────
+# ─── --all across 3 lanes: two wake, one has no block_ref (reported, ───────
 # not swallowed) — this is exactly the "waiting forever" failure mode the
 # team-lead flagged: a lane that emitted `waiting` and stopped by design
 # must never be silently left unwoken.
@@ -638,31 +641,31 @@ assert_contains "$(cat "${RUN_R}/lanes/backend/reply.md")" "- Sent at:" "reply.s
 REPLY_BACKEND=$(printf '%s\n' "$REPLY_OUT" | jq -c 'select(.lane=="backend")')
 REPLY_FRONTEND=$(printf '%s\n' "$REPLY_OUT" | jq -c 'select(.lane=="frontend")')
 REPLY_REVIEW=$(printf '%s\n' "$REPLY_OUT" | jq -c 'select(.lane=="review")')
-assert_eq "$(jq -r '.woken' <<<"$REPLY_BACKEND")" true "reply.sh --all: backend (has a surface_ref) is woken"
-assert_eq "$(jq -r '.woken' <<<"$REPLY_FRONTEND")" true "reply.sh --all: frontend (has a surface_ref) is woken"
-assert_eq "$(jq -r '.woken' <<<"$REPLY_REVIEW")" false "reply.sh --all: review (no surface_ref) fails to wake"
+assert_eq "$(jq -r '.woken' <<<"$REPLY_BACKEND")" true "reply.sh --all: backend (live block) is woken"
+assert_eq "$(jq -r '.woken' <<<"$REPLY_FRONTEND")" true "reply.sh --all: frontend (live block) is woken"
+assert_eq "$(jq -r '.woken' <<<"$REPLY_REVIEW")" false "reply.sh --all: review (no block_ref) fails to wake"
 assert_eq "$(jq -r '.reply_written' <<<"$REPLY_REVIEW")" true "reply.sh --all: reply.md is still written for review even though the wake itself failed"
-assert_contains "$(jq -r '.detail' <<<"$REPLY_REVIEW")" "no surface_ref" "reply.sh --all: the wake failure names the exact reason, not a generic error"
+assert_contains "$(jq -r '.detail' <<<"$REPLY_REVIEW")" "no block_ref" "reply.sh --all: the wake failure names the exact reason, not a generic error"
 assert_contains "$(jq -r '.detail' <<<"$REPLY_REVIEW")" "review" "reply.sh --all: the wake-failure detail names the failing lane"
 
-# ─── send-task.sh itself failing (surface_ref present, but the wake call ───
-# errors) is a DIFFERENT failure mode than "no surface_ref" and must be
-# reported with its own distinguishable detail.
+# ─── A block that is gone (block_ref present, but no loop is alive to read ─
+# the file) is a DIFFERENT failure mode than "no block_ref" and must be
+# reported with its own distinguishable detail. This is the stranded lane:
+# the reply is on disk and nobody will ever read it.
 
 CMUX_BIN_FAIL=$(mktemp -d)
-cat >"${CMUX_BIN_FAIL}/cmux" <<'STUB'
+cat >"${CMUX_BIN_FAIL}/wsh" <<'STUB'
 #!/usr/bin/env bash
-echo "cmux-stub: send failed" >&2
-exit 1
+exit 0
 STUB
-chmod +x "${CMUX_BIN_FAIL}/cmux"
+chmod +x "${CMUX_BIN_FAIL}/wsh"
 
 RUN_R2=$(reply_run)
 REPLY_RC2=0
 REPLY_OUT2=$(PATH="${CMUX_BIN_FAIL}:${PATH}" "$REPLY" "$RUN_R2" backend "urgent update" 2>/dev/null) || REPLY_RC2=$?
-assert_eq "$REPLY_RC2" 1 "reply.sh: a single-lane call where send-task.sh itself fails exits 1"
-assert_eq "$(jq -r '.woken' <<<"$REPLY_OUT2")" false "reply.sh: send-task.sh's own failure is reported as woken:false"
-assert_contains "$(jq -r '.detail' <<<"$REPLY_OUT2")" "send-task.sh failed" "reply.sh: the detail distinguishes 'send-task.sh failed' from 'no surface_ref'"
+assert_eq "$REPLY_RC2" 1 "reply.sh: a single-lane call whose block is gone exits 1"
+assert_eq "$(jq -r '.woken' <<<"$REPLY_OUT2")" false "reply.sh: a dead block is reported as woken:false"
+assert_contains "$(jq -r '.detail' <<<"$REPLY_OUT2")" "is gone" "reply.sh: the detail distinguishes a dead block from 'no block_ref'"
 
 # ─── An unknown lane name is a usage error, not a silent no-op ────────────
 

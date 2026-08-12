@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # init-run.sh — scaffolds a deep-execute run directory from an approved
 # parallel plan: validates the plan, refuses to start on any uncommitted
-# contract/shared file, hands cmux the confirmed agent mapping to scaffold
+# contract/shared file, hands the launch scaffolder the confirmed agent mapping
 # worker prompts, then writes the run-state manifest.json that everything
 # else in this skill (event.sh, board.sh, validate-run-state.sh) reads.
 #
@@ -13,17 +13,17 @@
 # against CWD, so this script validates the plan FROM CWD, matching how a
 # human would run validate-plan.sh from the project root.
 #
-# Design note (not spelled out in the plan's interface list): cmux's own
-# prepare-run.sh writes ITS OWN manifest.json, shaped for cmux's launch
-# bookkeeping (surface_ref, prompt/result files, worker_pane_ref) — a shape
+# Design note (not spelled out in the plan's interface list): the shared
+# prepare-run.sh writes ITS OWN manifest.json, shaped for the launch
+# bookkeeping (block_ref, prompt/result files, session_id) — a shape
 # that doesn't fit schemas/run-state.schema.json's `manifest` definition
 # (additionalProperties: false, and a different `workers[]` shape). Rather
-# than force those two shapes into one file, cmux is pointed at
-# `${RUN_DIR}/cmux/` as its own run directory, and this script writes the
+# than force those two shapes into one file, it is pointed at
+# `${RUN_DIR}/wave/` as its own run directory, and this script writes the
 # schema-conformant `${RUN_DIR}/manifest.json` separately. A later task that
-# needs a worker's surface_ref reads `${RUN_DIR}/cmux/manifest.json`; the
-# prompt/result files it writes live at predictable `${RUN_DIR}/cmux/
-# worker-<lane>.prompt.md` paths by cmux's own convention.
+# needs a worker's block_ref reads `${RUN_DIR}/wave/manifest.json` (filled in
+# by wave-launch.sh); the prompt files live at predictable
+# `${RUN_DIR}/wave/worker-<lane>.prompt.md` paths.
 
 set -eufo pipefail
 
@@ -62,6 +62,8 @@ PLAN="${PLAN_DIR_ABS}/$(basename "$PLAN_ARG")"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 DEEP_PLAN_SCRIPTS="$(cd "${SCRIPT_DIR}/../../deep-plan/scripts" && pwd)"
+# prepare-run.sh launches nothing and touches no multiplexer — it only writes
+# scaffolding — so it is reused across transports rather than re-implemented.
 CMUX_SCRIPTS="$(cd "${SCRIPT_DIR}/../../cmux-orchestrator/scripts" && pwd)"
 
 # Resolve BOTH the source-tree name (executable_*) and the deployed name for
@@ -138,12 +140,12 @@ done
   exit 1
 }
 
-# ─── Step 4: confirmed agent mapping -> cmux worker specs ──────────────────
+# ─── Step 4: confirmed agent mapping -> launch worker specs ────────────────
 # agents.allowlist lines are "<model> <effort>" for claude (opus/sonnet) or
 # "codex <model> <effort>" for codex — the exact grammar validate-plan.sh's
 # lane-agent-in-allowlist already checked the plan's `agent` column against,
 # so no further validation is needed here, only re-shaping into
-# launch-workers.sh's `name:runner:model@effort` spec grammar.
+# wave-launch.sh's `name:runner:model@effort` spec grammar.
 agent_to_spec() {
   local lane="$1" agent="$2" a b c runner model effort
   read -r a b c <<<"$agent"
@@ -172,12 +174,16 @@ done < <(jq -r --arg orch "$ORCH_LANE" '.lanes[] | select(.name != $orch) | "\(.
   exit 1
 }
 
-# ─── Step 5: cmux scaffolding (its own manifest.json, kept out of ours) ────
+# ─── Step 5: launch scaffolding (its own manifest.json, kept out of ours) ──
+# prepare-run.sh writes the shared system prompt, one worker-<lane>.prompt.md per
+# lane, and a manifest with a null transport ref. It launches nothing and touches no
+# multiplexer, so it is transport-agnostic and reused as-is; wave-launch.sh fills the
+# `block_ref` and `session_id` fields in afterwards.
 
 mkdir -p "$RUN_DIR"
-CMUX_DIR="${RUN_DIR}/cmux"
-mkdir -p "$CMUX_DIR"
-"$PREPARE_RUN" "$CMUX_DIR" "$CWD" "$ORCH_SURFACE" --system-prompt "$WORKER_PROMPT" "${WORKER_SPECS[@]}"
+WAVE_DIR="${RUN_DIR}/wave"
+mkdir -p "$WAVE_DIR"
+"$PREPARE_RUN" "$WAVE_DIR" "$CWD" "$ORCH_SURFACE" --system-prompt "$WORKER_PROMPT" "${WORKER_SPECS[@]}"
 
 # ─── Step 6: run-state scaffolding — events log, per-lane reply + files log ─
 # Never clobbers state a previous init-run.sh call already created, so a

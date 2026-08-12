@@ -8,11 +8,15 @@
 # Writes `lanes/<lane>/reply.md` (overwritten, not appended — a reply is the
 # current instruction for a waiting/blocked worker, not a running log; the
 # run's real history already lives in events.jsonl) with a small structured
-# header, then resolves the lane's `surface_ref` from
-# `RUN_DIR/cmux/manifest.json` (cmux's own manifest — see init-run.sh's
-# header note for why surface_ref lives there and not in this skill's own
-# manifest.json) and wakes the pane through cmux-orchestrator's own
-# send-task.sh, never a second hand-rolled `cmux send` call.
+# header. **That write is the wake.** worker-loop.sh blocks on the file's mtime
+# and resumes the lane's session when it moves, so nothing is typed into the
+# worker. Wave has no way to type into a live block — there is no `wsh send` —
+# which is why the transport is a file rather than a keystroke.
+#
+# The lane's `block_ref` is read from `RUN_DIR/wave/manifest.json` (the launch
+# transport's own manifest, kept out of this skill's — see init-run.sh's header)
+# only to check that the lane's loop is still alive. A reply written for a dead
+# block is on disk with nobody to read it, which is a stranded lane.
 #
 # `--all` writes and wakes every non-orchestrator lane listed in this
 # skill's own `RUN_DIR/manifest.json` (already excludes the orchestrator
@@ -41,22 +45,13 @@ command -v jq >/dev/null 2>&1 || {
   exit 2
 }
 MANIFEST="${RUN_DIR}/manifest.json"
-CMUX_MANIFEST="${RUN_DIR}/cmux/manifest.json"
+WAVE_MANIFEST="${RUN_DIR}/wave/manifest.json"
 [ -f "$MANIFEST" ] || {
   echo "reply.sh: missing ${MANIFEST}" >&2
   exit 2
 }
-[ -f "$CMUX_MANIFEST" ] || {
-  echo "reply.sh: missing ${CMUX_MANIFEST}" >&2
-  exit 2
-}
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CMUX_SCRIPTS="$(cd "${SCRIPT_DIR}/../../cmux-orchestrator/scripts" && pwd)"
-SEND_TASK="${CMUX_SCRIPTS}/send-task.sh"
-[ -f "$SEND_TASK" ] || SEND_TASK="${CMUX_SCRIPTS}/executable_send-task.sh"
-[ -f "$SEND_TASK" ] || {
-  echo "reply.sh: cannot find send-task.sh next to cmux-orchestrator's scripts" >&2
+[ -f "$WAVE_MANIFEST" ] || {
+  echo "reply.sh: missing ${WAVE_MANIFEST}" >&2
   exit 2
 }
 
@@ -98,27 +93,31 @@ for lane in "${TARGET_LANES[@]}"; do
     printf '\n%s\n' "$MESSAGE"
   } >"$REPLY_FILE"
 
-  SURFACE=$(jq -r --arg n "$lane" '.workers[]? | select(.name == $n) | .surface_ref // empty' "$CMUX_MANIFEST")
+  # The write above IS the wake: worker-loop.sh blocks on this file's mtime and
+  # resumes the lane's session when it moves. Nothing is typed into the worker,
+  # because Wave has no way to type into a block — see wave-launch.sh's header.
+  #
+  # A reply only reaches a lane whose loop is still alive, so the block is checked
+  # too. A dead block means the reply landed on disk and nobody will read it, which
+  # is the stranded-lane failure this script exists to report rather than swallow.
+  BLOCK=$(jq -r --arg n "$lane" '.workers[]? | select(.name == $n) | .block_ref // empty' "$WAVE_MANIFEST")
 
-  if [ -z "$SURFACE" ] || [ "$SURFACE" = "null" ]; then
+  if [ -z "$BLOCK" ] || [ "$BLOCK" = "null" ]; then
     FAILED=1
-    jq -n --arg lane "$lane" --arg detail "no surface_ref for lane '${lane}' in ${CMUX_MANIFEST}" \
+    jq -n --arg lane "$lane" --arg detail "no block_ref for lane '${lane}' in ${WAVE_MANIFEST} — was it launched?" \
       '{lane: $lane, reply_written: true, woken: false, detail: $detail}'
     continue
   fi
 
-  # Invoked via `bash "$SEND_TASK"` rather than executing it directly: the
-  # checked-out source tree does not always carry the executable bit on
-  # every cross-skill script (chezmoi sets it from the `executable_` prefix
-  # at `apply` time, not necessarily in the source checkout), and this
-  # script has no business depending on that bit for a script it doesn't
-  # own.
-  if WAKE_OUT=$(bash "$SEND_TASK" "$SURFACE" "Read ${REPLY_FILE}, apply it, then continue your lane." 2>&1); then
-    jq -n --arg lane "$lane" --arg detail "woken via ${SURFACE}: ${WAKE_OUT}" \
+  if ! command -v wsh >/dev/null 2>&1; then
+    jq -n --arg lane "$lane" --arg detail "reply written for ${BLOCK}; wsh absent, so liveness is unverified" \
+      '{lane: $lane, reply_written: true, woken: true, detail: $detail}'
+  elif wsh blocks list 2>/dev/null | grep -qF "${BLOCK#block:}"; then
+    jq -n --arg lane "$lane" --arg detail "reply written; ${BLOCK} is alive and watching" \
       '{lane: $lane, reply_written: true, woken: true, detail: $detail}'
   else
     FAILED=1
-    jq -n --arg lane "$lane" --arg detail "send-task.sh failed for surface ${SURFACE}: ${WAKE_OUT}" \
+    jq -n --arg lane "$lane" --arg detail "${BLOCK} is gone — the reply is on disk with no loop to read it" \
       '{lane: $lane, reply_written: true, woken: false, detail: $detail}'
   fi
 done
