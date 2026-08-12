@@ -324,6 +324,13 @@ is what the user reads; Plannotator carries the detail.
 ## Phase 3.5 — Execution recommendation (mandatory)
 
 The plan is approved; **how** it gets built is a separate decision, and it is the user's.
+
+**Re-gate first.** Plannotator's second pass can edit the plan after the last
+`finalize-plan.sh`, and `/deep-execute`'s `init-run.sh` re-runs the same check from the project
+root — so run it there, now: `(cd "$PROJECT_ROOT" && validate-plan.sh "$RUN_DIR/plan.md" --root
+--json)`. Any `fail` goes back to `finalize-plan.sh`. Never offer option A on a plan that
+`init-run.sh` will reject; that failure belongs here, not after the user asks to build.
+
 Write `$RUN_DIR/execution-recommendation.md` — recommendation first, then the four options
 with the trade-off that decides between them — and put the same four to the user through
 `AskUserQuestion`, recommended option first.
@@ -361,18 +368,20 @@ a plain browser agent otherwise) → a **separate** agent fixes the gaps QA foun
 `/pr-description` with evidence → HTML run report. `/deep-execute` runs that chain itself; for
 B, C and D you drive the same sequence from this session.
 
-**Open `/goal` before the build starts, whichever option won.** `/goal` is built into Claude
-Code and Codex, and it is what keeps the chain above running to the end instead of stopping at
-the first natural pause. State the objective as the finished result — reviewed, QA-green, PR
-open — not as the next step, and let it stop only on a blocker no agent can settle alone.
-Option A's skill opens it in its own Phase 0; for B, C and D you open it here.
+**Open `/goal` before the build starts, whichever option won.** It is built into Claude Code and
+Codex, and it keeps the chain above running to the end instead of stopping at the first natural
+pause. State the objective as the finished result — reviewed, QA-green, PR open — and let it stop
+only on a blocker no agent can settle alone. Option A opens it in Phase 0; B, C and D open it here.
 
-One asymmetry to state when you present the options: the self-contained **HTML run report**
-(what was built, every recorded decision with its rejected alternatives and accepted tradeoffs,
-drift, tests, evidence, PR) is a `/deep-execute` artifact — `build-run-report.sh` reads a
-deep-execute run directory. Under B, C and D the deliverables are the QA evidence report, the
-PR body carrying the decisions, and whatever you record as you go. If the user wants that page,
-option A is the one that produces it.
+**Open the diff pane too, whichever option won:** `wave-hunk "$PROJECT_ROOT" <HEAD>` puts a Hunk
+pane in Wave beside the build, so the user reads the change as it lands. Pass the base ref — a
+bare working-tree diff empties on every commit the build makes. Annotate it through the
+`hunk-review` skill. Option A opens it in Phase 1; B, C and D open it here.
+
+State one asymmetry with the options: the self-contained **HTML run report** — what was built,
+every decision with its rejected alternatives and accepted tradeoffs, drift, evidence, PR — is a
+`/deep-execute` artifact, because `build-run-report.sh` reads a deep-execute run directory. B, C
+and D deliver the QA evidence report and the PR body instead.
 
 Record the chosen option in `$RUN_DIR/execution-recommendation.md` under `## Chosen`, with
 the user's reason if they gave one.
@@ -398,9 +407,6 @@ Hand off according to the Phase 3.5 choice, then stop:
 - **B** → print `Skill(skill="superpowers:executing-plans")` against `$RUN_DIR/plan.md`.
 - **C** → print the `Workflow` phase shape the plan implies (one stage per lane, verify stage).
 - **D** → print the Codex dispatch plus the same post-build chain.
-
-Each drives isolate → build → simplify → `/deep-review` 3:3 + fixes → frozen commit → QA
-execution → PR with evidence → run report.
 
 > Tip: for a Jira ticket, `/deep-plan` is invoked **inside** the `jira-workflow` skill, which
 > then drives the chosen execution mode automatically after approval.
