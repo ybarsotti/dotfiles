@@ -1,7 +1,7 @@
 # deep-execute
 
 Runs an approved [deep-plan](../deep-plan/README.md) parallel plan as lane workers, in
-parallel cmux panes, inside ONE shared git worktree. Every worker stays inside its lane's
+parallel Wave Terminal blocks, inside ONE shared git worktree. Every worker stays inside its lane's
 declared `owns` globs; the orchestrator is the sole committer, gates every round, and never
 lets a worker touch `git` itself.
 
@@ -38,9 +38,18 @@ scripts/decision.sh        — records one lane decision/assumption, then announ
 scripts/build-run-report.sh — renders the run's HTML report from the run directory alone
 ```
 
-`init-run.sh` points cmux at `RUN_DIR/cmux/` as its own run directory (a different manifest
-shape than this skill's own `RUN_DIR/manifest.json`) and launches lanes through
-cmux-orchestrator's `launch-workers.sh`.
+`init-run.sh` scaffolds `RUN_DIR/wave/` as the launch transport's own run directory (a
+different manifest shape than this skill's own `RUN_DIR/manifest.json`) and `wave-launch.sh`
+launches each lane there as a Wave block running `worker-loop.sh`.
+
+**Why a loop instead of a REPL.** Wave has no way to type into a live block — `wsh run`
+launches one and `wsh termscrollback` reads one, but there is no `wsh send`. cmux had
+`cmux send`, which is how a `waiting` lane used to be woken. So the wake is a file:
+`worker-loop.sh` blocks on `lanes/<lane>/reply.md` and resumes the lane's session when it
+moves. Each lane is pinned to its own `--session-id` UUID, because every lane shares one
+worktree and resuming "the last session" would cross lanes. Codex lanes are stateless per
+turn — `codex exec resume` takes a session id but nothing pins one at creation — so a codex
+lane re-reads its prompt file and reply each turn instead.
 
 ## The lane-agent allowlist
 
@@ -85,7 +94,7 @@ failure signature (`invalid_event`, `vanished_pane`, `fatal_signature`, `monitor
 `timeout`) — every trigger except `timeout` exits 0, so the caller must branch on `.type`,
 never the exit code. Once the orchestrator has something for a lane, `reply.sh RUN_DIR
 LANE MESSAGE` (or `reply.sh RUN_DIR --all MESSAGE` for a contract-wide announcement) writes
-`lanes/<lane>/reply.md` and wakes the pane via cmux's `send-task.sh`. `reply.sh` attempts
+`lanes/<lane>/reply.md`, and that write IS the wake. `reply.sh` attempts
 every lane even when an earlier one fails to wake, and reports each lane's outcome as its own
 JSON line — a wake failure is surfaced, never swallowed, because a `waiting` lane that never
 gets its reply is stranded by design.
@@ -181,11 +190,11 @@ RUN_DIR/
 ├── lanes/<lane>/decisions/NNN.json # decisions/assumptions that lane recorded mid-run
 ├── light-review/round-<N>/        # round-gate.sh's own reviewer transcript per round
 ├── report/index.html              # the run report (build-run-report.sh)
-└── cmux/
-    ├── manifest.json              # cmux's own run bookkeeping (surface_ref, pane_ref)
-    └── worker-<lane>.prompt.md    # the prompt each lane pane was launched with
+└── wave/
+    ├── manifest.json              # launch bookkeeping (block_ref, session_id)
+    └── worker-<lane>.prompt.md    # the prompt each lane block was launched with
 ```
 
 At the end of a successful run, one full `/deep-review` pass runs over the whole diff, the run
-report is built, and the cmux panes are left alive — teardown is a separate, human-confirmed
+report is built, and the Wave blocks are left alive — teardown is a separate, human-confirmed
 step.

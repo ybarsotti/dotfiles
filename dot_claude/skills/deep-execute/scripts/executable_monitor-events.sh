@@ -96,7 +96,7 @@ if [ -z "$RUN_DIR" ]; then
 fi
 
 MANIFEST="${RUN_DIR}/manifest.json"
-CMUX_MANIFEST="${RUN_DIR}/cmux/manifest.json"
+WAVE_MANIFEST="${RUN_DIR}/wave/manifest.json"
 EVENTS="${RUN_DIR}/events.jsonl"
 
 [ -f "$MANIFEST" ] || {
@@ -190,24 +190,27 @@ while IFS= read -r l; do
   [ -n "$l" ] && LANES+=("$l")
 done < <(jq -r '.workers[]?.lane // empty' "$MANIFEST" 2>/dev/null)
 
-# do_liveness_check — one pass over every lane: vanished pane (capture-pane
-# fails) or a fatal signature in NEW pane-log output since that lane's own
-# watermark. Silently skipped (not an error) when cmux isn't available or
-# the cmux manifest doesn't exist yet — this script's primary job is
-# watching events.jsonl; pane health is a supplementary signal layered on
-# top, same relationship monitor-workers.sh has to done markers vs. panes.
+# do_liveness_check — one pass over every lane: a vanished block (its scrollback
+# can no longer be read) or a fatal signature in NEW block output since that lane's
+# own watermark. Silently skipped (not an error) when wsh is unavailable or the
+# launch manifest does not exist yet — this script's primary job is watching
+# events.jsonl; block health is a supplementary signal layered on top.
+#
+# `wsh termscrollback -b <block>` replaces cmux's `capture-pane`. The event name
+# stays `vanished_pane` because every caller's filter already branches on it, and
+# renaming a trigger silently is how a monitor goes deaf.
 do_liveness_check() {
-  command -v cmux >/dev/null 2>&1 || return 0
-  [ -f "$CMUX_MANIFEST" ] || return 0
-  local lane surface pane_log state_file total prev new match
+  command -v wsh >/dev/null 2>&1 || return 0
+  [ -f "$WAVE_MANIFEST" ] || return 0
+  local lane block pane_log state_file total prev new match
   for lane in "${LANES[@]}"; do
-    surface=$(jq -r --arg n "$lane" '.workers[]? | select(.name == $n) | .surface_ref // empty' "$CMUX_MANIFEST" 2>/dev/null)
-    if [ -z "$surface" ] || [ "$surface" = "null" ]; then
+    block=$(jq -r --arg n "$lane" '.workers[]? | select(.name == $n) | .block_ref // empty' "$WAVE_MANIFEST" 2>/dev/null)
+    if [ -z "$block" ] || [ "$block" = "null" ]; then
       continue
     fi
 
-    if ! pane_log=$(cmux capture-pane --surface "$surface" 2>&1); then
-      emit "vanished_pane" "$lane" "" "pane vanished: capture-pane failed for ${surface}"
+    if ! pane_log=$(wsh termscrollback -b "$block" 2>&1); then
+      emit "vanished_pane" "$lane" "" "block vanished: termscrollback failed for ${block}"
     fi
 
     state_file="${STATE_DIR}/pane-${lane}.lines"
