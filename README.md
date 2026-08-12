@@ -561,6 +561,35 @@ Config lives in `~/.config/waveterm/` (flat JSON, `:` as level separator). Docs:
     because fzf honours `NO_COLOR` too and would go monochrome. gh-notify's own colours are
     emitted by the script, so they are unaffected.
 
+#### The agent group chat — `llmessage`
+
+[llmessage](https://github.com/ybarsotti/llmessage) is a per-project chat that agents and you
+share. It lives in its own repo at `~/Developer/llmessage`; this repo carries only the widget.
+
+A `/deep-execute` run already writes `events.jsonl` and `lanes/<lane>/reply.md`, but that
+conversation is one-way, machine-shaped, and dies with the run — `RUN_DIR` ends when the PR
+opens, so CI failures and review rounds land nowhere. llmessage reads those files **from the
+outside** and projects them into a session that lives until the PR closes. **No line of
+deep-execute changes**, which is deliberate: its scripts carry 820 assertions.
+
+```bash
+llmessage daemon              # mirror runs into their sessions, every 5s
+llmessage daemon --once       # a single pass
+llmessage tui                 # session list + live conversation
+llmessage post --body "..."   # post to the current repo's session
+llmessage sessions            # every session, newest first
+```
+
+- The **`chat` widget** runs one `--once` sync and then the TUI, so it is useful even when no
+  daemon is running.
+- The chat sits **beside** the run, never on its critical path. `reply.md` stays the wake
+  channel `worker-loop.sh` blocks on, so a broken chat cannot strand a lane.
+- A human message reaches a lane through the **orchestrator**, which reads the chat and routes
+  it via `reply.sh` — the same single door that already owns commits and replies.
+- Install today is `cargo install --path ~/Developer/llmessage`. There is no pinned
+  `.chezmoiexternal.toml` entry yet, because there is no published release to pin a SHA256
+  against; that follows the obscura pattern once the repo has one.
+
 #### Following an agent's diff — `wave-hunk`
 
 `~/.local/bin/wave-hunk` opens a [Hunk](https://github.com/modem-dev/hunk) diff pane in Wave for a

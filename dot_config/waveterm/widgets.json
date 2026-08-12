@@ -232,8 +232,24 @@
       }
     }
   },
-  "weathr": {
+  "llmessage": {
     "display:order": 16,
+    "icon": "comments",
+    "color": "#94e2d5",
+    "label": "chat",
+    "description": "llmessage - the agent group chat for this project, live",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "/bin/zsh -lc 'llmessage daemon --once >/dev/null 2>&1; exec llmessage tui'",
+        "cmd:shell": true,
+        "cmd:clearonstart": true
+      }
+    }
+  },
+  "weathr": {
+    "display:order": 17,
     "icon": "cloud-sun",
     "color": "#f9e2af",
     "label": "weather",
