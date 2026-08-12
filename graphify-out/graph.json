@@ -9,7 +9,7 @@
       "source_file": "dot_config/wezterm/keys.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_keys_lua",
-      "community": 9,
+      "community": 5,
       "norm_label": "keys.lua"
     },
     {
@@ -18,7 +18,7 @@
       "source_file": "dot_config/wezterm/keys.lua",
       "source_location": "L19",
       "id": "wezterm_keys_m_setup",
-      "community": 9,
+      "community": 5,
       "norm_label": "m.setup()"
     },
     {
@@ -27,7 +27,7 @@
       "source_file": "dot_config/wezterm/wezterm.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_wezterm_lua",
-      "community": 16,
+      "community": 10,
       "norm_label": "wezterm.lua"
     },
     {
@@ -36,7 +36,7 @@
       "source_file": "dot_config/wezterm/fonts.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_fonts_lua",
-      "community": 10,
+      "community": 6,
       "norm_label": "fonts.lua"
     },
     {
@@ -45,7 +45,7 @@
       "source_file": "dot_config/wezterm/fonts.lua",
       "source_location": "L5",
       "id": "wezterm_fonts_m_setup",
-      "community": 10,
+      "community": 6,
       "norm_label": "m.setup()"
     },
     {
@@ -54,7 +54,7 @@
       "source_file": "dot_config/wezterm/plugins/zen-mode-vim.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_plugins_zen_mode_vim_lua",
-      "community": 17,
+      "community": 11,
       "norm_label": "zen-mode-vim.lua"
     },
     {
@@ -63,7 +63,7 @@
       "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_plugins_workspace_switcher_lua",
-      "community": 11,
+      "community": 7,
       "norm_label": "workspace-switcher.lua"
     },
     {
@@ -72,7 +72,7 @@
       "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
       "source_location": "L7",
       "id": "plugins_workspace_switcher_m_setup",
-      "community": 11,
+      "community": 7,
       "norm_label": "m.setup()"
     },
     {
@@ -81,7 +81,7 @@
       "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_plugins_move_workspace_lua",
-      "community": 12,
+      "community": 8,
       "norm_label": "move_workspace.lua"
     },
     {
@@ -90,7 +90,7 @@
       "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
       "source_location": "L5",
       "id": "plugins_move_workspace_m_setup",
-      "community": 12,
+      "community": 8,
       "norm_label": "m.setup()"
     },
     {
@@ -99,7 +99,7 @@
       "source_file": "dot_config/wezterm/plugins/bar.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_plugins_bar_lua",
-      "community": 13,
+      "community": 9,
       "norm_label": "bar.lua"
     },
     {
@@ -108,7 +108,7 @@
       "source_file": "dot_config/wezterm/plugins/bar.lua",
       "source_location": "L5",
       "id": "plugins_bar_m_setup",
-      "community": 13,
+      "community": 9,
       "norm_label": "m.setup()"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "dot_config/wezterm/themes/melange_dark.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_themes_melange_dark_lua",
-      "community": 18,
+      "community": 12,
       "norm_label": "melange_dark.lua"
     },
     {
@@ -126,7 +126,7 @@
       "source_file": "dot_config/wezterm/themes/kanagawa-dragon.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_themes_kanagawa_dragon_lua",
-      "community": 19,
+      "community": 13,
       "norm_label": "kanagawa-dragon.lua"
     },
     {
@@ -135,7 +135,7 @@
       "source_file": "dot_config/wezterm/themes/cyberdream.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_themes_cyberdream_lua",
-      "community": 20,
+      "community": 14,
       "norm_label": "cyberdream.lua"
     },
     {
@@ -144,7 +144,7 @@
       "source_file": "dot_config/yazi/plugins/smart-tab.yazi/init.lua",
       "source_location": "L1",
       "id": "dot_config_yazi_plugins_smart_tab_yazi_init_lua",
-      "community": 21,
+      "community": 15,
       "norm_label": "init.lua"
     },
     {
@@ -153,7 +153,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L1",
       "id": "dot_claude_skills_qa_test_plan_scripts_executable_qa_artifacts_py",
-      "community": 0,
+      "community": 3,
       "norm_label": "executable_qa_artifacts.py"
     },
     {
@@ -162,7 +162,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L44",
       "id": "scripts_executable_qa_artifacts_validate_plan",
-      "community": 0,
+      "community": 3,
       "norm_label": "validate_plan()"
     },
     {
@@ -171,7 +171,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L53",
       "id": "scripts_executable_qa_artifacts_render_plan",
-      "community": 0,
+      "community": 3,
       "norm_label": "render_plan()"
     },
     {
@@ -180,7 +180,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L65",
       "id": "scripts_executable_qa_artifacts_validate_results",
-      "community": 0,
+      "community": 3,
       "norm_label": "validate_results()"
     },
     {
@@ -189,7 +189,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L75",
       "id": "scripts_executable_qa_artifacts_render_report",
-      "community": 0,
+      "community": 3,
       "norm_label": "render_report()"
     },
     {
@@ -198,7 +198,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L87",
       "id": "scripts_executable_qa_artifacts_write_schemas",
-      "community": 0,
+      "community": 3,
       "norm_label": "write_schemas()"
     },
     {
@@ -207,7 +207,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L47",
       "id": "scripts_executable_qa_artifacts_rationale_47",
-      "community": 0,
+      "community": 3,
       "norm_label": "parse a qa plan and reject invalid or dangling references."
     },
     {
@@ -216,7 +216,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L57",
       "id": "scripts_executable_qa_artifacts_rationale_57",
-      "community": 0,
+      "community": 3,
       "norm_label": "render human-readable markdown from the structured qa plan."
     },
     {
@@ -225,7 +225,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L69",
       "id": "scripts_executable_qa_artifacts_rationale_69",
-      "community": 0,
+      "community": 3,
       "norm_label": "parse results and prove complete scenario/step coverage against the plan."
     },
     {
@@ -234,7 +234,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L80",
       "id": "scripts_executable_qa_artifacts_rationale_80",
-      "community": 0,
+      "community": 3,
       "norm_label": "render html, webvtt captions, and annotated screenshots from a bound run."
     },
     {
@@ -243,7 +243,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L88",
       "id": "scripts_executable_qa_artifacts_rationale_88",
-      "community": 0,
+      "community": 3,
       "norm_label": "write versioned json schemas for qa plan and results contracts."
     },
     {
@@ -252,7 +252,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L1",
       "id": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_models_py",
-      "community": 2,
+      "community": 1,
       "norm_label": "models.py"
     },
     {
@@ -261,7 +261,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L27",
       "id": "qa_artifacts_lib_models_parse_relative_path",
-      "community": 2,
+      "community": 1,
       "norm_label": "_parse_relative_path()"
     },
     {
@@ -270,7 +270,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L41",
       "id": "qa_artifacts_lib_models_frozenmodel",
-      "community": 2,
+      "community": 1,
       "norm_label": "frozenmodel"
     },
     {
@@ -279,7 +279,7 @@
       "source_file": "",
       "source_location": "",
       "id": "basemodel",
-      "community": 2,
+      "community": 1,
       "norm_label": "basemodel"
     },
     {
@@ -288,7 +288,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L45",
       "id": "qa_artifacts_lib_models_screenshotpolicy",
-      "community": 14,
+      "community": 1,
       "norm_label": "screenshotpolicy"
     },
     {
@@ -297,7 +297,7 @@
       "source_file": "",
       "source_location": "",
       "id": "strenum",
-      "community": 14,
+      "community": 1,
       "norm_label": "strenum"
     },
     {
@@ -306,7 +306,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L51",
       "id": "qa_artifacts_lib_models_capturepolicy",
-      "community": 14,
+      "community": 1,
       "norm_label": "capturepolicy"
     },
     {
@@ -342,7 +342,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L75",
       "id": "qa_artifacts_lib_models_evidencepolicy",
-      "community": 2,
+      "community": 1,
       "norm_label": "evidencepolicy"
     },
     {
@@ -378,7 +378,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L114",
       "id": "qa_artifacts_lib_models_references_exist",
-      "community": 2,
+      "community": 1,
       "norm_label": "references_exist()"
     },
     {
@@ -387,7 +387,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L129",
       "id": "qa_artifacts_lib_models_qaenvironment",
-      "community": 2,
+      "community": 1,
       "norm_label": "qaenvironment"
     },
     {
@@ -396,7 +396,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L137",
       "id": "qa_artifacts_lib_models_highlightbox",
-      "community": 2,
+      "community": 1,
       "norm_label": "highlightbox"
     },
     {
@@ -414,7 +414,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L158",
       "id": "qa_artifacts_lib_models_interval_is_ordered",
-      "community": 2,
+      "community": 1,
       "norm_label": "interval_is_ordered()"
     },
     {
@@ -432,7 +432,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L180",
       "id": "qa_artifacts_lib_models_scenario_is_consistent",
-      "community": 2,
+      "community": 1,
       "norm_label": "scenario_is_consistent()"
     },
     {
@@ -441,7 +441,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L200",
       "id": "qa_artifacts_lib_models_qaresults",
-      "community": 2,
+      "community": 1,
       "norm_label": "qaresults"
     },
     {
@@ -450,7 +450,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L211",
       "id": "qa_artifacts_lib_models_run_is_consistent",
-      "community": 2,
+      "community": 1,
       "norm_label": "run_is_consistent()"
     },
     {
@@ -468,7 +468,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L228",
       "id": "qa_artifacts_lib_models_require_unique",
-      "community": 2,
+      "community": 1,
       "norm_label": "_require_unique()"
     },
     {
@@ -477,7 +477,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/models.py",
       "source_location": "L237",
       "id": "qa_artifacts_lib_models_require_known",
-      "community": 2,
+      "community": 1,
       "norm_label": "_require_known()"
     },
     {
@@ -486,7 +486,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
       "source_location": "L1",
       "id": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_binding_py",
-      "community": 0,
+      "community": 3,
       "norm_label": "binding.py"
     },
     {
@@ -495,7 +495,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
       "source_location": "L16",
       "id": "qa_artifacts_lib_binding_load_plan",
-      "community": 0,
+      "community": 3,
       "norm_label": "load_plan()"
     },
     {
@@ -504,7 +504,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
       "source_location": "L21",
       "id": "qa_artifacts_lib_binding_load_results",
-      "community": 0,
+      "community": 3,
       "norm_label": "load_results()"
     },
     {
@@ -513,7 +513,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
       "source_location": "L25",
       "id": "qa_artifacts_lib_binding_bind_run",
-      "community": 0,
+      "community": 3,
       "norm_label": "bind_run()"
     },
     {
@@ -522,7 +522,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L1",
       "id": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
-      "community": 3,
+      "community": 4,
       "norm_label": "report.py"
     },
     {
@@ -585,7 +585,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L79",
       "id": "qa_artifacts_lib_report_render_plan",
-      "community": 3,
+      "community": 4,
       "norm_label": "render_plan()"
     },
     {
@@ -594,7 +594,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L85",
       "id": "qa_artifacts_lib_report_render_report",
-      "community": 3,
+      "community": 4,
       "norm_label": "render_report()"
     },
     {
@@ -603,7 +603,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L100",
       "id": "qa_artifacts_lib_report_build_scenario_views",
-      "community": 3,
+      "community": 4,
       "norm_label": "_build_scenario_views()"
     },
     {
@@ -612,7 +612,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L135",
       "id": "qa_artifacts_lib_report_build_step_view",
-      "community": 3,
+      "community": 4,
       "norm_label": "_build_step_view()"
     },
     {
@@ -621,7 +621,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L156",
       "id": "qa_artifacts_lib_report_annotate_screenshot",
-      "community": 3,
+      "community": 4,
       "norm_label": "_annotate_screenshot()"
     },
     {
@@ -630,7 +630,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L203",
       "id": "qa_artifacts_lib_report_write_vtt",
-      "community": 3,
+      "community": 4,
       "norm_label": "_write_vtt()"
     },
     {
@@ -639,7 +639,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L225",
       "id": "qa_artifacts_lib_report_vtt_time",
-      "community": 3,
+      "community": 4,
       "norm_label": "_vtt_time()"
     },
     {
@@ -648,7 +648,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L233",
       "id": "qa_artifacts_lib_report_overall_status",
-      "community": 3,
+      "community": 4,
       "norm_label": "_overall_status()"
     },
     {
@@ -657,7 +657,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L244",
       "id": "qa_artifacts_lib_report_status_counts",
-      "community": 3,
+      "community": 4,
       "norm_label": "_status_counts()"
     },
     {
@@ -666,7 +666,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L251",
       "id": "qa_artifacts_lib_report_requirement_views",
-      "community": 3,
+      "community": 4,
       "norm_label": "_requirement_views()"
     },
     {
@@ -675,7 +675,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L274",
       "id": "qa_artifacts_lib_report_status_color",
-      "community": 3,
+      "community": 4,
       "norm_label": "_status_color()"
     },
     {
@@ -684,15 +684,213 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L278",
       "id": "qa_artifacts_lib_report_template_environment",
-      "community": 3,
+      "community": 4,
       "norm_label": "_template_environment()"
+    },
+    {
+      "label": "executable_run-viewer.py",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L1",
+      "id": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
+      "community": 2,
+      "norm_label": "executable_run-viewer.py"
+    },
+    {
+      "label": "resolve_run_dir()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L56",
+      "id": "scripts_executable_run_viewer_resolve_run_dir",
+      "community": 2,
+      "norm_label": "resolve_run_dir()"
+    },
+    {
+      "label": "parse_event()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L74",
+      "id": "scripts_executable_run_viewer_parse_event",
+      "community": 2,
+      "norm_label": "parse_event()"
+    },
+    {
+      "label": "_invalid()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L100",
+      "id": "scripts_executable_run_viewer_invalid",
+      "community": 2,
+      "norm_label": "_invalid()"
+    },
+    {
+      "label": "read_events()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L110",
+      "id": "scripts_executable_run_viewer_read_events",
+      "community": 2,
+      "norm_label": "read_events()"
+    },
+    {
+      "label": "read_decisions()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L163",
+      "id": "scripts_executable_run_viewer_read_decisions",
+      "community": 2,
+      "norm_label": "read_decisions()"
+    },
+    {
+      "label": "build_snapshot()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L191",
+      "id": "scripts_executable_run_viewer_build_snapshot",
+      "community": 2,
+      "norm_label": "build_snapshot()"
+    },
+    {
+      "label": "list_runs()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L234",
+      "id": "scripts_executable_run_viewer_list_runs",
+      "community": 2,
+      "norm_label": "list_runs()"
+    },
+    {
+      "label": "Handler",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L255",
+      "id": "scripts_executable_run_viewer_handler",
+      "community": 2,
+      "norm_label": "handler"
+    },
+    {
+      "label": "BaseHTTPRequestHandler",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "basehttprequesthandler",
+      "community": 2,
+      "norm_label": "basehttprequesthandler"
+    },
+    {
+      "label": ".do_GET()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L263",
+      "id": "scripts_executable_run_viewer_handler_do_get",
+      "community": 2,
+      "norm_label": ".do_get()"
+    },
+    {
+      "label": "._serve_snapshot()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L274",
+      "id": "scripts_executable_run_viewer_handler_serve_snapshot",
+      "community": 2,
+      "norm_label": "._serve_snapshot()"
+    },
+    {
+      "label": "._send_json()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L286",
+      "id": "scripts_executable_run_viewer_handler_send_json",
+      "community": 2,
+      "norm_label": "._send_json()"
+    },
+    {
+      "label": "._send()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L290",
+      "id": "scripts_executable_run_viewer_handler_send",
+      "community": 2,
+      "norm_label": "._send()"
+    },
+    {
+      "label": ".log_message()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L300",
+      "id": "scripts_executable_run_viewer_handler_log_message",
+      "community": 2,
+      "norm_label": ".log_message()"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L309",
+      "id": "scripts_executable_run_viewer_main",
+      "community": 2,
+      "norm_label": "main()"
+    },
+    {
+      "label": "Return the absolute run directory, or None when it is not a real run.      This",
+      "file_type": "rationale",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L57",
+      "id": "scripts_executable_run_viewer_rationale_57",
+      "community": 2,
+      "norm_label": "return the absolute run directory, or none when it is not a real run.      this"
+    },
+    {
+      "label": "Turn one events.jsonl line into an event dict.      Anything that is not a well-",
+      "file_type": "rationale",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L75",
+      "id": "scripts_executable_run_viewer_rationale_75",
+      "community": 2,
+      "norm_label": "turn one events.jsonl line into an event dict.      anything that is not a well-"
+    },
+    {
+      "label": "Read every event, plus the streaming lane-status fold.      board.sh:56-64 group",
+      "file_type": "rationale",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L111",
+      "id": "scripts_executable_run_viewer_rationale_111",
+      "community": 2,
+      "norm_label": "read every event, plus the streaming lane-status fold.      board.sh:56-64 group"
+    },
+    {
+      "label": "Every decision record a lane wrote, oldest id first.      Absence here is meanin",
+      "file_type": "rationale",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L164",
+      "id": "scripts_executable_run_viewer_rationale_164",
+      "community": 2,
+      "norm_label": "every decision record a lane wrote, oldest id first.      absence here is meanin"
+    },
+    {
+      "label": "Assemble everything the page needs in one read.",
+      "file_type": "rationale",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L192",
+      "id": "scripts_executable_run_viewer_rationale_192",
+      "community": 2,
+      "norm_label": "assemble everything the page needs in one read."
+    },
+    {
+      "label": "Every directory under runs_dir holding a manifest.json, newest first.",
+      "file_type": "rationale",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L235",
+      "id": "scripts_executable_run_viewer_rationale_235",
+      "community": 2,
+      "norm_label": "every directory under runs_dir holding a manifest.json, newest first."
     },
     {
       "label": "test.rs",
       "file_type": "code",
       "source_file": "test.rs",
       "source_location": "L1",
-      "community": 22,
+      "community": 16,
       "norm_label": "test.rs",
       "id": "test_rs"
     },
@@ -701,7 +899,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L1",
-      "community": 4,
+      "community": 0,
       "norm_label": "private_ai-memory.ts",
       "id": "dot_config_opencode_plugins_private_ai_memory_ts"
     },
@@ -710,7 +908,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L30",
-      "community": 6,
+      "community": 0,
       "norm_label": "readfilesync()",
       "id": "plugins_private_ai_memory_readfilesync"
     },
@@ -719,7 +917,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L31",
-      "community": 8,
+      "community": 0,
       "norm_label": "capturetrimcomment()",
       "id": "plugins_private_ai_memory_capturetrimcomment"
     },
@@ -728,7 +926,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L32",
-      "community": 8,
+      "community": 0,
       "norm_label": "capturenormalize()",
       "id": "plugins_private_ai_memory_capturenormalize"
     },
@@ -737,7 +935,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L33",
-      "community": 4,
+      "community": 0,
       "norm_label": "capturejoin()",
       "id": "plugins_private_ai_memory_capturejoin"
     },
@@ -746,7 +944,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L34",
-      "community": 4,
+      "community": 0,
       "norm_label": "capturevalidglob()",
       "id": "plugins_private_ai_memory_capturevalidglob"
     },
@@ -755,7 +953,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L35",
-      "community": 8,
+      "community": 0,
       "norm_label": "captureparsearray()",
       "id": "plugins_private_ai_memory_captureparsearray"
     },
@@ -764,7 +962,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L36",
-      "community": 8,
+      "community": 0,
       "norm_label": "captureconfig()",
       "id": "plugins_private_ai_memory_captureconfig"
     },
@@ -773,7 +971,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L93",
-      "community": 15,
+      "community": 0,
       "norm_label": "captureglob()",
       "id": "plugins_private_ai_memory_captureglob"
     },
@@ -782,7 +980,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L94",
-      "community": 15,
+      "community": 0,
       "norm_label": "capturetool()",
       "id": "plugins_private_ai_memory_capturetool"
     },
@@ -791,7 +989,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L95",
-      "community": 15,
+      "community": 0,
       "norm_label": "capturepolicy()",
       "id": "plugins_private_ai_memory_capturepolicy"
     },
@@ -800,7 +998,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L98",
-      "community": 7,
+      "community": 0,
       "norm_label": "timeoutsignal()",
       "id": "plugins_private_ai_memory_timeoutsignal"
     },
@@ -809,7 +1007,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L104",
-      "community": 7,
+      "community": 0,
       "norm_label": "authheaders()",
       "id": "plugins_private_ai_memory_authheaders"
     },
@@ -818,7 +1016,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L122",
-      "community": 7,
+      "community": 0,
       "norm_label": "sleep()",
       "id": "plugins_private_ai_memory_sleep"
     },
@@ -827,7 +1025,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L126",
-      "community": 4,
+      "community": 0,
       "norm_label": "schedulehookflush()",
       "id": "plugins_private_ai_memory_schedulehookflush"
     },
@@ -836,7 +1034,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L135",
-      "community": 4,
+      "community": 0,
       "norm_label": "requesthookdrain()",
       "id": "plugins_private_ai_memory_requesthookdrain"
     },
@@ -845,7 +1043,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L145",
-      "community": 4,
+      "community": 0,
       "norm_label": "disposedraintimeout()",
       "id": "plugins_private_ai_memory_disposedraintimeout"
     },
@@ -854,7 +1052,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L152",
-      "community": 4,
+      "community": 0,
       "norm_label": "drainhookqueuefordispose()",
       "id": "plugins_private_ai_memory_drainhookqueuefordispose"
     },
@@ -863,7 +1061,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L156",
-      "community": 4,
+      "community": 0,
       "norm_label": "enqueuehook()",
       "id": "plugins_private_ai_memory_enqueuehook"
     },
@@ -872,7 +1070,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L166",
-      "community": 7,
+      "community": 0,
       "norm_label": "drainhookqueue()",
       "id": "plugins_private_ai_memory_drainhookqueue"
     },
@@ -881,7 +1079,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L194",
-      "community": 8,
+      "community": 0,
       "norm_label": "findmarker()",
       "id": "plugins_private_ai_memory_findmarker"
     },
@@ -890,7 +1088,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L207",
-      "community": 6,
+      "community": 0,
       "norm_label": "tomlkey()",
       "id": "plugins_private_ai_memory_tomlkey"
     },
@@ -899,7 +1097,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L217",
-      "community": 6,
+      "community": 0,
       "norm_label": "reporootproject()",
       "id": "plugins_private_ai_memory_reporootproject"
     },
@@ -908,7 +1106,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L238",
-      "community": 6,
+      "community": 0,
       "norm_label": "tomlflag()",
       "id": "plugins_private_ai_memory_tomlflag"
     },
@@ -917,7 +1115,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L246",
-      "community": 6,
+      "community": 0,
       "norm_label": "applymarkerparams()",
       "id": "plugins_private_ai_memory_applymarkerparams"
     },
@@ -926,7 +1124,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L286",
-      "community": 4,
+      "community": 0,
       "norm_label": "sessionid()",
       "id": "plugins_private_ai_memory_sessionid"
     },
@@ -935,7 +1133,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L291",
-      "community": 4,
+      "community": 0,
       "norm_label": "textfromparts()",
       "id": "plugins_private_ai_memory_textfromparts"
     },
@@ -944,7 +1142,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L310",
-      "community": 5,
+      "community": 0,
       "norm_label": "cwdfor()",
       "id": "plugins_private_ai_memory_cwdfor"
     },
@@ -953,7 +1151,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L314",
-      "community": 5,
+      "community": 0,
       "norm_label": "remembercwd()",
       "id": "plugins_private_ai_memory_remembercwd"
     },
@@ -962,7 +1160,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L318",
-      "community": 5,
+      "community": 0,
       "norm_label": "startsession()",
       "id": "plugins_private_ai_memory_startsession"
     },
@@ -971,7 +1169,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L330",
-      "community": 5,
+      "community": 0,
       "norm_label": "endsession()",
       "id": "plugins_private_ai_memory_endsession"
     },
@@ -980,7 +1178,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L339",
-      "community": 5,
+      "community": 0,
       "norm_label": "postprecompact()",
       "id": "plugins_private_ai_memory_postprecompact"
     },
@@ -989,7 +1187,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L349",
-      "community": 5,
+      "community": 0,
       "norm_label": "posthook()",
       "id": "plugins_private_ai_memory_posthook"
     },
@@ -998,7 +1196,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L363",
-      "community": 7,
+      "community": 0,
       "norm_label": "fetchhandoff()",
       "id": "plugins_private_ai_memory_fetchhandoff"
     },
@@ -1007,7 +1205,7 @@
       "file_type": "code",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L381",
-      "community": 4,
+      "community": 0,
       "norm_label": "aimemoryhooks()",
       "id": "plugins_private_ai_memory_aimemoryhooks"
     },
@@ -1016,7 +1214,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/keys.lua",
       "source_location": "L1",
-      "community": 9,
+      "community": 5,
       "norm_label": "keys.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_keys_lua"
     },
@@ -1025,7 +1223,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/wezterm.lua",
       "source_location": "L1",
-      "community": 23,
+      "community": 17,
       "norm_label": "wezterm.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_wezterm_lua"
     },
@@ -1034,7 +1232,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/fonts.lua",
       "source_location": "L1",
-      "community": 10,
+      "community": 6,
       "norm_label": "fonts.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_fonts_lua"
     },
@@ -1043,7 +1241,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/zen-mode-vim.lua",
       "source_location": "L1",
-      "community": 24,
+      "community": 18,
       "norm_label": "zen-mode-vim.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_zen_mode_vim_lua"
     },
@@ -1052,7 +1250,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
       "source_location": "L1",
-      "community": 11,
+      "community": 7,
       "norm_label": "workspace-switcher.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_workspace_switcher_lua"
     },
@@ -1061,7 +1259,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
       "source_location": "L1",
-      "community": 12,
+      "community": 8,
       "norm_label": "move_workspace.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_move_workspace_lua"
     },
@@ -1070,7 +1268,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/bar.lua",
       "source_location": "L1",
-      "community": 13,
+      "community": 9,
       "norm_label": "bar.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_bar_lua"
     },
@@ -1079,7 +1277,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/themes/melange_dark.lua",
       "source_location": "L1",
-      "community": 25,
+      "community": 19,
       "norm_label": "melange_dark.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_themes_melange_dark_lua"
     },
@@ -1088,7 +1286,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/themes/kanagawa-dragon.lua",
       "source_location": "L1",
-      "community": 26,
+      "community": 20,
       "norm_label": "kanagawa-dragon.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_themes_kanagawa_dragon_lua"
     },
@@ -1097,7 +1295,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/themes/cyberdream.lua",
       "source_location": "L1",
-      "community": 27,
+      "community": 21,
       "norm_label": "cyberdream.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_themes_cyberdream_lua"
     },
@@ -1106,7 +1304,7 @@
       "file_type": "code",
       "source_file": "dot_config/yazi/plugins/smart-tab.yazi/init.lua",
       "source_location": "L1",
-      "community": 28,
+      "community": 22,
       "norm_label": "init.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_yazi_plugins_smart_tab_yazi_init_lua"
     }
@@ -2775,6 +2973,337 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L56",
+      "weight": 1.0,
+      "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
+      "target": "scripts_executable_run_viewer_resolve_run_dir",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
+      "target": "scripts_executable_run_viewer_parse_event",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L100",
+      "weight": 1.0,
+      "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
+      "target": "scripts_executable_run_viewer_invalid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L110",
+      "weight": 1.0,
+      "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
+      "target": "scripts_executable_run_viewer_read_events",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L163",
+      "weight": 1.0,
+      "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
+      "target": "scripts_executable_run_viewer_read_decisions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L191",
+      "weight": 1.0,
+      "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
+      "target": "scripts_executable_run_viewer_build_snapshot",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L234",
+      "weight": 1.0,
+      "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
+      "target": "scripts_executable_run_viewer_list_runs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L255",
+      "weight": 1.0,
+      "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
+      "target": "scripts_executable_run_viewer_handler",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L309",
+      "weight": 1.0,
+      "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
+      "target": "scripts_executable_run_viewer_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L242",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_list_runs",
+      "target": "scripts_executable_run_viewer_resolve_run_dir",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L275",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_handler_serve_snapshot",
+      "target": "scripts_executable_run_viewer_resolve_run_dir",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L57",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_rationale_57",
+      "target": "scripts_executable_run_viewer_resolve_run_dir",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L89",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_parse_event",
+      "target": "scripts_executable_run_viewer_invalid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L134",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_read_events",
+      "target": "scripts_executable_run_viewer_parse_event",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L75",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_rationale_75",
+      "target": "scripts_executable_run_viewer_parse_event",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L196",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_build_snapshot",
+      "target": "scripts_executable_run_viewer_read_events",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L111",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_rationale_111",
+      "target": "scripts_executable_run_viewer_read_events",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L228",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_build_snapshot",
+      "target": "scripts_executable_run_viewer_read_decisions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L164",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_rationale_164",
+      "target": "scripts_executable_run_viewer_read_decisions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L280",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_handler_serve_snapshot",
+      "target": "scripts_executable_run_viewer_build_snapshot",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L192",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_rationale_192",
+      "target": "scripts_executable_run_viewer_build_snapshot",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L235",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_rationale_235",
+      "target": "scripts_executable_run_viewer_list_runs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L255",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_handler",
+      "target": "basehttprequesthandler",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L263",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_handler",
+      "target": "scripts_executable_run_viewer_handler_do_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L274",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_handler",
+      "target": "scripts_executable_run_viewer_handler_serve_snapshot",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L286",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_handler",
+      "target": "scripts_executable_run_viewer_handler_send_json",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L290",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_handler",
+      "target": "scripts_executable_run_viewer_handler_send",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L300",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_handler",
+      "target": "scripts_executable_run_viewer_handler_log_message",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L266",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_handler_do_get",
+      "target": "scripts_executable_run_viewer_handler_send",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L270",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_handler_do_get",
+      "target": "scripts_executable_run_viewer_handler_serve_snapshot",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L277",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_handler_serve_snapshot",
+      "target": "scripts_executable_run_viewer_handler_send_json",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
+      "source_location": "L288",
+      "weight": 1.0,
+      "source": "scripts_executable_run_viewer_handler_send_json",
+      "target": "scripts_executable_run_viewer_handler_send",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
       "source_location": "L30",
       "weight": 1.0,
@@ -3488,5 +4017,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ca87df56621178eb0cad4bbe46f89d20208159c4"
+  "built_at_commit": "625f126427dba38dc939e41dfb0da2c231168e99"
 }
