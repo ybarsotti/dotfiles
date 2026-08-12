@@ -192,9 +192,9 @@ so explicitly, which is the honest rendering. **Do not hand-write or supplement 
 memory.** Every claim on it must come from a file in the run directory; a decision that no lane
 recorded through `decision.sh` is one this report legitimately does not have.
 
-Report run directory, final `board.sh` table, contract version, round count, final SHA, QA
-verdict, the PR URL, and **both** HTML paths — the QA evidence report and this run report.
-**Leave the blocks alive** — success does not tear down the run's Wave state.
+Close the run with `finish-run.sh RUN_DIR [--qa PATH]` — it refuses to call a run finished with
+the report missing or unrendered, and opens it in a Wave block instead of printing a path. Report
+the board, contract version, rounds, SHA, QA verdict and PR URL too, and leave the blocks alive.
 
 ## Resume (`--resume RUN_DIR`)
 

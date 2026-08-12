@@ -34,7 +34,24 @@ be caught, whether or not you meant it.
    ```
 
    Use `--files` on the same call to append to your attribution log in one
-   step. `TYPE` is one of `task_start`, `task_done`, `progress`, `question`,
+   step.
+
+   **`TASK` names a task the plan already declares. You never invent one.**
+   The plan's `## Implementation tasks` is the list; your prompt file carries
+   the ones you own. Use the plan's number and title, `3 - order totals
+   migration`, under 50 characters — not `Task 3`, because a board reading
+   "Task 1, Task 2, Task 3" says nothing about what the run is doing.
+
+   Use the SAME string in every event for that task. The board groups by exact
+   match, so renaming a task halfway through splits it into two half-finished
+   rows.
+
+   Work the plan does not cover is not a task you may add. It is drift: emit
+   `blocked` and let the orchestrator decide whether the plan grows or the work
+   is dropped. A worker that invents its own tasks makes the board agree with
+   itself no matter what happened, which is precisely what it is for.
+
+   `TYPE` is one of `task_start`, `task_done`, `progress`, `question`,
    `waiting`, `blocked`, `done` — nothing else (`decision` exists too, but
    you emit it through `decision.sh`, never through `event.sh` by hand).
    `MSG` must be a single line (no embedded newline) and the whole event
@@ -82,6 +99,18 @@ be caught, whether or not you meant it.
    This is the ONLY channel that survives your session. The run report is
    built from these records; a decision you keep in your head is a decision
    nobody reviewing this work will ever see.
+
+## Building a screen
+
+**A description of a design is not a design.** If your task changes or adds a
+screen, open the design itself — the claude.design output, the Figma frame, the
+exported images your prompt file points at. Read it before you write markup, and
+match it: spacing, hierarchy, states, copy.
+
+If you cannot open it — no reference given, dead link, access denied — emit
+`blocked` naming what you could not reach, and stop. Do not build the screen from
+the prose around it. A screen built from a paraphrase looks nothing like the one
+that was designed, and nobody notices until it is on someone's monitor.
 
 ## Everyday flow
 
