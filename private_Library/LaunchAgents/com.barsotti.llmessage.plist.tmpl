@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.barsotti.llmessage</string>
+
+  <!-- The mirror loop. Without it the TUI tails a file nobody writes to: the chat only ever
+       shows what the last `daemon --once` happened to catch. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>{{ .chezmoi.homeDir }}/.cargo/bin/llmessage</string>
+    <string>daemon</string>
+    <string>--interval-secs</string>
+    <string>10</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>{{ .chezmoi.homeDir }}</string>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+
+  <key>ProcessType</key>
+  <string>Background</string>
+
+  <key>StandardOutPath</key>
+  <string>{{ .chezmoi.homeDir }}/Library/Application Support/llmessage/logs/daemon.out.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>{{ .chezmoi.homeDir }}/Library/Application Support/llmessage/logs/daemon.err.log</string>
+
+  <!-- The daemon shells out to `git` to identify a run's project, so a login PATH is not
+       optional here — a LaunchAgent starts with almost none. -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>{{ .chezmoi.homeDir }}/.cargo/bin:{{ .chezmoi.homeDir }}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+</dict>
+</plist>
