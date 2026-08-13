@@ -47,7 +47,7 @@ All reviewers run **headless in background** (no cmux panes, no UI clutter). Cla
 
 | Variant | When to use |
 |---------|-------------|
-| `default` | General PR review with 15 fixed lenses — `project-patterns` (CLAUDE.md + rules), `docs-consistency` (docs/ stale-check), `db-performance` (EXPLAIN-driven), `senior-frontend`, `senior-backend`, `security`, `edge-cases`, `test-coverage`, `architecture`, `concurrency-races`, `simplicity`, `code-reuse` (does the repo already do this?), `type-precision` (loose annotations, primitive obsession), `scope-completeness`, `error-handling-observability` |
+| `default` | General PR review with 16 fixed lenses — `project-patterns` (CLAUDE.md + rules), `docs-consistency` (docs/ stale-check), `db-performance` (EXPLAIN-driven), `design-fidelity` (screen vs its design; HIGH when a screen changed and no design exists), `senior-frontend`, `senior-backend`, `security`, `edge-cases`, `test-coverage`, `architecture`, `concurrency-races`, `simplicity`, `code-reuse` (does the repo already do this?), `type-precision` (loose annotations, primitive obsession), `scope-completeness`, `error-handling-observability` |
 | `security-focused` | Anything touching auth, payments, secrets, or external input |
 | `adversarial-debate` | When you want strong arguments both ways before merging a contentious change |
 | `stress-test` | Paranoid mode — 10 personas simulating concrete failure scenarios (races, partial failures, network chaos, time bugs, abuse, etc). Use before shipping anything fragile. |

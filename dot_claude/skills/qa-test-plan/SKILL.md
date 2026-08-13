@@ -96,7 +96,15 @@ Require mapper to write only structured `QA_PLAN` containing:
 - happy path plus invalid, empty, permission, refresh/back, concurrency, boundary, and
   dependency-failure cases when applicable;
 - objective acceptance rules;
-- evidence policy per step.
+- evidence policy per step;
+- **a design-comparison scenario for every screen the change adds or alters.** Ask first
+  whether a design exists — a claude.design output, a Figma frame, exported images in the
+  plan or ticket. When one exists, the mapper attaches it to the scenario and the
+  acceptance rule is that the captured screenshot matches it on layout, hierarchy, states
+  and exact copy. When none exists, record the scenario with acceptance `unverifiable — no
+  design supplied` rather than dropping it: a screen nobody could check against anything
+  must show up as an unanswered question, not as a pass. Skip only when the change touches
+  no user-facing screen.
 
 Store semantic actions such as `Click "Submit order"` and accessible names. Never store
 ephemeral `@e1` references or brittle CSS selectors.
