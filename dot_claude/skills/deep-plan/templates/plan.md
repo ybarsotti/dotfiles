@@ -193,6 +193,14 @@ stateDiagram-v2
 - Orchestrator lane: `<lane that commits between rounds>`
 - Shared, committed pre-fanout and read-only afterwards: `<path>`, `<path>`
 - Ownership syntax: exact repo-relative path, or a directory prefix ending in `/**`; multiple entries separated by `<br>`
+- `depends_on` is a decision, not a formality. A lane waits on another when it cannot start
+  without that lane's output existing: it consumes generated types or a migration, it is an
+  end-to-end lane needing both sides real, or it documents an API that does not exist yet.
+  Two lanes behind a materialized contract normally wait on nothing — that is what the contract
+  buys. Write `none` when they are genuinely independent; `none` everywhere across many lanes is
+  worth a second look, and the validator says so without failing the plan.
+- `mock_command` is currently read by nothing in `/deep-execute`. Fill it if it documents intent,
+  but no script consumes it today.
 
 | lane | scope | owns (path globs) | must-not-touch | agent | test_command | mock_command | depends_on |
 |---|---|---|---|---|---|---|---|

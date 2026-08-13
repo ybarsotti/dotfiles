@@ -929,6 +929,28 @@ if [ "$MODE" = "root" ]; then
     else
       record "depends-on-acyclic" "fail" "$ACYCLIC_DETAIL"
     fi
+
+    # depends-on-considered — a WARN, never a fail. The three checks above prove the graph is
+    # well formed, and an empty graph passes all of them trivially: no unknown name, no self
+    # edge, and nothing to make a cycle. So a plan that never thought about ordering scores
+    # identically to one that did, and every real plan on this machine declares `none`.
+    #
+    # It fires from three worker lanes up, not two. Two lanes behind a contract are expected to
+    # be independent — that is what the contract is for — so warning there would fire on every
+    # plan and be ignored within a week.
+    #
+    # It must never become a fail. Full parallelism is the point of /deep-execute, and a check
+    # that punishes independence would push planners to invent dependencies to silence it,
+    # which is worse than the silence it replaced.
+    WORKER_LANES=$(jq -r --arg orch "$(jq -r '.orchestrator_lane // ""' <<<"$PLAN_JSON")" \
+      '[.lanes[] | select(.name != $orch)] | length' <<<"$PLAN_JSON")
+    EDGE_COUNT=$(jq -r '[.lanes[] | .depends_on[]?] | length' <<<"$PLAN_JSON")
+    if [ "$WORKER_LANES" -ge 3 ] && [ "$EDGE_COUNT" -eq 0 ]; then
+      record "depends-on-considered" "warn" \
+        "${WORKER_LANES} worker lanes and no depends_on at all — confirm they really are independent (a lane consuming another's generated types, an e2e lane needing both sides, or docs describing an API that does not exist yet would each need one). If they are independent, that is the right answer."
+    else
+      record "depends-on-considered" "pass" "lane ordering was considered"
+    fi
   fi
 
   # 21. superpowers-ticks-have-receipts — always runs for real, in every
