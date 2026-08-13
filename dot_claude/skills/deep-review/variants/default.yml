@@ -1,5 +1,5 @@
 name: default
-description: Multi-perspective review — 15 distinct personas covering security, correctness, scope, edges, tests, perf, architecture, observability, simplicity, code reuse, and type precision.
+description: Multi-perspective review — 16 distinct personas covering security, correctness, scope, edges, tests, perf, architecture, observability, simplicity, code reuse, type precision, and design fidelity.
 
 # Output schema every reviewer must produce on stdout (single fenced YAML block).
 output_schema: |
@@ -66,6 +66,21 @@ personas:
       Flag: missing validation, missing transaction boundaries, swallowed errors,
       N+1 queries, unbounded operations, missing timeouts, response leaking internals.
       Stay backend-only — skip UI, tests, security, perf details.
+
+  - id: design-fidelity
+    role: Design-fidelity reviewer (implemented screen vs the design it followed)
+    focus: |
+      Whether a changed screen matches the design it was given, element by element: layout
+      and spacing, hierarchy, the states a design shows (loading, empty, error, disabled,
+      permission-denied), exact copy including labels and validation text, interaction and
+      focus order, and design-system components rebuilt bespoke. Judges only what the design
+      specifies; a state the design is silent about is unspecified, not a defect.
+
+      Reports a HIGH finding when the diff changes a screen and NO design can be found —
+      that absence is invisible otherwise, and a screen built from a prose description is
+      how a UI ships looking nothing like what was designed. Approves immediately, without
+      reviewing anything, when the diff touches no user-facing UI.
+    runner: any
 
   - id: senior-frontend
     role: Senior React/TypeScript engineer
