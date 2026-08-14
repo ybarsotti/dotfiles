@@ -21,7 +21,7 @@ execution half. Invoke each planning-phase skill via the Skill tool at its mappe
 | # | superpowers / skill | deep-plan phase | run by |
 |---|---------------------|----------------|--------|
 | ✳ | `EnterPlanMode` (plan mode on) | Phase 0.1 | deep-plan |
-| 0 | `grill-with-docs` | Phase 0.7 | **user** |
+| 0 | `grilling` + `domain-modeling` | Phase 0.7 | deep-plan |
 | 1 | `brainstorming` | Phase 1 | deep-plan |
 | 2 | `writing-plans` | Phase 1.5 | deep-plan |
 | 2b| `/qa-plan` | Phase 2.4 when user flows/screens change | deep-plan |
@@ -119,12 +119,12 @@ If — and only if — the task is genuinely unambiguous after a careful re-read
 
 After the multiple-choice clarifications resolve the obvious gaps, drill harder and capture the reasoning as docs.
 
-**Step 1 — ask the user to run `/mattpocock-skills:grill-with-docs`, then wait.** You cannot
-invoke it: it is `disable-model-invocation`, and the Skill tool refuses it while forbidding you
-to replicate the workflow another way. That is deliberate — it interviews the *user*, one
-question at a time down each branch, writing ADRs and a glossary via `/domain-modeling` as
-decisions land. Phase 0.5 is a multiple-choice sweep; this is the open-ended stress test that
-feeds `## Rationale & key decisions`. If they decline, treat it as `--skip-grill`.
+**Step 1 — run its two halves:** `Skill(skill="mattpocock-skills:grilling")`, then
+`Skill(skill="mattpocock-skills:domain-modeling")`. Not `grill-with-docs` — it is
+`disable-model-invocation` and the Skill tool refuses it; these two are the halves it composes,
+both model-invokable by their author's own frontmatter. Offer the user
+`/mattpocock-skills:grill-with-docs` when they would rather drive it. Phase 0.5 was the
+multiple-choice sweep; this is the open-ended stress test feeding `## Rationale & key decisions`.
 
 **Step 2 — record the transcript** in the plan under `## Grill-with-docs transcript` using `### Q:` / `### A:` headers (same format as clarifying questions, so the validator counts them too). Fold the resolved decisions into `## Rationale & key decisions`.
 
