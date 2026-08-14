@@ -9,9 +9,9 @@ Multi-agent peer review skill. Dispatches N reviewer personas (mix of Claude and
 cd ~/your-project
 
 # 2. Run the slash command from Claude Code
-/deep-review                              # default: 20 reviewers (each persona × both models), branch vs main
+/deep-review                              # default: 32 reviewers (16 personas × both models), branch vs main
 /deep-review --dry-run                    # preview the plan without spending tokens
-/deep-review --reviewers 10 --ratio 5:5   # cheaper: each persona once on one model
+/deep-review --reviewers 16 --ratio 8:8   # cheaper: each persona once on one model
 /deep-review --reviewers 4  --ratio 2:2   # quick pass with 4 reviewers
 
 # 3. Pick a different lens
@@ -85,12 +85,14 @@ personas:
 
 ## Cost guardrails
 
-Each reviewer is roughly **3-8k input + 1-3k output tokens**. Default 20 reviewers + 1 aggregator run is **~120-200k tokens** total.
+Each reviewer uses roughly **3-8k input + 1-3k output tokens**. The default runs 32 reviewers plus one aggregator.
 
-The default doubles up — each of the 10 personas runs once on Claude AND once on Codex — so you get cross-model agreement/disagreement on every angle. The aggregator surfaces disagreements explicitly.
+Reviewer calls use roughly **128-352k tokens** before aggregation. The aggregator adds synthesis cost based on reviewer output size.
+
+The default runs each of 16 personas once on Claude and once on Codex. The aggregator surfaces cross-model disagreements.
 
 For lighter passes:
-- `--reviewers 10 --ratio 5:5` — each persona once, half cost (no cross-model)
+- `--reviewers 16 --ratio 8:8` — each persona once, about half the reviewer-call cost
 - `--reviewers 4 --ratio 2:2` — quick triage during iteration
 - `--dry-run` — preview the plan and estimated cost before paying
 
@@ -137,7 +139,7 @@ This skill lives in `~/.claude/commands/` so it's invoked from Claude. The revie
 │   ├── reviewer.sh                   # runs ONE reviewer
 │   └── aggregate.sh                  # consolidates results
 └── variants/
-    ├── default.yml                   # 10 personas, multi-perspective
+    ├── default.yml                   # 16 personas, multi-perspective
     ├── security-focused.yml          # 10 personas, security lens
     └── adversarial-debate.yml        # 5 approver-vs-rejecter pairs
 ```

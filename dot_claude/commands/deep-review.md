@@ -17,9 +17,10 @@ Each reviewer uses a **fixed, predefined prompt file** (`personas/<id>.md`) — 
 
 VARIANT (positional, optional, default: "default")
   default             multi-perspective fixed roster: project-patterns, db-performance,
-                      senior-frontend, senior-backend, security, edge-cases, test-coverage,
-                      architecture, concurrency-races, simplicity, code-reuse,
-                      type-precision, scope-completeness
+                      docs-consistency, design-fidelity, senior-frontend, senior-backend,
+                      security, edge-cases, test-coverage, architecture, concurrency-races,
+                      simplicity, code-reuse, type-precision, scope-completeness,
+                      error-handling-observability
   security-focused    every persona reviews through an OWASP/security lens
   adversarial-debate  approver-vs-rejecter pairs across 5 dimensions
   stress-test         paranoid personas simulating concrete failure scenarios
@@ -27,7 +28,7 @@ VARIANT (positional, optional, default: "default")
 
 FLAGS
   --reviewers N       total reviewers (default: 2 × persona_count, so each persona runs once on Claude + once on Codex)
-  --ratio C:X         Claude:Codex split (default: N:N where N = persona_count)
+  --ratio C:X         Claude:Codex split (default: even reviewer split; 16:16 for default)
   --scope <ref>       git range (default: main...HEAD), or "PR-1234", or "file:path"
   --task <id>         force a Jira/Linear task ID (default: auto-detect from branch/commit)
   --timeout <secs>    per-reviewer timeout (default: 600)
@@ -61,7 +62,7 @@ The skill lives at `~/.claude/skills/deep-review/SKILL.md` and its scripts at `~
 /deep-review                                    # default roster (each persona × both models), current branch
 /deep-review security-focused                   # security lens
 /deep-review stress-test                        # paranoid mode — every persona simulates failure scenarios
-/deep-review default --reviewers 15 --ratio 15:0 # cheaper pass: each persona once on Claude/Sonnet only
+/deep-review default --reviewers 16 --ratio 16:0 # cheaper pass: each persona once on Claude/Sonnet only
 /deep-review default --reviewers 6 --ratio 3:3  # quick pass: 3 personas × both models
 /deep-review --scope PR-1234                    # review a GitHub PR
 /deep-review --dry-run                          # preview without executing
@@ -69,4 +70,8 @@ The skill lives at `~/.claude/skills/deep-review/SKILL.md` and its scripts at `~
 
 ### Cost awareness
 
-Each reviewer is roughly 3-8k input tokens + 1-3k output. A default run (30 reviewers + 1 aggregator) costs roughly 160-280k tokens total. The default doubles up so you get cross-model agreement/disagreement on every persona angle — drop to `--reviewers 15 --ratio 8:7` for half the cost.
+Each reviewer uses roughly 3-8k input tokens and 1-3k output tokens. The default runs 32 reviewers plus one aggregator.
+
+Reviewer calls use roughly 128-352k tokens before aggregation. The default runs each of 16 personas once on Claude and once on Codex.
+
+Use `--reviewers 16 --ratio 8:8` for one reviewer per persona and about half the reviewer-call cost.
