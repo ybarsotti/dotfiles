@@ -12,7 +12,7 @@ description: |
   ticket the user wants to work on. The workflow covers: reading + clarifying the
   ticket, renaming the cmux tab, creating a branch (main repo or new worktree),
   transitioning the Jira status to "Under investigation", then delegating the deep
-  planning to /deep-plan (grill-with-docs → brainstorming → writing-plans → 5-persona
+  planning to /deep-plan (grilling + domain-modeling → brainstorming → writing-plans → 5-persona
   review incl. ticket-matcher → plannotator → approved plan), then executing it — via
   /deep-execute for an approved `Mode: parallel` plan with 2+ lanes (lane fanout, round
   tests, run-state validation, orchestrator commits, one final /deep-review), or the
@@ -59,7 +59,7 @@ items.
 - [ ] **Continuity ledger** (multi-day ticket): bind/create via `continuity-ledger`
       (`new <CODE>`), then **save** at each progress boundary below — it auto-loads on resume
       after `/clear`. Skip for a quick single-session fix.
-- [ ] **Deep planning** — run `/deep-plan "<CODE>" --ticket <CODE>`: grill-with-docs →
+- [ ] **Deep planning** — run `/deep-plan "<CODE>" --ticket <CODE>`: grilling + domain-modeling →
       brainstorming → writing-plans → 5-persona review (incl. **ticket-matcher**, which bats
       requirements matrix point-by-point against ticket, preserving linked Slack threads) →
       plannotator → approved plan
@@ -213,7 +213,7 @@ deep-planning pipeline. Once the ticket is understood and the branch/worktree ex
 /deep-plan "<CODE>" --ticket <CODE>
 ```
 
-`/deep-plan` runs: grill-with-docs → brainstorming → writing-plans → parallel Opus+Codex
+`/deep-plan` runs: grilling + domain-modeling → brainstorming → writing-plans → parallel Opus+Codex
 drafts → a 5-persona review loop (architect, project-developer, **ticket-matcher**,
 flow-mapper, qa) that hardens the plan and bats it **point-by-point** against the ticket's
 acceptance criteria → plannotator → an approved plan at
