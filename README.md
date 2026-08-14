@@ -702,7 +702,7 @@ Three slash commands chain together for planning and parallel execution of non-t
   rounds; lane workers never run `git` themselves.
 - **`/deep-review`** - Multi-persona peer review of a diff (Claude + Codex headless
   reviewers), invoked once per `/deep-execute` run and usable standalone. The `default`
-  roster runs 15 lenses; two of them guard against the failure modes an agent writing code
+  roster runs 16 lenses; two of them guard against the failure modes an agent writing code
   falls into most: **`code-reuse`** asks whether the repo already does what the diff just
   added, searching by concept through Serena, gitnexus and graphify rather than by guessed
   name; **`type-precision`** flags loose annotations (bare `dict`, `any`,
@@ -748,6 +748,27 @@ B, C and D you get the QA evidence report and the PR body instead.
 QA adapts to the machine: `qa-testing` in EXECUTE mode when that skill is installed, the plan's
 `qa-plan.yaml` through `/qa-test-plan` when it names one, and a plain `agent-browser` agent
 otherwise. A missing skill downgrades the evidence; it never cancels the QA step.
+
+##### The Stop hook that refuses to lose the run report
+
+Phase 5 was the only phase without a gate, and across three real runs the report was never built
+once. `finish-run.sh` checks for it, but something has to call `finish-run.sh` — and forgetting
+the last step *is* the failure being fixed.
+
+So `~/.claude/hooks/unfinished-run-gate.sh` runs as a `Stop` hook. It fires from the harness
+whether or not anyone remembered, and blocks the session from ending while a recent
+`deep-execute` run has a manifest and no rendered `report/index.html`.
+
+A blocking hook that misdiagnoses is worse than the problem — it traps a session with no way out
+but editing `settings.json` mid-irritation. There are three guards, and all three leave a trace
+in `~/.local/state/deep-execute/stop-gate.log`:
+
+- Say **`encerrar mesmo assim`** anywhere in the session and it stands aside.
+- It blocks **once per run**. After that the run is marked and never blocks again.
+- It honours `stop_hook_active`, so it cannot loop against its own block.
+
+It also ignores runs whose `events.jsonl` has not moved in a day: an abandoned run from last
+month must not block every session from now on.
 
 ##### Run report (what was built, and why)
 
