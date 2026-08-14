@@ -158,6 +158,56 @@ else
   fi
 fi
 
+# ─── Stage 2b: acceptance ───────────────────────────────────────────────────
+# Runs the requirements matrix. Until now "requirement satisfied" was an agent's
+# claim that nothing compared against reality: the matrix carried a `verification`
+# column, and no script had ever read it.
+#
+# A cell holding exactly one backticked span is a command and gets executed. Prose
+# is recorded `warn`, never `fail` — plenty of criteria are genuinely observed
+# rather than run (a screenshot, a human looking at a screen), and failing those
+# would push planners to write a fake command to silence the gate, which is worse
+# than the prose it replaced. A plan with NO runnable criterion at all is still a
+# passing plan; it just says so out loud, once, instead of implying it verified
+# something.
+if [ "$STOP" -eq 1 ]; then
+  record "acceptance" "acceptance" "skipped" "not run: ${SKIP_REASON}"
+elif [ -z "${PLAN_JSON:-}" ]; then
+  record "acceptance" "acceptance" "skipped" "not run: plan did not parse"
+else
+  ACCEPT_FAIL=0
+  RUNNABLE=0
+  PROSE=0
+  while IFS=$'\t' read -r req cmd; do
+    [ -z "$req" ] && continue
+    if [ -z "$cmd" ]; then
+      PROSE=$((PROSE + 1))
+      continue
+    fi
+    RUNNABLE=$((RUNNABLE + 1))
+    if ACC_OUT=$(cd "$CWD" && sh -c "$cmd" 2>&1); then
+      record "acceptance" "acceptance:${req}" "pass" "verification command succeeded: ${cmd}"
+    else
+      # Same bounded tail as lane-tests, for the same reason: a full failing suite
+      # overflows ARG_MAX and silently drops the record.
+      ACC_TAIL=$(printf '%s\n' "$ACC_OUT" | tail -40)
+      record "acceptance" "acceptance:${req}" "fail" "verification command failed: ${cmd}: ...(tail)... ${ACC_TAIL}"
+      ACCEPT_FAIL=1
+    fi
+  done < <(jq -r '.requirements[]? | "\(.requirement)\t\(.command // "")"' <<<"$PLAN_JSON")
+
+  if [ "$PROSE" -gt 0 ]; then
+    record "acceptance" "acceptance-not-machine-checked" "warn" \
+      "${PROSE} requirement(s) carry prose rather than a runnable command, so nothing verified them — only ${RUNNABLE} of $((PROSE + RUNNABLE)) is checked by a script"
+  elif [ "$RUNNABLE" -eq 0 ]; then
+    record "acceptance" "acceptance" "warn" "the plan declares no requirements matrix rows to check"
+  fi
+  if [ "$ACCEPT_FAIL" -eq 1 ]; then
+    STOP=1
+    SKIP_REASON="short-circuited: 'acceptance' failed (see acceptance:<requirement> items)"
+  fi
+fi
+
 # ─── Stage 3: contract ──────────────────────────────────────────────────────
 if [ "$STOP" -eq 1 ]; then
   record "contract" "contract" "skipped" "not run: ${SKIP_REASON}"

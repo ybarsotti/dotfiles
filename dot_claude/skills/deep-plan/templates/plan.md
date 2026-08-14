@@ -31,9 +31,14 @@
      `✅ Planned` means the plan has a concrete implementation + verification mapping; it does
      NOT claim implementation is complete. `/pr-description` later reconciles each row against
      the finished diff/tests and changes status to ✅ Implemented, ⚠️ Partial, or ❌ Missing. -->
+<!-- `verification` holding exactly one backticked command is RUN by round-gate.sh, and a
+     failure blocks the round. Write the command whenever one exists — `just test_backend
+     apps/pricing -k organization`, not "Pytest tests 3, 4, 5". Prose is still allowed for a
+     criterion a human observes; it is recorded as unverified rather than failed, because
+     forcing a command there would only produce a fake one. -->
 | status | requirement | how the plan satisfies it | verification |
 |---|---|---|---|
-| ✅ Planned | <requirement> | <task/interface/behavior> | <test or observable evidence> |
+| ✅ Planned | <requirement> | <task/interface/behavior> | `<runnable command>` or <observed evidence> |
 
 ## User journey
 <!-- Use when the change affects a user/operator flow. Preserve meaningful interaction order. -->
