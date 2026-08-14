@@ -100,16 +100,16 @@
     "hash": "5a56d9dc1f920277b1b4e8198f2c9003"
   },
   "/Users/barsotti/.local/share/chezmoi/README.md": {
-    "mtime": 1786557055.9820251,
-    "hash": "2e07d9eb13204b8df3ff263813198024"
+    "mtime": 1786668302.436733,
+    "hash": "7afe7edbedbc664a738ad59ac9ee1afd"
   },
   "/Users/barsotti/.local/share/chezmoi/AGENTS.md": {
-    "mtime": 1786560049.4656465,
-    "hash": "7e0b6ca025a754efe79b07a2e5d6cd39"
+    "mtime": 1786582842.0658128,
+    "hash": "36b4e51823dbee020c780d935e7e4ded"
   },
   "/Users/barsotti/.local/share/chezmoi/CLAUDE.md": {
-    "mtime": 1786560049.4660199,
-    "hash": "bc9a2f5c30ac1f2311b7dc817777c41d"
+    "mtime": 1786667908.1335423,
+    "hash": "ba8ec61c1bd9dce03ef8a2d46be70850"
   },
   "/Users/barsotti/.local/share/chezmoi/docs/2026-07-26-journal-obsidian-design.md": {
     "mtime": 1785162322.9608605,
@@ -196,8 +196,8 @@
     "hash": "c41a0d861f196abf7fc0f2dd65941719"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/deep-review.md": {
-    "mtime": 1785957785.5385356,
-    "hash": "7b942ec499e5c75b2e3296f13c49ae84"
+    "mtime": 1786668328.8438745,
+    "hash": "83a37323d886bfce807aac48c8969c4f"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/anki.md": {
     "mtime": 1773060823.7624447,
@@ -220,8 +220,8 @@
     "hash": "cc1b92a86ac421e281149e2bb9324e6f"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/qa-test-plan/SKILL.md": {
-    "mtime": 1784913725.3570902,
-    "hash": "cfab697a92ded640e2911934fe916c7e"
+    "mtime": 1786641631.7033355,
+    "hash": "dfb8ae1f3cedb84890c344d047f38d7d"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/qa-test-plan/tests/fixtures/qa-plan.yaml": {
     "mtime": 1785164210.451697,
@@ -243,13 +243,17 @@
     "mtime": 1784913502.3814235,
     "hash": "1ae70aaadb743fc0dee5d479b395cba3"
   },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/follow-up-jira/SKILL.md": {
+    "mtime": 1786651411.5477698,
+    "hash": "de756fd4fd352792d1fa69820149859b"
+  },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/README.md": {
     "mtime": 1786557021.4887772,
     "hash": "b0221dfdbdbbcc6e70a3c430265a6122"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/SKILL.md": {
-    "mtime": 1786557002.7500055,
-    "hash": "eb0d45bd997f4a472b5ec2d77124e032"
+    "mtime": 1786572253.6041956,
+    "hash": "e59610cd4550500430d1a2e605c278fe"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/tests/fixtures/init-run-plan.md": {
     "mtime": 1786108837.493502,
@@ -272,8 +276,8 @@
     "hash": "62fa559adaa060ae3af06d11b96d6da5"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/templates/worker-system-prompt.txt": {
-    "mtime": 1785951756.6633456,
-    "hash": "22180482d95866965c5a2e2ab48ee1d6"
+    "mtime": 1786573651.01426,
+    "hash": "dcd7460cf0fa96f3f93995c9daa15972"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/plan/SKILL.md": {
     "mtime": 1785167081.6049688,
@@ -288,8 +292,8 @@
     "hash": "2e996859e2958753717b3eeeab28479f"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/SKILL.md": {
-    "mtime": 1786555421.4580023,
-    "hash": "a946a9a2f156c875abf696536b32074c"
+    "mtime": 1786666921.8222864,
+    "hash": "723bd8767754fad6a93a7877f051d554"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/tests/fixtures/lane-unescaped-pipe.md": {
     "mtime": 1784660236.7826335,
@@ -376,8 +380,8 @@
     "hash": "9e2baafb2c8fd6decfb88fd46965ea56"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/templates/plan.md": {
-    "mtime": 1786124062.2193332,
-    "hash": "eb3188a0c63be2cf468ee52d70b339a1"
+    "mtime": 1786582582.2682428,
+    "hash": "88734da9fca73f0be0f16fe88745c541"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/templates/subplan.md": {
     "mtime": 1784660236.774497,
@@ -396,16 +400,16 @@
     "hash": "da24635bd1cd8a87c27a49b21a84c510"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/README.md": {
-    "mtime": 1785957766.5003548,
-    "hash": "00cffc0b4728edd5d128af2c2e2f464c"
+    "mtime": 1786668302.4380732,
+    "hash": "ebeeac4878e369722f3738da69089328"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/SKILL.md": {
-    "mtime": 1784660236.784153,
-    "hash": "6ae5a955ca73099a1c5fd56500e7db3d"
+    "mtime": 1786668328.8435314,
+    "hash": "111a01bbbf781e63c5a1dd0c12d660fb"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/variants/default.yml": {
-    "mtime": 1785957916.136261,
-    "hash": "ef224da338152e0ddb33857dab4e9fd5"
+    "mtime": 1786641413.1023252,
+    "hash": "17ab80268f34fcfe2b1233d67afa872f"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/variants/stress-test.yml": {
     "mtime": 1783969881.3372653,
@@ -442,6 +446,10 @@
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/docs-consistency.md": {
     "mtime": 1783969881.3318255,
     "hash": "b80a6e4da43e25e39b547b752dc36df4"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/design-fidelity.md": {
+    "mtime": 1786641400.0543196,
+    "hash": "4a3db5d2685629f29588581973a95caa"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/type-precision.md": {
     "mtime": 1785957731.789486,
@@ -496,8 +504,8 @@
     "hash": "a26804b60736a669cfdd149e1e30e0ef"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/jira-workflow/SKILL.md": {
-    "mtime": 1785951756.6650167,
-    "hash": "87282b64ca6618b73ad98db853088730"
+    "mtime": 1786667125.6324348,
+    "hash": "7103339d763391fcc1ad7cb5fba84db8"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_config/yazi/flavors/catppuccin-macchiato.yazi/preview.png": {
     "mtime": 1785431941.9281232,
