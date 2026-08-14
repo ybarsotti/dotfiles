@@ -949,8 +949,10 @@ assert_contains "$(detail_of "$RG_JSON_R4" round-within-max-rounds)" "exceeds ma
 assert_contains "$(detail_of "$RG_JSON_R4" round-within-max-rounds)" "escalate" "round-gate.sh: the escalation record says this needs a human decision"
 assert_eq "$(jq -r '.[] | select(.stage=="lane-tests") | .status' <<<"$RG_JSON_R4")" skipped \
   "round-gate.sh: round 4 refuses before even the cheap lane-tests stage runs"
-assert_eq "$(jq -r '[.[] | select(.status=="skipped")] | length' <<<"$RG_JSON_R4")" 4 \
-  "round-gate.sh: all 4 later stages (lane-tests, contract, run-state, review) are skipped, none silently omitted"
+assert_eq "$(jq -r '[.[] | select(.status=="skipped")] | length' <<<"$RG_JSON_R4")" 5 \
+  "round-gate.sh: all 5 later stages (lane-tests, acceptance, contract, run-state, review) are skipped, none silently omitted"
+assert_eq "$(jq -r '.[] | select(.stage=="acceptance") | .status' <<<"$RG_JSON_R4")" skipped \
+  "round-gate.sh: acceptance is reported as skipped rather than omitted when the round short-circuits"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # decision.sh

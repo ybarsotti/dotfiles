@@ -323,6 +323,39 @@ TASKS_JSON=$(jq -sc '.' <"$TASKS_NDJSON")
 
 # ─── Assemble ────────────────────────────────────────────────────────────────
 
+# ─── Requirements matrix ───────────────────────────────────────────────────
+# Column 4 is `verification`. A cell holding a backticked command is runnable and
+# round-gate.sh executes it; prose stays prose. Both are emitted, with `command`
+# null for the prose ones, so a caller can tell "checked by a script" from
+# "someone will look" instead of guessing from the shape of a sentence.
+REQS_NDJSON="${SCRATCH}/reqs.ndjson"
+: >"$REQS_NDJSON"
+awk '
+  /^## / { inside = ($0 ~ /^## Requirements matrix[[:space:]]*$/) ; next }
+  !inside { next }
+  /^\|/ {
+    line = $0
+    sub(/^\|/, "", line); sub(/\|[[:space:]]*$/, "", line)
+    n = split(line, c, "|")
+    if (n < 4) next
+    for (i = 1; i <= n; i++) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", c[i]) }
+    if (c[2] == "requirement" || c[1] ~ /^[-: ]+$/) next
+    if (c[2] == "") next
+    print c[2] "\t" c[4]
+  }
+' "$PLAN" >"$REQS_NDJSON" || true
+
+REQS_JSON=$(jq -R -s -c '
+  split("\n") | map(select(length > 0)) | map(
+    split("\t") as $p |
+    ($p[1] // "") as $v |
+    # A single backticked span is a command; anything else is prose. Requiring the
+    # WHOLE cell to be one span avoids reading `Jest test 18` mid-sentence as a
+    # command and running it.
+    (if ($v | test("^`[^`]+`$")) then ($v | ltrimstr("`") | rtrimstr("`")) else null end) as $c |
+    {requirement: $p[0], verification: $v, command: $c}
+  )' <"$REQS_NDJSON" 2>/dev/null || echo '[]')
+
 jq -n \
   --argjson mode "$MODE_JSON" \
   --argjson orchestrator_lane "$ORCHESTRATOR_LANE_JSON" \
@@ -331,5 +364,7 @@ jq -n \
   --argjson contract "$CONTRACT_JSON" \
   --argjson affected_files "$AFFECTED_JSON" \
   --argjson tasks "$TASKS_JSON" \
+  --argjson requirements "$REQS_JSON" \
   '{mode:$mode, orchestrator_lane:$orchestrator_lane, shared_read_only:$shared_read_only,
-    lanes:$lanes, contract:$contract, affected_files:$affected_files, tasks:$tasks}'
+    lanes:$lanes, contract:$contract, affected_files:$affected_files, tasks:$tasks,
+    requirements:$requirements}'
