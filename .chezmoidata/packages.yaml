@@ -80,6 +80,10 @@ packages:
       terminal:
         file_tools:
           - ripgrep           # Fast text search (rg)
+          # Structural search over the tree-sitter AST. Pairs with ripgrep rather than
+          # replacing it: rg matches text, so it also matches commented-out code and a name
+          # inside a string; ast-grep matches shape, which is what a codemod needs.
+          - ast-grep          # AST-aware search and rewrite (sg)
           - fd                # Modern find replacement
           - bat               # Enhanced cat with syntax highlighting
           - eza               # Modern ls replacement
@@ -184,6 +188,7 @@ packages:
 
         system_enhancement:
           - betterdisplay     # Display management utility
+          - opensuperwhisper
           - stats             # System monitoring in menu bar
 
         communication:

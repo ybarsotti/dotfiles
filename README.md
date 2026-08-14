@@ -162,6 +162,11 @@ This dotfiles setup includes several development tools that are automatically in
 ### System Tools & Terminal Enhancements
 - **`ripgrep`** - Fast text search tool
   - Usage: `rg "pattern" file.txt`, `rg -i "case insensitive"`
+- **`ast-grep`** - Structural search and rewrite over the tree-sitter AST (`sg`)
+  - Usage: `ast-grep -p 'console.log($$$)' -l ts`, `ast-grep -p '$A == $B' -r '$A === $B' -U`
+  - Pairs with ripgrep, does not replace it: `rg` matches text, so it also matches
+    commented-out code and a name inside a string. `ast-grep` matches shape, which is what a
+    codemod needs. It also ships an MCP server.
 - **`fd`** - Modern find replacement with better performance
   - Usage: `fd filename`, `fd -e js` (find JS files)
 - **`bat`** - Enhanced cat with syntax highlighting and Git integration
