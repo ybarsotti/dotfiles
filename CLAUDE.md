@@ -112,7 +112,9 @@ When adding new packages:
    - Choose the most specific subcategory (e.g., `development.version_managers` for mise, nvm)
 2. Run `chezmoi apply` to trigger automatic package installation
 3. The `run_onchange_02_homebrew_packages.sh.tmpl` script will recursively process all categories
-4. Always update the @README.md file with package information, usage, and main commands
+4. Always update the `README.md` file with package information, usage, and main commands
+   <!-- Backticked on purpose. `@path` is import syntax, not a mention: unquoted, this line
+        pulled all 1026 lines of README.md into every session started in this repo. -->
 
 ### Package Categories Reference:
 - `packages.darwin.brews.development.*` - Development tools and runtimes
