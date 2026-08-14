@@ -19,7 +19,7 @@ Read `$ARGUMENTS` and extract:
 
 - **variant** (positional, default `"default"`): one of `default`, `security-focused`, `adversarial-debate`, or any name matching a `variants/<name>.yml` file
 - **--reviewers N** (default: `2 × persona_count`)
-- **--ratio C:X** (default: `N:N` where N = persona_count)
+- **--ratio C:X** (default: an even reviewer split; `16:16` for the default variant)
 - **--scope ref** (default `"main...HEAD"`)
 - **--task id** (default: auto-detect)
 - **--timeout secs** (default `600`)

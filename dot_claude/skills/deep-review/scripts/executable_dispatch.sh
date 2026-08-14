@@ -20,7 +20,7 @@ RUNS_ROOT="${HOME}/.claude/deep-review-runs"
 # --reviewers / --ratio for a cheaper pass.
 VARIANT="default"
 REVIEWERS=""   # empty → derive from persona_count after variant is loaded
-RATIO=""       # empty → derive (N:N where N = persona_count)
+RATIO=""       # empty → split the reviewer count evenly
 SCOPE="main...HEAD"
 TASK=""
 TIMEOUT=600
