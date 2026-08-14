@@ -88,3 +88,9 @@ Library
 Library/LaunchAgents/com.barsotti.journal.plist
 .chezmoiscripts/12_setup_journal.sh
 {{ end }}
+
+# The /follow-up-jira skill watches a ticket for the reporter's validation.
+# Only work machines have a Jira instance, so skip it elsewhere.
+{{ if ne .machine.purpose "work" }}
+.claude/skills/follow-up-jira
+{{ end }}
