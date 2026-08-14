@@ -2976,9 +2976,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
-      "target": "scripts_executable_run_viewer_resolve_run_dir",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_resolve_run_dir"
     },
     {
       "relation": "contains",
@@ -2986,9 +2986,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L74",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
-      "target": "scripts_executable_run_viewer_parse_event",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_parse_event"
     },
     {
       "relation": "contains",
@@ -2996,9 +2996,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L100",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
-      "target": "scripts_executable_run_viewer_invalid",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_invalid"
     },
     {
       "relation": "contains",
@@ -3006,9 +3006,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L110",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
-      "target": "scripts_executable_run_viewer_read_events",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_read_events"
     },
     {
       "relation": "contains",
@@ -3016,9 +3016,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L163",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
-      "target": "scripts_executable_run_viewer_read_decisions",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_read_decisions"
     },
     {
       "relation": "contains",
@@ -3026,9 +3026,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L191",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
-      "target": "scripts_executable_run_viewer_build_snapshot",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_build_snapshot"
     },
     {
       "relation": "contains",
@@ -3036,9 +3036,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L234",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
-      "target": "scripts_executable_run_viewer_list_runs",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_list_runs"
     },
     {
       "relation": "contains",
@@ -3046,9 +3046,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L255",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
-      "target": "scripts_executable_run_viewer_handler",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_handler"
     },
     {
       "relation": "contains",
@@ -3056,9 +3056,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L309",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
-      "target": "scripts_executable_run_viewer_main",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_main"
     },
     {
       "relation": "calls",
@@ -3067,9 +3067,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L242",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_list_runs",
-      "target": "scripts_executable_run_viewer_resolve_run_dir",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_resolve_run_dir"
     },
     {
       "relation": "calls",
@@ -3078,9 +3078,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L275",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_handler_serve_snapshot",
-      "target": "scripts_executable_run_viewer_resolve_run_dir",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_resolve_run_dir"
     },
     {
       "relation": "rationale_for",
@@ -3088,9 +3088,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_rationale_57",
-      "target": "scripts_executable_run_viewer_resolve_run_dir",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_resolve_run_dir"
     },
     {
       "relation": "calls",
@@ -3099,9 +3099,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L89",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_parse_event",
-      "target": "scripts_executable_run_viewer_invalid",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_invalid"
     },
     {
       "relation": "calls",
@@ -3110,9 +3110,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L134",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_read_events",
-      "target": "scripts_executable_run_viewer_parse_event",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_parse_event"
     },
     {
       "relation": "rationale_for",
@@ -3120,9 +3120,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L75",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_rationale_75",
-      "target": "scripts_executable_run_viewer_parse_event",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_parse_event"
     },
     {
       "relation": "calls",
@@ -3131,9 +3131,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L196",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_build_snapshot",
-      "target": "scripts_executable_run_viewer_read_events",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_read_events"
     },
     {
       "relation": "rationale_for",
@@ -3141,9 +3141,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L111",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_rationale_111",
-      "target": "scripts_executable_run_viewer_read_events",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_read_events"
     },
     {
       "relation": "calls",
@@ -3152,9 +3152,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L228",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_build_snapshot",
-      "target": "scripts_executable_run_viewer_read_decisions",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_read_decisions"
     },
     {
       "relation": "rationale_for",
@@ -3162,9 +3162,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L164",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_rationale_164",
-      "target": "scripts_executable_run_viewer_read_decisions",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_read_decisions"
     },
     {
       "relation": "calls",
@@ -3173,9 +3173,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L280",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_handler_serve_snapshot",
-      "target": "scripts_executable_run_viewer_build_snapshot",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_build_snapshot"
     },
     {
       "relation": "rationale_for",
@@ -3183,9 +3183,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L192",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_rationale_192",
-      "target": "scripts_executable_run_viewer_build_snapshot",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_build_snapshot"
     },
     {
       "relation": "rationale_for",
@@ -3193,9 +3193,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L235",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_rationale_235",
-      "target": "scripts_executable_run_viewer_list_runs",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_list_runs"
     },
     {
       "relation": "inherits",
@@ -3203,9 +3203,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L255",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_handler",
-      "target": "basehttprequesthandler",
-      "confidence_score": 1.0
+      "target": "basehttprequesthandler"
     },
     {
       "relation": "method",
@@ -3213,9 +3213,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L263",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_handler",
-      "target": "scripts_executable_run_viewer_handler_do_get",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_handler_do_get"
     },
     {
       "relation": "method",
@@ -3223,9 +3223,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L274",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_handler",
-      "target": "scripts_executable_run_viewer_handler_serve_snapshot",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_handler_serve_snapshot"
     },
     {
       "relation": "method",
@@ -3233,9 +3233,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L286",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_handler",
-      "target": "scripts_executable_run_viewer_handler_send_json",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_handler_send_json"
     },
     {
       "relation": "method",
@@ -3243,9 +3243,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L290",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_handler",
-      "target": "scripts_executable_run_viewer_handler_send",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_handler_send"
     },
     {
       "relation": "method",
@@ -3253,9 +3253,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L300",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_handler",
-      "target": "scripts_executable_run_viewer_handler_log_message",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_handler_log_message"
     },
     {
       "relation": "calls",
@@ -3264,9 +3264,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L266",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_handler_do_get",
-      "target": "scripts_executable_run_viewer_handler_send",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_handler_send"
     },
     {
       "relation": "calls",
@@ -3275,9 +3275,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L270",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_handler_do_get",
-      "target": "scripts_executable_run_viewer_handler_serve_snapshot",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_handler_serve_snapshot"
     },
     {
       "relation": "calls",
@@ -3286,9 +3286,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L277",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_handler_serve_snapshot",
-      "target": "scripts_executable_run_viewer_handler_send_json",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_handler_send_json"
     },
     {
       "relation": "calls",
@@ -3297,9 +3297,9 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L288",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_executable_run_viewer_handler_send_json",
-      "target": "scripts_executable_run_viewer_handler_send",
-      "confidence_score": 1.0
+      "target": "scripts_executable_run_viewer_handler_send"
     },
     {
       "relation": "contains",
@@ -4017,5 +4017,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "625f126427dba38dc939e41dfb0da2c231168e99"
+  "built_at_commit": "2fc7397d792de9b71b603834a2521a906192095c"
 }
