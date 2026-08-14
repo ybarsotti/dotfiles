@@ -21,7 +21,7 @@ execution half. Invoke each planning-phase skill via the Skill tool at its mappe
 | # | superpowers / skill | deep-plan phase | run by |
 |---|---------------------|----------------|--------|
 | ✳ | `EnterPlanMode` (plan mode on) | Phase 0.1 | deep-plan |
-| 0 | `grill-with-docs` | Phase 0.7 | deep-plan |
+| 0 | `grill-with-docs` | Phase 0.7 | **user** |
 | 1 | `brainstorming` | Phase 1 | deep-plan |
 | 2 | `writing-plans` | Phase 1.5 | deep-plan |
 | 2b| `/qa-plan` | Phase 2.4 when user flows/screens change | deep-plan |
@@ -119,12 +119,12 @@ If — and only if — the task is genuinely unambiguous after a careful re-read
 
 After the multiple-choice clarifications resolve the obvious gaps, drill harder and capture the reasoning as docs.
 
-**Step 1 — invoke the skill via Skill tool:**
-```
-Skill(skill="grill-with-docs")
-```
-
-`grill-with-docs` runs a relentless `/grilling` interview (one question at a time, down each branch of the decision tree) **and** produces ADRs + a glossary via `/domain-modeling` as decisions are reached. Where Phase 0.5 is a fast multiple-choice sweep, this is open-ended stress-testing that leaves a documented decision trail — feeding the plan's `## Rationale & key decisions`.
+**Step 1 — ask the user to run `/mattpocock-skills:grill-with-docs`, then wait.** You cannot
+invoke it: it is `disable-model-invocation`, and the Skill tool refuses it while forbidding you
+to replicate the workflow another way. That is deliberate — it interviews the *user*, one
+question at a time down each branch, writing ADRs and a glossary via `/domain-modeling` as
+decisions land. Phase 0.5 is a multiple-choice sweep; this is the open-ended stress test that
+feeds `## Rationale & key decisions`. If they decline, treat it as `--skip-grill`.
 
 **Step 2 — record the transcript** in the plan under `## Grill-with-docs transcript` using `### Q:` / `### A:` headers (same format as clarifying questions, so the validator counts them too). Fold the resolved decisions into `## Rationale & key decisions`.
 
