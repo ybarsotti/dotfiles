@@ -24,6 +24,7 @@ MARKETPLACES=(
   "wshobson/agents"
   "backnotprop/plannotator"
   "JuliusBrussee/caveman"
+  "mattpocock/skills"
 )
 
 echo "Registering custom marketplaces..."
@@ -58,6 +59,10 @@ PLUGINS=(
   "find-skills@vercel-labs-skills"
   "plannotator@plannotator"
   "caveman@caveman"
+  # deep-plan calls these by their plugin-prefixed names, as
+  # Skill(skill="mattpocock-skills:grilling"). Installing the same repo through
+  # `npx skills add` gives bare names instead, which do not resolve.
+  "mattpocock-skills@mattpocock"
 )
 
 echo "Installing Claude Code plugins..."
@@ -70,7 +75,6 @@ done
 SKILLS=(
   "https://github.com/coreyhaines31/marketingskills --skill seo-audit"
   "https://github.com/anthropics/skills --skill frontend-design"
-  "mattpocock/skills"
   "github/gh-stack"
 )
 
