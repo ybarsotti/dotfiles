@@ -29,10 +29,26 @@
 set -eu
 
 inline=""
+split_target=""
+display_name=""
 if [ "${1:-}" = "--exec" ]; then
 	inline=1
 	shift
 fi
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+	--split-right)
+		split_target="${2:-}"
+		shift 2
+		;;
+	--name)
+		display_name="${2:-}"
+		shift 2
+		;;
+	*) break ;;
+	esac
+done
 
 dir=${1:-.}
 if [ $# -gt 0 ]; then shift; fi
@@ -76,7 +92,15 @@ fi
 id=$(session_id) || id=""
 if [ -n "$id" ]; then
 	hunk session reload --repo "$root" -- diff "$@"
-	echo "wave-hunk: reloaded session $id for $root"
+	block_ref=""
+	if [ -n "${WAVETERM_TABID:-}" ]; then
+		block_ref=$(wsh blocks list --tab "$WAVETERM_TABID" --json 2>/dev/null |
+			jq -r --arg root "$root" 'first(.[]? | select(.meta["cmd:cwd"] == $root and (.meta.cmd // "" | contains("hunk diff"))) | "block:" + .blockid)' 2>/dev/null)
+	fi
+	[ -z "$block_ref" ] || [ -z "$display_name" ] || \
+		wsh setmeta -b "${block_ref#block:}" "frame:title=${display_name}" >/dev/null 2>&1 || true
+	jq -cn --arg block "$block_ref" --arg session "$id" --arg repo "$root" \
+		'{block_ref:$block, session_id:$session, repo:$repo}'
 	exit 0
 fi
 
@@ -85,7 +109,17 @@ if ! command -v wsh >/dev/null 2>&1; then
 	exit 1
 fi
 
-wsh run --cwd "$root" -- /bin/zsh -lc 'exec hunk diff --watch "$@"' wave-hunk "$@"
+split_run="${HOME}/.local/bin/wave-split-run"
+if [ -n "$split_target" ] && [ -x "$split_run" ]; then
+	block_out=$($split_run right "$split_target" "${display_name:-Diff}" "$root" \
+		/bin/zsh -lc 'exec hunk diff --watch "$@"' wave-hunk "$@")
+else
+	block_out=$(wsh run --cwd "$root" -- /bin/zsh -lc 'exec hunk diff --watch "$@"' wave-hunk "$@")
+	block_ref=$(printf '%s' "$block_out" | grep -oE 'block:[0-9a-f-]+' | head -1)
+	[ -z "$block_ref" ] || [ -z "$display_name" ] || \
+		wsh setmeta -b "${block_ref#block:}" "frame:title=${display_name}" >/dev/null 2>&1 || true
+fi
+block_ref=$(printf '%s' "$block_out" | grep -oE 'block:[0-9a-f-]+' | head -1)
 
 # The daemon registers the session a moment after the block starts. Wait for it, so the
 # caller can drive `hunk session` right away.
@@ -93,7 +127,8 @@ i=0
 while [ "$i" -lt 20 ]; do
 	id=$(session_id) || id=""
 	if [ -n "$id" ]; then
-		echo "wave-hunk: opened session $id for $root"
+		jq -cn --arg block "$block_ref" --arg session "$id" --arg repo "$root" \
+			'{block_ref:$block, session_id:$session, repo:$repo}'
 		exit 0
 	fi
 	sleep 0.5
