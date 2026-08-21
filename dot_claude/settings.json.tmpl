@@ -302,7 +302,9 @@
     "plannotator@plannotator": true,
     "ponytail@ponytail": true,
     "sentry@claude-plugins-official": true,
-    "mattpocock-skills@mattpocock": true
+    "mattpocock-skills@mattpocock": true,
+    "pstack@cursor-plugins": true,
+    "diagram-design@diagram-design": true
   },
   "extraKnownMarketplaces": {
     "plannotator": {
@@ -358,6 +360,18 @@
       "source": {
         "source": "github",
         "repo": "mattpocock/skills"
+      }
+    },
+    "cursor-plugins": {
+      "source": {
+        "source": "directory",
+        "path": "{{ .chezmoi.homeDir }}/.local/share/claude-marketplaces/cursor-plugins"
+      }
+    },
+    "diagram-design": {
+      "source": {
+        "source": "github",
+        "repo": "cathrynlavery/diagram-design"
       }
     }
   },

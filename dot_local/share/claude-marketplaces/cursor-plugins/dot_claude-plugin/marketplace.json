@@ -1,0 +1,29 @@
+{
+  "name": "cursor-plugins",
+  "owner": {
+    "name": "Cursor",
+    "url": "https://github.com/cursor/plugins"
+  },
+  "metadata": {
+    "description": "Shim marketplace. cursor/plugins ships .cursor-plugin/marketplace.json, which Codex reads and Claude Code does not. This file re-declares the same plugins in the schema Claude Code understands, and pulls each one straight from the upstream repository with git-subdir. Nothing is vendored, so an upstream release arrives with `claude plugin update`."
+  },
+  "plugins": [
+    {
+      "name": "pstack",
+      "description": "Rigorous agent workflows: /poteto-mode with 22 playbooks, 44 skills, and the poteto-agent and Comment Sicko subagents. By Lauren Tan (poteto).",
+      "author": {
+        "name": "Lauren Tan",
+        "url": "https://github.com/poteto"
+      },
+      "category": "developer-tools",
+      "homepage": "https://github.com/cursor/plugins/tree/main/pstack",
+      "license": "MIT",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/cursor/plugins.git",
+        "path": "pstack",
+        "ref": "main"
+      }
+    }
+  ]
+}
