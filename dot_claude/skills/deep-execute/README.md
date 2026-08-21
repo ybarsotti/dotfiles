@@ -29,6 +29,8 @@ SKILL.md (this skill — orchestrates)
 scripts/init-run.sh        — validates the plan, scaffolds RUN_DIR + manifest.json
 scripts/event.sh           — atomic append to events.jsonl (workers call this, not the orchestrator)
 scripts/board.sh           — folds events.jsonl to a Markdown status table
+scripts/run-status.sh      — phase, task percentage, elapsed time, and Wave status
+scripts/set-phase.sh       — advances the human-facing phase without mutating the run manifest
 scripts/monitor-events.sh  — blocks, emits ONE trigger JSON, never guesses past what it observed
 scripts/reply.sh           — writes lanes/<lane>/reply.md and wakes the pane
 scripts/validate-contract.sh   — sha256 / version / lint check on the contract
@@ -184,6 +186,7 @@ reasoning, which is the best account anyone will get and still not an audit trai
 ```
 RUN_DIR/
 ├── manifest.json                  # schema-conformant run state (schemas/run-state.schema.json)
+├── status.json                    # current phase and elapsed-time origin for Wave status
 ├── events.jsonl                   # append-only event log
 ├── worker-<lane>.files.txt        # per-lane attribution log (self-declared, see above)
 ├── lanes/<lane>/reply.md          # the orchestrator's current instruction for that lane

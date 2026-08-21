@@ -55,13 +55,12 @@ inside the SAME shared worktree. You commit, you gate, you reply — you don't e
 3. If the user passed `--max-rounds N` and `N` differs from the default, patch
    `RUN_DIR/manifest.json`'s `max_rounds` field now — `round-gate.sh` reads that field, never a
    hardcoded number, so this is the only place the override needs to land.
-4. Launch every non-orchestrator lane in the same worktree with the confirmed agent specs,
-   via `wave-launch.sh RUN_DIR/wave CWD SPEC...` (grammar `name:runner:model@effort`; bare
-   `name` means `claude:sonnet`). Each lane is a Wave block running `worker-loop.sh`, which
-   takes its first prompt as an argument and every later one from `lanes/<lane>/reply.md` —
-   Wave cannot type into a live block, so the reply file is the wake.
-5. **Open the diff pane** for the human: `wave-hunk CWD <baseline_commit>`. Pass the baseline,
-   never the bare working tree — you commit between rounds. A failure here never blocks a lane.
+4. Launch confirmed specs through `wave-launch.sh RUN_DIR/wave CWD SPEC...`. It runs each lane
+   through `worker-loop.sh`, names its block, stacks lanes, and starts the Wave status watcher.
+5. Read the first `block_ref` from `RUN_DIR/wave/manifest.json`. Open Hunk to its right with
+   `wave-hunk --split-right <block> --name "Diff · <task>" CWD <baseline_commit>`, then open
+   `wave-chat` below Hunk for this worktree's exact llmessage session. Visual failures never
+   block lanes. Without macOS Accessibility control, Wave keeps names/order but places blocks.
 
 ## Phase 2 — Monitor and react
 
@@ -132,7 +131,7 @@ running anything — obey it rather than calling it a fourth time on your own ju
 
 ## Phase 4 — Review, QA, gap fixes, frozen SHA, PR
 
-These steps run **back to back, unattended** — no progress check-ins between them.
+Run `set-phase.sh RUN_DIR review`, then run these steps **back to back, unattended**.
 
 1. **Full peer review.** `Skill(skill="deep-review", args="default --reviewers 6 --ratio 3:3")`
    over the whole run's diff — the one thorough pass; every per-round `round-gate.sh` review
@@ -141,8 +140,8 @@ These steps run **back to back, unattended** — no progress check-ins between t
 2. **Record it while it is still true.** Through `decision.sh`, per lane and for the review
    itself: what was built, which findings landed, which were rejected and why. A fix nobody
    recorded is a fix the Phase 5 report cannot show.
-3. **QA agent** — its own agent, whose only job is to test. Pick the pass by what this machine
-   actually has, checking in this order:
+3. Run `set-phase.sh RUN_DIR qa`, then start the **QA agent** — its own agent, whose only job is
+   to test. Pick the pass by what this machine actually has, checking in this order:
    - `~/.claude/skills/qa-testing/SKILL.md` exists → `Skill(skill="qa-testing")` in EXECUTE
      mode, driving a real browser through `agent-browser` over every flow and screen the plan
      touched, capturing screenshots and recordings. Give it the running URL and the current
@@ -161,7 +160,8 @@ These steps run **back to back, unattended** — no progress check-ins between t
 5. **Freeze.** Commit, record the full `git rev-parse HEAD`. QA evidence binds the commit it
    ran against — any later change invalidates it. Never finish on missing, blocked or stale
    evidence; surface a blocker when the URL or the commit proof is unavailable.
-6. **Open the PR.** `Skill(skill="pr-description", args="--plan <plan.md> --ticket <KEY-123> --evidence <qa-index.html>")`
+6. Run `set-phase.sh RUN_DIR delivery`, then **open the PR.**
+   `Skill(skill="pr-description", args="--plan <plan.md> --ticket <KEY-123> --evidence <qa-index.html>")`
    — requirements reconciled against the finished diff, Mermaid, key decisions, and the
    **evidence** from step 3: screenshots for a changed screen, a GIF or recording for a changed
    flow. Keep the returned PR URL for Phase 5.

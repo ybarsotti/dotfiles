@@ -52,6 +52,11 @@ command -v wsh >/dev/null 2>&1 || {
 	echo "wave-launch.sh: wsh not found — this run is not inside Wave Terminal" >&2
 	exit 2
 }
+[ -n "${WAVETERM_TABID:-}" ] && [ -n "${WAVETERM_BLOCKID:-}" ] || {
+	echo "wave-launch.sh: run /deep-execute inside the Wave tab reserved for this task" >&2
+	exit 2
+}
+wsh setmeta -b "${WAVETERM_BLOCKID}" "frame:title=Orchestrator" >/dev/null 2>&1 || true
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKER_LOOP="${SCRIPT_DIR}/worker-loop.sh"
@@ -72,6 +77,9 @@ new_uuid() {
 }
 
 FAILED=0
+TARGET_BLOCK="${WAVETERM_BLOCKID}"
+SPLIT_RUN="${HOME}/.local/bin/wave-split-run"
+LAYOUT_ACTION="right"
 for spec in "$@"; do
 	LANE="${spec%%:*}"
 	REST="${spec#*:}"
@@ -101,10 +109,18 @@ for spec in "$@"; do
 	# find neither claude nor jq. Arguments are passed positionally rather than
 	# interpolated into the command string, so a lane name never becomes shell syntax.
 	# shellcheck disable=SC2016  # the single quotes are deliberate: zsh expands these, not us
-	if BLOCK_OUT=$(wsh run --cwd "$CWD" -- /bin/zsh -lc \
-		'exec "$1" "$2" "$3" "$4" "$5" "$6" "$7"' \
-		"deep-execute:${LANE}" \
-		"$WORKER_LOOP" "$(dirname "$WAVE_DIR")" "$LANE" "$SESSION_ID" "$RUNNER" "$MODEL" "$PROMPT_FILE" 2>&1); then
+	if [ -n "$TARGET_BLOCK" ] && [ -x "$SPLIT_RUN" ]; then
+		BLOCK_OUT=$($SPLIT_RUN "$LAYOUT_ACTION" "$TARGET_BLOCK" "Lane · ${LANE}" "$CWD" /bin/zsh -lc \
+			'exec "$1" "$2" "$3" "$4" "$5" "$6" "$7"' \
+			"deep-execute:${LANE}" \
+			"$WORKER_LOOP" "$(dirname "$WAVE_DIR")" "$LANE" "$SESSION_ID" "$RUNNER" "$MODEL" "$PROMPT_FILE" 2>&1) && LAUNCHED=1 || LAUNCHED=0
+	else
+		BLOCK_OUT=$(wsh run --cwd "$CWD" -- /bin/zsh -lc \
+			'exec "$1" "$2" "$3" "$4" "$5" "$6" "$7"' \
+			"deep-execute:${LANE}" \
+			"$WORKER_LOOP" "$(dirname "$WAVE_DIR")" "$LANE" "$SESSION_ID" "$RUNNER" "$MODEL" "$PROMPT_FILE" 2>&1) && LAUNCHED=1 || LAUNCHED=0
+	fi
+	if [ "$LAUNCHED" -eq 1 ]; then
 		BLOCK_REF=$(printf '%s' "$BLOCK_OUT" | grep -oE 'block:[0-9a-f-]+' | head -1)
 		TMP=$(mktemp)
 		jq --arg n "$LANE" --arg b "${BLOCK_REF:-}" --arg s "$SESSION_ID" \
@@ -112,6 +128,8 @@ for spec in "$@"; do
 			"$MANIFEST" >"$TMP" && mv "$TMP" "$MANIFEST"
 		jq -n --arg lane "$LANE" --arg block "${BLOCK_REF:-unknown}" --arg session "$SESSION_ID" \
 			'{lane: $lane, launched: true, block_ref: $block, session_id: $session}'
+		TARGET_BLOCK="${BLOCK_REF:-$TARGET_BLOCK}"
+		LAYOUT_ACTION="down"
 	else
 		FAILED=1
 		jq -n --arg lane "$LANE" --arg detail "wsh run failed: ${BLOCK_OUT}" \
@@ -122,5 +140,12 @@ done
 if [ "$FAILED" -eq 1 ]; then
 	echo "wave-launch.sh: at least one lane failed to launch — see the 'launched:false' line(s) above" >&2
 	exit 1
+fi
+
+STATUS_RUNNER="${SCRIPT_DIR}/run-status.sh"
+[ -f "$STATUS_RUNNER" ] || STATUS_RUNNER="${SCRIPT_DIR}/executable_run-status.sh"
+if [ -x "$STATUS_RUNNER" ] && [ -f "$(dirname "$WAVE_DIR")/status.json" ]; then
+	nohup "$STATUS_RUNNER" "$(dirname "$WAVE_DIR")" --watch \
+		>"$(dirname "$WAVE_DIR")/status-watcher.log" 2>&1 </dev/null &
 fi
 exit 0

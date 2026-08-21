@@ -77,6 +77,13 @@ fi
 
 [ "$FAILED" -eq 0 ] || exit 1
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SET_PHASE="${SCRIPT_DIR}/set-phase.sh"
+[ -f "$SET_PHASE" ] || SET_PHASE="${SCRIPT_DIR}/executable_set-phase.sh"
+if [ -x "$SET_PHASE" ] && [ -f "${RUN_DIR}/status.json" ]; then
+	"$SET_PHASE" "$RUN_DIR" complete >/dev/null
+fi
+
 # Deliver it. A missing wsh means this run is not inside Wave, which is not a failure of the
 # run — the report exists either way, so say where and carry on.
 if [ "$OPEN" -eq 1 ]; then
