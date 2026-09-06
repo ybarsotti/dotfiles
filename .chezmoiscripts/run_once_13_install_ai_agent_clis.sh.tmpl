@@ -1,0 +1,31 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# run_once_13_install_ai_agent_clis.sh.tmpl
+#
+# Installs the agent CLIs that ship their own installer instead of a Homebrew
+# formula. Each installer brings its own runtime (uv for Hermes, a private Node
+# for OpenClaw), so a brew or npm install would give a different layout than the
+# one the tools expect.
+
+set -eufo pipefail
+
+export PATH="$HOME/.local/bin:$HOME/.openclaw/bin:$PATH"
+
+# Hermes Agent — https://github.com/NousResearch/hermes-agent
+if command -v hermes >/dev/null 2>&1; then
+    echo "✅ Hermes already installed: $(command -v hermes)"
+else
+    echo "📥 Installing Hermes Agent..."
+    curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash || echo "⚠️  Hermes install failed. Continuing."
+fi
+
+# OpenClaw — https://github.com/openclaw/openclaw
+if command -v openclaw >/dev/null 2>&1; then
+    echo "✅ OpenClaw already installed: $(command -v openclaw)"
+else
+    echo "📥 Installing OpenClaw..."
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash || echo "⚠️  OpenClaw install failed. Continuing."
+fi
+
+{{ end -}}

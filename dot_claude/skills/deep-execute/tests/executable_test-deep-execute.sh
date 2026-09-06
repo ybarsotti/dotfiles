@@ -20,6 +20,8 @@ VALIDATE_CONTRACT="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_val
 ROUND_GATE="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_round-gate.sh"
 DECISION="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_decision.sh"
 BUILD_REPORT="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_build-run-report.sh"
+RUN_STATUS="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_run-status.sh"
+SET_PHASE="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_set-phase.sh"
 WORKER_PROMPT="${ROOT}/dot_claude/skills/deep-execute/templates/worker-system-prompt.txt"
 FIXTURE_PLAN="${ROOT}/dot_claude/skills/deep-execute/tests/fixtures/init-run-plan.md"
 SKILL_MD="${ROOT}/dot_claude/skills/deep-execute/SKILL.md"
@@ -36,6 +38,8 @@ assert_exit 0 test -f "$VALIDATE_CONTRACT"
 assert_exit 0 test -f "$ROUND_GATE"
 assert_exit 0 test -f "$DECISION"
 assert_exit 0 test -f "$BUILD_REPORT"
+assert_exit 0 test -f "$RUN_STATUS"
+assert_exit 0 test -f "$SET_PHASE"
 assert_exit 0 test -f "$WORKER_PROMPT"
 assert_exit 0 test -f "$FIXTURE_PLAN"
 
@@ -203,6 +207,28 @@ assert_exit 0 test -f "${RUN_HAPPY}/worker-backend.files.txt"
 assert_exit 0 test -f "${RUN_HAPPY}/lanes/backend/reply.md"
 assert_exit 0 test -f "${RUN_HAPPY}/wave/manifest.json"
 assert_exit 0 test -f "${RUN_HAPPY}/wave/worker-backend.prompt.md"
+assert_exit 0 test -f "${RUN_HAPPY}/status.json"
+assert_eq "$(jq -r '.phase' "${RUN_HAPPY}/status.json")" "execution" "new run starts in execution phase"
+
+assert_exit 0 "$EVENT" "$RUN_HAPPY" backend "Task 2" "done" "backend complete"
+assert_exit 0 "$EVENT" "$RUN_HAPPY" frontend "Task 3" progress "frontend active"
+STATUS_TEXT=$("$RUN_STATUS" "$RUN_HAPPY")
+assert_contains "$STATUS_TEXT" "phase 1/4: execution" "status names the current execution phase"
+assert_contains "$STATUS_TEXT" "tasks 1/3 (33%)" "status derives task percentage from declared non-orchestrator tasks"
+assert_exit 0 "$SET_PHASE" "$RUN_HAPPY" review
+REVIEW_STATUS=$("$RUN_STATUS" "$RUN_HAPPY")
+assert_contains "$REVIEW_STATUS" "phase 2/4: review" "phase update advances the status surface"
+STATUS_BIN=$(mktemp -d)
+STATUS_WSH_LOG=$(mktemp)
+cat >"${STATUS_BIN}/wsh" <<'STUB'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"$STATUS_WSH_LOG"
+STUB
+chmod +x "${STATUS_BIN}/wsh"
+STATUS_WSH_LOG="$STATUS_WSH_LOG" WAVETERM_TABID=test WAVETERM_BLOCKID=orchestrator PATH="${STATUS_BIN}:$PATH" \
+  "$RUN_STATUS" "$RUN_HAPPY" --update-tab >/dev/null
+assert_contains "$(cat "$STATUS_WSH_LOG")" "review 2/4 · tasks 33%" \
+  "review pane title keeps task percentage distinct from workflow phase"
 
 HAPPY_JSON=$("$VALIDATE_STATE" "$RUN_HAPPY" --json)
 assert_exit 0 "$VALIDATE_STATE" "$RUN_HAPPY" --json

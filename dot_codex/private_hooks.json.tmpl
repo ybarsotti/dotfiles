@@ -85,6 +85,36 @@
             "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event session-start --agent codex --server-url http://127.0.0.1:49374 --project-strategy repo-root"
           }
         ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "gh-axi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "chrome-devtools-axi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "lavish-axi",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -118,20 +148,13 @@
         "hooks": [
           {
             "type": "command",
-            "command": "notify-claude"
+            "command": "notify-claude",
+            "timeout": 5
           },
           {
             "type": "command",
-            "command": "'{{ .chezmoi.homeDir }}/.codex/hooks/session-log.sh'"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "{{ .chezmoi.homeDir }}/.local/bin/plannotator",
-            "timeout": 345600
+            "command": "'{{ .chezmoi.homeDir }}/.codex/hooks/session-log.sh'",
+            "timeout": 5
           }
         ]
       },
@@ -140,7 +163,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event stop --agent codex --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+            "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event stop --agent codex --server-url http://127.0.0.1:49374 --project-strategy repo-root",
+            "timeout": 10
           }
         ]
       }

@@ -38,6 +38,10 @@ against the baseline commit. Every round gate refreshes it and writes that round
 the lines that produced them, so the user reads the change as it lands. Use `/hunk-watch` to open
 the same pane on any other worktree.
 
+Every task uses one Wave tab. Lane blocks have names and form one vertical column. Hunk opens to
+the right, and the task's llmessage chat opens below Hunk. The orchestrator header shows current
+phase, task completion, percentage, and elapsed time; tab badge shows running, blocked, or complete.
+
 Once the lanes are done, the tail runs back to back:
 
 1. `/deep-review default --reviewers 6 --ratio 3:3`, fixes routed back to the owning lane.

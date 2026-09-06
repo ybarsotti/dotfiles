@@ -50,6 +50,27 @@ enabled = true
 [plugins."browser@openai-bundled"]
 enabled = true
 
+[plugins."sites@openai-bundled"]
+enabled = true
+
+[plugins."visualize@openai-bundled"]
+enabled = true
+
+[plugins."computer-use@openai-bundled"]
+enabled = true
+
+[plugins."computer-history@openai-bundled"]
+enabled = true
+
+[plugins."codex-app-tools@openai-bundled"]
+enabled = true
+
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
+
 [tui.model_availability_nux]
 "gpt-5.5" = 3
 
@@ -84,10 +105,41 @@ source = "/Users/barsotti/.codex/plugins/cache/sisyphuslabs"
 source_type = "git"
 source = "https://github.com/DietrichGebert/ponytail.git"
 
+[marketplaces.caveman]
+source_type = "git"
+source = "https://github.com/JuliusBrussee/caveman.git"
+
+[marketplaces.mattpocock]
+source_type = "git"
+source = "https://github.com/mattpocock/skills.git"
+
+[marketplaces.diagram-design]
+source_type = "git"
+source = "https://github.com/cathrynlavery/diagram-design.git"
+
+# Codex reads .cursor-plugin/marketplace.json directly, so it takes the upstream repository as
+# it is. Claude Code does not, and needs the shim marketplace under
+# ~/.local/share/claude-marketplaces/cursor-plugins to reach the same plugin.
+[marketplaces.cursor-plugins]
+source_type = "git"
+source = "https://github.com/cursor/plugins.git"
+
 [plugins."omo@sisyphuslabs"]
 enabled = true
 
 [plugins."ponytail@ponytail"]
+enabled = true
+
+[plugins."pstack@cursor-plugins"]
+enabled = true
+
+[plugins."caveman@caveman"]
+enabled = true
+
+[plugins."mattpocock-skills@mattpocock"]
+enabled = true
+
+[plugins."diagram-design@diagram-design"]
 enabled = true
 
 [plugins."omo@sisyphuslabs".mcp_servers.context7]
