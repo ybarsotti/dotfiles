@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -eufo pipefail
+
+ACTION="auto"
+TARGET=""
+NAME=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --split-down) TARGET="${2:-}"; ACTION="down"; shift 2 ;;
+    --name) NAME="${2:-}"; shift 2 ;;
+    *) break ;;
+  esac
+done
+
+DIR="${1:-.}"
+command -v jq >/dev/null 2>&1 || { echo "wave-chat: jq required" >&2; exit 2; }
+command -v llmessage >/dev/null 2>&1 || { echo "wave-chat: llmessage required" >&2; exit 2; }
+ROOT=$(git -C "$DIR" rev-parse --show-toplevel 2>/dev/null) || {
+  echo "wave-chat: $DIR is not inside a git worktree" >&2
+  exit 2
+}
+BRANCH=$(git -C "$ROOT" rev-parse --abbrev-ref HEAD)
+[ -n "$NAME" ] || NAME="Chat · ${BRANCH}"
+
+llmessage daemon --once >/dev/null 2>&1 || true
+HOME_DIR="${LLMESSAGE_HOME:-${HOME}/Library/Application Support/llmessage}"
+SESSION=""
+for meta in "${HOME_DIR}"/sessions/*/meta.json; do
+  [ -f "$meta" ] || continue
+  if jq -e --arg root "$ROOT" --arg branch "$BRANCH" \
+    '.state == "open" and .repo_path == $root and .branch == $branch' "$meta" >/dev/null; then
+    SESSION=$(jq -r '.session_id' "$meta")
+  fi
+done
+[ -n "$SESSION" ] || {
+  echo "wave-chat: llmessage has no open session for ${BRANCH} in ${ROOT}" >&2
+  exit 1
+}
+
+SPLIT="${HOME}/.local/bin/wave-split-run"
+TUI_COMMAND="exec llmessage tui --session \"\$1\""
+if [ "$ACTION" = "down" ] && [ -x "$SPLIT" ]; then
+  OUT=$($SPLIT down "$TARGET" "$NAME" "$ROOT" /bin/zsh -lc "$TUI_COMMAND" wave-chat "$SESSION")
+else
+  OUT=$(wsh run --cwd "$ROOT" -- /bin/zsh -lc "$TUI_COMMAND" wave-chat "$SESSION")
+  BLOCK=$(printf '%s' "$OUT" | grep -oE 'block:[0-9a-f-]+' | head -1)
+  [ -z "$BLOCK" ] || wsh setmeta -b "${BLOCK#block:}" "display:name=${NAME}" >/dev/null 2>&1 || true
+fi
+
+printf '%s\n' "$OUT" | grep -oE 'block:[0-9a-f-]+' | head -1

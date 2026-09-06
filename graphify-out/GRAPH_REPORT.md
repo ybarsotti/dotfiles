@@ -1,7 +1,7 @@
-# Graph Report - chezmoi  (2026-08-13)
+# Graph Report - chezmoi  (2026-08-26)
 
 ## Corpus Check
-- 22 files · ~99,306 words
+- 24 files · ~100,530 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2fc7397d`
+- Built from commit: `2a9dc7f8`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

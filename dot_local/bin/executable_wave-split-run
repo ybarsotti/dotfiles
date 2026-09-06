@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+set -eufo pipefail
+
+ACTION="${1:-}"
+TARGET="${2:-}"
+NAME="${3:-}"
+CWD="${4:-}"
+[ $# -ge 5 ] || {
+  echo "wave-split-run: usage: wave-split-run right|down TARGET NAME CWD COMMAND..." >&2
+  exit 2
+}
+shift 4
+
+case "$ACTION" in right | down) ;; *) echo "wave-split-run: action must be right or down" >&2; exit 2 ;; esac
+[ -d "$CWD" ] || { echo "wave-split-run: no such directory: $CWD" >&2; exit 2; }
+command -v wsh >/dev/null 2>&1 || { echo "wave-split-run: wsh required" >&2; exit 2; }
+command -v jq >/dev/null 2>&1 || { echo "wave-split-run: jq required" >&2; exit 2; }
+
+fallback() {
+  local out block
+  out=$(wsh run --cwd "$CWD" -- "$@")
+  block=$(printf '%s' "$out" | grep -oE 'block:[0-9a-f-]+' | head -1)
+  [ -n "$block" ] || { echo "wave-split-run: wsh run returned no block id" >&2; exit 1; }
+  wsh setmeta -b "${block#block:}" "frame:title=${NAME}" >/dev/null 2>&1 || true
+  printf '%s\n' "$block"
+}
+
+if [ "$(uname -s)" != "Darwin" ] || ! command -v osascript >/dev/null 2>&1 || \
+  [ -z "${WAVETERM_TABID:-}" ] || [ -z "$TARGET" ]; then
+  fallback "$@"
+  exit 0
+fi
+
+ACCESS=$(osascript -e 'tell application "System Events" to get UI elements enabled' 2>/dev/null || true)
+if [ "$ACCESS" != "true" ]; then
+  fallback "$@"
+  exit 0
+fi
+
+before=$(wsh blocks list --tab "$WAVETERM_TABID" --json | jq -r '.[].blockid')
+wsh focusblock -b "${TARGET#block:}" >/dev/null
+osascript -e 'tell application "Wave" to activate' -e 'delay 0.2' >/dev/null
+FRONTMOST=$(osascript -e 'tell application "System Events" to get name of first process whose frontmost is true')
+[ "$FRONTMOST" = "Wave" ] || { echo "wave-split-run: Wave did not become frontmost" >&2; exit 1; }
+
+if [ "$ACTION" = "right" ]; then
+  osascript -e 'tell application "System Events" to keystroke "d" using command down' >/dev/null
+else
+  osascript -e 'tell application "System Events" to keystroke "d" using {command down, shift down}' >/dev/null
+fi
+
+block=""
+for _ in $(seq 1 30); do
+  after=$(wsh blocks list --tab "$WAVETERM_TABID" --json | jq -r '.[].blockid')
+  block=$(comm -13 <(printf '%s\n' "$before" | sort) <(printf '%s\n' "$after" | sort) | head -1)
+  [ -z "$block" ] || break
+  sleep 0.1
+done
+[ -n "$block" ] || { echo "wave-split-run: split created no detectable block" >&2; exit 1; }
+
+wsh setmeta -b "$block" "frame:title=${NAME}" >/dev/null 2>&1 || true
+wsh focusblock -b "$block" >/dev/null
+osascript -e 'tell application "Wave" to activate' -e 'delay 0.2' >/dev/null
+FRONTMOST=$(osascript -e 'tell application "System Events" to get name of first process whose frontmost is true')
+[ "$FRONTMOST" = "Wave" ] || { echo "wave-split-run: Wave lost focus before command input" >&2; exit 1; }
+printf -v command_line '%q ' "$@"
+osascript \
+  -e 'on run argv' \
+  -e 'tell application "System Events" to keystroke (item 1 of argv)' \
+  -e 'tell application "System Events" to key code 36' \
+  -e 'end run' \
+  "$command_line" >/dev/null
+
+printf 'block:%s\n' "$block"

@@ -46,6 +46,10 @@ README.md
 # with `npx gitnexus analyze` / `graphify update .` instead of syncing them between machines.
 graphify-out/
 
+# Repository tests, the same as .github/test-scripts/. They run against this checkout and have
+# no target in the home directory: without this rule chezmoi deploys ~/tests/test-stop-hooks.sh.
+tests/
+
 # Vendor files, not configuration: the omo Codex plugin ships these agent definitions and
 # reinstalls them on every update, so the live copies are byte-identical to
 # ~/.codex/plugins/cache/sisyphuslabs/omo/<version>/components/ultrawork/agents/. Managing them
