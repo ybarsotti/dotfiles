@@ -195,6 +195,13 @@ packages:
           - slack             # Team communication
           - notion            # Note-taking and collaboration
 
+      # AI Agents (desktop apps)
+      ai_agents:
+        # The plain "orca" cask in homebrew/cask is plotly's chart renderer, not this one,
+        # so the token stays tap-qualified.
+        - stablyai/orca/orca  # Orca — agent worktree manager (provides the `orca` CLI)
+        - grok-bot            # Grok Bot — xAI desktop agent
+
       # Media & Entertainment
       media:
         - obs                 # Open Broadcaster Software
