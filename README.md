@@ -276,6 +276,20 @@ This dotfiles setup includes several development tools that are automatically in
   - Outputs `graphify-out/GRAPH_REPORT.md` — Claude Code skill auto-reads it
 - **`bmad-method`** - AI-driven agile development framework with 34+ workflows
   - Usage: `npx bmad-method install` (per-project)
+- **`hermes`** - Hermes Agent CLI from Nous Research
+  - Usage: `hermes`, `hermes-agent`
+  - Install: `curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash` (automatic)
+  - The installer builds its own uv virtual environment under `~/.hermes`
+- **`openclaw`** - Multi-channel AI gateway with messaging integrations
+  - Usage: `openclaw`, binary at `~/.openclaw/bin/openclaw`
+  - Install: `curl -fsSL https://openclaw.ai/install.sh | bash` (automatic)
+  - The installer brings a private Node runtime under `~/.openclaw/tools`
+- **`orca`** - Orca app and CLI for agent worktrees, terminals, and artifacts
+  - Usage: `orca worktree list`, `orca terminal send`
+  - Install: `brew install --cask stablyai/orca/orca`
+  - The plain `orca` cask in `homebrew/cask` is a different tool, so the token stays tap-qualified
+- **Grok Bot** - xAI desktop agent that works across apps and tools
+  - Install: `brew install --cask grok-bot`
 
 ### Data Engineering & Analytics
 
