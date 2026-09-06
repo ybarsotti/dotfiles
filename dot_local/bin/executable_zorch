@@ -1,0 +1,549 @@
+#!/usr/bin/env bash
+# zorch — CLI helper for the Zellij Agent Orchestrator
+# Manages git worktrees, Claude Code launches, and state for the zorch plugin.
+set -eufo pipefail
+
+readonly VERSION="0.1.0"
+readonly STATE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/zorch"
+readonly STATE_FILE="${STATE_DIR}/state.json"
+
+# Colors
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly BLUE='\033[0;34m'
+readonly NC='\033[0m'
+
+log_info()    { echo -e "${BLUE}ℹ️  $*${NC}"; }
+log_success() { echo -e "${GREEN}✅ $*${NC}"; }
+log_warning() { echo -e "${YELLOW}⚠️  $*${NC}"; }
+log_error()   { echo -e "${RED}❌ $*${NC}" >&2; }
+
+error_handler() {
+    local line_number="$1"
+    local command="$2"
+    local error_code="$3"
+    log_error "Command failed at line ${line_number}: ${command}"
+    log_error "Exit code: ${error_code}"
+    exit "${error_code}"
+}
+trap 'error_handler ${LINENO} "$BASH_COMMAND" $?' ERR
+
+command_exists() { command -v "$1" &>/dev/null; }
+
+# ─── State management ───────────────────────────────────────────────
+
+ensure_state_dir() {
+    mkdir -p "$STATE_DIR"
+    if [[ ! -f "$STATE_FILE" ]]; then
+        echo '{"version":1,"sessions":{}}' > "$STATE_FILE"
+    fi
+}
+
+get_session_name() {
+    echo "${ZELLIJ_SESSION_NAME:-default}"
+}
+
+read_state() {
+    ensure_state_dir
+    cat "$STATE_FILE"
+}
+
+write_state() {
+    local new_state="$1"
+    ensure_state_dir
+    local tmp
+    tmp=$(mktemp "${STATE_DIR}/state.json.XXXXXX")
+    echo "$new_state" > "$tmp"
+    mv "$tmp" "$STATE_FILE"
+}
+
+# Get or create session entry, returning updated state
+ensure_session() {
+    local project_root="$1"
+    local session
+    session=$(get_session_name)
+    local state
+    state=$(read_state)
+
+    if echo "$state" | jq -e --arg s "$session" '.sessions[$s]' > /dev/null 2>&1; then
+        echo "$state"
+    else
+        echo "$state" | jq --arg s "$session" --arg r "$project_root" \
+            '.sessions[$s] = {"project_root": $r, "agents": []}'
+    fi
+}
+
+add_agent_to_state() {
+    local slug="$1" branch="$2" worktree_path="$3" prompt="$4" status="$5" base_branch="${6:-}"
+    local session
+    session=$(get_session_name)
+    local state
+    state=$(read_state)
+    local now
+    now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    local updated
+    updated=$(echo "$state" | jq \
+        --arg s "$session" \
+        --arg slug "$slug" \
+        --arg branch "$branch" \
+        --arg wt "$worktree_path" \
+        --arg pane "zorch: $slug" \
+        --arg status "$status" \
+        --arg prompt "$prompt" \
+        --arg created "$now" \
+        --arg base "$base_branch" \
+        '.sessions[$s].agents += [{
+            "slug": $slug,
+            "branch": $branch,
+            "worktree_path": $wt,
+            "pane_name": $pane,
+            "status": $status,
+            "prompt": $prompt,
+            "created_at": $created,
+            "base_branch": $base
+        }]')
+
+    write_state "$updated"
+}
+
+update_agent_status() {
+    local slug="$1" new_status="$2"
+    local session
+    session=$(get_session_name)
+    local state
+    state=$(read_state)
+
+    local updated
+    updated=$(echo "$state" | jq \
+        --arg s "$session" \
+        --arg slug "$slug" \
+        --arg status "$new_status" \
+        '(.sessions[$s].agents[] | select(.slug == $slug)).status = $status')
+
+    write_state "$updated"
+}
+
+remove_agent_from_state() {
+    local slug="$1"
+    local session
+    session=$(get_session_name)
+    local state
+    state=$(read_state)
+
+    local updated
+    updated=$(echo "$state" | jq \
+        --arg s "$session" \
+        --arg slug "$slug" \
+        '.sessions[$s].agents = [.sessions[$s].agents[] | select(.slug != $slug)]')
+
+    write_state "$updated"
+}
+
+notify_plugin() {
+    local name="$1" payload="$2"
+    if command_exists zellij; then
+        zellij pipe --plugin "zorch" --name "$name" --payload "$payload" 2>/dev/null || true
+    fi
+}
+
+# Build JSON payload safely (avoids shell injection via string interpolation)
+json_slug_status() {
+    jq -n --arg slug "$1" --arg status "$2" '{"slug":$slug,"status":$status}'
+}
+
+json_slug() {
+    jq -n --arg slug "$1" '{"slug":$slug}'
+}
+
+# ─── Slug generation ────────────────────────────────────────────────
+
+generate_slug() {
+    local prompt="$1"
+    echo "$prompt" \
+        | tr '[:upper:]' '[:lower:]' \
+        | sed 's/[^a-z0-9 ]/ /g' \
+        | tr -s ' ' \
+        | awk '{for(i=1;i<=NF && i<=4;i++) printf "%s%s", (i>1?"-":""), $i; print ""}' \
+        | head -c 30 \
+        | sed 's/-$//'
+}
+
+# ─── Commands ────────────────────────────────────────────────────────
+
+cmd_new() {
+    local project_root="" prompt="" slug=""
+
+    # Parse arguments
+    if [[ $# -lt 1 ]]; then
+        log_error "Usage: zorch new <project-root> --prompt \"task\" [--slug name]"
+        exit 1
+    fi
+    project_root="$1"; shift
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --prompt) prompt="$2"; shift 2 ;;
+            --slug)   slug="$2"; shift 2 ;;
+            *)        log_error "Unknown option: $1"; exit 1 ;;
+        esac
+    done
+
+    if [[ -z "$prompt" ]]; then
+        log_error "Missing --prompt"
+        exit 1
+    fi
+
+    if [[ -z "$slug" ]]; then
+        slug=$(generate_slug "$prompt")
+    fi
+
+    if [[ -z "$slug" ]]; then
+        slug="agent-$(date +%s | tail -c 5)"
+    fi
+
+    local branch="zorch/${slug}"
+    local worktree_path="${project_root}/.claude/worktrees/${slug}"
+
+    # Verify project root is a git repo
+    if [[ ! -d "${project_root}/.git" ]] && ! git -C "$project_root" rev-parse --git-dir &>/dev/null; then
+        log_error "Not a git repository: $project_root"
+        exit 1
+    fi
+
+    # Verify repo has at least one commit (HEAD must exist for worktrees)
+    if ! git -C "$project_root" rev-parse HEAD &>/dev/null; then
+        log_error "Repository has no commits yet. Run: git -C $project_root commit --allow-empty -m 'init'"
+        exit 1
+    fi
+
+    # Ensure session exists in state
+    local state
+    state=$(ensure_session "$project_root")
+    write_state "$state"
+
+    # Check if slug already exists
+    if echo "$state" | jq -e --arg s "$(get_session_name)" --arg slug "$slug" \
+        '.sessions[$s].agents[] | select(.slug == $slug)' > /dev/null 2>&1; then
+        log_error "Agent '$slug' already exists"
+        exit 1
+    fi
+
+    log_info "Creating agent: $slug"
+
+    # Detect current main branch for later merge (#15)
+    local main_branch
+    main_branch=$(git -C "$project_root" symbolic-ref --short HEAD 2>/dev/null || echo "main")
+
+    # Create worktree directory
+    mkdir -p "$(dirname "$worktree_path")"
+
+    # Add state entry (with base branch)
+    add_agent_to_state "$slug" "$branch" "$worktree_path" "$prompt" "creating" "$main_branch"
+    notify_plugin "status_update" "$(json_slug_status "$slug" "creating")"
+
+    # Create git worktree
+    log_info "Creating worktree at $worktree_path"
+    git -C "$project_root" worktree add -b "$branch" "$worktree_path" HEAD
+
+    # Open Zellij pane with Claude
+    local pane_opened=false
+    if command_exists zellij && [[ -n "${ZELLIJ_SESSION_NAME:-}" ]]; then
+        log_info "Opening Claude in new pane..."
+        if zellij action new-pane \
+            --name "zorch: ${slug}" \
+            --cwd "$worktree_path" \
+            -- bash -c 'exec claude "$1"' _ "$prompt" 2>/dev/null; then
+            pane_opened=true
+        else
+            log_warning "Could not open Zellij pane — worktree created"
+            log_info "Run manually: cd $worktree_path && claude \"$prompt\""
+        fi
+    else
+        log_warning "Not inside Zellij — worktree created but no pane opened"
+        log_info "Run manually: cd $worktree_path && claude \"$prompt\""
+    fi
+
+    # Update status — only "working" if pane actually opened (#12)
+    if $pane_opened; then
+        update_agent_status "$slug" "working"
+        notify_plugin "agent_started" "$(json_slug_status "$slug" "working")"
+    else
+        update_agent_status "$slug" "pending"
+        notify_plugin "status_update" "$(json_slug_status "$slug" "pending")"
+    fi
+
+    log_success "Agent '$slug' created"
+}
+
+cmd_merge() {
+    local slug="" project_root=""
+
+    if [[ $# -lt 1 ]]; then
+        log_error "Usage: zorch merge <slug> [--project <root>]"
+        exit 1
+    fi
+    slug="$1"; shift
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --project) project_root="$2"; shift 2 ;;
+            *)         log_error "Unknown option: $1"; exit 1 ;;
+        esac
+    done
+
+    # Auto-detect project root from state (#11: safe jq)
+    if [[ -z "$project_root" ]]; then
+        local session
+        session=$(get_session_name)
+        project_root=$(read_state | jq -r --arg s "$session" '.sessions[$s].project_root // empty')
+    fi
+
+    if [[ -z "$project_root" ]]; then
+        log_error "Cannot determine project root. Use --project"
+        exit 1
+    fi
+
+    local branch="zorch/${slug}"
+    local worktree_path="${project_root}/.claude/worktrees/${slug}"
+
+    if [[ ! -d "$worktree_path" ]]; then
+        log_error "Worktree not found: $worktree_path"
+        exit 1
+    fi
+
+    log_info "Merging agent: $slug"
+
+    # Check for uncommitted changes in worktree (#13: use git status --porcelain)
+    if [[ -n "$(git -C "$worktree_path" status --porcelain 2>/dev/null)" ]]; then
+        log_warning "Uncommitted changes detected — auto-committing"
+        git -C "$worktree_path" add -A
+        git -C "$worktree_path" commit -m "zorch: auto-commit before merge ($slug)"
+    fi
+
+    # Read base branch from state (#15), fall back to current HEAD
+    local session
+    session=$(get_session_name)
+    local main_branch
+    main_branch=$(read_state | jq -r --arg s "$session" --arg slug "$slug" \
+        '(.sessions[$s].agents[] | select(.slug == $slug)).base_branch // empty')
+    if [[ -z "$main_branch" ]]; then
+        main_branch=$(git -C "$project_root" symbolic-ref --short HEAD 2>/dev/null || echo "main")
+    fi
+
+    # Phase 1: merge main into worktree (#3: handle conflicts gracefully)
+    log_info "Phase 1: merging $main_branch into worktree..."
+    if ! git -C "$worktree_path" merge "$main_branch" --no-edit; then
+        log_error "Merge conflict in Phase 1. Resolve in $worktree_path then re-run: zorch merge $slug"
+        git -C "$worktree_path" merge --abort 2>/dev/null || true
+        exit 1
+    fi
+
+    # Phase 2: merge worktree branch into main (#3: handle conflicts gracefully)
+    log_info "Phase 2: merging $branch into $main_branch..."
+    if ! git -C "$project_root" merge "$branch" --no-edit; then
+        log_error "Merge conflict in Phase 2. Resolve in $project_root: git merge --continue"
+        exit 1
+    fi
+
+    # Cleanup (#14: use -D since work is already merged)
+    log_info "Cleaning up worktree and branch..."
+    git -C "$project_root" worktree remove "$worktree_path"
+    git -C "$project_root" branch -D "$branch"
+
+    # Update state
+    remove_agent_from_state "$slug"
+    notify_plugin "agent_closed" "$(json_slug "$slug")"
+
+    log_success "Agent '$slug' merged and cleaned up"
+}
+
+cmd_close() {
+    local slug="" project_root=""
+
+    if [[ $# -lt 1 ]]; then
+        log_error "Usage: zorch close <slug> [--project <root>]"
+        exit 1
+    fi
+    slug="$1"; shift
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --project) project_root="$2"; shift 2 ;;
+            *)         log_error "Unknown option: $1"; exit 1 ;;
+        esac
+    done
+
+    if [[ -z "$project_root" ]]; then
+        local session
+        session=$(get_session_name)
+        project_root=$(read_state | jq -r --arg s "$session" '.sessions[$s].project_root // empty')
+    fi
+
+    if [[ -z "$project_root" ]]; then
+        log_error "Cannot determine project root. Use --project"
+        exit 1
+    fi
+
+    local branch="zorch/${slug}"
+    local worktree_path="${project_root}/.claude/worktrees/${slug}"
+
+    log_info "Closing agent: $slug"
+
+    # Remove worktree
+    if [[ -d "$worktree_path" ]]; then
+        git -C "$project_root" worktree remove --force "$worktree_path" 2>/dev/null || true
+    fi
+
+    # Delete branch
+    git -C "$project_root" branch -D "$branch" 2>/dev/null || true
+
+    # Update state
+    remove_agent_from_state "$slug"
+    notify_plugin "agent_closed" "$(json_slug "$slug")"
+
+    log_success "Agent '$slug' closed"
+}
+
+cmd_list() {
+    local json_output=false project_root=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --json)    json_output=true; shift ;;
+            --project) project_root="$2"; shift 2 ;;
+            *)         log_error "Unknown option: $1"; exit 1 ;;
+        esac
+    done
+
+    ensure_state_dir
+    local state
+    state=$(read_state)
+
+    if $json_output; then
+        echo "$state"
+        return
+    fi
+
+    local session
+    session=$(get_session_name)
+    local agents
+    agents=$(echo "$state" | jq -r --arg s "$session" '.sessions[$s].agents // []')
+    local count
+    count=$(echo "$agents" | jq 'length')
+
+    if [[ "$count" -eq 0 ]]; then
+        echo "No active agents"
+        return
+    fi
+
+    echo -e "${BLUE}Active agents ($count):${NC}"
+    echo ""
+    echo "$agents" | jq -r '.[] | "  \(.slug)\t\(.status)\t\(.branch)\n    \"\(.prompt)\""'
+}
+
+cmd_status() {
+    ensure_state_dir
+    local state
+    state=$(read_state)
+    local session
+    session=$(get_session_name)
+
+    local root
+    root=$(echo "$state" | jq -r --arg s "$session" '.sessions[$s].project_root // "(unknown)"')
+    local count
+    count=$(echo "$state" | jq --arg s "$session" '.sessions[$s].agents | length // 0')
+
+    echo -e "${BLUE}zorch status${NC}"
+    echo "  Session:  $session"
+    echo "  Project:  $root"
+    echo "  Agents:   $count"
+    echo "  State:    $STATE_FILE"
+}
+
+cmd_terminal() {
+    local project_root="${1:-$(pwd)}"
+
+    if command_exists zellij && [[ -n "${ZELLIJ_SESSION_NAME:-}" ]]; then
+        zellij action new-pane \
+            --name "terminal" \
+            --cwd "$project_root"
+    else
+        log_warning "Not inside Zellij"
+    fi
+}
+
+usage() {
+    cat <<EOF
+zorch v${VERSION} — Zellij Agent Orchestrator
+
+Usage: zorch <command> [options]
+
+Commands:
+  new <project-root> --prompt "task" [--slug name]
+      Create a new agent with git worktree + Claude Code pane
+
+  merge <slug> [--project <root>]
+      Merge agent's worktree back into main branch
+
+  close <slug> [--project <root>]
+      Close agent and remove worktree + branch
+
+  list [--json] [--project <root>]
+      List active agents
+
+  status
+      Show current session status
+
+  terminal [project-root]
+      Open a plain terminal pane in the project root
+
+  help
+      Show this help message
+
+Environment:
+  ZELLIJ_SESSION_NAME   Used to scope state to the current Zellij session
+  XDG_DATA_HOME         State file location (default: ~/.local/share)
+EOF
+}
+
+# ─── Main ─────────────────────────────────────────────────────────────
+
+main() {
+    if [[ $# -eq 0 ]]; then
+        usage
+        exit 0
+    fi
+
+    # Check dependencies
+    if ! command_exists jq; then
+        log_error "jq is required but not installed"
+        exit 1
+    fi
+
+    if ! command_exists git; then
+        log_error "git is required but not installed"
+        exit 1
+    fi
+
+    local cmd="$1"; shift
+
+    case "$cmd" in
+        new)      cmd_new "$@" ;;
+        merge)    cmd_merge "$@" ;;
+        close)    cmd_close "$@" ;;
+        list)     cmd_list "$@" ;;
+        status)   cmd_status ;;
+        terminal) cmd_terminal "$@" ;;
+        help|--help|-h) usage ;;
+        version|--version|-v) echo "zorch v${VERSION}" ;;
+        *)
+            log_error "Unknown command: $cmd"
+            usage
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"
