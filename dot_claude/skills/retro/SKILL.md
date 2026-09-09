@@ -1,6 +1,6 @@
 ---
 name: retro
-description: Close the week in the Obsidian journal — read the week's day notes, compare them with the commitments, and draft the Retro section. With `/retro slack`, produce the emoji-tagged message to paste into the team channel. Use when the user types /retro, says "fechar a semana", "retro da semana", "retro pro Slack", or asks what happened this week.
+description: Close the week in the Obsidian journal — read the week's day notes, compare them with the commitments, and draft the Retro section. With `/retro slack`, produce the emoji-tagged message to paste into the team channel. Use when the user types /retro, says "close the week", "weekly retro", "retro for Slack", or asks what happened this week.
 ---
 
 # Retro
@@ -13,8 +13,7 @@ whole week. That is the work this skill does.
 
 ## Language and tone
 
-**Entries are written in Portuguese.** Section names are fixed Portuguese
-strings.
+**Entries are written in English.** Section names are canonical journal keys.
 
 **Write short and plain.** Simple words, no jargon, no long sentences. A retro
 line should read like something said out loud, not like a report. If a line runs
@@ -43,27 +42,27 @@ Write into `## Retro` with `journal append --week --section Retro`. Four groups,
 each one only if it has content:
 
 ```markdown
-### Entregue
-- [[PROJ-102]] — ETA ter, fechado na ter
+### Delivered
+- [[PROJ-102]] — ETA ter, completed on ter
 
-### Escorregou
-- Sincronização de preço — ETA qua, aberto desde seg (4 dias)
+### Slipped
+- Price sync — ETA qua, open since seg (4 days)
 
-### Decisões da semana
-- Script cria a nota do dia, não plugin
+### Weekly decisions
+- The script creates the daily note, not the plugin
 
-### Pro radar
-- Sincronização de preço
+### Carry over
+- Price sync
 ```
 
 Rules:
 
-- **Entregue**: commitment done. Say the ETA and when it actually closed.
-- **Escorregou**: commitment not done. Say the ETA and how long it has been open.
+- **Delivered**: commitment done. Say the ETA and when it actually closed.
+- **Slipped**: commitment not done. Say the ETA and how long it has been open.
   State the fact, do not explain it away.
-- **Decisões da semana**: one line each, pulled from the day notes. Link, do not
+- **Weekly decisions**: one line each, pulled from the day notes. Link, do not
   repeat.
-- **Pro radar**: what is worth carrying into next week.
+- **Carry over**: what is worth carrying into next week.
 
 Group by project, same as everywhere else — pass `--project`.
 
@@ -103,29 +102,29 @@ codes, not Unicode. Blank line between blocks.
 ```
 [Retro]
 
-:white_check_mark: PROJ-101 – filtros de tipo e de site no relatório de envios
-:white_check_mark: Painel de alertas
-Cards de e-mail
-Cards de fatura
+:white_check_mark: PROJ-101 – shipment report type and site filters
+:white_check_mark: Alert panel
+Email cards
+Invoice cards
 
-:warning: PROJ-102 – prioridade do primeiro pedido
-Fiz complexidade demais nos testes, estou limpando
+:warning: PROJ-102 – first order priority
+Tests became too complex and are being simplified
 
-:bulb: Sincronização de preço – decidimos a solução, falta implementar
+:bulb: Price sync – solution decided, implementation pending
 
 [Extra]
 
-Incluído validador de e-mail na criação de conta
-:exclamation: Cálculo de caixa – mudou o escopo, precisa de decisão
+Added email validation to account creation
+:exclamation: Box calculation – scope changed, decision required
 
 [Carry over]
 
-Sincronização de preço – implementação da opção decidida
-PROJ-102 – prioridade do primeiro pedido
+Price sync – implement the chosen option
+PROJ-102 – first order priority
 
 [Aprendizados]
 
-Item fora de padrão também força embalagem fora de padrão, quando o maior lado passa do maior lado da maior caixa. Testar sempre com item GRANDE.
+An out-of-pattern item also forces out-of-pattern packaging when its longest side exceeds the largest box side. Always test with a LARGE item.
 ```
 
 ### Blocks

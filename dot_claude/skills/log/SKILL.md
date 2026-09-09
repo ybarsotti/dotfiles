@@ -1,6 +1,6 @@
 ---
 name: log
-description: Record decisions, Slack threads, tickets and learnings in the Obsidian journal. Use when the user types /log, asks to "registrar", "anotar no diário", "log this", "save this decision", when the journal-nudge hook fires, or after work whose motivation would not be obvious from the code alone.
+description: Record decisions, Slack threads, tickets and learnings in the Obsidian journal. Use when the user types /log, asks to "record this", "add it to the journal", "log this", "save this decision", when the journal-nudge hook fires, or after work whose motivation would not be obvious from the code alone.
 ---
 
 # Journal
@@ -13,8 +13,8 @@ Works identically in Claude Code and Codex — every write goes through one scri
 
 ## Language and tone
 
-**Entries are written in Portuguese.** Section names are fixed Portuguese strings
-and are never translated.
+**Entries are written in English.** Section names are canonical journal keys and
+are never translated.
 
 **Write short and plain.** Simple words, no jargon, no long sentences. An entry
 should read like something said out loud, not like a report. If a line runs past
@@ -52,8 +52,8 @@ only reviewed, something raised in a meeting.
 than that, it wants its own note, not a longer bullet.
 
 ```bash
-journal append --section Decisões --text "- **Sincronização de preço → opção 5** — usa o mesmo payload do catálogo
-  As outras divergiam o preço entre catálogo e pedido. [[PROJ-101]] · [thread](https://...)"
+journal append --section Decisões --text "- **Price sync → option 5** — it uses the catalog payload
+  Other options diverged between catalog and order prices. [[PROJ-101]] · [thread](https://...)"
 ```
 
 No paragraph of background. In three months the user needs the decision and the
@@ -80,7 +80,7 @@ A thought with no project, no date and no section — a link to read, a reminder
 something to ask someone — goes to the inbox:
 
 ```bash
-journal note "perguntar pro time sobre o cache"
+journal note "ask the team about the cache"
 ```
 
 The inbox has no rules on purpose: capture only works while it costs nothing.
@@ -132,7 +132,7 @@ skill directly, same behaviour.
 3. Append, one call per entry.
 4. Reply with one line per record — do not paste the file back.
 
-With an argument (`/log decidi a opção 5 na sincronização de preço porque X`), record **that**
+With an argument (`/log chose option 5 for price sync because X`), record **that**
 and do not comb the conversation.
 
 If nothing passes, say so. That is a valid outcome.
