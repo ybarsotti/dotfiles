@@ -263,10 +263,10 @@ jq -n \
 TASK_LABEL=$(git -C "$CWD" rev-parse --abbrev-ref HEAD 2>/dev/null || basename "$CWD")
 NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 jq -n \
-  --arg label "$TASK_LABEL" \
+  --arg task_label "$TASK_LABEL" \
   --arg started "$NOW" \
   --arg orch "$ORCH_LANE" \
-  '{schema_version:"1.0.0", task_label:$label, started_at:$started,
+  '{schema_version:"1.0.0", task_label:$task_label, started_at:$started,
     phase:"execution", phase_started_at:$started, orchestrator_lane:$orch}' \
   >"${RUN_DIR}/status.json"
 
