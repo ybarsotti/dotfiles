@@ -24,10 +24,10 @@ command -v jq >/dev/null 2>&1 || {
 
 MANIFEST="${RUN_DIR}/manifest.json"
 STATUS="${RUN_DIR}/status.json"
-[ -f "$MANIFEST" ] && [ -f "$STATUS" ] || {
+if [ ! -f "$MANIFEST" ] || [ ! -f "$STATUS" ]; then
   echo "run-status.sh: run has no manifest.json or status.json" >&2
   exit 1
-}
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLAN=$(jq -r '.plan_path' "$MANIFEST")
