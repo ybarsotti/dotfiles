@@ -62,9 +62,6 @@ PLAN="${PLAN_DIR_ABS}/$(basename "$PLAN_ARG")"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 DEEP_PLAN_SCRIPTS="$(cd "${SCRIPT_DIR}/../../deep-plan/scripts" && pwd)"
-# prepare-run.sh launches nothing and touches no multiplexer — it only writes
-# scaffolding — so it is reused across transports rather than re-implemented.
-CMUX_SCRIPTS="$(cd "${SCRIPT_DIR}/../../cmux-orchestrator/scripts" && pwd)"
 
 # Resolve BOTH the source-tree name (executable_*) and the deployed name for
 # every cross-skill script — chezmoi apply strips the `executable_` prefix
@@ -73,8 +70,8 @@ VALIDATE_PLAN="${DEEP_PLAN_SCRIPTS}/validate-plan.sh"
 [ -f "$VALIDATE_PLAN" ] || VALIDATE_PLAN="${DEEP_PLAN_SCRIPTS}/executable_validate-plan.sh"
 PARSER="${DEEP_PLAN_SCRIPTS}/plan-to-json.sh"
 [ -f "$PARSER" ] || PARSER="${DEEP_PLAN_SCRIPTS}/executable_plan-to-json.sh"
-PREPARE_RUN="${CMUX_SCRIPTS}/prepare-run.sh"
-[ -f "$PREPARE_RUN" ] || PREPARE_RUN="${CMUX_SCRIPTS}/executable_prepare-run.sh"
+PREPARE_RUN="${SCRIPT_DIR}/prepare-run.sh"
+[ -f "$PREPARE_RUN" ] || PREPARE_RUN="${SCRIPT_DIR}/executable_prepare-run.sh"
 
 WORKER_PROMPT="${SKILL_DIR}/templates/worker-system-prompt.txt"
 [ -f "$WORKER_PROMPT" ] || {
