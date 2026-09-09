@@ -183,7 +183,6 @@ test-deep-pipeline:
     dot_claude/skills/deep-execute/tests/executable_test-pipeline-integration.sh
     dot_claude/skills/_shared/tests/executable_test-assert.sh
     dot_claude/skills/deep-plan/tests/executable_test-deep-plan.sh
-    dot_claude/skills/cmux-orchestrator/tests/executable_test-cmux-orchestrator.sh
     dot_claude/skills/deep-execute/tests/executable_test-deep-execute.sh
     dot_claude/skills/deep-execute/tests/executable_test-run-viewer.sh
     dot_claude/skills/deep-review/tests/executable_test-deep-review.sh
