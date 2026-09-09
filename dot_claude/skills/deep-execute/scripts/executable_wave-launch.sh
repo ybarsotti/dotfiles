@@ -52,10 +52,10 @@ command -v wsh >/dev/null 2>&1 || {
 	echo "wave-launch.sh: wsh not found — this run is not inside Wave Terminal" >&2
 	exit 2
 }
-[ -n "${WAVETERM_TABID:-}" ] && [ -n "${WAVETERM_BLOCKID:-}" ] || {
+if [ -z "${WAVETERM_TABID:-}" ] || [ -z "${WAVETERM_BLOCKID:-}" ]; then
 	echo "wave-launch.sh: run /deep-execute inside the Wave tab reserved for this task" >&2
 	exit 2
-}
+fi
 wsh setmeta -b "${WAVETERM_BLOCKID}" "frame:title=Orchestrator" >/dev/null 2>&1 || true
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
