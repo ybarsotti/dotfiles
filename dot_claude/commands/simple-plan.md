@@ -53,6 +53,8 @@ form:
 - Comment only what the code cannot show.
 - Edge cases go in a table with a decision: cover now, fail loudly, or out of scope. Only
   `Cover now` rows reach the implementation.
+- Touch only the code the task needs. No drive-by refactor, rename, or reformat. When nearby
+  logic looks complex or defective, ask the user before you change it.
 
 ## Examples
 

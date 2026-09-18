@@ -95,6 +95,9 @@ retry.* Show a Mermaid `sequenceDiagram` or `flowchart`. Otherwise omit this sec
 draw a diagram for a straight-line call.
 
 **8. Affected files** — A table of path, action (add, edit, delete), and one line of reason.
+Constraint rule 9 applies: the table holds only files the task needs. It lists no refactor,
+no rename, and no reformat that the task does not require. When the plan wants to change
+nearby logic, it asks the user first and records the answer.
 
 **9. Edge cases** — A table. Constraint rule 7 defines the decisions.
 

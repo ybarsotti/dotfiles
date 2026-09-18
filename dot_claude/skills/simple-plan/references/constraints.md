@@ -87,3 +87,23 @@ a simple plan.
 
 One test per `Cover now` row, plus one test for the main success path. Write the test list
 before the code. No test suite beyond that list.
+
+## 9. Touch only the code the task needs
+
+The diff contains the task and nothing else. An unrelated change hides the real change from
+the reviewer.
+
+Do not do any of these while you implement the task:
+
+- Refactor code that the task does not require you to change.
+- Rename a symbol, move a file, or reorder imports outside the task.
+- Reformat a file, or fix whitespace the task did not touch.
+- Fix a bug you found on the way, unless it blocks the task.
+- Update a dependency the task does not need.
+
+When you believe a nearby piece of logic needs work — it is already large, it is complex, or
+it carries a real defect — **stop and ask the user first**. Describe what you found, name the
+path, and propose the change. Wait for a decision. Do not start.
+
+When the user says no, record the finding in the plan's `## Non-goals` section so the work is
+not lost.
