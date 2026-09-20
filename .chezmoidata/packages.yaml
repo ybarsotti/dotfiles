@@ -21,7 +21,7 @@ packages:
           - git-sizer         # Compute size metrics for git repos
 
         containerization:
-          # docker CLI is included with Docker Desktop cask
+          # docker CLI + compose + buildx are included with the orbstack cask
           - lazydocker        # Terminal UI for Docker
 
         infrastructure:
@@ -174,7 +174,7 @@ packages:
         - cmux                # Claude Code terminal session manager (multiplexer)
         - conductor           # Claude Code + GitHub integration for Mac
         - figma               # Design and prototyping tool
-        - docker              # Docker Desktop (includes Docker Engine, CLI, Compose)
+        - orbstack            # Container & Linux VM runtime (Docker-compatible, replaces Docker Desktop)
         - ghostty             # Fast, feature-rich terminal emulator
         - wave                # Wave Terminal (blocks/widgets, wsh, local-LLM AI panel)
         - visual-studio-code  # IDE
