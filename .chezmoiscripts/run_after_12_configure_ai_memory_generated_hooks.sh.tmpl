@@ -3,6 +3,11 @@
 
 # Generate agent-owned integrations locally. Never store generated hooks or
 # OpenCode plugin code in chezmoi because they may include local configuration.
+#
+# Codex is not in this script. dot_codex/private_hooks.json.tmpl owns the Codex
+# ai-memory hooks, because it bounds each hook with a timeout. The installer
+# rewrites those entries without a timeout and in a different order, so every
+# apply then showed ~/.codex/hooks.json as modified.
 
 set -eufo pipefail
 umask 077
@@ -13,14 +18,6 @@ data_dir="{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory"
 if [ ! -x "$ai_memory_bin" ]; then
     echo "ai-memory binary missing: $ai_memory_bin" >&2
     exit 1
-fi
-
-if [ -d "{{ .chezmoi.homeDir }}/.codex" ]; then
-    "$ai_memory_bin" --data-dir "$data_dir" install-hooks \
-        --agent codex \
-        --apply \
-        --server-url http://127.0.0.1:49374 \
-        --project-strategy repo-root
 fi
 
 if [ -d "{{ .chezmoi.homeDir }}/.config/opencode" ]; then
