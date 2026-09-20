@@ -357,14 +357,16 @@ For databases and heavy services (PostgreSQL, Kafka, Spark, etc.), use Docker Co
   - Usage: `make`, `make install`
 
 ### Containerization
-- **`docker`** (Docker Desktop cask) - Container platform with Docker Engine, CLI, and Compose
+- **`orbstack`** (cask) - Container and Linux VM runtime. It replaces Docker Desktop. The cask supplies the `docker`, `docker compose`, and `docker buildx` commands.
   - Usage: `docker run`, `docker build`, `docker compose up`
+  - Manage the runtime: `orbctl start`, `orbctl stop`, `orb status`
+  - Migrate from Docker Desktop: `orb docker migrate`
 
 ### GUI Applications (Casks)
 
 **Browsers:** Arc, Brave, Firefox
 
-**Development:** Apidog (API testing), Beekeeper Studio (SQL editor), cmux (Claude Code terminal session manager), Conductor (Claude Code + GitHub), Docker Desktop, Figma, Ghostty (terminal emulator), Wave Terminal (block/widget terminal with local-LLM AI panel), Visual Studio Code, P4Merge (visual merge tool)
+**Development:** Apidog (API testing), Beekeeper Studio (SQL editor), cmux (Claude Code terminal session manager), Conductor (Claude Code + GitHub), OrbStack (containers and Linux VMs), Figma, Ghostty (terminal emulator), Wave Terminal (block/widget terminal with local-LLM AI panel), Visual Studio Code, P4Merge (visual merge tool)
 
 **Productivity:** Alt-Tab (window switcher), Raycast (launcher), BetterDisplay, Stats (menu bar monitor), Slack, Notion
 
