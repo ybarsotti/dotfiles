@@ -14,9 +14,23 @@ VARIANT_NAME="${2:-default}"
 RESULTS_DIR="${RUN_DIR}/results"
 REPORT_FILE="${RUN_DIR}/report.md"
 LOG_FILE="${RUN_DIR}/aggregate.log"
+FINDINGS_FILE="${RUN_DIR}/findings.jsonl"
 
 err() { printf 'aggregate: ERROR: %s\n' "$*" >&2; exit 1; }
 log() { printf 'aggregate: %s\n' "$*" >&2; }
+
+# --- Record mode: reviewers already wrote structured findings ---
+# dispatch.sh creates findings.jsonl only when the variant records findings by command.
+# The findings carry severity and category, so the report is a deterministic jq
+# transform. No LLM call, no chance of an invented finding.
+if [ -f "$FINDINGS_FILE" ]; then
+  command -v jq >/dev/null 2>&1 || err "jq not installed (brew install jq)"
+  log "building report from $(wc -l < "$FINDINGS_FILE" | tr -d ' ') recorded finding(s)"
+  "$(dirname "${BASH_SOURCE[0]}")/report.sh" "$RUN_DIR" > "$REPORT_FILE"
+  log "wrote $REPORT_FILE ($(wc -l < "$REPORT_FILE") lines)"
+  cat "$REPORT_FILE"
+  exit 0
+fi
 
 [ -d "$RESULTS_DIR" ] || err "results dir missing: $RESULTS_DIR"
 

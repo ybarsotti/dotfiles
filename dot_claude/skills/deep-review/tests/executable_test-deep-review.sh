@@ -22,14 +22,24 @@ REVIEWER="${ROOT}/dot_claude/skills/deep-review/scripts/executable_reviewer.sh"
 [ -f "$REVIEWER" ] || REVIEWER="${ROOT}/dot_claude/skills/deep-review/scripts/reviewer.sh"
 AGGREGATE="${ROOT}/dot_claude/skills/deep-review/scripts/executable_aggregate.sh"
 [ -f "$AGGREGATE" ] || AGGREGATE="${ROOT}/dot_claude/skills/deep-review/scripts/aggregate.sh"
+RECORD="${ROOT}/dot_claude/skills/deep-review/scripts/executable_record.sh"
+[ -f "$RECORD" ] || RECORD="${ROOT}/dot_claude/skills/deep-review/scripts/record.sh"
+REPORT="${ROOT}/dot_claude/skills/deep-review/scripts/executable_report.sh"
+[ -f "$REPORT" ] || REPORT="${ROOT}/dot_claude/skills/deep-review/scripts/report.sh"
+SARIF="${ROOT}/dot_claude/skills/deep-review/scripts/executable_sarif.sh"
+[ -f "$SARIF" ] || SARIF="${ROOT}/dot_claude/skills/deep-review/scripts/sarif.sh"
 
 # ─── Task 12: SKILL.md points at dispatch.sh's own invocation and reuse of ─
 # reviewer.sh by /deep-execute, and is under the pre-slimming baseline. ────
 
 SKILL_MD_TEXT="$(cat "$SKILL_MD")"
 
-assert_eq "$([ "$(wc -l <"$SKILL_MD" | tr -d ' ')" -lt 139 ] && echo yes || echo no)" yes \
-  "SKILL.md: line count is under the pre-slimming baseline of 139"
+# Baseline raised from 139 to 165 when reviewers moved to recording findings by command.
+# The added section states a contract the agent cannot derive from the scripts: evidence is
+# mandatory, categories are a closed set, and severity replaces the per-reviewer verdict.
+# Raise this again only for a rule of that weight, never to fit restated script internals.
+assert_eq "$([ "$(wc -l <"$SKILL_MD" | tr -d ' ')" -lt 165 ] && echo yes || echo no)" yes \
+  "SKILL.md: line count is under the baseline of 165"
 assert_contains "$SKILL_MD_TEXT" "scripts/dispatch.sh" \
   "SKILL.md: Phase 2 still names dispatch.sh as the invocation target"
 assert_contains "$SKILL_MD_TEXT" 'Skill(skill="simplify")' \
@@ -60,8 +70,17 @@ assert_contains "$SKILL_MD_TEXT" "Headless only" \
   "SKILL.md: must-survive — headless only"
 assert_contains "$SKILL_MD_TEXT" "Do NOT spawn reviewers in cmux panes" \
   "SKILL.md: must-survive — do not spawn reviewers in cmux panes"
-assert_contains "$SKILL_MD_TEXT" "One aggregator call" \
-  "SKILL.md: must-survive — one aggregator call"
+assert_contains "$SKILL_MD_TEXT" "No aggregator call in record mode" \
+  "SKILL.md: must-survive — no aggregator call when reviewers record findings"
+assert_contains "$SKILL_MD_TEXT" "still use a single \`claude -p\` aggregator" \
+  "SKILL.md: must-survive — non-recording variants keep exactly one aggregator call"
+
+# The record contract. Each of these is a rule the scripts enforce but the agent must know
+# up front, because a reviewer that does not know it wastes a whole run producing text.
+assert_contains "$SKILL_MD_TEXT" "rejects a finding with no \`--evidence\`" \
+  "SKILL.md: must-survive — a finding with no evidence is rejected"
+assert_contains "$SKILL_MD_TEXT" "There is no per-reviewer verdict" \
+  "SKILL.md: must-survive — severity decides the verdict, reviewers do not vote"
 
 # ─── The restated dispatcher mechanics are genuinely gone, not just ────────
 # shortened — content, not occurrence: the full progress-transcript example
@@ -87,7 +106,7 @@ assert_eq "$NO_STEP_LIST" "yes" \
 # source-tree executable bit set, or dispatch.sh fails before chezmoi apply
 # ever gets a chance to fix the mode. dispatch.sh itself is the direct
 # invocation target named in Phase 2 above.
-for script in "$DISPATCH" "$COLLECT_CONTEXT" "$REVIEWER" "$AGGREGATE"; do
+for script in "$DISPATCH" "$COLLECT_CONTEXT" "$REVIEWER" "$AGGREGATE" "$RECORD" "$REPORT" "$SARIF"; do
   MODE=$(stat -c '%a' "$script" 2>/dev/null || stat -f '%Lp' "$script")
   assert_eq "$MODE" "755" "$(basename "$script"): source-tree executable bit is 755"
 done
