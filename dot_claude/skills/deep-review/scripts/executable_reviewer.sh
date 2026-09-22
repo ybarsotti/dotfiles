@@ -20,7 +20,7 @@ TIMEOUT="${4:-600}"
 # Codex reviewers run on the strongest reasoning tier available. Override per-run with
 # DEEP_REVIEW_CODEX_MODEL / DEEP_REVIEW_CODEX_EFFORT (efforts: none|minimal|low|medium|high|xhigh|max).
 CODEX_MODEL="${DEEP_REVIEW_CODEX_MODEL:-gpt-5.6-sol}"
-CODEX_EFFORT="${DEEP_REVIEW_CODEX_EFFORT:-xhigh}"
+CODEX_EFFORT="${DEEP_REVIEW_CODEX_EFFORT:-medium}"
 
 PROMPT_FILE="${RUN_DIR}/reviewers/${PERSONA}.prompt.md"
 CONTEXT_FILE="${RUN_DIR}/context.md"

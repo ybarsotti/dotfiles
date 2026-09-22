@@ -20,7 +20,7 @@ TIMEOUT="${4:-900}"
 # interactive config. Override with DEEP_PLAN_CODEX_MODEL / DEEP_PLAN_CODEX_EFFORT
 # (efforts: none|minimal|low|medium|high|xhigh|max).
 CODEX_MODEL="${DEEP_PLAN_CODEX_MODEL:-gpt-5.6-sol}"
-CODEX_EFFORT="${DEEP_PLAN_CODEX_EFFORT:-high}"
+CODEX_EFFORT="${DEEP_PLAN_CODEX_EFFORT:-medium}"
 
 # A planner must invoke the Skill tool, read the writing-plans skill, and
 # then emit a full multi-task plan — 8 turns is not enough budget for that

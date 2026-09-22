@@ -96,7 +96,7 @@ For lighter passes:
 - `--reviewers 4 --ratio 2:2` — quick triage during iteration
 - `--dry-run` — preview the plan and estimated cost before paying
 
-The Claude side runs on Sonnet; the Codex side runs `gpt-5.6-sol` with `model_reasoning_effort=xhigh` (ignores the `~/.codex/config.toml` default, so review depth doesn't drift with your interactive config). Override per run:
+The Claude side runs on Sonnet; the Codex side runs `gpt-5.6-sol` with `model_reasoning_effort=medium` (ignores the `~/.codex/config.toml` default, so review depth doesn't drift with your interactive config). Override per run:
 
 ```bash
 DEEP_REVIEW_CODEX_MODEL=gpt-5.6-terra DEEP_REVIEW_CODEX_EFFORT=high /deep-review
