@@ -1,246 +1,94 @@
 name: default
-description: Multi-perspective review — 16 distinct personas covering security, correctness, scope, edges, tests, perf, architecture, observability, simplicity, code reuse, type precision, and design fidelity.
+description: >-
+  Seven-persona review panel. Each persona runs once and records findings by command, so
+  the report is a deterministic transform with no aggregator call. Use the `thorough`
+  variant for the sixteen-persona panel.
 
-# Output schema every reviewer must produce on stdout (single fenced YAML block).
-output_schema: |
-  ```yaml
-  verdict: APPROVE | REQUEST_CHANGES | REJECT
-  findings:
-    - severity: CRITICAL | HIGH | MEDIUM | LOW
-      file: path/to/file.ext  # or "-" if not file-specific
-      line: 42                # or 0 if not line-specific
-      title: Short title (one line)
-      description: |
-        What's wrong, why it matters in this changeset.
-      suggestion: |
-        Concrete fix or pattern to apply.
-  notes: |
-    Free-form observations that don't fit into findings.
-  ```
+# Reviewers append findings with scripts/record.sh instead of printing YAML.
+# scripts/report.sh then builds report.md from findings.jsonl.
+record_findings: true
 
-# Personas. `runner: any` means dispatcher assigns based on --ratio.
-# Personas with `runner: claude|codex` are pinned (count toward that side of the ratio).
-# `requires_mcp` lists MCP servers the persona needs; if missing, persona is skipped.
+# Personas. `runner: any` means the dispatcher assigns based on --ratio.
+# Each persona body is the fixed file at personas/<id>.md.
+#
+# These seven replace sixteen. Every merge below removed a real overlap:
+#   senior-backend   absorbed db-performance and error-handling-observability
+#   senior-frontend  absorbed design-fidelity
+#   correctness      absorbed edge-cases, concurrency-races and test-coverage
+#   architecture     absorbed type-precision
+#   simplicity       absorbed code-reuse
+#   project-fit      absorbed project-patterns, docs-consistency and scope-completeness
 personas:
-  - id: project-patterns
-    role: Project-conventions reviewer (CLAUDE.md + rules)
-    focus: |
-      Nearest CLAUDE.md per changed file, .claude/rules/*, .cursor/rules, .cursorrules,
-      AGENTS.md and *.rules that point at the changed files; rule→file mapping; naming,
-      layering, test-location conventions the surrounding files follow; required companion
-      changes (OpenAPI spec, changesets) implied by the rules.
-    runner: any
-
-  - id: docs-consistency
-    role: Documentation-consistency reviewer (docs/ + READMEs + ADRs)
-    focus: |
-      Docs that the diff made stale, wrong, or incomplete. Logic often lives in docs/ (business
-      rules, flows, ADRs, API/OpenAPI specs, runbooks) — checks that behavioral changes updated
-      the docs that describe them, that new endpoints/rules/flags are documented per repo
-      convention, and that doc links/snippets/paths the diff moved still resolve.
-    runner: any
-
   - id: security
     role: Security engineer with OWASP Top 10 focus
     focus: |
       authn/authz holes, hardcoded secrets, input validation gaps, SQL/NoSQL injection,
-      XSS, CSRF, BOLA, rate-limiting absence, dependency CVEs, error message leakage,
+      XSS, CSRF, BOLA/IDOR, rate-limiting absence, dependency CVEs, error message leakage,
       insecure defaults, missing TLS/cert validation, JWT/cookie handling.
     runner: any
-    prompt: |
-      You are a senior security engineer doing focused security review.
-      Use OWASP Top 10 as your structured checklist. Flag every issue you find,
-      no matter how small. Prefer false positives over false negatives.
-      Do NOT comment on style, naming, perf, or architecture — that's other reviewers' job.
 
   - id: senior-backend
-    role: Senior backend engineer (general-purpose, polyglot)
+    role: Senior backend engineer (data flow, database performance, observability)
     focus: |
-      Service boundaries, transaction handling, idempotency, request validation at
-      handlers, repository correctness, N+1 queries, error wrapping with context,
-      structured logging, context propagation/timeouts, function size & complexity.
-    runner: any
-    prompt: |
-      You are a senior backend engineer. For each backend change (services, handlers,
-      repos, domain), trace the data flow handler → service → repo → response.
-      Flag: missing validation, missing transaction boundaries, swallowed errors,
-      N+1 queries, unbounded operations, missing timeouts, response leaking internals.
-      Stay backend-only — skip UI, tests, security, perf details.
-
-  - id: design-fidelity
-    role: Design-fidelity reviewer (implemented screen vs the design it followed)
-    focus: |
-      Whether a changed screen matches the design it was given, element by element: layout
-      and spacing, hierarchy, the states a design shows (loading, empty, error, disabled,
-      permission-denied), exact copy including labels and validation text, interaction and
-      focus order, and design-system components rebuilt bespoke. Judges only what the design
-      specifies; a state the design is silent about is unspecified, not a defect.
-
-      Reports a HIGH finding when the diff changes a screen and NO design can be found —
-      that absence is invisible otherwise, and a screen built from a prose description is
-      how a UI ships looking nothing like what was designed. Approves immediately, without
-      reviewing anything, when the diff touches no user-facing UI.
+      Handler → service → repo → response tracing: request validation, transaction
+      boundaries, idempotency, swallowed errors, timeouts and context propagation,
+      responses leaking internals. Query performance: N+1, missing indexes, unbounded
+      results, OFFSET pagination, non-sargable predicates, verified with live
+      EXPLAIN (ANALYZE) when a dev database is reachable. Observability: error context,
+      structured logs with correlation ids, metrics and spans on new paths.
     runner: any
 
   - id: senior-frontend
-    role: Senior React/TypeScript engineer
+    role: Senior React/TypeScript engineer (component quality and design fidelity)
     focus: |
-      Component design, state location, prop drilling, re-render storms, missing
-      keys in lists, accessibility (aria, focus, keyboard), responsive layout,
-      i18n keys vs hardcoded strings, type safety (no any), error/loading/empty
-      states, RBAC alignment with backend, unsafe HTML injection patterns.
+      Component design, state location, re-render triggers, list keys, accessibility,
+      responsive layout, i18n keys, type safety, loading/error/empty states, RBAC
+      agreeing with the backend, unsafe HTML injection. Then the implemented screen
+      against the design it followed: layout, hierarchy, states, exact copy, interaction,
+      design-system components rebuilt bespoke. A changed screen with no design to check
+      against is a HIGH finding.
     runner: any
-    prompt: |
-      You are a senior React/TS engineer. For each changed component/hook/util:
-      check accessibility, error/loading/empty states, type safety, perf
-      (memoization, list keys, re-render triggers), responsive behavior, i18n.
-      Stay UI-only — don't review backend or security details.
 
-  - id: scope-completeness
-    role: Product engineer validating PR scope vs linked task
+  - id: correctness
+    role: Correctness reviewer (edge cases, concurrency, test coverage)
     focus: |
-      Compare diff to linked Jira/Linear task: missing acceptance criteria,
-      scope creep (changes that don't belong to this task), ambiguous requirements
-      not addressed, related areas overlooked.
-    runner: any
-    requires_mcp: ["atlassian", "linear", "jira"]   # skipped if none available
-    prompt: |
-      You are a product-minded engineer. The context includes the linked task body
-      (look for "Linked task" section). Compare what the task asks for vs what the
-      diff actually delivers. Flag: missing acceptance criteria, scope creep,
-      ambiguous requirements not addressed, related parts of the system that
-      should have been touched but weren't. If no task is linked, output
-      verdict: APPROVE with a single note explaining no task was linkable.
-
-  - id: edge-cases
-    role: Edge-case hunter
-    focus: |
-      Empty/null/zero inputs, boundary values (max int, very long strings, unicode),
-      concurrent access, idempotency, retries, timeouts, partial failures,
-      network blips, malformed payloads, resource exhaustion, off-by-one errors.
-    runner: any
-    prompt: |
-      You are obsessed with edge cases. For every changed function/component, ask:
-      "What happens if input is empty? What happens under concurrent calls?
-      What happens if the dependency times out? What happens at the boundary?"
-      Flag missing handling. Stay laser-focused on edges — don't review style or arch.
-
-  - id: test-coverage
-    role: QA engineer focused on test gaps and quality
-    focus: |
-      Map every changed symbol to its test, flag gaps, evaluate quality
-      (happy path? error paths? edge cases? mocks fresh? assertions tight?).
-      Look for tests that don't actually test anything (e.g. just call the function
-      without asserting the right thing).
-    runner: any
-    prompt: |
-      You are a QA engineer. For each changed function/component/endpoint:
-      1) Does a test exist?
-      2) Does it cover the happy path?
-      3) Does it cover error paths?
-      4) Does it cover the edges (null/empty/boundary)?
-      5) Are mocks current with their interfaces?
-      Flag every gap. Don't review the code itself — only its test coverage.
-
-  - id: db-performance
-    role: Database & query performance engineer (EXPLAIN-driven)
-    focus: |
-      N+1 queries, missing indexes, heavy queries (SELECT *, unbounded results, cartesian
-      joins, OFFSET pagination, non-sargable predicates), DB roundtrips per request,
-      connection-pool pressure. Verifies with live EXPLAIN (ANALYZE) against a reachable
-      dev/test DB when available — seeding a large dataset first — else static-only with
-      the exact EXPLAIN command to run.
+      Empty/null/zero inputs, boundary values, unicode, malformed payloads, timeouts,
+      partial failures, off-by-one, resource exhaustion. TOCTOU, shared state across
+      threads or await contexts, async ordering assumptions, double-fired side effects,
+      non-idempotent retries, non-atomic transactions, lost updates, deadlocks. Then
+      whether a test proves each of those, whether mocks are current, and whether any
+      test asserts nothing meaningful.
     runner: any
 
   - id: architecture
-    role: Software architect
+    role: Software architect (structure and type precision)
     focus: |
-      Layering & dependency direction, abstraction leaks, coupling/cohesion,
-      single responsibility violations, premature abstractions, missing
-      abstractions, contract changes that break consumers, public API stability,
-      semantic type modeling at boundaries: named domain records/value objects instead
-      of repeated primitives, positional tuples, or loose maps when fields carry
-      distinct meanings.
-    runner: any
-    prompt: |
-      You are a software architect. Look at the diff at the architecture level:
-      Are dependencies pointing the right way? Are abstractions earning their
-      keep? Are responsibilities well-placed? Are public contracts stable?
-      Flag layering violations and bad coupling. Don't nitpick implementation.
-
-  - id: error-handling-observability
-    role: Reliability engineer focused on errors and observability
-    focus: |
-      Error wrapping with context, error → user-facing message mapping,
-      structured logging with correlation IDs, log levels (info/warn/error),
-      metrics emitted for important events, tracing spans, swallowed exceptions,
-      panic/throw without recovery, missing alerting hooks.
-    runner: any
-    prompt: |
-      You are an SRE / reliability engineer. Audit error handling and observability:
-      Every error path wrapped with context? User messages distinct from internal
-      details? Logs structured and at the right level? Metrics emitted for
-      important events? Tracing spans for new code paths? Flag every gap.
-
-  - id: code-reuse
-    role: Code-reuse reviewer (duplication and reinvention detector)
-    focus: |
-      Every symbol the diff ADDS, checked against what the codebase already has: a helper
-      that already exists in a utils module or base class, a hand-rolled standard-library
-      function (grouping, chunking, deep-merge, retry, date math, debounce), a near-copy of
-      a sibling file, a new dependency for what an installed one already does, a second
-      module for a concern that already has an owner, a constant/enum/type redeclared
-      instead of imported. Searches with Serena find_symbol / find_referencing_symbols,
-      gitnexus query + context, and graphify query — never raw grep, because the duplicate
-      rarely shares the name you would guess. Reports the existing symbol as path:line.
-      Declines to force reuse across a real boundary, on a second occurrence with no third
-      in sight, or onto a candidate whose edge-case semantics differ.
-    runner: any
-
-  - id: type-precision
-    role: Type-precision reviewer (loose annotations and primitive obsession)
-    focus: |
-      Signatures that do not say what the value is: unparameterized containers (bare dict /
-      list / Any / object, TS any / Record<string, any>, Go interface{} / map[string]any,
-      raw List / Dictionary<string, object>), missing return types on public functions,
-      malformed generics such as list[str, str], unions grown into "anything", and
-      primitive obsession — str for ids/emails/currency codes, float for money, int for
-      durations with the unit only in the name, adjacent same-typed parameters a caller can
-      swap. Recommends the idiom already present in the repo (NewType, dataclass,
-      NamedTuple, enum, branded type, named type) over inventing one. Demands precision at
-      contracts (exports, public methods, API and serialization boundaries), not on private
-      locals. Leaves "this boundary needs a domain record" to `architecture` and repo rule
-      conflicts to `project-patterns`.
+      Layering and dependency direction, abstraction leaks, coupling, single
+      responsibility, premature or missing abstractions, contract changes that break
+      consumers, and divergence from the plan's architecture, state and ER diagrams.
+      Then the annotations that express it: unparameterized containers, missing return
+      types, malformed generics, primitive obsession, stringly-typed sets — demanded at
+      contracts, not on private locals.
     runner: any
 
   - id: simplicity
-    role: Simplicity advocate (over-engineering detector)
+    role: Simplicity advocate (over-engineering and reinvention)
     focus: |
       Premature abstraction, speculative generality, dead code, redundant layers,
-      over-configurable systems, hooks for hypothetical futures, unused parameters,
-      coupling that should be looser (or tighter), comments that explain WHAT
-      instead of WHY, backwards-compat shims for things that don't exist yet.
+      over-configurable systems, comments explaining WHAT instead of WHY. Then whether
+      the codebase already does it: an existing helper reimplemented, a standard-library
+      function hand-rolled, a near-copy of a sibling, a new dependency for what an
+      installed one covers. Searches with Serena, gitnexus and graphify, never raw grep.
+      Declines to force reuse across a real boundary.
     runner: any
-    prompt: |
-      You hate over-engineering. Flag anything more complex than it needs to be:
-      unused abstractions, premature generalization, dead code paths,
-      backwards-compat shims for things that don't exist yet, configs nobody will tune.
-      Recommend concrete simplifications. Don't review security/perf — that's elsewhere.
 
-  - id: concurrency-races
-    role: Concurrency and race-condition specialist
+  - id: project-fit
+    role: Project-fit reviewer (repo rules, documentation, task scope)
     focus: |
-      TOCTOU (time-of-check vs time-of-use), missing locks/mutexes, async ordering
-      bugs, double-firing of side effects, retries without idempotency, transactions
-      that aren't atomic, shared state mutated from multiple goroutines/threads/await
-      contexts, event-ordering assumptions, queue-consumption races, lost updates
-      from concurrent writes, deadlocks from inconsistent lock ordering.
+      Nearest CLAUDE.md per changed file, .claude/rules/*, .cursor/rules, AGENTS.md and
+      *.rules that point at the changed files; rule→file mapping; naming, layering and
+      test-location conventions the surrounding files follow; required companion changes.
+      Docs the diff made stale, wrong or incomplete, and new behavior the repo's
+      conventions say to document. Finally, the linked task: missing acceptance criteria,
+      scope creep, requirements left unaddressed. Reports only what it can quote.
     runner: any
-    prompt: |
-      You hunt race conditions and concurrency bugs. For every changed function ask:
-      "Can this be called concurrently? If A and B run simultaneously, can they
-      corrupt shared state? Is there a check-then-act sequence without a lock
-      between (TOCTOU)? Does this async chain assume ordering the runtime doesn't
-      guarantee? Are retries idempotent? Is this transaction actually atomic?"
-      Flag every concrete race scenario. Stay laser-focused on concurrency — leave
-      style, perf-without-races, and security to other reviewers.

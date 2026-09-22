@@ -15,9 +15,9 @@ VARIANTS_DIR="${SKILL_DIR}/variants"
 RUNS_ROOT="${HOME}/.claude/deep-review-runs"
 
 # --- Defaults ---
-# REVIEWERS and RATIO default to "derived from variant" — each persona runs once
-# on Claude and once on Codex for full cross-model coverage. Override with
-# --reviewers / --ratio for a cheaper pass.
+# REVIEWERS and RATIO default to "derived from variant" — each persona runs ONCE.
+# Running a persona twice produces duplicate findings by construction and doubles the
+# token cost, so ask for it explicitly with --reviewers when you want it.
 VARIANT="default"
 REVIEWERS=""   # empty → derive from persona_count after variant is loaded
 RATIO=""       # empty → split the reviewer count evenly
@@ -26,6 +26,7 @@ TASK=""
 TIMEOUT=600
 KEEP_ARTIFACTS=0
 DRY_RUN=0
+SARIF=0
 
 log() { printf '[deep-review] %s\n' "$*" >&2; }
 err() { printf '[deep-review] ERROR: %s\n' "$*" >&2; exit 1; }
@@ -45,6 +46,7 @@ while [ $# -gt 0 ]; do
     --timeout)          TIMEOUT="$2"; shift 2 ;;
     --keep-artifacts)   KEEP_ARTIFACTS=1; shift ;;
     --dry-run)          DRY_RUN=1; shift ;;
+    --sarif)            SARIF=1; shift ;;
     *)                  err "unknown flag: $1" ;;
   esac
 done
@@ -68,9 +70,18 @@ fi
 PERSONA_COUNT=$(yq '.personas | length' "$VARIANT_FILE")
 [ "$PERSONA_COUNT" -ge 1 ] || err "variant has no personas"
 
+# Variants with `record_findings: true` have each reviewer append findings with record.sh
+# instead of printing YAML. The report is then a deterministic transform of that file.
+RECORD_FINDINGS=$(yq -r '.record_findings // false' "$VARIANT_FILE")
+if [ "$RECORD_FINDINGS" = "true" ]; then
+  command -v jq >/dev/null 2>&1 || err "jq not installed (brew install jq)"
+fi
+[ "$SARIF" = 0 ] || [ "$RECORD_FINDINGS" = "true" ] \
+  || err "--sarif needs a variant with record_findings: true (got: $VARIANT)"
+
 # --- Derive REVIEWERS / RATIO from persona_count when not user-provided ---
 if [ -z "$REVIEWERS" ]; then
-  REVIEWERS=$((PERSONA_COUNT * 2))
+  REVIEWERS=$PERSONA_COUNT
 fi
 if [ -z "$RATIO" ]; then
   HALF=$((REVIEWERS / 2))
@@ -98,6 +109,13 @@ N_CODEX=$(( REVIEWERS - N_CLAUDE ))
 RUN_ID="run-$(date +%Y%m%d-%H%M%S)-$(openssl rand -hex 2)"
 RUN_DIR="/tmp/deep-review/${RUN_ID}"
 mkdir -p "${RUN_DIR}/reviewers" "${RUN_DIR}/results" "${RUN_DIR}/logs"
+
+FINDINGS_FILE="${RUN_DIR}/findings.jsonl"
+STATUS_FILE="${RUN_DIR}/status.tsv"
+if [ "$RECORD_FINDINGS" = "true" ]; then
+  : > "$FINDINGS_FILE"
+  export DEEP_REVIEW_FINDINGS="$FINDINGS_FILE"
+fi
 
 log "run-id=${RUN_ID}"
 log "variant=${VARIANT} personas=${PERSONA_COUNT} reviewers=${REVIEWERS} ratio=${N_CLAUDE}c:${N_CODEX}x scope=${SCOPE}"
@@ -222,18 +240,27 @@ if [ "$DRY_RUN" = 1 ]; then
     done
   fi
   echo
-  printf 'Estimated cost: ~%dk tokens (rough: 5k input + 2k output per reviewer + 10k aggregator)\n' \
-    $(( ${#PERSONAS[@]} * 7 + 10 ))
+  if [ "$RECORD_FINDINGS" = "true" ]; then
+    printf 'Estimated cost: ~%dk tokens (rough: 5k input + 2k output per reviewer; report is a jq transform, no aggregator call)\n' \
+      $(( ${#PERSONAS[@]} * 7 ))
+  else
+    printf 'Estimated cost: ~%dk tokens (rough: 5k input + 2k output per reviewer + 10k aggregator)\n' \
+      $(( ${#PERSONAS[@]} * 7 + 10 ))
+  fi
   exit 0
 fi
 
-# --- Synthetic results for skipped personas (so aggregator surfaces them) ---
+# --- Record skipped personas so the report surfaces them ---
 for ((i=0; i<${#SKIPPED[@]}; i++)); do
   pname="${SKIPPED[$i]}"
   preason="${SKIPPED_REASON[$i]}"
-  # shellcheck disable=SC2016  # %s are printf format specifiers, not shell expansions
-  printf '```yaml\nverdict: APPROVE\nfindings: []\nnotes: |\n  Persona %s skipped — %s.\n```\n' \
-    "$pname" "$preason" > "${RUN_DIR}/results/${pname}.md"
+  if [ "$RECORD_FINDINGS" = "true" ]; then
+    printf '%s\t-\tskipped: %s\n' "$pname" "$preason" >> "$STATUS_FILE"
+  else
+    # shellcheck disable=SC2016  # %s are printf format specifiers, not shell expansions
+    printf '```yaml\nverdict: APPROVE\nfindings: []\nnotes: |\n  Persona %s skipped — %s.\n```\n' \
+      "$pname" "$preason" > "${RUN_DIR}/results/${pname}.md"
+  fi
 done
 
 # --- Phase 1: Collect context ---
@@ -260,6 +287,55 @@ for ((i=0; i<${#PERSONAS[@]}; i++)); do
     body=$(yq ".personas[$pidx].prompt" "$VARIANT_FILE")
   fi
 
+  if [ "$RECORD_FINDINGS" = "true" ]; then
+    OUTPUT_SECTION=$(cat <<EOF
+## How to report (REQUIRED)
+
+Record every finding by running this command, once per finding. Do NOT print findings
+as text — text is discarded, only recorded findings reach the report.
+
+\`\`\`bash
+${SCRIPT_DIR}/record.sh \\
+  --persona ${persona_id} \\
+  --category <one of: security correctness concurrency db-performance typing architecture simplicity code-reuse tests docs project-fit scope frontend observability> \\
+  --severity <CRITICAL|HIGH|MEDIUM|LOW> \\
+  --file <path> --line <n> \\
+  --title "<one line>" \\
+  --evidence "<path:line of the precedent in THIS repo, or the exact repo rule the diff breaks>" \\
+  --description "<what is wrong and why it matters here>" \\
+  --suggestion "<the concrete fix>"
+\`\`\`
+
+\`--evidence\` is mandatory and the command rejects a finding without it. Cite what this
+repository already does, as \`path:line\` — for example a module that holds this kind of
+file, a helper that already exists, or a sibling that handles the same case. When the diff
+breaks a written rule, quote the rule instead. A finding you cannot ground this way is an
+opinion, so do not record it.
+
+Record nothing when you find nothing. Silence is how you approve; there is no verdict to
+emit, because severity decides the verdict.
+
+When every finding is recorded, print one line: \`done: <n> finding(s)\`. Then exit.
+
+The diff and repo context follow below the separator.
+EOF
+)
+  else
+    OUTPUT_SECTION=$(cat <<EOF
+## Output format (REQUIRED)
+
+You MUST output ONLY a single fenced YAML block in exactly this shape — nothing
+else, no preamble, no commentary outside the fence:
+
+${OUTPUT_SCHEMA}
+
+After the YAML block, do not write anything else. Exit immediately.
+
+The diff and repo context follow below the separator.
+EOF
+)
+  fi
+
   cat > "${RUN_DIR}/reviewers/${persona_id}.prompt.md" <<EOF
 # Persona: ${persona_id} (base: ${base_id})
 
@@ -272,16 +348,7 @@ ${focus}
 ## Instructions
 ${body}
 
-## Output format (REQUIRED)
-
-You MUST output ONLY a single fenced YAML block in exactly this shape — nothing
-else, no preamble, no commentary outside the fence:
-
-${OUTPUT_SCHEMA}
-
-After the YAML block, do not write anything else. Exit immediately.
-
-The diff and repo context follow below the separator.
+${OUTPUT_SECTION}
 EOF
 done
 
@@ -314,15 +381,21 @@ for ((i=0; i<${#PIDS[@]}; i++)); do
     SUCCEEDED=$((SUCCEEDED+1))
     elapsed=$(( $(date +%s) - START_TS[i] ))
     log "  [${PERSONAS[$i]}] done (${elapsed}s)"
+    [ "$RECORD_FINDINGS" = "true" ] \
+      && printf '%s\t%s\tok\n' "${PERSONAS[$i]}" "${RUNNERS[$i]}" >> "$STATUS_FILE"
   else
     FAILED=$((FAILED+1))
     elapsed=$(( $(date +%s) - START_TS[i] ))
     log "  [${PERSONAS[$i]}] FAILED (${elapsed}s) — see ${RUN_DIR}/logs/${PERSONAS[$i]}.log"
-    # Drop empty result so aggregator doesn't trip
-    : > "${RUN_DIR}/results/${PERSONAS[$i]}.md"
-    # shellcheck disable=SC2016  # %s are printf format specifiers, not shell expansions
-    printf '```yaml\nverdict: REQUEST_CHANGES\nfindings: []\nnotes: |\n  Reviewer %s (%s) failed — no findings produced.\n```\n' \
-      "${PERSONAS[$i]}" "${RUNNERS[$i]}" > "${RUN_DIR}/results/${PERSONAS[$i]}.md"
+    if [ "$RECORD_FINDINGS" = "true" ]; then
+      printf '%s\t%s\tfailed after %ss\n' "${PERSONAS[$i]}" "${RUNNERS[$i]}" "$elapsed" >> "$STATUS_FILE"
+    else
+      # Drop empty result so aggregator doesn't trip
+      : > "${RUN_DIR}/results/${PERSONAS[$i]}.md"
+      # shellcheck disable=SC2016  # %s are printf format specifiers, not shell expansions
+      printf '```yaml\nverdict: REQUEST_CHANGES\nfindings: []\nnotes: |\n  Reviewer %s (%s) failed — no findings produced.\n```\n' \
+        "${PERSONAS[$i]}" "${RUNNERS[$i]}" > "${RUN_DIR}/results/${PERSONAS[$i]}.md"
+    fi
   fi
 done
 
@@ -338,6 +411,15 @@ mkdir -p "$PERSIST_DIR"
 cp "${RUN_DIR}/report.md" "${PERSIST_DIR}/report.md"
 cp "${RUN_DIR}/context.md" "${PERSIST_DIR}/context.md"
 log "report saved to ${PERSIST_DIR}/report.md"
+
+if [ "$RECORD_FINDINGS" = "true" ]; then
+  cp "$FINDINGS_FILE" "${PERSIST_DIR}/findings.jsonl"
+  log "findings saved to ${PERSIST_DIR}/findings.jsonl"
+  if [ "$SARIF" = 1 ]; then
+    "${SCRIPT_DIR}/sarif.sh" "$RUN_DIR" > "${PERSIST_DIR}/findings.sarif"
+    log "sarif saved to ${PERSIST_DIR}/findings.sarif"
+  fi
+fi
 
 if [ "$KEEP_ARTIFACTS" = 0 ]; then
   rm -rf "$RUN_DIR"

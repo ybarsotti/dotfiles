@@ -17,13 +17,20 @@ The user typed `/deep-review [args]`, OR the user asked for a multi-agent peer r
 
 Read `$ARGUMENTS` and extract:
 
-- **variant** (positional, default `"default"`): one of `default`, `security-focused`, `adversarial-debate`, or any name matching a `variants/<name>.yml` file
-- **--reviewers N** (default: `2 × persona_count`)
-- **--ratio C:X** (default: an even reviewer split; `16:16` for the default variant)
+- **variant** (positional, default `"default"`): one of `default` (7 personas), `thorough`
+  (the 16-persona panel), `security-focused`, `adversarial-debate`, or any name matching a
+  `variants/<name>.yml` file
+- **--reviewers N** (default: `persona_count` — each persona runs **once**)
+- **--ratio C:X** (default: an even reviewer split)
 - **--scope ref** (default `"main...HEAD"`)
 - **--task id** (default: auto-detect)
 - **--timeout secs** (default `600`)
+- **--sarif** (default off): also write `findings.sarif` for GitHub code scanning
+- **--simplify** (default off): run the `/simplify` pass after the report
 - **--keep-artifacts** / **--dry-run** (default off)
+
+Running a persona twice produces duplicate findings by construction and doubles the token
+cost. Ask for it with `--reviewers` only when you mean it.
 
 `scripts/dispatch.sh` validates all of this itself (variant file exists, `--reviewers` is a
 positive integer, `--ratio` sums correctly, required binaries are present) and exits with a
@@ -42,9 +49,13 @@ Call the dispatcher with the parsed args:
   --scope <ref> \
   [--task <id>] \
   [--timeout <secs>] \
+  [--sarif] \
   [--keep-artifacts] \
   [--dry-run]
 ```
+
+`--simplify` is yours, not the dispatcher's. Strip it from the args before you call
+`dispatch.sh`, which rejects flags it does not know, and act on it in Phase 5.
 
 `dispatch.sh` handles everything end-to-end: context collection, persona assignment, prompt
 generation, fanning reviewers out as background processes, waiting for them, and aggregating
@@ -67,10 +78,13 @@ When the dispatcher finishes, the report is already on stdout. Just summarize th
 - If `REJECT` → "Critical blockers found. Top issue: <title>. Recommend stopping and addressing before any further work."
 
 Always tell the user where the full report lives (`~/.claude/deep-review-runs/<RUN_ID>/report.md`).
+In record mode the raw findings sit beside it as `findings.jsonl`, and `findings.sarif` too
+when `--sarif` was passed — upload that one with `gh code-scanning` to get inline PR alerts.
 
-## Phase 5 — Simplify pass
+## Phase 5 — Simplify pass (only with `--simplify`)
 
-After presenting the report, run a cleanup pass on the reviewed scope:
+A review command that edits code surprises whoever asked for an opinion, so this pass is
+opt-in. When the user passed `--simplify`, run a cleanup pass on the reviewed scope:
 
 ```
 Skill(skill="simplify")
@@ -80,8 +94,35 @@ Feed `/simplify` the same scope that was reviewed (the changed files). It applie
 `simplicity` reviewer's findings plus obvious dead-code / guard-clause / nesting cleanups,
 running tests after each change. This is a single pass — do not loop it here.
 
-Skip Phase 5 only when: the run was `--dry-run`, the diff was empty, or the verdict was
-`REJECT` (fix the blockers first, simplifying broken code is wasted work).
+Skip it even with the flag when: the run was `--dry-run`, the diff was empty, or the verdict
+was `REJECT` (fix the blockers first, simplifying broken code is wasted work).
+
+## How findings are recorded
+
+A variant with `record_findings: true` — the `default` variant does — changes how reviewers
+report. Instead of printing YAML for an aggregator to parse, each reviewer appends findings
+by running `scripts/record.sh`, one call per finding, to a shared `findings.jsonl`.
+
+Three things follow from that:
+
+1. **Every finding must cite evidence.** `record.sh` rejects a finding with no `--evidence`:
+   a `path:line` of the precedent in this repo, or the exact rule the diff breaks. An
+   ungrounded opinion never reaches the report.
+2. **`--category` is a closed set**, so the report groups and SARIF gets a stable `ruleId`.
+3. **There is no per-reviewer verdict.** Severity decides it: any CRITICAL is `REJECT`, any
+   HIGH is `REQUEST_CHANGES`, no findings is `APPROVE`. A reviewer cannot report a CRITICAL
+   and vote APPROVE.
+
+`scripts/report.sh` then builds `report.md` as a pure `jq` transform — no aggregator model
+call, so nothing can invent a finding. `scripts/merge.jq` defines what counts as one finding:
+same file, same line, same category. `report.sh` and `sarif.sh` both use it, so the Markdown
+and the SARIF always agree.
+
+Concurrent appends are safe without a lock because each finding is one compact JSON line
+under 4 KB, and `record.sh` trims prose rather than dropping a finding that would exceed it.
+
+Variants without `record_findings` keep the older path: reviewers print YAML and a single
+`claude -p` aggregator consolidates it.
 
 ## Reviewer model policy
 
@@ -99,8 +140,10 @@ says; don't work around a failure it already reported.
 
 ## Constraints
 
-- **Headless only.** Do NOT spawn reviewers in cmux panes. Use `claude -p` and `codex exec`.
-- **Reviewers are non-interactive.** They read context, output structured findings, exit. No follow-up.
-- **One aggregator call.** The aggregator is a single `claude -p` invocation that consumes all reviewer outputs.
+- **Headless only.** Do NOT spawn reviewers in cmux panes or Orca terminals. Use `claude -p`
+  and `codex exec` — an interactive pane costs more and buys nothing a log does not.
+- **Reviewers are non-interactive.** They read context, record findings, exit. No follow-up.
+- **No aggregator call in record mode.** `report.sh` is a `jq` transform. Variants without
+  `record_findings` still use a single `claude -p` aggregator.
 - **Run dirs are scoped per invocation.** Old runs in `~/.claude/deep-review-runs/` are kept for audit; cleanup is manual.
 - **Never invent findings.** If a reviewer fails, report it as failed — don't fabricate substitute findings.

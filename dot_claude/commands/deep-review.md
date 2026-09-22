@@ -1,12 +1,20 @@
 ---
-description: Multi-agent peer review — runs fixed reviewer personas in parallel (Claude Sonnet + Codex headless), aggregates a consolidated report, then runs /simplify
+description: Multi-agent peer review — fixed reviewer personas in parallel (Claude Sonnet + Codex headless), each recording evidence-backed findings into one report
 ---
 
 # /deep-review
 
-Run a configurable panel of reviewer agents in parallel against the current branch (or a target file/PR), aggregate their findings into a single consolidated report, then apply a `/simplify` cleanup pass.
+Run a panel of reviewer agents in parallel against the current branch (or a target file/PR)
+and produce one consolidated report.
 
-Each reviewer uses a **fixed, predefined prompt file** (`personas/<id>.md`) — the orchestrator never authors reviewer prompts. Claude-side reviewers always run on **Sonnet**; the Codex side stays Codex.
+Each reviewer uses a **fixed, predefined prompt file** (`personas/<id>.md`) — the orchestrator
+never authors reviewer prompts. Claude-side reviewers always run on **Sonnet**; the Codex side
+stays Codex.
+
+Reviewers do not print findings. They record each one with `scripts/record.sh`, which
+**rejects a finding that cites no evidence** — a `path:line` of the precedent in this repo, or
+the rule the diff breaks. The report is then a `jq` transform of those records, so no model
+gets a chance to invent a finding.
 
 **Arguments:** `$ARGUMENTS`
 
@@ -16,62 +24,76 @@ Each reviewer uses a **fixed, predefined prompt file** (`personas/<id>.md`) — 
 /deep-review [variant] [flags]
 
 VARIANT (positional, optional, default: "default")
-  default             multi-perspective fixed roster: project-patterns, db-performance,
-                      docs-consistency, design-fidelity, senior-frontend, senior-backend,
-                      security, edge-cases, test-coverage, architecture, concurrency-races,
-                      simplicity, code-reuse, type-precision, scope-completeness,
-                      error-handling-observability
+  default             7 personas, each run once: security, senior-backend, senior-frontend,
+                      correctness, architecture, simplicity, project-fit
+  thorough            the previous 16-persona roster, for a change that earns it
   security-focused    every persona reviews through an OWASP/security lens
   adversarial-debate  approver-vs-rejecter pairs across 5 dimensions
   stress-test         paranoid personas simulating concrete failure scenarios
                       (races, partial failures, network chaos, time bugs, abuse)
 
 FLAGS
-  --reviewers N       total reviewers (default: 2 × persona_count, so each persona runs once on Claude + once on Codex)
-  --ratio C:X         Claude:Codex split (default: even reviewer split; 16:16 for default)
+  --reviewers N       total reviewers (default: persona_count — each persona runs ONCE)
+  --ratio C:X         Claude:Codex split (default: even reviewer split)
   --scope <ref>       git range (default: main...HEAD), or "PR-1234", or "file:path"
   --task <id>         force a Jira/Linear task ID (default: auto-detect from branch/commit)
   --timeout <secs>    per-reviewer timeout (default: 600)
+  --sarif             also write findings.sarif for GitHub code scanning
+  --simplify          run the /simplify cleanup pass after the report (off by default)
   --keep-artifacts    don't delete the run dir after completion
   --dry-run           print the plan without spawning reviewers
 
 MODELS
   Claude side  sonnet
-  Codex side   gpt-5.6-sol @ model_reasoning_effort=xhigh
+  Codex side   see scripts/reviewer.sh
                override: DEEP_REVIEW_CODEX_MODEL / DEEP_REVIEW_CODEX_EFFORT
                (none|minimal|low|medium|high|xhigh|max)
 ```
 
 ## What you must do
 
-You are the **orchestrator**. Invoke the `deep-review` skill — do NOT try to run reviewers manually inline. The skill defines the full protocol (validate args → collect context → fan out fixed-prompt reviewers → aggregate → /simplify). Follow it exactly.
+You are the **orchestrator**. Invoke the `deep-review` skill — do NOT try to run reviewers
+manually inline. The skill defines the full protocol. Follow it exactly.
 
-The skill lives at `~/.claude/skills/deep-review/SKILL.md` and its scripts at `~/.claude/skills/deep-review/scripts/`.
+The skill lives at `~/.claude/skills/deep-review/SKILL.md` and its scripts at
+`~/.claude/skills/deep-review/scripts/`.
 
 ### High-level flow
 
-1. Parse `$ARGUMENTS` into variant + flags
-2. Run `~/.claude/skills/deep-review/scripts/dispatch.sh "$VARIANT" --reviewers <N> --ratio <C:X> --scope <ref> [--dry-run]`
-3. The dispatcher handles everything: builds the run dir, loads each reviewer's fixed `personas/<id>.md` prompt, fans out reviewers in background (Claude Sonnet + Codex), waits, and aggregates
-4. Report is printed to stdout AND saved to `~/.claude/deep-review-runs/<RUN_ID>/report.md`
-5. Run `/simplify` on the reviewed scope to apply the simplicity findings
+1. Parse `$ARGUMENTS` into variant + flags. Keep `--simplify` for yourself; the dispatcher
+   rejects flags it does not know.
+2. Run `~/.claude/skills/deep-review/scripts/dispatch.sh "$VARIANT" --scope <ref> [flags]`
+3. The dispatcher builds the run dir, loads each reviewer's fixed `personas/<id>.md` prompt,
+   fans reviewers out in the background, waits, and builds the report.
+4. Report goes to stdout and to `~/.claude/deep-review-runs/<RUN_ID>/report.md`, beside
+   `findings.jsonl` (and `findings.sarif` with `--sarif`).
+5. Only with `--simplify`: run `/simplify` on the reviewed scope.
+
+### Findings
+
+Every finding carries a severity (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`) and a category from a
+closed set: `security`, `correctness`, `concurrency`, `db-performance`, `typing`,
+`architecture`, `simplicity`, `code-reuse`, `tests`, `docs`, `project-fit`, `scope`,
+`frontend`, `observability`.
+
+There is no per-reviewer verdict. Severity decides it: any CRITICAL is `REJECT`, any HIGH is
+`REQUEST_CHANGES`, nothing recorded is `APPROVE`.
 
 ### Quick examples
 
 ```bash
-/deep-review                                    # default roster (each persona × both models), current branch
+/deep-review                                    # 7 personas, current branch
+/deep-review thorough                           # the 16-persona panel
 /deep-review security-focused                   # security lens
-/deep-review stress-test                        # paranoid mode — every persona simulates failure scenarios
-/deep-review default --reviewers 16 --ratio 16:0 # cheaper pass: each persona once on Claude/Sonnet only
-/deep-review default --reviewers 6 --ratio 3:3  # quick pass: 3 personas × both models
-/deep-review --scope PR-1234                    # review a GitHub PR
+/deep-review --scope PR-1234 --sarif            # review a GitHub PR, emit SARIF
+/deep-review default --ratio 7:0                # Claude only, no Codex
 /deep-review --dry-run                          # preview without executing
 ```
 
 ### Cost awareness
 
-Each reviewer uses roughly 3-8k input tokens and 1-3k output tokens. The default runs 32 reviewers plus one aggregator.
+Each reviewer uses roughly 3-8k input tokens and 1-3k output tokens. The default is 7
+reviewers and **no aggregator call**, because the report is built by `jq`.
 
-Reviewer calls use roughly 128-352k tokens before aggregation. The default runs each of 16 personas once on Claude and once on Codex.
-
-Use `--reviewers 16 --ratio 8:8` for one reviewer per persona and about half the reviewer-call cost.
+The previous default ran 32 reviewers plus an aggregator. `thorough` still does 16. Reach for
+it when the diff is large or risky, not by habit.
