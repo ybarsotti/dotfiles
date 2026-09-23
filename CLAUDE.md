@@ -160,6 +160,22 @@ MCP servers are split by account type in `.chezmoidata/mcp-server.yml`:
 
 The template `dot_claude/mcp_servers.json.tmpl` merges `shared` + the typed section automatically.
 
+### Commands Also Reach Codex
+
+`~/.claude/commands` is the single source of truth for slash commands. Add a command there
+and `.chezmoiscripts/run_after_14_sync_codex_prompts.sh.tmpl` copies it to
+`~/.codex/prompts` on the next `chezmoi apply`, so it appears in Codex too. Do not add a
+second copy by hand.
+
+**Never link the two directories.** Codex skips symlinked prompts without an error
+(openai/codex#3637, #4383, #5040), so a symlink looks correct and shows nothing. The sync
+script copies real files for that reason.
+
+A command that invokes `Skill(skill="...")` — `deep-plan`, `deep-review`, `simple-plan` —
+appears in Codex but stops when it reaches the skill, because skills are a Claude Code
+feature. When you need one of those to run under Codex, write a Codex-native prompt that
+reads the `SKILL.md` by path and calls the skill's scripts through the shell.
+
 ### Asking About Account Type
 **IMPORTANT**: When the user asks to install, configure, or add anything related to Claude Code
 (MCP servers, plugins, hooks, settings, commands, etc.), **always ask first**:
