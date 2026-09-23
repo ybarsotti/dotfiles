@@ -28,14 +28,17 @@ personas:
     runner: any
 
   - id: senior-backend
-    role: Senior backend engineer (data flow, database performance, observability)
+    role: Senior backend engineer (data flow, schema and query performance, observability)
     focus: |
       Handler → service → repo → response tracing: request validation, transaction
       boundaries, idempotency, swallowed errors, timeouts and context propagation,
-      responses leaking internals. Query performance: N+1, missing indexes, unbounded
-      results, OFFSET pagination, non-sargable predicates, verified with live
-      EXPLAIN (ANALYZE) when a dev database is reachable. Observability: error context,
-      structured logs with correlation ids, metrics and spans on new paths.
+      responses leaking internals. Schema design: column types, nullability, missing
+      foreign-key, unique and check constraints, JSON holding queryable fields, redundant
+      or wrongly ordered indexes, and migrations that lock a large table or cannot be
+      reversed. Query performance: N+1, missing indexes, unbounded results, OFFSET
+      pagination, non-sargable predicates, verified with live EXPLAIN (ANALYZE) when a dev
+      database is reachable. Observability: error context, structured logs with correlation
+      ids, metrics and spans on new paths.
     runner: any
 
   - id: senior-frontend
