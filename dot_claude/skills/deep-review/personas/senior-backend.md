@@ -26,6 +26,23 @@ Static pass, for every changed query, ORM call, or repository method:
   cartesian joins, `OFFSET` pagination on large tables, aggregates with no covering index,
   and functions wrapped around indexed columns, which kill index use.
 
+Schema pass, for every changed migration, model, or table definition:
+
+- **Column type**: `float` for money, which is a correctness bug; `timestamp` where
+  `timestamptz` belongs; free text where an enum or a check constraint states the real set;
+  a width that cannot hold the values the code writes.
+- **Nullability**: a column the code always populates but the schema leaves nullable, and
+  the reverse — a `NOT NULL` added with no backfill for existing rows.
+- **Missing constraint**: a foreign key the relation implies, a unique constraint the code
+  enforces in application code instead, a check constraint for a range the code assumes.
+- **Shape**: a JSON column holding fields the code queries by, which belong in columns; a
+  denormalized copy with no stated reason; a table that grows without a retention plan.
+- **Index hygiene**: an index redundant with the primary key or with another index's
+  prefix, and a composite index whose column order does not match the query's predicates.
+- **Migration safety**: an operation that takes a long lock on a large table, such as adding
+  an index without `CONCURRENTLY` on Postgres or rewriting a table to add a column; a
+  destructive change with no backfill; a migration with no way back.
+
 Live `EXPLAIN` pass, best effort. Look for a reachable database in this order: a dev or test
 container (`docker compose ps`, `docker ps`), then a `DATABASE_URL` or test settings pointing
 at localhost, then the project's own harness (`just psql`, a compose service). When one is
