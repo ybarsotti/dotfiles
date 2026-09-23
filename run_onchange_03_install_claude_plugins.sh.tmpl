@@ -25,6 +25,7 @@ MARKETPLACES=(
   "backnotprop/plannotator"
   "JuliusBrussee/caveman"
   "mattpocock/skills"
+  "typesafe-ai/skills"
 )
 
 echo "Registering custom marketplaces..."
@@ -63,6 +64,7 @@ PLUGINS=(
   # Skill(skill="mattpocock-skills:grilling"). Installing the same repo through
   # `npx skills add` gives bare names instead, which do not resolve.
   "mattpocock-skills@mattpocock"
+  "typesafe@typesafe-ai"
 )
 
 echo "Installing Claude Code plugins..."
@@ -76,6 +78,9 @@ SKILLS=(
   "https://github.com/coreyhaines31/marketingskills --skill seo-audit"
   "https://github.com/anthropics/skills --skill frontend-design"
   "github/gh-stack"
+  # Also installed as the typesafe@typesafe-ai plugin above. The plugin gives Claude
+  # Code the skill; this line gives Codex its own copy, which the plugin cannot reach.
+  "typesafe-ai/skills --skill typesafe-ai"
 )
 
 if command -v npx &>/dev/null; then
