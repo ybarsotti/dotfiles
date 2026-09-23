@@ -25,7 +25,10 @@ RUN_DIR=~/.claude/simple-plan-runs/$(date +%Y%m%d-%H%M%S)-$(printf '%s' "$ARGUME
 mkdir -p "$RUN_DIR"
 ```
 
-The plan lives at `$RUN_DIR/plan.md`.
+`$RUN_DIR` holds `context.md`, the review notes, and the `qa/` bundle. The plan is not stored
+there. The plan lives where `superpowers:writing-plans` saves it:
+`docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md` inside the project. `$RUN_DIR/plan.md`
+is a one-line pointer file that contains that path.
 
 Read `references/constraints.md` now. It holds the rules that the plan and both reviewers
 enforce. Quote its rule numbers in the plan and in every review verdict.
@@ -63,10 +66,23 @@ not settle the design, stop and tell the user that the task needs `/deep-plan`.
 
 ## Phase 2 — Draft the plan
 
-`superpowers:writing-plans` defines the plan format. Invoke it with
-`Skill(skill="superpowers:writing-plans")`. Never paraphrase it from memory.
+Invoke `Skill(skill="superpowers:writing-plans")` and follow it completely. Never paraphrase
+it from memory. That skill owns the document header, the task structure (Files, Interfaces,
+and checkbox steps), the no-placeholder rule, the self-review, the save location, and the
+execution handoff. `simple-plan` never replaces or relocates anything that
+`superpowers:writing-plans` prescribes.
 
-Write `$RUN_DIR/plan.md` with that skill's document header, and these sections in this order.
+`simple-plan` only adds the sections below. Insert them between the writing-plans header and
+the first task, in this order.
+
+After the plan is saved, record its path:
+
+```bash
+PLAN_PATH=docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md
+printf '%s\n' "$PLAN_PATH" > "$RUN_DIR/plan.md"
+```
+
+Every later phase reads the plan from `$PLAN_PATH`.
 
 ### Required sections
 
@@ -111,7 +127,12 @@ Raise race conditions and failure modes here. Do not implement them here. If eve
 `Cover now`, the plan is not simple. Re-read constraint rule 7 and reduce it.
 
 **10. TDD plan** — The test list, written before the code. One test per `Cover now` row, plus
-one test for the success path. For each test, give the name, the file, and the assertion. The
+one test for the success path. For each test, give the name, the file, the assertion, and the mock
+target. Constraint rule 10 applies: each test mocks only the outermost call to an external
+service (HTTP request, broker enqueue, SDK call, or clock), and runs this project's services,
+repositories, dispatchers, and clients for real. Name the exact mock target, for example
+`httpx.AsyncClient.post` or `apps.billing.tasks.deliver_b2b_invoice_link_task.delay`. A row
+whose mock target is a class or method of this project is a plan defect. The
 implementation follows `superpowers:test-driven-development`: write the failing test, watch it
 fail, then write the code.
 
@@ -130,12 +151,19 @@ Run both reviewers in parallel, in a single message with two `Agent` calls.
 
 | Reviewer | How | Lens |
 |---|---|---|
-| Over-engineering | `Skill(skill="ponytail:ponytail-review")` against `$RUN_DIR/plan.md` | What can be deleted from the plan |
+| Over-engineering | `Skill(skill="ponytail:ponytail-review")` against `$PLAN_PATH` | What can be deleted from the plan |
 | Project fit | `Agent` with the persona at `~/.claude/skills/deep-plan/personas/project-developer.md` | Does the plan match this codebase |
 
-Give the project-fit reviewer the plan, `$RUN_DIR/context.md`, and
+Give the project-fit reviewer `$PLAN_PATH`, `$RUN_DIR/context.md`, and
 `references/constraints.md`. Tell it to reject the plan when any constraint rule is broken,
 and to quote the rule number.
+
+Both reviewers check test coverage against constraint rule 10. For every row of the TDD
+plan, the reviewer confirms that the mock target is the outermost call to an external
+service. The reviewer rejects a row that mocks a service, repository, dispatcher, client, or
+model method of this project, and names the outermost call to mock instead. Example finding:
+"TDD row 3 mocks `SupplyBuyInvoiceLinkDispatcher` (rule 10). Use the real dispatcher and mock
+`deliver_b2b_invoice_link_task.delay`."
 
 Apply the findings. Re-run the reviewers. **Stop after two rounds.** Record any finding you
 did not apply, with the reason, in a `## Open findings` section at the end of the plan.
@@ -143,26 +171,28 @@ did not apply, with the reason, in a `## Open findings` section at the end of th
 ## Phase 4 — QA plan, only when a flow or a screen changes
 
 Run `/qa-plan` when the change alters a user-facing flow or screen. Reference the generated
-`qa-plan.yaml` from the plan's Validation section. Skip this phase otherwise, and record that
+`qa-plan.yaml` from the Validation section of `$PLAN_PATH`. Skip this phase otherwise, and record that
 you skipped it.
 
 ## Phase 5 — Present
 
-1. `Skill(skill="plannotator-annotate")`, then `plannotator annotate "$RUN_DIR/plan.md" --gate`.
+1. `Skill(skill="plannotator-annotate")`, then `plannotator annotate "$PLAN_PATH" --gate`.
 2. Apply the annotations that come back.
 3. `ExitPlanMode` for the final approval.
 
-Then stop. Print the plan path and tell the user how to build it:
+Then stop. Print `$PLAN_PATH`. After approval, offer the two execution options exactly as the
+"Execution Handoff" section of `superpowers:writing-plans` words them: **1. Subagent-Driven
+(recommended)** and **2. Inline Execution**. Then stop.
 
-- `Skill(skill="superpowers:executing-plans")` against `$RUN_DIR/plan.md` in this session.
-- Or `/deep-execute "$RUN_DIR/plan.md"` when the user wants parallel lanes.
+- `Skill(skill="superpowers:executing-plans")` against `$PLAN_PATH` in this session.
+- Or `/deep-execute "$PLAN_PATH"` when the user wants parallel lanes.
 
 Do not start the implementation yourself.
 
 ## Failure handling
 
-- `plannotator` CLI is missing → print a short summary of the plan inline, print the plan
-  path, and continue to `ExitPlanMode`. Install it with
+- `plannotator` CLI is missing → print a short summary of the plan inline, print
+  `$PLAN_PATH`, and continue to `ExitPlanMode`. Install it with
   `curl -fsSL https://plannotator.ai/install.sh | bash`.
 - `plannotator annotate --gate` exits with no feedback → treat the plan as approved, record
   that, and continue.

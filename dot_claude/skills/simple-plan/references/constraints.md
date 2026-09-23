@@ -107,3 +107,66 @@ path, and propose the change. Wait for a decision. Do not start.
 
 When the user says no, record the finding in the plan's `## Non-goals` section so the work is
 not lost.
+
+## 10. Mock only the outermost call to an external service
+
+A test runs the real code of this project. It mocks only the last call that leaves the
+process: an HTTP request, a message-broker publish, a third-party SDK call, or the clock.
+Services, repositories, dispatchers, clients, and helpers of this project run for real. A
+test that replaces an inner collaborator with a mock does not break when that collaborator
+changes, so it hides the regression it exists to catch.
+
+Allowed mock targets:
+
+- The HTTP call itself, such as `httpx.AsyncClient.post` or `requests.Session.request`.
+- The broker enqueue, such as `some_task.delay` or `apply_async`.
+- The SDK call, such as `stripe.Refund.create` or `boto3` client methods.
+- The clock, such as `freezegun` or `django.utils.timezone.now`.
+
+Forbidden mock targets, unless the plan states why the real one cannot run:
+
+- A service, repository, dispatcher, or client class of this project, replaced by `MagicMock()`.
+- A method of a model or service of this project, such as `Order.issue_refund`.
+- A whole HTTP client class, such as `patch("module.httpx.AsyncClient")`, when patching the
+  single request method is enough.
+
+Examples:
+
+```python
+# Wrong: the dispatcher is this project's code. A broken dispatcher still passes.
+dispatcher = MagicMock()
+service = InvoiceService(..., supplybuy_invoice_link_dispatcher=dispatcher)
+service.persist(order)
+dispatcher.enqueue_invoice_link.assert_called_once()
+
+# Right: the real dispatcher runs. Only the broker publish is mocked.
+delay = mocker.patch("apps.billing.tasks.deliver_b2b_invoice_link_task.delay")
+service = InvoiceService(..., supplybuy_invoice_link_dispatcher=SupplyBuyInvoiceLinkCeleryDispatcher())
+service.persist(order)
+delay.assert_called_once_with({"order_number": order.order_number, ...})
+```
+
+```python
+# Wrong: the client and the repository are mocks, so the URL, the headers, the payload,
+# and the database lookup are never exercised.
+client = MagicMock(); client.link_invoice = AsyncMock(return_value=True)
+deliver(payload, client, MagicMock())
+
+# Right: the real client and repository run. Only the HTTP request is mocked.
+post = mocker.patch.object(httpx.AsyncClient, "post", AsyncMock(return_value=response))
+deliver(payload, SupplyBuyClient(base_url=URL, token=TOKEN), InvoiceRepository())
+assert post.call_args.kwargs["json"] == {"fb_wholesale_id": 10042, ...}
+```
+
+```python
+# Wrong: the model method is this project's code.
+@patch("dashboard.models.BusinessCustomerOrder.issue_stripe_refund")
+
+# Right: mock the Stripe SDK call that the method makes.
+@patch("dashboard.models.stripe.Refund.create")
+```
+
+When many tests build the same service, give the builder the real collaborator and put the
+outermost mock in one shared fixture. A spy on an internal method, such as asserting that
+`save()` was not called, is also an implementation detail. Assert the observable result
+instead.

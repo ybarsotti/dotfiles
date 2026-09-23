@@ -51,6 +51,10 @@ form:
 - Validate API input with the framework's validator, at the boundary only.
 - No `# noqa` or `# type: ignore` unless the plan names the line and the reason.
 - Comment only what the code cannot show.
+- Tests mock only the outermost call to an external service: the HTTP request, the broker
+  enqueue, the SDK call, or the clock. This project's services, repositories, dispatchers,
+  and clients run for real. Mock `httpx.AsyncClient.post`, not the `SupplyBuyClient`; mock
+  `task.delay`, not the dispatcher; mock `stripe.Refund.create`, not the model's refund method.
 - Edge cases go in a table with a decision: cover now, fail loudly, or out of scope. Only
   `Cover now` rows reach the implementation.
 - Touch only the code the task needs. No drive-by refactor, rename, or reformat. When nearby

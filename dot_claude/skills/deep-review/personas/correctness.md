@@ -38,8 +38,22 @@ For each changed function, component, or endpoint:
 5. Are the mocks current with the interfaces they stand in for?
 
 Also flag a test that asserts nothing meaningful, and over-mocking that hides real behavior.
-Only the outermost boundaries — network, third-party APIs, the clock — should be mocked.
-Inner services and repositories should run real.
+
+**Mock only the outermost call to an external service**: the HTTP request, the broker
+enqueue, the third-party SDK call, or the clock. This project's own services, repositories,
+dispatchers, clients, and model methods must run for real. A test that replaces an inner
+collaborator with a mock does not break when that collaborator changes, so it hides the
+regression it exists to catch.
+
+Flag every mock of project code, and name the outermost call the test should mock instead:
+
+- `service(dispatcher=MagicMock())` → real dispatcher, mock `some_task.delay`.
+- A `MagicMock()` client with `link_invoice = AsyncMock()` → real client, mock
+  `httpx.AsyncClient.post`.
+- `patch("module.httpx.AsyncClient")`, the whole class → patch only `httpx.AsyncClient.post`.
+- `patch("app.models.Order.issue_stripe_refund")` → mock `stripe.Refund.create`.
+- A spy asserting that an internal method such as `save()` was not called → assert the
+  observable result instead.
 
 **Tie the sections together.** An edge case or race you reported in section 1 or 2 with no
 test covering it is a test finding as well. Prefer one finding that names both.
