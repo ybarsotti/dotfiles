@@ -171,6 +171,13 @@ second copy by hand.
 (openai/codex#3637, #4383, #5040), so a symlink looks correct and shows nothing. The sync
 script copies real files for that reason.
 
+**A plugin's skills do not travel this way.** Codex runs its own plugin system and does not
+read Claude's plugins, so a plugin that ships skills instead of commands — superpowers, for
+one — surfaces nothing in Codex no matter what the prompts directory holds. Install it on
+the Codex side as well, through
+`.chezmoiscripts/run_onchange_after_15_install_codex_plugins.sh.tmpl`. Find the plugin with
+`codex plugin list` and add its `name@marketplace` line to that script.
+
 A command that invokes `Skill(skill="...")` — `deep-plan`, `deep-review`, `simple-plan` —
 appears in Codex but stops when it reaches the skill, because skills are a Claude Code
 feature. When you need one of those to run under Codex, write a Codex-native prompt that

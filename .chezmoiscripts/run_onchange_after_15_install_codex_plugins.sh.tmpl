@@ -1,0 +1,42 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# run_onchange_after_15_install_codex_plugins.sh.tmpl
+#
+# Installs the Codex plugins that do not ship with Codex itself.
+#
+# Codex has its own plugin system and does not read Claude's plugins. superpowers
+# publishes to both, so it must be installed on each side separately. Its skills are
+# skills, not slash commands, which is why mirroring ~/.claude/commands never surfaced
+# them (see run_after_14_sync_codex_prompts.sh.tmpl).
+#
+# Add a plugin by appending a "name@marketplace" line to CODEX_PLUGINS.
+
+set -eufo pipefail
+
+CODEX_PLUGINS="
+superpowers@openai-curated-remote
+"
+
+command -v codex >/dev/null 2>&1 || {
+    echo "⏭️  codex not installed — skipping Codex plugins."
+    exit 0
+}
+
+INSTALLED=$(codex plugin list 2>/dev/null || true)
+
+while IFS= read -r plugin; do
+    [ -n "$plugin" ] || continue
+    name="${plugin%%@*}"
+    # The listing marks every known plugin, so match the name AND the installed state.
+    if printf '%s\n' "$INSTALLED" | grep -q "^${name}@.*installed, enabled"; then
+        echo "✅ Codex plugin already installed: ${name}"
+    else
+        echo "📥 Installing Codex plugin ${plugin}..."
+        codex plugin add "$plugin" || echo "⚠️  ${plugin} install failed. Continuing."
+    fi
+done <<EOF
+${CODEX_PLUGINS}
+EOF
+
+{{ end -}}
