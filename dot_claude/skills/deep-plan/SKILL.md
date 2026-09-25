@@ -189,7 +189,7 @@ Loop, starting at iteration 1:
    - Claude **Sonnet** reviewers: `personas/architect.md`, `personas/project-developer.md`, `personas/ticket-matcher.md`
    - Codex reviewers: `personas/flow-mapper.md`, `personas/qa.md` *(use Claude/Sonnet when `--no-codex`)*
 
-   Reviewers are always **Sonnet** on the Claude side; the Codex side runs `gpt-5.6-sol` at
+   Reviewers are always **Sonnet** on the Claude side; the Codex side runs `gpt-6-sol` at
    `model_reasoning_effort=high` (pinned in `scripts/runner.sh`, overridable with
    `DEEP_PLAN_CODEX_MODEL` / `DEEP_PLAN_CODEX_EFFORT`). Each persona gets `plan.md`, the project's `CLAUDE.md`, the ticket body (when a ticket is set), and a short context snapshot. Each writes a verdict JSON to `$RUN_DIR/verdict-<persona>-iter<N>.json`:
 

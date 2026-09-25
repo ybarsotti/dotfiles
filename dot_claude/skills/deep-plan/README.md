@@ -52,7 +52,7 @@ Both resolve either the deployed name (`parse-args.sh`) or the source-tree name
 
 Reviewers always run on **Sonnet** (Claude side) or **Codex** — never Opus (Opus is for planners).
 
-Codex-side agents (planner-codex, flow-mapper, qa) are pinned to **`gpt-5.6-sol` @
+Codex-side agents (planner-codex, flow-mapper, qa) are pinned to **`gpt-6-sol` @
 `model_reasoning_effort=high`** in `scripts/runner.sh` — not the `~/.codex/config.toml`
 default. Override with `DEEP_PLAN_CODEX_MODEL` / `DEEP_PLAN_CODEX_EFFORT`
 (`none|minimal|low|medium|high|xhigh|max`).
