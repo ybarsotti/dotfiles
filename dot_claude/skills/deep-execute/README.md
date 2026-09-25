@@ -63,7 +63,7 @@ offering exactly the lines in `agents.allowlist`:
 opus high
 sonnet high
 codex gpt-5.6-terra high
-codex gpt-5.6-sol high
+codex gpt-6-sol medium
 ```
 
 `validate-plan.sh` already checked the plan's suggestion is one of these lines; the

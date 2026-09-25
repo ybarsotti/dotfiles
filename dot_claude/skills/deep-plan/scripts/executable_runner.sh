@@ -19,7 +19,7 @@ TIMEOUT="${4:-900}"
 # whatever ~/.codex/config.toml happens to hold, so plan quality doesn't drift with the
 # interactive config. Override with DEEP_PLAN_CODEX_MODEL / DEEP_PLAN_CODEX_EFFORT
 # (efforts: none|minimal|low|medium|high|xhigh|max).
-CODEX_MODEL="${DEEP_PLAN_CODEX_MODEL:-gpt-5.6-sol}"
+CODEX_MODEL="${DEEP_PLAN_CODEX_MODEL:-gpt-6-sol}"
 CODEX_EFFORT="${DEEP_PLAN_CODEX_EFFORT:-medium}"
 
 # A planner must invoke the Skill tool, read the writing-plans skill, and

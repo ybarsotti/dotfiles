@@ -1,4 +1,4 @@
-model = "gpt-5.5"
+model = "gpt-6-sol"
 model_reasoning_effort = "medium"
 approval_policy = "never"
 default_permissions = ":danger-full-access"
@@ -6,6 +6,7 @@ web_search = "live"
 approvals_reviewer = "user"
 sandbox_mode = "danger-full-access"
 network_access = "enabled"
+suppress_unstable_features_warning = true
 
 [projects."/Users/barsotti"]
 trust_level = "trusted"
@@ -60,7 +61,13 @@ enabled = true
 enabled = true
 
 [plugins."computer-history@openai-bundled"]
-enabled = true
+# Disabled to silence a startup error that no setting here can prevent. The server
+# itself is healthy: run its launcher by hand with `"capabilities":{}` and both
+# initialize and tools/list succeed. Codex CLI breaks it by advertising an
+# `experimental` capability whose values are not strings, which the bundled Swift
+# servers reject with a Cocoa decode error as JSON-RPC -32603.
+# Upstream: openai/codex#44458 and #45269. Re-enable once Codex ships the fix.
+enabled = false
 
 [plugins."codex-app-tools@openai-bundled"]
 enabled = true
