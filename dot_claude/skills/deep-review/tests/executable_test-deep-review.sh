@@ -34,12 +34,13 @@ SARIF="${ROOT}/dot_claude/skills/deep-review/scripts/executable_sarif.sh"
 
 SKILL_MD_TEXT="$(cat "$SKILL_MD")"
 
-# Baseline raised from 139 to 165 when reviewers moved to recording findings by command.
-# The added section states a contract the agent cannot derive from the scripts: evidence is
-# mandatory, categories are a closed set, and severity replaces the per-reviewer verdict.
+# Baseline history: 139 -> 165 when reviewers moved to recording findings by command
+# (evidence mandatory, closed category set, severity replacing the per-reviewer verdict), then
+# 165 -> 200 for Phase 4.5, which makes fixing and re-reviewing the default instead of a
+# question the agent asks. Both are contracts the agent cannot derive from the scripts.
 # Raise this again only for a rule of that weight, never to fit restated script internals.
-assert_eq "$([ "$(wc -l <"$SKILL_MD" | tr -d ' ')" -lt 165 ] && echo yes || echo no)" yes \
-  "SKILL.md: line count is under the baseline of 165"
+assert_eq "$([ "$(wc -l <"$SKILL_MD" | tr -d ' ')" -lt 200 ] && echo yes || echo no)" yes \
+  "SKILL.md: line count is under the baseline of 200"
 assert_contains "$SKILL_MD_TEXT" "scripts/dispatch.sh" \
   "SKILL.md: Phase 2 still names dispatch.sh as the invocation target"
 assert_contains "$SKILL_MD_TEXT" 'Skill(skill="simplify")' \

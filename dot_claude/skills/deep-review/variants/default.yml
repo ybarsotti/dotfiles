@@ -1,8 +1,7 @@
 name: default
 description: >-
-  Seven-persona review panel. Each persona runs once and records findings by command, so
-  the report is a deterministic transform with no aggregator call. Use the `thorough`
-  variant for the sixteen-persona panel.
+  Eight-persona review panel. Each persona runs once and records findings by command, so
+  the report is a deterministic transform with no aggregator call. Each persona runs once.
 
 # Reviewers append findings with scripts/record.sh instead of printing YAML.
 # scripts/report.sh then builds report.md from findings.jsonl.
@@ -11,13 +10,15 @@ record_findings: true
 # Personas. `runner: any` means the dispatcher assigns based on --ratio.
 # Each persona body is the fixed file at personas/<id>.md.
 #
-# These seven replace sixteen. Every merge below removed a real overlap:
+# These eight replaced a sixteen-persona panel that ran each persona twice. Every merge below removed a real overlap:
 #   senior-backend   absorbed db-performance and error-handling-observability
 #   senior-frontend  absorbed design-fidelity
 #   correctness      absorbed edge-cases, concurrency-races and test-coverage
 #   architecture     absorbed type-precision
 #   simplicity       absorbed code-reuse
 #   project-fit      absorbed project-patterns, docs-consistency and scope-completeness
+# ui-ux is new, not a merge: nothing owned the project's UI conventions, usability,
+# component boundaries or motion.
 personas:
   - id: security
     role: Security engineer with OWASP Top 10 focus
@@ -34,8 +35,8 @@ personas:
       boundaries, idempotency, swallowed errors, timeouts and context propagation,
       responses leaking internals. Schema design: column types, nullability, missing
       foreign-key, unique and check constraints, JSON holding queryable fields, redundant
-      or wrongly ordered indexes, and migrations that lock a large table or cannot be
-      reversed. Query performance: N+1, missing indexes, unbounded results, OFFSET
+      or wrongly ordered indexes, more than one migration file where one would do, and
+      migrations that lock a large table or cannot be reversed. Query performance: N+1, missing indexes, unbounded results, OFFSET
       pagination, non-sargable predicates, verified with live EXPLAIN (ANALYZE) when a dev
       database is reachable. Observability: error context, structured logs with correlation
       ids, metrics and spans on new paths.
@@ -44,12 +45,34 @@ personas:
   - id: senior-frontend
     role: Senior React/TypeScript engineer (component quality and design fidelity)
     focus: |
-      Component design, state location, re-render triggers, list keys, accessibility,
-      responsive layout, i18n keys, type safety, loading/error/empty states, RBAC
-      agreeing with the backend, unsafe HTML injection. Then the implemented screen
+      Component design, state location, re-render triggers, list keys, i18n keys, type
+      safety, loading/error/empty states, RBAC agreeing with the backend, unsafe HTML
+      injection. Accessibility in depth: tab order and Enter/Space operation, a div with an
+      onClick and no role, focus indicators and focus moved into and out of dialogs,
+      icon-only controls with no accessible name, errors announced through a live region,
+      state carried by colour alone, contrast on disabled and placeholder text, alt text.
+      Responsiveness against the project's own breakpoints: overflow that scrolls the page
+      body, rows that neither wrap nor stack, touch targets, hover-only affordances, images
+      capped with max-width. Then the implemented screen
       against the design it followed: layout, hierarchy, states, exact copy, interaction,
       design-system components rebuilt bespoke. A changed screen with no design to check
       against is a HIGH finding.
+    runner: any
+
+  - id: ui-ux
+    role: UI/UX reviewer (project UI patterns, usability, componentization, motion)
+    focus: |
+      Records nothing when the diff touches no user-facing UI. Otherwise: an existing
+      component or design token rebuilt by hand; a pattern the neighbour screens follow and
+      this one does not; usability — an action with no visible outcome, a destructive action
+      with no guard, work the user can lose, an undesigned empty/loading/error/permission
+      state, labels only the author understands, the primary action buried; componentization
+      — several components in one file, reusable fragments left inline, data fetching or
+      business rules inside a presentational component when the project puts them in the page,
+      layout, hook or service, and the opposite error of splitting too thin; motion and
+      feedback — no pending state where the user waits, animation that costs instead of helps,
+      bespoke transitions where the project has a utility, prefers-reduced-motion ignored.
+      Grounds findings with ui-ux-pro-max guidance, but the project's own code outranks it.
     runner: any
 
   - id: correctness

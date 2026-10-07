@@ -34,10 +34,16 @@ there. The plan lives where `superpowers:writing-plans` saves it:
 `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md` inside the project. `$RUN_DIR/plan.md`
 is a one-line pointer file that contains that path.
 
-Read `references/constraints.md` now. It holds the rules that the plan and both reviewers
+Read `~/.claude/skills/simple-plan/references/constraints.md` now. It holds the rules that the plan and both reviewers
 enforce. Quote its rule numbers in the plan and in every review verdict.
 
 ## Phase 0 — Project context brief
+
+**First, look for an existing breakdown.** List
+`docs/superpowers/plans/*-breakdown.md`. When one matches this work, read it, and treat the
+first task whose dependencies are met and which has no plan file yet as the task for this run.
+Say which task you picked and which breakdown it came from. This is how a split survives
+across runs — skip Phase 1.5 when a breakdown already answers it.
 
 Gather evidence before you draft. Write the result to `$RUN_DIR/context.md`.
 
@@ -73,12 +79,14 @@ not settle the design, the task is bigger than one task. Go to Phase 1.5 and spl
 Enter this phase when any of these holds:
 
 - The work has two or more outcomes that could ship separately.
-- It would need more than three phases, or touch more than about six files.
+- Phase 0 found more than about six files it must change, or two or more directories that
+  each need their own change.
 - Three brainstorm questions did not settle the design.
 - It needs a requirements matrix, a user journey, or parallel lanes.
 
 Dispatch **one** agent to split it. That agent does not plan and does not write code. Give it
-`$RUN_DIR/context.md` and `references/constraints.md`, and require an ordered list where:
+`$RUN_DIR/context.md` and `~/.claude/skills/simple-plan/references/constraints.md`, and require an
+ordered list where:
 
 - **Each task ships on its own.** A person can exercise it and say whether it works. A task
   that cannot be validated alone is merged into the one that makes it validatable.
@@ -89,15 +97,63 @@ Dispatch **one** agent to split it. That agent does not plan and does not write 
 - **The list holds 2 to 6 tasks.** More than six means the split is still too coarse; tell the
   agent to group them.
 
-The agent writes the list to `$RUN_DIR/breakdown.md`.
+The agent writes the list to `$RUN_DIR/breakdown.md` in exactly this shape, so the next step
+can parse it:
+
+```markdown
+## Task 1 — <short title>
+- **Delivers:** <the observable outcome a person can check>
+- **Validated by:** <what someone does to confirm it, in one sentence>
+- **Touches:** <paths or directories>
+- **Depends on:** none
+
+## Task 2 — <short title>
+- **Delivers:** ...
+- **Validated by:** ...
+- **Touches:** ...
+- **Depends on:** Task 1
+```
+
+Task 1 depends on nothing. Every later task depends only on earlier ones.
+
+Copy the list to `docs/superpowers/plans/<YYYY-MM-DD>-<slug>-breakdown.md` inside the project,
+beside where the plans live. `$RUN_DIR` is keyed to this invocation's arguments, so a file left
+only there is unreachable from the next run.
 
 Present the list with `AskUserQuestion` and let the user pick **one** task to plan now. Then
-run Phase 2 for that task alone. Record the tasks not chosen in the plan's `## Non-goals`,
-pointing at `breakdown.md`, so the next run picks up from there.
+run Phase 2 for that task alone. In the plan's `## Non-goals`, list the tasks not chosen and
+link the breakdown file by its project path.
 
 Never plan two tasks in one run. One plan, one task.
 
 ## Phase 2 — Draft the plan
+
+### UI/UX consultation, when the change touches an interface
+
+Before drafting, when the task adds or changes a user-facing screen, component, page or
+layout, consult the design intelligence and dispatch one UI/UX agent:
+
+1. `Skill(skill="ui-ux-pro-max:ui-ux-pro-max")` for this project's stack — styles, palettes,
+   font pairings, UX guidelines, motion presets and component guidance.
+2. One `Agent` with the reviewer persona at
+   `~/.claude/skills/deep-review/personas/ui-ux.md`, pointed at the **existing** UI rather
+   than at a diff. Give it `$RUN_DIR/context.md`, `~/.claude/skills/simple-plan/references/constraints.md` and the task description, and ask for: the
+   components and design tokens this change should reuse, with `path:line`; the screen the new
+   one should follow as a pattern; the states it must design for; where the component
+   boundaries fall and where the logic goes; the feedback the user needs for each action; the
+   breakpoints this project supports and how the layout reflows at the narrowest one; and the
+   accessibility this screen owes — keyboard path, focus handling on anything that opens, the
+   accessible name of every icon-only control, and how errors get announced.
+
+The plan states the breakpoints and the keyboard path as acceptance criteria, not as good
+intentions. A screen whose plan is silent about them gets built without them.
+
+Fold the answer into the plan's `Project fit`, `Affected files` and `Edge cases` sections. The
+plan names the existing component it reuses instead of leaving the implementer to invent one.
+`Skill(skill="frontend-design")` applies when the change needs visual direction rather than
+pattern-matching.
+
+Skip this when the change touches no interface, and record that you skipped it.
 
 Invoke `Skill(skill="superpowers:writing-plans")` and follow it completely. Never paraphrase
 it from memory. That skill owns the document header, the task structure (Files, Interfaces,
@@ -188,7 +244,7 @@ Run both reviewers in parallel, in a single message with two `Agent` calls.
 | Project fit | `Agent` with the persona at `~/.claude/skills/deep-plan/personas/project-developer.md` | Does the plan match this codebase |
 
 Give the project-fit reviewer `$PLAN_PATH`, `$RUN_DIR/context.md`, and
-`references/constraints.md`. Tell it to reject the plan when any constraint rule is broken,
+`~/.claude/skills/simple-plan/references/constraints.md`. Tell it to reject the plan when any constraint rule is broken,
 and to quote the rule number.
 
 Both reviewers check test coverage against constraint rule 10. For every row of the TDD

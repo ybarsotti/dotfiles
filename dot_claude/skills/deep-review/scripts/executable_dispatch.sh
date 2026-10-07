@@ -297,7 +297,7 @@ as text — text is discarded, only recorded findings reach the report.
 \`\`\`bash
 ${SCRIPT_DIR}/record.sh \\
   --persona ${persona_id} \\
-  --category <one of: security correctness concurrency db-performance typing architecture simplicity code-reuse tests docs project-fit scope frontend observability> \\
+  --category <one of: security correctness concurrency db-performance typing architecture simplicity code-reuse tests docs project-fit scope frontend observability ui-ux accessibility responsiveness> \\
   --severity <CRITICAL|HIGH|MEDIUM|LOW> \\
   --file <path> --line <n> \\
   --title "<one line>" \\

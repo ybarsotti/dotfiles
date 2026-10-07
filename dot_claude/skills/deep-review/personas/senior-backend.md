@@ -42,6 +42,12 @@ Schema pass, for every changed migration, model, or table definition:
 - **Migration safety**: an operation that takes a long lock on a large table, such as adding
   an index without `CONCURRENTLY` on Postgres or rewriting a table to add a column; a
   destructive change with no backfill; a migration with no way back.
+- **More than one migration in the same change.** Two or more new migration files are usually
+  one schema change written in installments. Flag it and name the single migration they should
+  become. Accept the split only for a stated reason: one has already run somewhere, an
+  operation cannot share their transaction (`CREATE INDEX CONCURRENTLY`), or a long backfill
+  must sit between two schema steps. "Easier to read" is not a reason, and a migration whose
+  only dependency is tidiness gets merged.
 
 Live `EXPLAIN` pass, best effort. Look for a reachable database in this order: a dev or test
 container (`docker compose ps`, `docker ps`), then a `DATABASE_URL` or test settings pointing
@@ -62,6 +68,8 @@ When no database is reachable, say so and fall back to static findings. Include 
 - Logs structured, at the right level, and carrying a correlation id.
 - Metrics emitted for events that matter, and tracing spans on new code paths.
 - No swallowed exception, and no panic or throw with no recovery.
+- An alerting hook for a failure a human must know about. A new failure path that only ever
+  reaches a log is a failure nobody is paged for.
 
 ## Stay in your lane
 

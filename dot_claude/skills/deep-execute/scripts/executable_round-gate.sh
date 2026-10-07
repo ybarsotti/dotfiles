@@ -11,7 +11,7 @@
 #   3. contract       — validate-contract.sh --json
 #   4. run-state      — validate-run-state.sh --json
 #   5. review         — one light reviewer pass (deep-review's
-#                        project-patterns persona) must APPROVE
+#                        project-fit persona) must APPROVE
 #
 # The order is deliberate: cheapest/fastest checks first, the reviewer (an
 # LLM call) last, so a lane-test failure never pays for a contract check,
@@ -31,7 +31,7 @@
 # different ceiling is honored without editing this script.
 #
 # The reviewer step reuses deep-review's reviewer.sh and its
-# project-patterns persona verbatim, but that persona (like every
+# project-fit persona verbatim, but that persona (like every
 # deep-review persona) has no fixed output contract of its own — dispatch.sh
 # normally appends one. Since this is a single ad hoc reviewer call, not a
 # full dispatch.sh run, the same minimal addition is made here: the copied
@@ -90,7 +90,7 @@ VALIDATE_STATE="${SCRIPT_DIR}/validate-run-state.sh"
 [ -f "$VALIDATE_STATE" ] || VALIDATE_STATE="${SCRIPT_DIR}/executable_validate-run-state.sh"
 REVIEWER="${DEEP_REVIEW_DIR}/scripts/reviewer.sh"
 [ -f "$REVIEWER" ] || REVIEWER="${DEEP_REVIEW_DIR}/scripts/executable_reviewer.sh"
-PERSONA_FILE="${DEEP_REVIEW_DIR}/personas/project-patterns.md"
+PERSONA_FILE="${DEEP_REVIEW_DIR}/personas/project-fit.md"
 
 CWD=$(jq -r '.cwd' "$MANIFEST")
 BASELINE_COMMIT=$(jq -r '.baseline_commit' "$MANIFEST")
