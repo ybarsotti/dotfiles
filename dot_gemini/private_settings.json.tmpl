@@ -37,6 +37,25 @@
             "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event pre-tool-use --agent gemini-cli --server-url http://127.0.0.1:49374 --project-strategy repo-root"
           }
         ]
+      },
+      {
+        "matcher": "exit_plan_mode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "plannotator",
+            "timeout": 345600
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -r '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -x '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ]; then /bin/sh '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh'; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "timeout": 10000
+          }
+        ]
       }
     ],
     "AfterTool": [
@@ -48,6 +67,15 @@
             "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event post-tool-use --agent gemini-cli --server-url http://127.0.0.1:49374 --project-strategy repo-root"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -r '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -x '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ]; then /bin/sh '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh'; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "timeout": 10000
+          }
+        ]
       }
     ],
     "PreCompress": [
@@ -57,6 +85,28 @@
           {
             "type": "command",
             "command": "{{ .chezmoi.homeDir }}/Applications/ai-memory/current/ai-memory --data-dir '{{ .chezmoi.homeDir }}/Library/Application Support/ai-memory' hook --event pre-compact --agent gemini-cli --server-url http://127.0.0.1:49374 --project-strategy repo-root"
+          }
+        ]
+      }
+    ],
+    "BeforeAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -r '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -x '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ]; then /bin/sh '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh'; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -r '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -x '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ]; then /bin/sh '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh'; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "timeout": 10000
           }
         ]
       }
