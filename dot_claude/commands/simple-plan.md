@@ -7,9 +7,9 @@ description: Lean plan — least code that works, project patterns, strict typin
 Plan a small or medium change and stop at an approved plan. `/simple-plan` does not build,
 review code, or open a pull request.
 
-It is the short counterpart of `/deep-plan`: one drafter, two reviewers, at most two review
-rounds. When the task needs a requirements matrix, a user journey, or parallel lanes, the
-skill says so and stops. Run `/deep-plan` yourself in that case.
+It plans **one task**. When the work is bigger than that, the skill splits it into
+deliverable tasks ordered from the foundation up and plans the one you pick — it does not
+hand the problem to another command.
 
 **Arguments:** `$ARGUMENTS`
 
@@ -24,13 +24,28 @@ skill says so and stops. Run `/deep-plan` yourself in that case.
    Every claim cites a path.
 1. **Brainstorm** — `superpowers:brainstorming`, only when the task is unclear, and with at
    most 3 questions.
+1.5 **Split** — when the work holds more than one shippable outcome, an agent turns it into
+   2-6 deliverable tasks ordered from the foundation up. You pick one; this run plans that one.
 2. **Draft** — `superpowers:writing-plans` defines the format. The plan states the problem,
    the non-goals, the approach, the project fit, the concrete types, the affected files, an
    edge-case decision table, the TDD test list, and the validation steps.
 3. **Review** — `ponytail:ponytail-review` for over-engineering and the deep-plan
    `project-developer` persona for project fit, in parallel, for at most 2 rounds.
-4. **QA plan** — `/qa-plan`, only when a user-facing flow or screen changes.
-5. **Present** — `plannotator annotate --gate`, then `ExitPlanMode`.
+4. **Present** — `plannotator annotate --gate`, then `ExitPlanMode`.
+5. **Recommend what comes next, in order** — `/qa-plan` first when a flow or screen changes,
+   since it runs before implementation, then implementation, then the mandatory
+   review-and-QA chain below, then the next task from the breakdown.
+
+## The chain after implementation
+
+These run by default, in order, and each one **fixes what it finds**:
+
+`/deep-review` (with its `/simplify` pass) → fix every CRITICAL and HIGH, re-review the fix →
+`/qa-execute` or `/qa-testing` → fix every failure with a different agent than the one that
+tested, re-run QA → one summary of what was tested, what failed, what was fixed and what is
+open → `/pr-description`.
+
+A finding reported and not fixed is not a reviewed change.
 
 ## What you must do
 

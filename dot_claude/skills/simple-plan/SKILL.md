@@ -10,9 +10,13 @@ and still respects the project's patterns, its frameworks, and strict typing.
 
 `simple-plan` stops at an approved plan. It does not write production code.
 
-`simple-plan` is not `deep-plan`. It runs one drafter, two reviewers, and at most two review
-rounds. When the task turns out to need a requirements matrix, a user journey, or parallel
-lanes, say so and let the user run `/deep-plan` themselves. Do not escalate on your own.
+`simple-plan` runs one drafter, two reviewers, and at most two review rounds. It plans **one
+task**, never a programme of work.
+
+When the task arrives too big for that, do not hand it to another command and do not plan it
+anyway. Split it first, in Phase 1.5: an agent turns the epic into deliverable tasks ordered
+from the foundation up, you pick one, and this run plans that one. The rest waits, written
+down, for its own run.
 
 ## Setup
 
@@ -61,8 +65,37 @@ Run `Skill(skill="superpowers:brainstorming")` when any of these is true:
 - The scope is unclear.
 - The change touches a flow you could not map in Phase 0.
 
-**Ask at most 3 questions.** Batch them into one `AskUserQuestion` call. If 3 questions do
-not settle the design, stop and tell the user that the task needs `/deep-plan`.
+**Ask at most 3 questions.** Batch them into one `AskUserQuestion` call. When 3 questions do
+not settle the design, the task is bigger than one task. Go to Phase 1.5 and split it.
+
+## Phase 1.5 — Split the work, when it is more than one task
+
+Enter this phase when any of these holds:
+
+- The work has two or more outcomes that could ship separately.
+- It would need more than three phases, or touch more than about six files.
+- Three brainstorm questions did not settle the design.
+- It needs a requirements matrix, a user journey, or parallel lanes.
+
+Dispatch **one** agent to split it. That agent does not plan and does not write code. Give it
+`$RUN_DIR/context.md` and `references/constraints.md`, and require an ordered list where:
+
+- **Each task ships on its own.** A person can exercise it and say whether it works. A task
+  that cannot be validated alone is merged into the one that makes it validatable.
+- **Each names the observable outcome** that proves it is done — what a reviewer sees, not
+  what the code does.
+- **The first task is the foundation** the rest build on: the schema, the type, the contract,
+  the seam. Later tasks depend only on earlier ones.
+- **The list holds 2 to 6 tasks.** More than six means the split is still too coarse; tell the
+  agent to group them.
+
+The agent writes the list to `$RUN_DIR/breakdown.md`.
+
+Present the list with `AskUserQuestion` and let the user pick **one** task to plan now. Then
+run Phase 2 for that task alone. Record the tasks not chosen in the plan's `## Non-goals`,
+pointing at `breakdown.md`, so the next run picks up from there.
+
+Never plan two tasks in one run. One plan, one task.
 
 ## Phase 2 — Draft the plan
 
@@ -168,26 +201,53 @@ model method of this project, and names the outermost call to mock instead. Exam
 Apply the findings. Re-run the reviewers. **Stop after two rounds.** Record any finding you
 did not apply, with the reason, in a `## Open findings` section at the end of the plan.
 
-## Phase 4 — QA plan, only when a flow or a screen changes
-
-Run `/qa-plan` when the change alters a user-facing flow or screen. Reference the generated
-`qa-plan.yaml` from the Validation section of `$PLAN_PATH`. Skip this phase otherwise, and record that
-you skipped it.
-
-## Phase 5 — Present
+## Phase 4 — Present the plan
 
 1. `Skill(skill="plannotator-annotate")`, then `plannotator annotate "$PLAN_PATH" --gate`.
 2. Apply the annotations that come back.
 3. `ExitPlanMode` for the final approval.
 
-Then stop. Print `$PLAN_PATH`. After approval, offer the two execution options exactly as the
-"Execution Handoff" section of `superpowers:writing-plans` words them: **1. Subagent-Driven
-(recommended)** and **2. Inline Execution**. Then stop.
+## Phase 5 — Recommend the next commands, in order
+
+The plan is approved. Print `$PLAN_PATH`, then recommend the commands that come next **in the
+order they must run**. The user runs them; this session does not start the implementation.
+
+**1. `/qa-plan` — when the change alters a user-facing flow or screen.** This runs *before*
+implementation, not after it. It maps the plan's requirements into a reviewed `qa-plan.yaml`,
+which the Validation section of `$PLAN_PATH` then references, so the implementer knows what
+QA will check before writing the first line. Say plainly that skipping it means QA writes its
+own criteria later, from the finished code. When the change touches no flow and no screen, say
+why you are not recommending it.
+
+**2. Then implementation.** Offer the two options exactly as the "Execution Handoff" section
+of `superpowers:writing-plans` words them: **1. Subagent-Driven (recommended)** and
+**2. Inline Execution**.
 
 - `Skill(skill="superpowers:executing-plans")` against `$PLAN_PATH` in this session.
 - Or `/deep-execute "$PLAN_PATH"` when the user wants parallel lanes.
 
-Do not start the implementation yourself.
+**3. Review and QA, which are not optional.** State this chain as the default that runs
+after implementation, in this order, and say that each step **fixes what it finds** rather
+than reporting it for later:
+
+1. `/deep-review` on the implemented change. Its `/simplify` pass is part of the default.
+2. **Fix every CRITICAL and HIGH finding, then re-run the review** on the fix. A finding
+   left in the report is not a reviewed change. Record a finding you deliberately do not
+   fix, with the reason, under `## Open findings`.
+3. QA: `/qa-execute` against the approved `qa-plan.yaml` when step 1 produced one, otherwise
+   `/qa-testing` in EXECUTE mode.
+4. **Fix every QA failure, then re-run QA** on the fix. A separate agent fixes what QA found;
+   the agent that tested does not grade its own repair.
+5. Return one summary covering: what was tested, what passed, what failed, what was fixed,
+   and what is still open. The summary names the commit the result applies to. "Tests pass"
+   is not a summary.
+
+**4. `/pr-description`** to open the PR once the chain above is clean.
+
+**5. The next task from `$RUN_DIR/breakdown.md`**, when Phase 1.5 produced one. Name the task
+that comes next so the user does not have to reopen the file.
+
+Then stop. Do not start the implementation yourself.
 
 ## Failure handling
 
