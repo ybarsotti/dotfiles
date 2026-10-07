@@ -50,6 +50,36 @@ related parts of the system that should have been touched and were not.
 
 When no task is linked, skip this section. Do not record a finding about the absence.
 
+## 4. Layout, naming and lint escapes
+
+These are the ones a diff slips past review most often.
+
+- **A silenced linter.** `# noqa`, `# type: ignore`, `eslint-disable`, `@ts-expect-error`,
+  `pylint: disable`. The diff should not need one. Report every occurrence the diff adds,
+  and accept it only when the surrounding comment states which rule it silences and why the
+  real fix is impossible. "It was failing CI" is not a reason.
+- **A prefix doing a directory's job.** A run of files sharing a prefix —
+  `invoice_export.py`, `invoice_export_mapper.py`, `invoice_export_errors.py` — is a package
+  asking to exist. Name the directory those files belong in, and the shorter names they take
+  once inside it. Flag the reverse too: a directory holding one file nobody else will join.
+- **Naming that fights the repo.** A new file, module, class or symbol whose case, suffix or
+  word order does not match its neighbours. Quote a neighbour as the pattern.
+- **File granularity.** A small, single-purpose thing buried in a large unrelated file, and
+  its mirror — a file created for three lines that belong beside their only caller. Say which
+  way the diff errs and where the code should live.
+- **A function outside its class.** A module-level function whose every parameter comes from
+  one object, or that only ever runs on one class's state, is a method in the wrong place.
+  Name the class it belongs to. Do not flag a genuinely free function: a pure helper over
+  primitives, or one deliberately kept out to avoid a dependency.
+
+## 5. Dependencies the diff left behind
+
+- **An installed dependency nobody imports.** Read the manifest against the code. A package
+  that no longer has an importer is dead weight: it carries install time, lock churn and
+  CVEs. Name the package and the manifest line to remove.
+- **A dependency added and barely used.** A new package pulled in for one call that the
+  standard library or an already-installed package covers.
+
 ## Confidence bar
 
 Report a rule or doc violation only when you can point at the specific rule or doc line that
@@ -58,4 +88,6 @@ so when you cannot quote the source, do not record the finding.
 
 ## Stay in your lane
 
-Skip security, performance, and architecture layering.
+Skip security and performance. Leave dependency direction and abstraction boundaries to
+`architecture`; you own where a file, a name or a function sits, not which layer may call
+which.

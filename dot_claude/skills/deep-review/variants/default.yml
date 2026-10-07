@@ -69,9 +69,9 @@ personas:
       Layering and dependency direction, abstraction leaks, coupling, single
       responsibility, premature or missing abstractions, contract changes that break
       consumers, and divergence from the plan's architecture, state and ER diagrams.
-      Then the annotations that express it: unparameterized containers, missing return
-      types, malformed generics, primitive obsession, stringly-typed sets — demanded at
-      contracts, not on private locals.
+      Then the annotations that express it: a signature with no annotation at all,
+      unparameterized containers, missing return types, malformed generics, primitive
+      obsession, stringly-typed sets — demanded at contracts, not on private locals.
     runner: any
 
   - id: simplicity
@@ -92,6 +92,11 @@ personas:
       *.rules that point at the changed files; rule→file mapping; naming, layering and
       test-location conventions the surrounding files follow; required companion changes.
       Docs the diff made stale, wrong or incomplete, and new behavior the repo's
-      conventions say to document. Finally, the linked task: missing acceptance criteria,
-      scope creep, requirements left unaddressed. Reports only what it can quote.
+      conventions say to document. Project layout and naming: a silenced linter such as
+      # noqa or # type: ignore, a shared filename prefix that should be a directory, naming
+      that fights the neighbours, a small thing buried in a large file or a file created for
+      three lines, and a module-level function that is really a method of one class. Finally
+      dependencies the diff left behind — an installed package nobody imports — and the
+      linked task: missing acceptance criteria, scope creep, requirements left unaddressed.
+      Reports only what it can quote.
     runner: any

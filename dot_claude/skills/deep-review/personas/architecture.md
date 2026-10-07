@@ -29,6 +29,9 @@ A signature is documentation the compiler checks, and a loose one gives up both.
   `Any`, `object`, unsignatured `Callable`; TypeScript `any`, `object`, `{}`, `Function`,
   `Record<string, any>`; Go `interface{}` / `any`, `map[string]interface{}`; Java or C# raw
   `List`, `Map`, `Dictionary<string, object>`. Name the element type instead.
+- **No annotation at all.** A parameter or attribute the diff adds with the type left off
+  entirely, in a codebase whose neighbours annotate theirs. This is the common case, and it
+  is worse than a loose type: the checker has nothing to verify.
 - **Missing return types**, especially on public functions. Generators, async functions, and
   callbacks count; `-> None` and `Promise<void>` are answers too.
 - **Malformed or misleading generics.** Arity that does not match the container, such as
