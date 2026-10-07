@@ -59,9 +59,10 @@ functions.
 
 ## 5. No escape hatches without a reason
 
-Do not add `# noqa`, `# type: ignore`, `eslint-disable`, or `@ts-expect-error`. If one is
-unavoidable, the plan names the line, names the rule, and states the reason. The reason goes
-in a comment on the same line in the code.
+Do not add `# noqa`, `# type: ignore`, `eslint-disable`, `@ts-expect-error`, or
+`pylint: disable`. If one is unavoidable, the plan names the line, names the rule it
+silences, and states why the real fix is impossible. The reason goes in a comment on the
+same line in the code. "It was failing CI" is not a reason — it is the problem.
 
 ## 6. Comments explain why, not what
 
@@ -170,3 +171,27 @@ When many tests build the same service, give the builder the real collaborator a
 outermost mock in one shared fixture. A spy on an internal method, such as asserting that
 `save()` was not called, is also an implementation detail. Assert the observable result
 instead.
+
+## 11. Put code where it belongs
+
+The plan says where each new file, name and function goes, and why that place.
+
+- **A prefix is not a package.** When the plan adds several files sharing a prefix, such as
+  `invoice_export.py`, `invoice_export_mapper.py` and `invoice_export_errors.py`, it creates
+  the directory instead and gives the files the shorter names they take inside it. Do not
+  create a directory for one file either.
+- **Names follow the neighbours.** Case, suffix and word order match the files already in
+  that directory. The plan cites the neighbour it copied.
+- **A small thing gets a small file.** Do not bury new single-purpose code in a large
+  unrelated file, and do not create a file for three lines that belong beside their only
+  caller.
+- **A function that belongs to a class is a method.** When every parameter comes from one
+  object, or the function only ever runs on one class's state, it goes on that class. A pure
+  helper over primitives stays free.
+
+## 12. No dependency the code does not import
+
+A dependency the plan adds must have an importer when the task is done. A package left in the
+manifest with no importer carries install time, lock churn and CVEs for nothing. When the
+change removes the last use of a dependency, the plan removes it from the manifest in the
+same step and names the line. Rule 1.5 already forbids adding one for a few lines of code.
