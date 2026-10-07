@@ -7,6 +7,7 @@ approvals_reviewer = "user"
 sandbox_mode = "danger-full-access"
 network_access = "enabled"
 suppress_unstable_features_warning = true
+notify = ["/Users/barsotti/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
 
 [projects."/Users/barsotti"]
 trust_level = "trusted"
@@ -24,6 +25,12 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/Users/barsotti/.config/opencode"]
+trust_level = "trusted"
+
+[projects."/Users/barsotti/Library/Application Support/orca/rate-limit-pty-cwd"]
+trust_level = "trusted"
+
+[projects."/Users/barsotti/Developer/Work/SwapMe/VPay"]
 trust_level = "trusted"
 
 [notice.model_migrations]
@@ -77,6 +84,9 @@ enabled = true
 
 [plugins."template-creator@openai-primary-runtime"]
 enabled = true
+
+[tui]
+screen_reader_detection_done = true
 
 [tui.model_availability_nux]
 "gpt-5.5" = 3
