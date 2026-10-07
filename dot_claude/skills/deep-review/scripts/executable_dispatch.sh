@@ -280,6 +280,10 @@ for ((i=0; i<${#PERSONAS[@]}; i++)); do
   # Reviewer prompts are FIXED, predefined files — the orchestrator never authors them.
   # Load the persona body from personas/<base_id>.md; fall back to the variant YAML
   # `prompt:` field only when no dedicated file exists (legacy variants).
+  # A variant may pin a persona's category, so a focused panel cannot scatter one concern
+  # across the closed set. Without it the reviewer picks from the full list.
+  persona_category=$(yq -r ".personas[$pidx].category // \"\"" "$VARIANT_FILE")
+
   PERSONA_FILE="${SKILL_DIR}/personas/${base_id}.md"
   if [ -f "$PERSONA_FILE" ]; then
     body=$(cat "$PERSONA_FILE")
@@ -288,6 +292,16 @@ for ((i=0; i<${#PERSONAS[@]}; i++)); do
   fi
 
   if [ "$RECORD_FINDINGS" = "true" ]; then
+    # A trailing comment would swallow the line-continuation backslash, so the pin is stated
+    # below the code block instead of inside it.
+    if [ -n "$persona_category" ]; then
+      CATEGORY_ARG="$persona_category"
+      CATEGORY_NOTE="Your \`--category\` is fixed at \`${persona_category}\` for this panel. Use it for every
+finding you record, and do not pick another value."
+    else
+      CATEGORY_ARG="<one of: security correctness concurrency db-performance typing architecture simplicity code-reuse tests docs project-fit scope frontend observability ui-ux accessibility responsiveness>"
+      CATEGORY_NOTE="Pick the \`--category\` that fits each finding, from the closed set shown above."
+    fi
     OUTPUT_SECTION=$(cat <<EOF
 ## How to report (REQUIRED)
 
@@ -297,7 +311,7 @@ as text — text is discarded, only recorded findings reach the report.
 \`\`\`bash
 ${SCRIPT_DIR}/record.sh \\
   --persona ${persona_id} \\
-  --category <one of: security correctness concurrency db-performance typing architecture simplicity code-reuse tests docs project-fit scope frontend observability ui-ux accessibility responsiveness> \\
+  --category ${CATEGORY_ARG} \\
   --severity <CRITICAL|HIGH|MEDIUM|LOW> \\
   --file <path> --line <n> \\
   --title "<one line>" \\
@@ -305,6 +319,8 @@ ${SCRIPT_DIR}/record.sh \\
   --description "<what is wrong and why it matters here>" \\
   --suggestion "<the concrete fix>"
 \`\`\`
+
+${CATEGORY_NOTE}
 
 \`--evidence\` is mandatory and the command rejects a finding without it. Cite what this
 repository already does, as \`path:line\` — for example a module that holds this kind of

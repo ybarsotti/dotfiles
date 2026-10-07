@@ -141,8 +141,14 @@ and the SARIF always agree.
 Concurrent appends are safe without a lock because each finding is one compact JSON line
 under 4 KB, and `record.sh` trims prose rather than dropping a finding that would exceed it.
 
-Variants without `record_findings` keep the older path: reviewers print YAML and a single
-`claude -p` aggregator consolidates it.
+A variant may also pin a persona's `category`, as `security-focused` and `stress-test` do.
+A focused panel then cannot scatter one concern across the closed set, and the report groups
+the way the panel was meant to read. Without the field the reviewer picks per finding.
+
+`adversarial-debate` is the one variant still on the older path, and deliberately: its
+reviewers argue a `position` over a `dimension` rather than reporting findings, so there is
+nothing for `record.sh` to validate and `aggregate.sh` weighs the two sides with a model.
+Reviewers there print YAML and a single `claude -p` aggregator consolidates it.
 
 ## Reviewer model policy
 
