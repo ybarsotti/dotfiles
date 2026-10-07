@@ -49,7 +49,11 @@ form:
   plan shows the real type declarations, because a passing type checker does not prove good
   typing.
 - Validate API input with the framework's validator, at the boundary only.
-- No `# noqa` or `# type: ignore` unless the plan names the line and the reason.
+- No `# noqa` or `# type: ignore` unless the plan names the line, the rule it silences, and
+  why the real fix is impossible. "It was failing CI" is not a reason.
+- Put code where it belongs: a shared filename prefix becomes a directory, names follow the
+  neighbours, a small thing gets a small file, and a function that belongs to a class is a
+  method. No dependency stays in the manifest with no importer.
 - Comment only what the code cannot show.
 - Tests mock only the outermost call to an external service: the HTTP request, the broker
   enqueue, the SDK call, or the clock. This project's services, repositories, dispatchers,

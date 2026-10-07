@@ -12,6 +12,15 @@ You read the candidate plan against the **actual codebase**:
 - Does the plan match the project's existing patterns (DI style, error-handling style, test layout)?
 - Are the chosen libraries already in the dependency manifest? If a new dep is proposed, is it justified?
 - Does the plan respect any project-specific rules in `CLAUDE.md` (e.g., "always use real DB in tests", "no inline SQL")?
+- Does every new file, name and function have a stated place, and is that place right? A run
+  of files sharing a prefix is a directory the plan should create. A small single-purpose
+  thing belongs in its own small file, not buried in a large unrelated one — and three lines
+  do not earn a file of their own. A function whose parameters all come from one object is a
+  method of that object's class.
+- Does the plan reach for a lint escape (`# noqa`, `# type: ignore`, `eslint-disable`,
+  `@ts-expect-error`, `pylint: disable`) instead of fixing the cause?
+- Does every signature the plan declares state its types, and does the plan leave any
+  dependency in the manifest that nothing imports?
 
 ## Process
 
@@ -53,6 +62,13 @@ Write **only** this JSON:
 - If the plan introduces a utility that already exists in the codebase → `CHANGES_REQUESTED`.
 - If naming conventions are violated → `CHANGES_REQUESTED`.
 - If a new dependency is added without justification → `CHANGES_REQUESTED`.
+- If the plan adds a lint escape without naming the rule it silences and why the real fix is
+  impossible → `CHANGES_REQUESTED`. "It was failing CI" is not a reason.
+- If the plan adds several files sharing a prefix instead of a directory, buries a small
+  single-purpose thing in a large unrelated file, or puts a function outside the class whose
+  state it works on → `CHANGES_REQUESTED`.
+- If the plan leaves a dependency in the manifest that nothing imports, or declares a
+  signature with no types → `CHANGES_REQUESTED`.
 - If the plan violates a rule from `CLAUDE.md` → `CHANGES_REQUESTED`.
 - If the change alters behavior documented under `docs/` (business rules, flows, ADRs, API
   specs) and the plan's `## Documentation impact` omits that doc update → `CHANGES_REQUESTED`.
