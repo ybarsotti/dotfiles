@@ -23,8 +23,13 @@ output_schema: |
 # Each persona is a paranoid simulator. Their job is to imagine specific failure
 # scenarios, not to lint code. Findings should always include a `scenario:` field
 # describing the concrete sequence of events that breaks things.
+# Reviewers append findings with scripts/record.sh; scripts/report.sh then builds the
+# report as a jq transform, so no aggregator model call can invent a finding.
+record_findings: true
+
 personas:
   - id: race-conditions
+    category: concurrency
     role: Race-condition simulator
     focus: |
       TOCTOU sequences, missing locks, async ordering assumptions, double-firing
@@ -37,6 +42,7 @@ personas:
       Don't just say "race possible" — give the exact interleaving.
 
   - id: input-fuzzer
+    category: correctness
     role: Input-fuzzing simulator
     focus: |
       Empty/null/zero/negative, max-int / overflow, very long strings, unicode
@@ -51,6 +57,7 @@ personas:
       ordering — is it sanitized BEFORE validation or AFTER?
 
   - id: partial-failure
+    category: correctness
     role: Partial-failure simulator
     focus: |
       Multi-step operations that fail at step N of M, distributed transactions
@@ -64,6 +71,7 @@ personas:
       or compensating actions? Can a caller observe partial state?
 
   - id: network-chaos
+    category: correctness
     role: Network-chaos simulator
     focus: |
       Timeouts (connect, read, write), connection drops mid-request, slow
@@ -78,6 +86,7 @@ personas:
       it leak resources? Where does it return success when the operation didn't?
 
   - id: replay-idempotency
+    category: concurrency
     role: Replay & idempotency simulator
     focus: |
       Duplicate requests (network retries, user double-click, queue redelivery),
@@ -91,6 +100,7 @@ personas:
       cause a double-charge?
 
   - id: cache-coherence
+    category: concurrency
     role: Cache-coherence simulator
     focus: |
       Stale reads after writes, cache stampede / thundering herd, missing
@@ -104,6 +114,7 @@ personas:
       atomic with the write? Can an attacker poison the cache with crafted input?
 
   - id: resource-exhaustion
+    category: correctness
     role: Resource-exhaustion simulator
     focus: |
       OOM from unbounded allocations (read entire file into memory? unbounded
@@ -117,6 +128,7 @@ personas:
       resources released on every error path? Are connection pools bounded?
 
   - id: clock-and-time
+    category: correctness
     role: Clock-and-time simulator
     focus: |
       DST transitions (and the once-per-year repeated hour), leap seconds,
@@ -131,6 +143,7 @@ personas:
       Where does the code break or compute wrong durations?
 
   - id: state-corruption
+    category: concurrency
     role: State-corruption simulator
     focus: |
       Concurrent writes to the same row without optimistic locking, mid-transaction
@@ -146,6 +159,7 @@ personas:
       know about appears in the DB?
 
   - id: adversarial-user
+    category: security
     role: Adversarial-user simulator
     focus: |
       Parameter tampering (changing IDs in URL, modifying hidden fields), rate-

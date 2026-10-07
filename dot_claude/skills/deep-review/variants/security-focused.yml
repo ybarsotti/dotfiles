@@ -20,8 +20,13 @@ output_schema: |
   ```
 
 # Every persona is a security specialist viewing the diff from one angle.
+# Reviewers append findings with scripts/record.sh; scripts/report.sh then builds the
+# report as a jq transform, so no aggregator model call can invent a finding.
+record_findings: true
+
 personas:
   - id: owasp-top10
+    category: security
     role: OWASP Top 10 specialist
     focus: |
       A01 broken access control, A02 cryptographic failures, A03 injection,
@@ -34,6 +39,7 @@ personas:
       Top 10 (2021). For each finding, cite the OWASP category and CWE.
 
   - id: secrets-and-credentials
+    category: security
     role: Secrets-management auditor
     focus: |
       Hardcoded API keys, passwords, tokens, connection strings, private keys.
@@ -46,6 +52,7 @@ personas:
       query string), secrets returned in API responses or error messages.
 
   - id: authn-authz
+    category: security
     role: Authentication/authorization specialist
     focus: |
       Missing auth on protected endpoints, session handling, token expiration,
@@ -59,6 +66,7 @@ personas:
       Are JWT claims validated? Cookie flags correct? Sessions invalidated on logout?
 
   - id: injection
+    category: security
     role: Injection vulnerability hunter
     focus: |
       SQL/NoSQL injection (string concat in queries), command injection
@@ -71,6 +79,7 @@ personas:
       or rendered HTML. Verify proper escaping/parameterization at each.
 
   - id: xss-csrf
+    category: security
     role: Web client-side security specialist
     focus: |
       XSS (stored, reflected, DOM), unsafe HTML rendering patterns, CSRF token
@@ -83,6 +92,7 @@ personas:
       origin validation. Flag every gap.
 
   - id: rate-limiting
+    category: security
     role: Abuse-prevention specialist
     focus: |
       Rate limiting on public/mutating endpoints, brute-force protections on
@@ -96,6 +106,7 @@ personas:
       differences, places that accept unbounded input sizes.
 
   - id: data-leakage
+    category: security
     role: Data leakage auditor
     focus: |
       PII in logs, full DB rows leaking through API (passwords, internal IDs),
@@ -108,6 +119,7 @@ personas:
       in production paths, verbose error messages. Flag every leak path.
 
   - id: dependencies-supply-chain
+    category: security
     role: Supply-chain security specialist
     focus: |
       New deps added: known CVEs (npm audit, govulncheck, pip-audit), unmaintained
@@ -120,6 +132,7 @@ personas:
       missing lockfile updates, dangerous postinstall scripts.
 
   - id: crypto
+    category: security
     role: Cryptography specialist
     focus: |
       Weak/deprecated algos (MD5, SHA1, DES, RC4), wrong primitives (ECB mode,
@@ -133,6 +146,7 @@ personas:
       not MD5/SHA1), constant-time comparisons for tokens. Flag every weakness.
 
   - id: server-side-request-forgery
+    category: security
     role: SSRF and external-call specialist
     focus: |
       User-controlled URLs passed to fetch/http.Get/curl, internal service
