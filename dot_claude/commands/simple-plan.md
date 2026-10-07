@@ -26,7 +26,10 @@ hand the problem to another command.
    most 3 questions.
 1.5 **Split** — when the work holds more than one shippable outcome, an agent turns it into
    2-6 deliverable tasks ordered from the foundation up. You pick one; this run plans that one.
-2. **Draft** — `superpowers:writing-plans` defines the format. The plan states the problem,
+2. **Draft** — when the change touches an interface, first consult
+   `ui-ux-pro-max:ui-ux-pro-max` and one UI/UX agent against the existing UI, so the plan
+   names the components and tokens to reuse instead of inventing them.
+   `superpowers:writing-plans` defines the format. The plan states the problem,
    the non-goals, the approach, the project fit, the concrete types, the affected files, an
    edge-case decision table, the TDD test list, and the validation steps.
 3. **Review** — `ponytail:ponytail-review` for over-engineering and the deep-plan
@@ -70,6 +73,9 @@ form:
   neighbours, a small thing gets a small file, and a function that belongs to a class is a
   method. No dependency stays in the manifest with no importer.
 - Comment only what the code cannot show.
+- One migration per change. Two migration files are one schema change in installments — merge
+  them unless one already ran, an operation cannot share their transaction, or a long backfill
+  must sit between two steps.
 - Tests mock only the outermost call to an external service: the HTTP request, the broker
   enqueue, the SDK call, or the clock. This project's services, repositories, dispatchers,
   and clients run for real. Mock `httpx.AsyncClient.post`, not the `SupplyBuyClient`; mock

@@ -12,7 +12,9 @@ For every file in the diff:
    `.cursorrules`, `AGENTS.md`, and any `*.rules` file. A rule points at a changed file when
    its glob, path, or scope matches that file's path or directory. Build a rule-to-file map.
 3. **Check compliance.** For each mapped rule, verify the diff follows it. Quote the exact
-   rule text and name the `file:line` that breaks it.
+   rule text and name the `file:line` that breaks it. Prefer semantic tools over raw grep
+   here — Serena `find_symbol` and `find_referencing_symbols`, gitnexus `context` — because a
+   convention is about where a symbol lives and who calls it, which grep cannot see.
 
 Also flag:
 
@@ -31,8 +33,8 @@ Code is not the only place logic lives. This repo keeps real behavior, rules, an
 For every behavioral change:
 
 1. **Find the docs that describe it.** Search `docs/`, `README*`, ADR and decision files,
-   OpenAPI or GraphQL schemas, `*.mdx`, and any `docs/**/business_rules` tree. Prefer gitnexus
-   `query` and graphify over `rg`.
+   OpenAPI or GraphQL schemas, `*.mdx`, and any `docs/**/business_rules` or `docs/**/thoughts`
+   tree. Prefer gitnexus `query` and graphify over `rg`.
 2. **Compare the doc against the new behavior.** A rule, default, endpoint shape, config key,
    flow, or invariant that a doc describes and the diff changed is stale unless the diff also
    updated it. Name the doc `file:line` and the sentence that no longer matches.

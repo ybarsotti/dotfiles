@@ -17,8 +17,7 @@ The user typed `/deep-review [args]`, OR the user asked for a multi-agent peer r
 
 Read `$ARGUMENTS` and extract:
 
-- **variant** (positional, default `"default"`): one of `default` (7 personas), `thorough`
-  (the 16-persona panel), `security-focused`, `adversarial-debate`, or any name matching a
+- **variant** (positional, default `"default"`): one of `default` (8 personas), `security-focused`, `adversarial-debate`, or any name matching a
   `variants/<name>.yml` file
 - **--reviewers N** (default: `persona_count` — each persona runs **once**)
 - **--ratio C:X** (default: an even reviewer split)
@@ -74,12 +73,30 @@ flags the failure in the report — that's informational, not fatal.
 When the dispatcher finishes, the report is already on stdout. Just summarize the verdict in 1-2 sentences and offer next steps:
 
 - If `APPROVE` → "All N reviewers cleared the changes. Ready to ship."
-- If `REQUEST_CHANGES` → "N findings (X CRITICAL, Y HIGH). Top issue: <title>. Want me to start fixing?"
-- If `REJECT` → "Critical blockers found. Top issue: <title>. Recommend stopping and addressing before any further work."
+- If `REQUEST_CHANGES` → "N findings (X CRITICAL, Y HIGH). Top issue: <title>. Fixing now."
+- If `REJECT` → "Critical blockers found. Top issue: <title>. Fixing the blockers before anything else."
 
 Always tell the user where the full report lives (`~/.claude/deep-review-runs/<RUN_ID>/report.md`).
 In record mode the raw findings sit beside it as `findings.jsonl`, and `findings.sarif` too
 when `--sarif` was passed — upload that one with `gh code-scanning` to get inline PR alerts.
+
+## Phase 4.5 — Fix, then re-review
+
+A finding reported and not fixed is not a reviewed change, so this phase is the default rather
+than a question. Do not stop at the report and wait to be asked.
+
+1. **Fix every CRITICAL and HIGH.** Each finding names a file, a line and a suggestion, so
+   work from the report rather than re-deriving the problem.
+2. **Re-run the panel on the fix**, scoped to the changed files. A fix that introduces its own
+   finding is common, and the second pass is what catches it.
+3. **Stop after two fix rounds.** What survives goes in a `## Open findings` section with the
+   reason, and you say plainly which findings remain.
+4. **MEDIUM and LOW are the user's call.** List them and ask; do not fix them silently.
+
+Skip this phase when the run was `--dry-run` or the diff was empty.
+
+The fixer must not be the reviewer that found the issue. Dispatch a separate `Agent` for the
+fix, so nothing grades its own repair.
 
 ## Phase 5 — Simplify pass (default; skip with `--no-simplify`)
 

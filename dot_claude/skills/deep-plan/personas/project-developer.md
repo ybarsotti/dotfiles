@@ -69,6 +69,9 @@ Write **only** this JSON:
   state it works on → `CHANGES_REQUESTED`.
 - If the plan leaves a dependency in the manifest that nothing imports, or declares a
   signature with no types → `CHANGES_REQUESTED`.
+- If the plan adds two or more migrations without stating why they cannot be one →
+  `CHANGES_REQUESTED`. Valid reasons: one already ran somewhere, an operation cannot share
+  their transaction, or a long backfill must sit between two schema steps.
 - If the plan violates a rule from `CLAUDE.md` → `CHANGES_REQUESTED`.
 - If the change alters behavior documented under `docs/` (business rules, flows, ADRs, API
   specs) and the plan's `## Documentation impact` omits that doc update → `CHANGES_REQUESTED`.

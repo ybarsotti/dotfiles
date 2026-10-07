@@ -24,9 +24,8 @@ gets a chance to invent a finding.
 /deep-review [variant] [flags]
 
 VARIANT (positional, optional, default: "default")
-  default             7 personas, each run once: security, senior-backend, senior-frontend,
-                      correctness, architecture, simplicity, project-fit
-  thorough            the previous 16-persona roster, for a change that earns it
+  default             8 personas, each run once: security, senior-backend, senior-frontend,
+                      ui-ux, correctness, architecture, simplicity, project-fit
   security-focused    every persona reviews through an OWASP/security lens
   adversarial-debate  approver-vs-rejecter pairs across 5 dimensions
   stress-test         paranoid personas simulating concrete failure scenarios
@@ -67,7 +66,9 @@ The skill lives at `~/.claude/skills/deep-review/SKILL.md` and its scripts at
    fans reviewers out in the background, waits, and builds the report.
 4. Report goes to stdout and to `~/.claude/deep-review-runs/<RUN_ID>/report.md`, beside
    `findings.jsonl` (and `findings.sarif` with `--sarif`).
-5. Run `/simplify` on the reviewed scope, unless `--no-simplify` was passed.
+5. Fix every CRITICAL and HIGH with an agent other than the reviewer that found it, then
+   re-run the panel on the fix. At most two rounds; what survives goes to `## Open findings`.
+6. Run `/simplify` on the reviewed scope, unless `--no-simplify` was passed.
 
 ### Findings
 
@@ -82,18 +83,18 @@ There is no per-reviewer verdict. Severity decides it: any CRITICAL is `REJECT`,
 ### Quick examples
 
 ```bash
-/deep-review                                    # 7 personas, current branch
-/deep-review thorough                           # the 16-persona panel
+/deep-review                                    # 8 personas, current branch
 /deep-review security-focused                   # security lens
 /deep-review --scope PR-1234 --sarif            # review a GitHub PR, emit SARIF
-/deep-review default --ratio 7:0                # Claude only, no Codex
+/deep-review default --ratio 8:0                # Claude only, no Codex
 /deep-review --dry-run                          # preview without executing
 ```
 
 ### Cost awareness
 
-Each reviewer uses roughly 3-8k input tokens and 1-3k output tokens. The default is 7
+Each reviewer uses roughly 3-8k input tokens and 1-3k output tokens. The default is 8
 reviewers and **no aggregator call**, because the report is built by `jq`.
 
-The previous default ran 32 reviewers plus an aggregator. `thorough` still does 16. Reach for
-it when the diff is large or risky, not by habit.
+The panel this replaced ran 16 personas twice each, so 32 reviewers plus an aggregator. Raise
+`--reviewers` only when a diff is large or risky enough to earn a second opinion per persona,
+not by habit.

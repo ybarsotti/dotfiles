@@ -106,7 +106,7 @@ gets its reply is stranded by design.
 `round-gate.sh RUN_DIR ROUND --json` runs, in this fixed cheapest-first order, short-
 circuiting on the first failure: lane tests (each lane's own `test_command`) → contract
 (`validate-contract.sh`) → run-state (`validate-run-state.sh`) → one light reviewer pass
-(deep-review's `project-patterns` persona, must `APPROVE`). Every stage's records are
+(deep-review's `project-fit` persona, must `APPROVE`). Every stage's records are
 returned even when skipped — nothing is silently omitted, nothing skipped is reported as
 having passed. A `fail` blocks the round; `warn` (e.g. `post-done-writes-absent`) never does.
 

@@ -9,7 +9,10 @@
 def rank: {"CRITICAL":0,"HIGH":1,"MEDIUM":2,"LOW":3}[.] // 4;
 def first_nonempty(f): (map(f) | map(select(. != null and . != "")) | first) // "";
 
-group_by([.file, .line, .category])
+# A finding that names no file lands at file "-" and line 0, so file+line+category would
+# collapse two unrelated repo-wide findings into one and lose the second title. Key those
+# on the title instead; located findings still merge across personas as before.
+group_by(if .line > 0 and .file != "-" then [.file, .line, .category] else [.file, .line, .category, (.title | ascii_downcase)] end)
 | map(
     (sort_by(.severity | rank) | .[0]) as $top
     | $top + {

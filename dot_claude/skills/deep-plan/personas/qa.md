@@ -19,6 +19,26 @@ For each step in the plan, enumerate:
 
 You then check the plan's TDD test list against these dimensions. Every dimension that **applies** to the change MUST have at least one test name listed.
 
+## Mock depth
+
+A test list is only worth what its mocks allow it to prove. Check **what each planned test
+mocks**, not just that a test exists.
+
+The plan may mock only the **outermost call that leaves the process**: the HTTP request, the
+message-broker publish, the third-party SDK call, or the clock. Everything of this project —
+services, repositories, dispatchers, clients, model methods — runs for real. Mocking an inner
+collaborator means the test keeps passing when that collaborator breaks, so it hides the
+regression it exists to catch, and it gives up the control the test was supposed to buy.
+
+Allowed: `httpx.AsyncClient.post`, `requests.Session.request`, `some_task.delay`,
+`apply_async`, `stripe.Refund.create`, a `boto3` client method, `freezegun`,
+`django.utils.timezone.now`.
+
+Flag: a service, repository, dispatcher or client of this project replaced by `MagicMock()`;
+a model or service method such as `Order.issue_refund` patched directly; a whole HTTP client
+class patched when the single request method would do; a spy that asserts an internal call
+such as `save()` happened, instead of asserting the observable result.
+
 ## Process
 
 Use code-intel to find what the plan's test list missed:
@@ -52,6 +72,9 @@ Write **only** this JSON:
 ## Hard rules
 
 - No TDD test list → `CHANGES_REQUESTED`.
+- A planned test that mocks this project's own service, repository, dispatcher, client or
+  model method, instead of the outermost call that leaves the process → `CHANGES_REQUESTED`.
+  Name the outermost call it should mock instead.
 - Test list does not cover any boundary/failure/race dimension that applies → `CHANGES_REQUESTED`.
 - Plan introduces a network call without a failure-path test → `CHANGES_REQUESTED`.
 - Plan changes auth/authz without a permission-boundary test → `CHANGES_REQUESTED`.

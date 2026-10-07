@@ -195,3 +195,28 @@ A dependency the plan adds must have an importer when the task is done. A packag
 manifest with no importer carries install time, lock churn and CVEs for nothing. When the
 change removes the last use of a dependency, the plan removes it from the manifest in the
 same step and names the line. Rule 1.5 already forbids adding one for a few lines of code.
+
+## 13. One migration per change
+
+A change that adds two or more migration files is almost always one schema change written in
+installments. Squash them into a single migration before the plan is approved.
+
+Merge them when all of this holds, which is the common case:
+
+- They are part of this same change, and none has run anywhere yet — not on a shared
+  database, not on staging, not on a teammate's machine.
+- Nothing between them depends on the intermediate state. A backfill that must observe the
+  column before a later step changes it is a real dependency; ordering for tidiness is not.
+
+Keep them separate, and the plan says which reason applies, when:
+
+- One has already run somewhere. A migration that has run is history, so never rewrite it;
+  add a new one.
+- An operation cannot share a transaction with the others, such as `CREATE INDEX
+  CONCURRENTLY` on Postgres.
+- A long backfill must sit between two schema steps so the table is never locked while it
+  runs.
+
+The plan states the final migration count and, when it is more than one, the reason for each
+extra. Rule 9 applies as well: a migration for something the task does not need does not
+belong in this change at all.

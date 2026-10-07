@@ -27,7 +27,7 @@ A signature is documentation the compiler checks, and a loose one gives up both.
 
 - **Unparameterized or escape-hatch containers.** Python bare `dict`, `list`, `tuple`, `set`,
   `Any`, `object`, unsignatured `Callable`; TypeScript `any`, `object`, `{}`, `Function`,
-  `Record<string, any>`; Go `interface{}` / `any`, `map[string]interface{}`; Java or C# raw
+  `Record<string, any>`, `object[]`; Go `interface{}` / `any`, `map[string]interface{}`; Java or C# raw
   `List`, `Map`, `Dictionary<string, object>`. Name the element type instead.
 - **No annotation at all.** A parameter or attribute the diff adds with the type left off
   entirely, in a codebase whose neighbours annotate theirs. This is the common case, and it
