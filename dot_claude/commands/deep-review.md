@@ -39,7 +39,7 @@ FLAGS
   --task <id>         force a Jira/Linear task ID (default: auto-detect from branch/commit)
   --timeout <secs>    per-reviewer timeout (default: 600)
   --sarif             also write findings.sarif for GitHub code scanning
-  --simplify          run the /simplify cleanup pass after the report (off by default)
+  --no-simplify       skip the /simplify cleanup pass that runs after the report by default
   --keep-artifacts    don't delete the run dir after completion
   --dry-run           print the plan without spawning reviewers
 
@@ -60,14 +60,14 @@ The skill lives at `~/.claude/skills/deep-review/SKILL.md` and its scripts at
 
 ### High-level flow
 
-1. Parse `$ARGUMENTS` into variant + flags. Keep `--simplify` for yourself; the dispatcher
+1. Parse `$ARGUMENTS` into variant + flags. Keep `--no-simplify` for yourself; the dispatcher
    rejects flags it does not know.
 2. Run `~/.claude/skills/deep-review/scripts/dispatch.sh "$VARIANT" --scope <ref> [flags]`
 3. The dispatcher builds the run dir, loads each reviewer's fixed `personas/<id>.md` prompt,
    fans reviewers out in the background, waits, and builds the report.
 4. Report goes to stdout and to `~/.claude/deep-review-runs/<RUN_ID>/report.md`, beside
    `findings.jsonl` (and `findings.sarif` with `--sarif`).
-5. Only with `--simplify`: run `/simplify` on the reviewed scope.
+5. Run `/simplify` on the reviewed scope, unless `--no-simplify` was passed.
 
 ### Findings
 

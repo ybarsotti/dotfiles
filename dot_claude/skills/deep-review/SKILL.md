@@ -26,7 +26,7 @@ Read `$ARGUMENTS` and extract:
 - **--task id** (default: auto-detect)
 - **--timeout secs** (default `600`)
 - **--sarif** (default off): also write `findings.sarif` for GitHub code scanning
-- **--simplify** (default off): run the `/simplify` pass after the report
+- **--no-simplify** (default off): skip the `/simplify` pass that otherwise runs after the report
 - **--keep-artifacts** / **--dry-run** (default off)
 
 Running a persona twice produces duplicate findings by construction and doubles the token
@@ -54,7 +54,7 @@ Call the dispatcher with the parsed args:
   [--dry-run]
 ```
 
-`--simplify` is yours, not the dispatcher's. Strip it from the args before you call
+`--no-simplify` is yours, not the dispatcher's. Strip it from the args before you call
 `dispatch.sh`, which rejects flags it does not know, and act on it in Phase 5.
 
 `dispatch.sh` handles everything end-to-end: context collection, persona assignment, prompt
@@ -81,10 +81,13 @@ Always tell the user where the full report lives (`~/.claude/deep-review-runs/<R
 In record mode the raw findings sit beside it as `findings.jsonl`, and `findings.sarif` too
 when `--sarif` was passed — upload that one with `gh code-scanning` to get inline PR alerts.
 
-## Phase 5 — Simplify pass (only with `--simplify`)
+## Phase 5 — Simplify pass (default; skip with `--no-simplify`)
 
-A review command that edits code surprises whoever asked for an opinion, so this pass is
-opt-in. When the user passed `--simplify`, run a cleanup pass on the reviewed scope:
+A review that names the same cleanups every time and applies none of them wastes the finding.
+This pass runs by default. Say in the final summary that it ran and what it changed, so nobody
+is surprised by a diff. Skip it when the user passed `--no-simplify`.
+
+Run a cleanup pass on the reviewed scope:
 
 ```
 Skill(skill="simplify")
@@ -94,8 +97,8 @@ Feed `/simplify` the same scope that was reviewed (the changed files). It applie
 `simplicity` reviewer's findings plus obvious dead-code / guard-clause / nesting cleanups,
 running tests after each change. This is a single pass — do not loop it here.
 
-Skip it even with the flag when: the run was `--dry-run`, the diff was empty, or the verdict
-was `REJECT` (fix the blockers first, simplifying broken code is wasted work).
+Skip it regardless when: the run was `--dry-run`, the diff was empty, or the verdict was
+`REJECT` (fix the blockers first, simplifying broken code is wasted work).
 
 ## How findings are recorded
 
