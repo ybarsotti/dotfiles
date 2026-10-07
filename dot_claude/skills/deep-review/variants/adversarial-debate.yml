@@ -16,6 +16,15 @@ output_schema: |
     Free-form observations.
   ```
 
+# This variant deliberately keeps the older path: reviewers print YAML and one claude -p
+# aggregator consolidates it. Do NOT add `record_findings: true` here.
+#
+# record.sh stores a finding — severity, category, file, line, evidence. A debate entry is a
+# position with claims and an anticipated counter, and the aggregator's job is to WEIGH the
+# two sides and pick a winner per dimension. That is a judgment, and report.sh is a jq
+# transform, which cannot make one. Migrating this variant would keep the file format and
+# throw away the only thing the variant exists to do.
+#
 # Pairs are matched by `dimension`. Aggregator should:
 #   - For each dimension, weigh approver vs rejecter arguments.
 #   - Output verdict per dimension and an overall verdict (REJECT if ANY dimension's
