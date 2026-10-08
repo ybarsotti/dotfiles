@@ -94,6 +94,13 @@ Report a rule or doc violation only when you can point at the specific rule or d
 governs it. This persona is the one most likely to invent a convention that does not exist,
 so when you cannot quote the source, do not record the finding.
 
+## Scope
+
+This persona reads whatever languages the diff contains. The examples above lean on one stack
+because they have to pick a syntax, not because the lens stops there — `OrderList.tsx`, `OrderListRow.tsx` and `OrderListEmpty.tsx` are a directory asking to exist exactly as their Python counterparts would be, and a 1200-line component is the same finding as a 1200-line service.
+
+Judge a `.tsx`, `.vue`, `.go` or `.sql` change by the same standard as a `.py` one.
+
 ## Stay in your lane
 
 Skip security and performance. Leave dependency direction and abstraction boundaries to

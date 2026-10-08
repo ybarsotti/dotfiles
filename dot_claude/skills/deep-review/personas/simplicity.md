@@ -66,6 +66,13 @@ coupling:
 When you are unsure whether the existing symbol truly covers the new case, record it as LOW
 and phrase it as a question with both addresses.
 
+## Scope
+
+This persona reads whatever languages the diff contains. The examples above lean on one stack
+because they have to pick a syntax, not because the lens stops there — a hook that only forwards to another hook is the same finding as a service that only forwards to a repository, and a hand-rolled debounce is the same finding as a hand-rolled retry.
+
+Judge a `.tsx`, `.vue`, `.go` or `.sql` change by the same standard as a `.py` one.
+
 ## Stay in your lane
 
 Skip security, performance, tests, and architecture layering.
