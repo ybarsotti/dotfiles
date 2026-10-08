@@ -32,8 +32,11 @@ hand the problem to another command.
    `superpowers:writing-plans` defines the format. The plan states the problem,
    the non-goals, the approach, the project fit, the concrete types, the affected files, an
    edge-case decision table, the TDD test list, and the validation steps.
-3. **Review** — `ponytail:ponytail-review` for over-engineering and the deep-plan
-   `project-developer` persona for project fit, in parallel, for at most 2 rounds.
+3. **Review** — in parallel, for at most 2 rounds: `ponytail:ponytail-review` for
+   over-engineering, the deep-plan `project-developer` persona for project fit, and — when the
+   plan touches a table, column, migration or query — the `senior-backend` persona as the data
+   reviewer, asking whether the schema shape makes sense and whether the queries hold at real
+   size, with `EXPLAIN` against a seeded dev database when one is reachable.
 4. **Present** — `plannotator annotate --gate`, then `ExitPlanMode`.
 5. **Recommend what comes next, in order** — `/qa-plan` first when a flow or screen changes,
    since it runs before implementation, then implementation, then the mandatory

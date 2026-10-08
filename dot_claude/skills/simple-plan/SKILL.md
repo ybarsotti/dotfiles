@@ -236,12 +236,36 @@ fail, then write the code.
 
 ## Phase 3 — Review
 
-Run both reviewers in parallel, in a single message with two `Agent` calls.
+Run the reviewers in parallel, in a single message with one `Agent` call each.
 
-| Reviewer | How | Lens |
-|---|---|---|
-| Over-engineering | `Skill(skill="ponytail:ponytail-review")` against `$PLAN_PATH` | What can be deleted from the plan |
-| Project fit | `Agent` with the persona at `~/.claude/skills/deep-plan/personas/project-developer.md` | Does the plan match this codebase |
+| Reviewer | How | Lens | When |
+|---|---|---|---|
+| Over-engineering | `Skill(skill="ponytail:ponytail-review")` against `$PLAN_PATH` | What can be deleted from the plan | always |
+| Project fit | `Agent` with the persona at `~/.claude/skills/deep-plan/personas/project-developer.md` | Does the plan match this codebase | always |
+| Data | `Agent` with the persona at `~/.claude/skills/deep-review/personas/senior-backend.md` | Does the schema make sense, and will the queries hold | the plan touches a table, a column, a migration or a query |
+
+### The data reviewer
+
+Run it whenever the plan adds or changes a table, a column, an index, a migration, or a query
+— including an ORM call or a serializer that loads a relation. Skip it otherwise and record
+that you skipped it.
+
+Point it at the plan, not at a diff, and tell it to answer two questions:
+
+1. **Does the structure make sense?** Not "is it valid" — whether the shape matches what the
+   data is. Judge the column types, the nullability, the keys and constraints, whether a JSON
+   column holds fields the code will query by, whether the normalisation fits how the data is
+   written and read, and whether the table has a growth and retention story. Its schema pass
+   lists what to look for; constraint rule 13 governs the migration count.
+2. **Will the queries hold at real size?** The plan's new reads, judged against the indexes
+   that will exist after the migration: a query with no supporting index, an N+1 the plan sets
+   up, an unbounded result set, `OFFSET` pagination on a table that grows. When a dev database
+   is reachable, it reconstructs the SQL and runs `EXPLAIN (ANALYZE)` on a seeded table rather
+   than guessing; when it is not, it says so and gives the exact `EXPLAIN` to run.
+
+A finding here is cheap now and expensive later: a wrong column type ships as a migration, and
+a missing index ships as an outage. The plan states the final schema, the indexes and the
+migration count before implementation starts.
 
 Give the project-fit reviewer `$PLAN_PATH`, `$RUN_DIR/context.md`, and
 `~/.claude/skills/simple-plan/references/constraints.md`. Tell it to reject the plan when any constraint rule is broken,
