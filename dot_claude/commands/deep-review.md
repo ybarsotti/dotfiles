@@ -26,6 +26,8 @@ gets a chance to invent a finding.
 VARIANT (positional, optional, default: "default")
   default             8 personas, each run once: security, senior-backend, senior-frontend,
                       ui-ux, correctness, architecture, simplicity, project-fit
+  code-judo           opt-in structural review: is there a dramatically simpler shape for
+                      this change? Two personas, at most 3 findings, none below MEDIUM
   security-focused    every persona reviews through an OWASP/security lens
   adversarial-debate  approver-vs-rejecter pairs across 5 dimensions
   stress-test         paranoid personas simulating concrete failure scenarios
@@ -87,6 +89,7 @@ There is no per-reviewer verdict. Severity decides it: any CRITICAL is `REJECT`,
 /deep-review security-focused                   # security lens
 /deep-review --scope PR-1234 --sarif            # review a GitHub PR, emit SARIF
 /deep-review default --ratio 8:0                # Claude only, no Codex
+/deep-review code-judo                          # when a change looks more complex than the problem
 /deep-review --dry-run                          # preview without executing
 ```
 

@@ -13,6 +13,11 @@ handler → service → repo → response. Flag:
 - Unbounded operations, missing timeouts, missing context/timeout propagation.
 - Responses that leak internals: stack traces, driver errors, internal ids.
 - Idempotency gaps on state writes, especially on retried or queued work.
+- **Orchestration more sequential or less atomic than it needs to be**, judged as a design
+  smell rather than a micro-optimisation. Independent work awaited one after another when
+  running it together would also be simpler to read. Related updates that can leave state
+  half-applied where one atomic step is available. Flag it only when the cleaner structure is
+  obvious; do not chase micro-optimisations.
 
 ## 2. Database and queries
 

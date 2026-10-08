@@ -12,6 +12,18 @@ Flag:
 - Configuration values nobody will ever tune.
 - Comments that explain WHAT instead of WHY.
 
+**Spaghetti the diff grew in code it did not own.** The sections above judge the new code;
+this one judges what the change did to the code already there:
+
+- A new ad-hoc conditional dropped into an unrelated flow, or a special case inserted mid-way
+  through an already busy function. Treat it as a design problem, not a style nit, and name
+  the abstraction, helper, policy object or dispatcher the logic belongs behind.
+- A one-off boolean, a nullable mode, or a flag parameter that complicates control flow that
+  used to be straight. Repeated conditionals on the same value signal a missing model.
+- A previously cohesive module that the diff left more coupled, more stateful, or harder to
+  scan top to bottom.
+- "Temporary" branching with no removal condition. It becomes permanent.
+
 Recommend the concrete simplification, not the principle.
 
 ## 2. Reinvention
