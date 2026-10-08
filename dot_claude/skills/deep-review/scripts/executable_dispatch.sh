@@ -331,6 +331,11 @@ opinion, so do not record it.
 Record nothing when you find nothing. Silence is how you approve; there is no verdict to
 emit, because severity decides the verdict.
 
+**Prefer a few high-conviction findings to a long list.** When you have a structural finding
+and several cosmetic ones, record the structural one and drop the cosmetics — a report padded
+with nits buries the finding that mattered. Never record something a formatter or a linter
+already owns, and never record a renaming preference.
+
 When every finding is recorded, print one line: \`done: <n> finding(s)\`. Then exit.
 
 The diff and repo context follow below the separator.

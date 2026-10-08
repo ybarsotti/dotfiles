@@ -69,6 +69,12 @@ These are the ones a diff slips past review most often.
 - **File granularity.** A small, single-purpose thing buried in a large unrelated file, and
   its mirror — a file created for three lines that belong beside their only caller. Say which
   way the diff errs and where the code should live.
+- **A file crossing 1000 lines because of this diff.** Check the before and after line count
+  of every changed file. A file the diff pushes from under 1000 lines to over it is a finding
+  by default: ask whether the new code should be extracted first, and name what to split out.
+  Waive it only when the file is still clearly organised and the author gave a structural
+  reason. A file already over 1000 lines before the diff is not this finding — say so and
+  move on, rather than reopening history.
 - **A function outside its class.** A module-level function whose every parameter comes from
   one object, or that only ever runs on one class's state, is a method in the wrong place.
   Name the class it belongs to. Do not flag a genuinely free function: a pure helper over
