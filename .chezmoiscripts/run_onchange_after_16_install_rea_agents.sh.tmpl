@@ -1,0 +1,36 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# run_onchange_after_16_install_rea_agents.sh.tmpl
+#
+# Install REA (reverse engineering for coding agents) and register it with the
+# agents whose config chezmoi does not manage.
+#
+# Codex and Cursor are absent on purpose. Their MCP config lives in
+# dot_codex/private_config.toml and dot_cursor/private_mcp.json, so chezmoi owns
+# the rea entry there. Letting `rea setup` write those files too would make every
+# apply rewrite them without rea, and the next setup add it back — a drift loop.
+#
+# rea version: 6.4.0
+{{ template "error_handling" . }}
+
+REA_BIN="${HOME}/.local/bin/rea"
+
+if ! command -v npm &>/dev/null; then
+  echo "npm not found, skipping REA installation"
+  exit 0
+fi
+
+echo "Installing rea-agents"
+npm install --global rea-agents@latest
+
+if ! command -v rea &>/dev/null && [ ! -x "${REA_BIN}" ]; then
+  echo "rea command not found after installation, skipping agent setup"
+  exit 0
+fi
+
+# --yes approves the user-owned actions only. Hopper needs --install-hopper, so
+# a native analysis engine is never installed without an explicit request.
+echo "Registering REA with Claude Code and OpenCode"
+rea setup --yes --client claude_code --client opencode
+{{- end -}}

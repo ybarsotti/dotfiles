@@ -10,6 +10,13 @@ mcp_servers:
       type: http
       url: http://127.0.0.1:49374/mcp
 
+    rea:
+      command: npx
+      args:
+        - -y
+        - rea-agents@latest
+        - mcp
+
     memory:
       command: npx
       args:
