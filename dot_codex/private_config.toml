@@ -168,6 +168,11 @@ enabled = true
 [plugins."omo@sisyphuslabs".mcp_servers.git_bash]
 enabled = false
 
+[mcp_servers.rea]
+command = "npx"
+args = [ "-y", "rea-agents@latest", "mcp" ]
+startup_timeout_sec = 30
+
 [mcp_servers.serena]
 command = "uvx"
 args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--project-from-cwd"]
