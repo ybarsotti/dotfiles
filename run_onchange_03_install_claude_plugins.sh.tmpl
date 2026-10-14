@@ -26,6 +26,9 @@ MARKETPLACES=(
   "JuliusBrussee/caveman"
   "mattpocock/skills"
   "typesafe-ai/skills"
+  "pydantic/skills"
+  "DietrichGebert/ponytail"
+  "cathrynlavery/diagram-design"
 )
 
 echo "Registering custom marketplaces..."
@@ -42,7 +45,7 @@ PLUGINS=(
   "code-simplifier@claude-plugins-official"
   "commit-commands@claude-plugins-official"
   "context7@claude-plugins-official"
-  "everything-claude-code@everything-claude-code"
+  "ecc@ecc"
   "feature-dev@claude-plugins-official"
   "frontend-design@claude-plugins-official"
   "pyright-lsp@claude-plugins-official"
@@ -65,6 +68,15 @@ PLUGINS=(
   # `npx skills add` gives bare names instead, which do not resolve.
   "mattpocock-skills@mattpocock"
   "typesafe@typesafe-ai"
+  "code-modernization@claude-plugins-official"
+  # Logfire ships from two marketplaces. Pin the Pydantic one: it is upstream and
+  # ahead of the copy in claude-plugins-official. Installing both duplicates the
+  # skills and the MCP server.
+  "logfire@pydantic-skills"
+  "ponytail@ponytail"
+  "diagram-design@diagram-design"
+  "sentry@claude-plugins-official"
+  "gopls-lsp@claude-plugins-official"
 )
 
 echo "Installing Claude Code plugins..."
