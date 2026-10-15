@@ -311,7 +311,7 @@ screen.** Run this as soon as the implementation is done. Use the `annotated-scr
 skill to capture each changed flow, one image per step, with highlight boxes and numbered
 callouts. Capture the running app when a local environment is reachable. Otherwise render the
 component with fixture data, and let the banner say so. When a later review or QA fix changes
-a captured screen, capture that screen again before `/pr-description`, which embeds the images
+a captured screen, capture that screen again before `/pr`, which embeds the images
 as UI evidence. When the change touches no flow and no screen, say why you skip this step.
 
 **4. Review and QA, which are not optional.** State this chain as the default that runs
@@ -330,7 +330,7 @@ than reporting it for later:
    and what is still open. The summary names the commit the result applies to. "Tests pass"
    is not a summary.
 
-**5. `/pr-description`** to open the PR once the chain above is clean.
+**5. `/pr`** to open the PR once the chain above is clean.
 
 **6. A narrated demo video, when the change adds or alters a feature a person uses.** This
 runs after the PR is open, because the demo goes into the PR body. Use the `video-demo` skill

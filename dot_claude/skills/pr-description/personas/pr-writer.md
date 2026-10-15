@@ -64,6 +64,19 @@ against. Embed with `![alt](url)` only when a URL GitHub can fetch was supplied;
 list each asset by filename with one line on what it demonstrates and say the media is local.
 
 UI unchanged: write exactly `_no UI change — no visual evidence_`.>
+
+## Permissions
+
+<Only when the diff changes who may do what — a role, a permission, a scope, a policy, a
+guard, or a migration on a roles or permissions table. Leave the whole section out otherwise.
+
+One row per role in the system, one column per action this PR adds or changes, plus an
+`Enforced at` column holding a `file:line` for each allowed cell or `denied by default`.
+Every role appears, including the untouched ones. Take the role names from the role enum,
+table, seed or fixture in the diff's project and cite that source under the table; never
+from memory. Add a `Change` column with `+ gained`, `- lost` or `unchanged` when the PR
+alters access that already existed. Write the cells from the code, not from the ticket's
+intention, and flag any disagreement between them under the table.>
 ```
 
 ## Hard rules — do NOT break these
@@ -120,6 +133,10 @@ flowchart TD
 ...
 
 ## Evidence
+
+...
+
+## Permissions
 
 ...
 ```

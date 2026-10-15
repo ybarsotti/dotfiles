@@ -17,7 +17,7 @@ description: |
   /deep-execute for an approved `Mode: parallel` plan with 2+ lanes (lane fanout, round
   tests, run-state validation, orchestrator commits, one final /deep-review), or the
   superpowers execution workflow under strict TDD otherwise — running /qa-test-plan when
-  flows or screens change, opening the PR via /pr-description (conventional title,
+  flows or screens change, opening the PR via /pr (conventional title,
   Mermaid, no file list, assigned to the user), and looping on CI + Copilot feedback
   until both are clean.
 ---
@@ -71,7 +71,7 @@ items.
 - [ ] **`/qa-test-plan`** (if the plan's QA flag is "yes" — flow change or new screens):
       manual test doc + codex review + agent-browser execution with video
 - [ ] **Re-run tests**: every test (new + existing) must be green
-- [ ] **`/pr-description`**: title + ticket/Slack + reconciled requirements + Mermaid +
+- [ ] **`/pr`**: title + ticket/Slack + reconciled requirements + Mermaid +
       decisions, **no file list**, assigned to me
 - [ ] **cmux notify (PR opened)**
 - [ ] **Wait for CI green** (in parallel with Copilot loop)
@@ -87,7 +87,7 @@ Use `cmux set-progress` at natural boundaries:
 | Branch created | 0.15 |
 | Plan approved (`/deep-plan`) | 0.30 |
 | Plan executed (`/deep-execute`, or superpowers build + `/simplify` + `/deep-review`) | 0.75 |
-| PR opened (`/pr-description`) | 0.85 |
+| PR opened (`/pr`) | 0.85 |
 | CI + Copilot clean | 1.00 |
 
 ---
@@ -317,20 +317,20 @@ Implements <CODE>.
 
 Don't skip hooks. Don't `--no-verify`.
 
-### 6.2 Push + open PR — `/pr-description`
+### 6.2 Push + open PR — `/pr`
 
-Push the branch, then let `/pr-description` build the title + body and open the PR — do NOT
+Push the branch, then let `/pr` build the title + body and open the PR — do NOT
 hand-write the PR body here:
 
 ```bash
 git push -u origin HEAD
 ```
 ```
-/pr-description --ticket <CODE> --plan ~/.claude/deep-plan-runs/<RUN_ID>/plan.md \
+/pr --ticket <CODE> --plan ~/.claude/deep-plan-runs/<RUN_ID>/plan.md \
   --evidence <qa-report-index.html>
 ```
 
-`/pr-description` produces a Conventional-Commit title `<type>(<scope>): <summary> (<CODE>)`
+`/pr` produces a Conventional-Commit title `<type>(<scope>): <summary> (<CODE>)`
 and an **objective** body — what it solves + ticket/Slack links + reconciled requirements
 matrix + Mermaid + rationale/key decisions + **evidence** (a GIF or recording of the flow and
 before/after screenshots when the UI changed). It contains **no file list and no counts**.

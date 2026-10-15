@@ -62,7 +62,7 @@ default. Override with `DEEP_PLAN_CODEX_MODEL` / `DEEP_PLAN_CODEX_EFFORT`
 deep-plan prints `/deep-execute "$RUN_DIR/plan.md"` and stops. `/deep-execute` drives:
 `superpowers:using-git-worktrees` → `subagent-driven-development` (TDD, mock only outer
 boundaries) → `/simplify` ×2 → `/qa-test-plan` (if flows/screens change) → `/deep-review` →
-`verification-before-completion` → `/pr-description` (title + ticket/Slack + reconciled
+`verification-before-completion` → `/pr` (title + ticket/Slack + reconciled
 requirements + Mermaid + decisions, no file list, assigned to you) → CI/Copilot watch →
 `finishing-a-development-branch`. For a Jira ticket, `jira-workflow` drives all of this.
 
@@ -108,7 +108,7 @@ See `~/.claude/commands/deep-plan.md` for full arg grammar. Common:
 
 Each run writes to `~/.claude/deep-plan-runs/<RUN_ID>/`:
 
-- `plan.md` — final approved plan (consumed by `/pr-description` and `jira-workflow`)
+- `plan.md` — final approved plan (consumed by `/pr` and `jira-workflow`)
 - `related-context.md` — ticket and Slack source links supplied to planners/reviewers
 - `draft-opus.md`, `draft-codex.md` — initial drafts
 - `verdict-<persona>-iter<N>.json` — reviewer verdicts per iteration

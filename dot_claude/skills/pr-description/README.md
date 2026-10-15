@@ -2,7 +2,7 @@
 
 Generate **and** review a pull-request title + description, then open (or update) the PR
 assigned to you. A **claude Sonnet** agent writes the title/body; a **codex** agent reviews
-it. Used standalone via `/pr-description`, and as a runtime dependency of `deep-plan`
+it. Used standalone via `/pr`, and as a runtime dependency of `deep-plan`
 (Phase 6 handoff) and `jira-workflow` (PR step).
 
 ## What it produces
@@ -16,11 +16,11 @@ it. Used standalone via `/pr-description`, and as a runtime dependency of `deep-
 ## Invocation
 
 ```bash
-/pr-description                                        # draft from git diff main...HEAD, auto-detect ticket
-/pr-description --plan <deep-plan plan.md> --ticket PROJ-2982
-/pr-description --update 1421 --draft                  # update an existing PR
-/pr-description --dry-run                              # print title + body, don't touch the PR
-/pr-description --no-codex                             # Sonnet self-review instead of codex
+/pr                                        # draft from git diff main...HEAD, auto-detect ticket
+/pr --plan <deep-plan plan.md> --ticket PROJ-2982
+/pr --update 1421 --draft                  # update an existing PR
+/pr --dry-run                              # print title + body, don't touch the PR
+/pr --no-codex                             # Sonnet self-review instead of codex
 ```
 
 ## Reviewers
@@ -34,15 +34,15 @@ it. Used standalone via `/pr-description`, and as a runtime dependency of `deep-
 ## Layout
 
 ```
-~/.claude/skills/pr-description/
+~/.claude/skills/pr/
 ├── README.md                # this file
-├── SKILL.md                 # protocol the orchestrator follows when /pr-description runs
+├── SKILL.md                 # protocol the orchestrator follows when /pr runs
 └── personas/
     └── pr-writer.md         # fixed Sonnet writer prompt
 ```
 
 Run artifacts (writer input, draft, codex review, final body) persist at
-`~/.claude/pr-description-runs/<RUN_ID>/`.
+`~/.claude/pr-runs/<RUN_ID>/`.
 
 ## Depends on
 

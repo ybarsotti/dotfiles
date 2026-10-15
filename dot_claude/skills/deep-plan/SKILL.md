@@ -35,7 +35,7 @@ execution half. Invoke each planning-phase skill via the Skill tool at its mappe
 | 6b| `systematic-debugging` | execution (bug/regression tasks) | deep-execute |
 | 6c| `dispatching-parallel-agents` | execution (fallback for parallel slices) | deep-execute |
 | 7 | `/deep-review` + `receiving-code-review` + `/qa-execute` | execution | deep-execute |
-| 8 | `/pr-description` + `finishing-a-development-branch` | execution | deep-execute |
+| 8 | `/pr` + `finishing-a-development-branch` | execution | deep-execute |
 
 Plus deep-plan adds: multi-model planner/reviewer fan-out, the `ticket-matcher` reviewer,
 code-intel bootstrap, and the machine-validated checklist gate.
@@ -365,7 +365,7 @@ Whatever the user picks, the post-build chain is the same and runs unattended:
 changed → QA against a live env with `agent-browser` (`qa-testing` in EXECUTE mode when that
 skill is on this machine; the plan's `qa-plan.yaml` through `/qa-test-plan` when it names one;
 a plain browser agent otherwise) → a **separate** agent fixes the gaps QA found → frozen SHA →
-`/pr-description` with evidence → HTML run report. `/deep-execute` runs that chain itself; for
+`/pr` with evidence → HTML run report. `/deep-execute` runs that chain itself; for
 B, C and D you drive the same sequence from this session.
 
 **Open `/goal` before the build starts, whichever option won.** It is built into Claude Code and
@@ -414,7 +414,7 @@ Hand off according to the Phase 3.5 choice, then stop:
 ## Reuse
 
 - Patterns for `claude -p` / `codex exec` flags: `~/.claude/skills/deep-review/scripts/reviewer.sh`.
-- Post-approval build/review/PR helpers live in this skill's `scripts/` (`feature-branch.sh`, `pr-open.sh`, `ci-and-copilot-watch.sh`, `handle-findings.sh`) and are consumed by `/pr-description` and `jira-workflow` — not by deep-plan itself.
+- Post-approval build/review/PR helpers live in this skill's `scripts/` (`feature-branch.sh`, `pr-open.sh`, `ci-and-copilot-watch.sh`, `handle-findings.sh`) and are consumed by `/pr` and `jira-workflow` — not by deep-plan itself.
 - TDD enforcement: `superpowers:test-driven-development`.
 
 ## Failure modes

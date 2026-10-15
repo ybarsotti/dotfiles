@@ -29,7 +29,7 @@
 ## Requirements matrix
 <!-- One row per ticket acceptance criterion or, without a ticket, per concrete user requirement.
      `✅ Planned` means the plan has a concrete implementation + verification mapping; it does
-     NOT claim implementation is complete. `/pr-description` later reconciles each row against
+     NOT claim implementation is complete. `/pr` later reconciles each row against
      the finished diff/tests and changes status to ✅ Implemented, ⚠️ Partial, or ❌ Missing. -->
 <!-- `verification` holding exactly one backticked command is RUN by round-gate.sh, and a
      failure blocks the round. Write the command whenever one exists — `just test_backend

@@ -90,7 +90,7 @@ stopping** and halts only on a blocker no agent can decide alone:
    skill is installed, `/qa-execute` for a plan's `qa-plan.yaml`, a plain browser agent otherwise.
 7. A **separate, non-tester** agent fixes every gap QA found; QA re-runs on the fix.
 8. Freeze final commit SHA; `/qa-execute` for the approved QA plan when one exists.
-9. `/pr-description` — title + ticket/Slack + requirements + Mermaid + decisions + **evidence**
+9. `/pr` — title + ticket/Slack + requirements + Mermaid + decisions + **evidence**
    (screenshots/GIF when UI changed), assigned to you.
 10. HTML run report: what was built, decisions, trade-offs, assumptions, tests, screenshots,
     recordings, PR link.
