@@ -264,6 +264,10 @@ This dotfiles setup includes several development tools that are automatically in
 - **`gastown`** - Multi-agent orchestration (coordinates Claude, Codex, Gemini workers)
   - Usage: `gt install ~/gt --git`, `gt mayor attach`
   - Install: Via `brew install gastown`
+- **`agent-browser`** - Browser automation CLI for AI agents
+  - Usage: `agent-browser open <url>`, `agent-browser screenshot out.png`, `agent-browser eval <js>`
+  - Install: Via `brew install agent-browser`, then `agent-browser install` downloads its Chrome
+  - The `annotated-screenshots` skill uses it to capture pages at 2x
 - **`agent-deck`** - Terminal session manager TUI for AI coding agents
   - Usage: `agent-deck`
   - Install: Via `brew install asheshgoplani/tap/agent-deck`
@@ -691,6 +695,9 @@ provider resolves the endpoint and secret name automatically.
   - `/pr-description` - Conventional-commit PR title/body with requirements matrix, Mermaid,
     decisions and **UI evidence** (flow GIF/recording + before/after screenshots), then opens
     the PR assigned to you
+- **`~/.claude/skills/annotated-screenshots`** - Annotated feature screenshots: captures the live
+  app or a component rendered with fixture data through `agent-browser`, then draws highlight
+  boxes, numbered callouts and a source banner with `annotate.py` (Pillow through `uv run`)
 
 #### Deep-* Agent Pipeline
 
