@@ -1,0 +1,30 @@
+{
+  "name": "video-demo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "studio": "remotion studio src/index.ts",
+    "assets": "uv run --with numpy,pillow python scripts/sfx.py && uv run --with numpy,pillow python scripts/grain.py",
+    "voice": "uv run --with edge-tts python scripts/tts.py edge",
+    "collect": "node scripts/collect.cjs",
+    "stills": "node scripts/stills.cjs",
+    "render": "remotion render src/index.ts Tour out/tour.mp4 --codec=h264 --crf=18",
+    "finish": "bash scripts/finish.sh",
+    "verify": "bash scripts/verify.sh out/tour-final.mp4"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.532",
+    "@remotion/cli": "4.0.532",
+    "@remotion/google-fonts": "4.0.532",
+    "@remotion/renderer": "4.0.532",
+    "@remotion/transitions": "4.0.532",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "remotion": "4.0.532"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.0",
+    "typescript": "5.8.3"
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "coordinateSpace": [
+    1440,
+    900
+  ],
+  "voice": {
+    "edge": "en-US-AndrewMultilingualNeural",
+    "eleven": {
+      "voice_id": "",
+      "model": "eleven_multilingual_v2"
+    }
+  },
+  "spelled": {},
+  "segments": [
+    {
+      "id": "01-intro",
+      "kind": "title",
+      "chapter": "Intro",
+      "eyebrow": "Tasks",
+      "title": "Saved",
+      "accent": "views",
+      "subtitle": {
+        "at": "click",
+        "text": "Your daily view, one click away"
+      },
+      "text": "This is saved views on the tasks list. You set your filters once, and the same view comes back with one click."
+    },
+    {
+      "id": "02-filter",
+      "kind": "clip",
+      "chapter": "Flow \u00b7 Filter the list",
+      "image": "example.svg",
+      "camera": [
+        {
+          "at": 0,
+          "zoom": 1.0,
+          "cx": 720,
+          "cy": 450
+        },
+        {
+          "at": "filters",
+          "zoom": 1.7,
+          "cx": 620,
+          "cy": 200
+        }
+      ],
+      "focus": [
+        {
+          "at": "filters",
+          "rect": [
+            314,
+            118,
+            660,
+            166
+          ],
+          "hold": 4,
+          "label": "the filters you use every day"
+        }
+      ],
+      "text": "Start on the tasks list. Pick the status and the owner, as you do every morning. These are the filters you want to keep."
+    },
+    {
+      "id": "03-save",
+      "kind": "clip",
+      "chapter": "Flow \u00b7 Save the view",
+      "image": "example.svg",
+      "camera": [
+        {
+          "at": 0,
+          "zoom": 1.0,
+          "cx": 720,
+          "cy": 450
+        },
+        {
+          "at": "Save",
+          "zoom": 1.7,
+          "cx": 1150,
+          "cy": 120
+        }
+      ],
+      "focus": [
+        {
+          "at": "Save",
+          "rect": [
+            1174,
+            24,
+            1406,
+            84
+          ],
+          "hold": 4,
+          "label": "saves this view"
+        }
+      ],
+      "text": "Now click Save view on the top right and give the view a name. Next time, open it from the list and everything is back."
+    },
+    {
+      "id": "04-closing",
+      "kind": "closing",
+      "chapter": "Closing",
+      "kicker": "Not shown in this video",
+      "cards": [
+        {
+          "at": "Sharing",
+          "title": "Sharing a view",
+          "note": "It works the same way from the view menu."
+        }
+      ],
+      "endcard": {
+        "at": "menu",
+        "title": "Saved views",
+        "subtitle": "Tasks"
+      },
+      "text": "Sharing a view is not shown here. It works the same way, from the view menu."
+    }
+  ]
+}

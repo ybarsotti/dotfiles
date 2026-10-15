@@ -167,6 +167,9 @@ This dotfiles setup includes several development tools that are automatically in
   - Pairs with ripgrep, does not replace it: `rg` matches text, so it also matches
     commented-out code and a name inside a string. `ast-grep` matches shape, which is what a
     codemod needs. It also ships an MCP server.
+- **`ffmpeg`** - Audio and video encoder, with `ffprobe` for stream checks
+  - Usage: `ffmpeg -i in.mp4 -vf scale=1280:-2 out.mp4`, `ffprobe -show_streams in.mp4`
+  - The `video-demo` skill uses it to encode clips, mix the voice and verify the render
 - **`fd`** - Modern find replacement with better performance
   - Usage: `fd filename`, `fd -e js` (find JS files)
 - **`bat`** - Enhanced cat with syntax highlighting and Git integration
@@ -698,6 +701,9 @@ provider resolves the endpoint and secret name automatically.
 - **`~/.claude/skills/annotated-screenshots`** - Annotated feature screenshots: captures the live
   app or a component rendered with fixture data through `agent-browser`, then draws highlight
   boxes, numbered callouts and a source banner with `annotate.py` (Pillow through `uv run`)
+- **`~/.claude/skills/video-demo`** - Short narrated demo video of a feature: a brief introduction,
+  then the real flow recorded with Playwright, rendered with Remotion from one `narration.json`,
+  with edge-tts voices (English, pt-BR) and word-synced captions. Needs Node, `uv` and `ffmpeg`
 
 #### Deep-* Agent Pipeline
 

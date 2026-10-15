@@ -40,7 +40,7 @@ data, so label it `"source": "fixture"`.
 3. Run only that file from the project's frontend directory, with the scratch directory as an
    extra root:
    ```bash
-   SHOT_DIR=<scratch>/shots/out SHOT=tracker TZ=America/New_York \
+   SHOT_DIR=<scratch>/shots/out SHOT=tracker TZ=UTC \
      <pm> jest --roots <scratch>/harness --modulePaths <frontend>/node_modules <scratch>/harness/shot.test.tsx
    ```
    Do not run the full suite.
