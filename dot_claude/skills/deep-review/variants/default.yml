@@ -121,5 +121,6 @@ personas:
       three lines, and a module-level function that is really a method of one class. Finally
       dependencies the diff left behind — an installed package nobody imports — and the
       linked task: missing acceptance criteria, scope creep, requirements left unaddressed.
-      Reports only what it can quote.
+      Quotes the rule or doc line for every rule and doc finding. Layout findings stand on
+      the code itself.
     runner: any
