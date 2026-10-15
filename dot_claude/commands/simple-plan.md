@@ -54,7 +54,11 @@ These run by default, in order, and each one **fixes what it finds**:
 `/deep-review` (with its `/simplify` pass) → fix every CRITICAL and HIGH, re-review the fix →
 `/qa-execute` or `/qa-testing` → fix every failure with a different agent than the one that
 tested, re-run QA → one summary of what was tested, what failed, what was fixed and what is
-open → `/pr-description`.
+open → `/pr-description` → the `video-demo` skill, whose narrated video goes into the PR body
+under `## Demo`.
+
+The demo comes last because it needs the PR to exist. Skip it for a change with no
+user-facing flow, and say why.
 
 A finding reported and not fixed is not a reviewed change.
 

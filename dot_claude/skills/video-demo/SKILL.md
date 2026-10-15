@@ -71,7 +71,7 @@ Use these scene kinds for a demo:
 | `clip` | One step of the flow, recorded or as a still, with camera moves and focus boxes. |
 | `compare` | Optional. The same screen before and after an action, with a wipe. |
 | `cards` | Optional. A short recap of the steps. |
-| `closing` | A short card with what the video did not show, then the end card. |
+| `closing` | The end card. |
 
 Every camera move and focus box has an `at`: a word from that segment's text, or a fraction of the segment. A word that is not in the text stops the render and names the segment.
 
@@ -107,7 +107,7 @@ Remotion is free for individuals and for companies of up to 3 people. A larger c
 
 ## Deliverables
 
-Give the user the path of each `out/tour-final.mp4`, its length, and the closing card's list of what each video did not show. For chat tools, also make a 720p copy:
+Give the user the path of each `out/tour-final.mp4` and its length. For chat tools, also make a 720p copy:
 
 ```bash
 ffmpeg -i out/tour-final.mp4 -vf scale=1280:-2 -crf 26 -c:a copy out/tour-720p.mp4

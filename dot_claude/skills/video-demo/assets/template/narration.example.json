@@ -97,20 +97,12 @@
       "id": "04-closing",
       "kind": "closing",
       "chapter": "Closing",
-      "kicker": "Not shown in this video",
-      "cards": [
-        {
-          "at": "Sharing",
-          "title": "Sharing a view",
-          "note": "It works the same way from the view menu."
-        }
-      ],
       "endcard": {
-        "at": "menu",
+        "at": "list",
         "title": "Saved views",
         "subtitle": "Tasks"
       },
-      "text": "Sharing a view is not shown here. It works the same way, from the view menu."
+      "text": "That is saved views. Open one from the list whenever you need it."
     }
   ]
 }

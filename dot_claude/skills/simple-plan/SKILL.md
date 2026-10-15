@@ -332,7 +332,22 @@ than reporting it for later:
 
 **5. `/pr-description`** to open the PR once the chain above is clean.
 
-**6. The next task from `$RUN_DIR/breakdown.md`**, when Phase 1.5 produced one. Name the task
+**6. A narrated demo video, when the change adds or alters a feature a person uses.** This
+runs after the PR is open, because the demo goes into the PR body. Use the `video-demo` skill
+to record the real flow with narration, then add the video to the PR description under a
+`## Demo` heading. Render the 720p copy as well, because the full-size file often exceeds what
+a PR body accepts.
+
+GitHub has no API that uploads a video into a PR body. So either give the user the file path
+and ask them to drop it into the PR on the web, which produces the
+`user-images.githubusercontent.com` link, or link a video that already has a URL. Say which of
+the two you did. Never claim the demo is in the PR until the body shows the link.
+
+Skip this step for a change with no user-facing flow: a refactor, a migration on its own, or
+an internal API. Say why you skip it. The `annotated-screenshots` images from step 3 stay in
+the PR either way; the video adds to them and does not replace them.
+
+**7. The next task from `$RUN_DIR/breakdown.md`**, when Phase 1.5 produced one. Name the task
 that comes next so the user does not have to reopen the file.
 
 Then stop. Do not start the implementation yourself.
