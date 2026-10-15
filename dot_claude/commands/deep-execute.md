@@ -51,7 +51,7 @@ Once the lanes are done, the tail runs back to back:
    the plan carries a `qa-plan.yaml`, a plain browser agent otherwise.
 4. A **different** agent fixes every gap QA found; QA re-verifies. The tester never fixes.
 5. Freeze the commit SHA.
-6. `/pr-description` opens the PR with the evidence attached.
+6. `/pr` opens the PR with the evidence attached.
 7. Build the run report — a self-contained HTML page covering what was built, every decision and
    assumption the lanes recorded (alternatives rejected, tradeoffs accepted), drift from the
    approved plan, tests, the review and QA evidence, and the PR. Assembled from the run directory

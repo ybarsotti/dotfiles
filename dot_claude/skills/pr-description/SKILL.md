@@ -1,6 +1,6 @@
 ---
 name: pr-description
-description: Generate and review a pull-request title/body, then open or update assigned PR. Use for /pr-description, PR-description/opening requests, or deep-plan/jira-workflow handoff. Produces Conventional Commit title plus objective, ticket, Slack threads, reconciled requirements matrix, Mermaid, key decisions and verification, with no changed-file inventory. Claude Sonnet writes; Codex reviews.
+description: Generate and review a pull-request title/body, then open or update assigned PR. Use for /pr, PR-description/opening requests, or deep-plan/jira-workflow handoff. Produces Conventional Commit title plus objective, ticket, Slack threads, reconciled requirements matrix, Mermaid, key decisions, verification and — when the diff touches permissions — a role-by-role access table, with no changed-file inventory. Claude Sonnet writes; Codex reviews.
 ---
 
 # pr-description
@@ -18,7 +18,8 @@ its concrete fixes, and open/update the PR.
 - **Title = Conventional Commit**: `type(scope): summary`, `type` ∈ `feat` `fix` `refactor` `perf` `docs` `test` `chore`, ≤ 70 chars.
 - **Body contains**: what it solves, **Mermaid**, ticket, Slack threads, requirements matrix,
   rationale/key decisions, verification, and — whenever the change touches UI — an
-  **`## Evidence`** section (see Phase 2.5).
+  **`## Evidence`** section (see Phase 2.5), and — whenever it touches who may do what — an
+  **`## Permissions`** section (see Phase 2.6).
 - **Body must NOT contain**: a changed-file list, file paths as an inventory, or file/line counts. Objective about *what we solve*, not *what moved*.
 - **Writer is claude Sonnet. Reviewer is codex.** Any additional reviewers on the claude side are Sonnet; the codex reviewer stays codex.
 - **PR is assigned to the user**: `--assignee @me` on create, `--add-assignee @me` on update.
@@ -38,7 +39,7 @@ Read `$ARGUMENTS`. Extract:
   there is none.
 - `--dry-run` — print the drafted title + body, do not open/update
 
-Set `RUN_DIR=~/.claude/pr-description-runs/$(date +%Y%m%d-%H%M%S)-$(git rev-parse --short HEAD 2>/dev/null)`. Create it with `mkdir -p`. Drafts, the review, and the final body live there.
+Set `RUN_DIR=~/.claude/pr-runs/$(date +%Y%m%d-%H%M%S)-$(git rev-parse --short HEAD 2>/dev/null)`. Create it with `mkdir -p`. Drafts, the review, and the final body live there.
 
 Verify binaries: `git`, `gh`. Verify `codex` unless `--no-codex`. If `gh` is not authenticated, halt and ask the user to `gh auth login`.
 
@@ -57,7 +58,7 @@ If `--dry-run`, note it — you will stop after Phase 2.
 ## Phase 1 — WRITE (claude Sonnet)
 
 Assemble the writer input into `$RUN_DIR/writer-input.md`:
-1. The persona prompt: `~/.claude/skills/pr-description/personas/pr-writer.md`
+1. The persona prompt: `~/.claude/skills/pr/personas/pr-writer.md`
 2. `---`
 3. Context: detected ticket, `git diff --stat main...HEAD` **for the writer's private
    understanding only** (remind it: never echo file names/counts into the body), the
@@ -159,6 +160,47 @@ them rendered inline.
 Evidence is captured against the frozen SHA. If the branch moved after the capture, say so
 rather than presenting stale media as current.
 
+## Phase 2.6 — PERMISSIONS (access changes)
+
+**A reviewer cannot approve an access change they have to infer.** Decide whether this diff
+changes who may do what: a new or renamed role, a changed permission or scope, a new guarded
+endpoint or action, an altered policy, decorator, guard, middleware, `can?` rule or row-level
+rule. Changed paths naming `permission`, `role`, `policy`, `scope`, `ability`, `guard`,
+`authoriz`, or a migration on a roles or permissions table are the signal. When it is
+ambiguous, assume it does.
+
+If it does not, leave the section out. This section appears only when access changed.
+
+If it does, the body carries a `## Permissions` table: **every role in the system as a row**,
+and **one column per action this PR adds or changes**. The reader must see, without opening
+the code, which roles gained an ability and which stayed out.
+
+| Role | Create record | Delete record | Enforced at |
+| --- | --- | --- | --- |
+| `owner` | ✅ | ✅ | `policies/record.py:34` |
+| `admin` | ✅ | ✅ | `policies/record.py:34` |
+| `member` | ✅ | ❌ | `policies/record.py:41` |
+| `viewer` | ❌ | ❌ | denied by default |
+
+Rules for the table:
+
+1. **Read the roles from the project, never from memory.** Take them from the role enum,
+   the roles table, the seed or the fixture that defines them, and cite that source under the
+   table. A role you invented is worse than no table.
+2. **Every role appears**, including the ones this PR does not touch. A role missing from the
+   table reads as an oversight, and the reviewer cannot tell which it was.
+3. **`Enforced at` names a `file:line`** for each allowed cell, or says `denied by default`
+   when the role falls through with no rule. A `✅` with nothing behind it is the bug this
+   table exists to catch.
+4. **Mark a role whose access this PR changes.** Add a `Change` column with `+ gained`,
+   `- lost` or `unchanged` when the PR alters existing access rather than adding a new action.
+5. **Say what is not covered.** When an action is guarded in the UI but not on the server, or
+   the reverse, write it under the table as a one-line warning. Do not let the ✅ imply both.
+
+Derive the cells from the code in the diff, not from the ticket's intention. When the two
+disagree, write the table from the code and flag the disagreement — that gap is the most
+valuable thing this section can surface.
+
 If `--dry-run`: print the final title + body and **stop here**. Do not open/update.
 
 ## Phase 3 — OPEN / UPDATE PR
@@ -219,6 +261,9 @@ Verify each and report the state to the user:
 - [ ] `evidence-attached` — UI change ⇒ `## Evidence` carries a flow GIF/recording, before/after
       screenshots for changed screens, and a link to the QA report + its SHA; no UI change ⇒ the
       explicit `_no UI change — no visual evidence_`
+- [ ] `permissions-tabled-or-n/a` — access change ⇒ `## Permissions` lists every role in the
+      system, one column per changed action, a `file:line` or `denied by default` behind each
+      cell, and the source the role names came from; no access change ⇒ section absent
 - [ ] `assigned-to-me` — PR assignee includes `@me`
 - [ ] `codex-review-applied` — codex reviewer ran and its fixes were applied (or `--no-codex` was set)
 
