@@ -136,13 +136,13 @@ Examples:
 ```python
 # Wrong: the dispatcher is this project's code. A broken dispatcher still passes.
 dispatcher = MagicMock()
-service = InvoiceService(..., supplybuy_invoice_link_dispatcher=dispatcher)
+service = InvoiceService(..., vendor_invoice_link_dispatcher=dispatcher)
 service.persist(order)
 dispatcher.enqueue_invoice_link.assert_called_once()
 
 # Right: the real dispatcher runs. Only the broker publish is mocked.
-delay = mocker.patch("apps.billing.tasks.deliver_b2b_invoice_link_task.delay")
-service = InvoiceService(..., supplybuy_invoice_link_dispatcher=SupplyBuyInvoiceLinkCeleryDispatcher())
+delay = mocker.patch("apps.billing.tasks.deliver_invoice_link_task.delay")
+service = InvoiceService(..., vendor_invoice_link_dispatcher=VendorInvoiceLinkCeleryDispatcher())
 service.persist(order)
 delay.assert_called_once_with({"order_number": order.order_number, ...})
 ```
@@ -155,13 +155,13 @@ deliver(payload, client, MagicMock())
 
 # Right: the real client and repository run. Only the HTTP request is mocked.
 post = mocker.patch.object(httpx.AsyncClient, "post", AsyncMock(return_value=response))
-deliver(payload, SupplyBuyClient(base_url=URL, token=TOKEN), InvoiceRepository())
-assert post.call_args.kwargs["json"] == {"fb_wholesale_id": 10042, ...}
+deliver(payload, VendorClient(base_url=URL, token=TOKEN), InvoiceRepository())
+assert post.call_args.kwargs["json"] == {"vendor_account_id": 10042, ...}
 ```
 
 ```python
 # Wrong: the model method is this project's code.
-@patch("dashboard.models.BusinessCustomerOrder.issue_stripe_refund")
+@patch("dashboard.models.CustomerOrder.issue_stripe_refund")
 
 # Right: mock the Stripe SDK call that the method makes.
 @patch("dashboard.models.stripe.Refund.create")

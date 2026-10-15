@@ -90,7 +90,7 @@ form:
   must sit between two steps.
 - Tests mock only the outermost call to an external service: the HTTP request, the broker
   enqueue, the SDK call, or the clock. This project's services, repositories, dispatchers,
-  and clients run for real. Mock `httpx.AsyncClient.post`, not the `SupplyBuyClient`; mock
+  and clients run for real. Mock `httpx.AsyncClient.post`, not the `VendorClient`; mock
   `task.delay`, not the dispatcher; mock `stripe.Refund.create`, not the model's refund method.
 - Edge cases go in a table with a decision: cover now, fail loudly, or out of scope. Only
   `Cover now` rows reach the implementation.

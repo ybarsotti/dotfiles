@@ -220,7 +220,7 @@ one test for the success path. For each test, give the name, the file, the asser
 target. Constraint rule 10 applies: each test mocks only the outermost call to an external
 service (HTTP request, broker enqueue, SDK call, or clock), and runs this project's services,
 repositories, dispatchers, and clients for real. Name the exact mock target, for example
-`httpx.AsyncClient.post` or `apps.billing.tasks.deliver_b2b_invoice_link_task.delay`. A row
+`httpx.AsyncClient.post` or `apps.billing.tasks.deliver_invoice_link_task.delay`. A row
 whose mock target is a class or method of this project is a plan defect. The
 implementation follows `superpowers:test-driven-development`: write the failing test, watch it
 fail, then write the code.
@@ -275,8 +275,8 @@ Both reviewers check test coverage against constraint rule 10. For every row of 
 plan, the reviewer confirms that the mock target is the outermost call to an external
 service. The reviewer rejects a row that mocks a service, repository, dispatcher, client, or
 model method of this project, and names the outermost call to mock instead. Example finding:
-"TDD row 3 mocks `SupplyBuyInvoiceLinkDispatcher` (rule 10). Use the real dispatcher and mock
-`deliver_b2b_invoice_link_task.delay`."
+"TDD row 3 mocks `VendorInvoiceLinkDispatcher` (rule 10). Use the real dispatcher and mock
+`deliver_invoice_link_task.delay`."
 
 Apply the findings. Re-run the reviewers. **Stop after two rounds.** Record any finding you
 did not apply, with the reason, in a `## Open findings` section at the end of the plan.
