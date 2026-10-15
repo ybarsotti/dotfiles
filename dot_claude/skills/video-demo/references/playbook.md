@@ -81,7 +81,6 @@ For a `clip`:
 - Use the labels that the screen shows. Do not name code, tickets or pull requests.
 - Write numbers as words. Use absolute dates, never "yesterday".
 - In pt-BR, use the Portuguese word for what the voice must say, and keep on-screen names as they appear.
-- Closing: one sentence that names what the video did not show, if anything.
 
 ## 3. Voice and assets
 
