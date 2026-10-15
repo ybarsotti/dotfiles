@@ -154,6 +154,7 @@ packages:
         - gemini-cli          # Google Gemini CLI agent
         - asheshgoplani/tap/agent-deck  # Terminal session manager TUI for AI coding agents
         - PeonPing/tap/peon-ping        # Terminal notification tool — game voice lines on agent events (MCP-integrated)
+        - agent-browser       # Browser automation CLI for agents (screenshots, element boxes; annotated-screenshots skill)
 
       # macOS-specific Tools
       macos:
