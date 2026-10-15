@@ -7,3 +7,5 @@ public/grain/
 public/clips/
 src/manifest.json
 __pycache__/
+state.json
+*.state.json

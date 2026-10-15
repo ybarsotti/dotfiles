@@ -14,7 +14,7 @@ module.exports = {
   // Optional. Omit it to use the browser that Playwright installed.
   chrome: '/path/to/Google Chrome for Testing',
   // A logged-in session saved with Playwright `context.storageState()`. Omit it for a public page.
-  storageState: path.resolve(__dirname, '../state.json'),
+  storageState: path.resolve(__dirname, '../work/state.json'),
   base: 'https://app.example.local',
   // Optional: `locale` (default 'en-US') and `timezoneId` (default: this machine's zone) for dates on screen.
   locale: 'en-US',
