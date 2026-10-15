@@ -14,7 +14,7 @@ The steps file (copy `scripts/steps.example.cjs`) sets:
 |---|---|
 | `playwright` | Path to a `node_modules/@playwright/test` directory. |
 | `chrome` | Optional. Path to a Chrome or Chrome for Testing executable. Without it, Playwright uses the browser that it installed. |
-| `storageState` | A logged-in session saved with `context.storageState()`. Omit it for a public page. |
+| `storageState` | A logged-in session saved with `context.storageState()`. Keep it under `work/`, which git ignores: the file holds live session cookies. Omit it for a public page. |
 | `base` | The base URL that `open(path, waitMs)` uses. |
 | `locale`, `timezoneId` | Optional. The locale and the time zone for dates on screen. |
 | `clips` | A map from clip name to `async ({ page, rec, open, W, H }) => { ... }`. |
