@@ -306,7 +306,15 @@ of `superpowers:writing-plans` words them: **1. Subagent-Driven (recommended)** 
 - `Skill(skill="superpowers:executing-plans")` against `$PLAN_PATH` in this session.
 - Or `/deep-execute "$PLAN_PATH"` when the user wants parallel lanes.
 
-**3. Review and QA, which are not optional.** State this chain as the default that runs
+**3. Annotated screenshots of the flows, when the change alters a user-facing flow or
+screen.** Run this as soon as the implementation is done. Use the `annotated-screenshots`
+skill to capture each changed flow, one image per step, with highlight boxes and numbered
+callouts. Capture the running app when a local environment is reachable. Otherwise render the
+component with fixture data, and let the banner say so. When a later review or QA fix changes
+a captured screen, capture that screen again before `/pr-description`, which embeds the images
+as UI evidence. When the change touches no flow and no screen, say why you skip this step.
+
+**4. Review and QA, which are not optional.** State this chain as the default that runs
 after implementation, in this order, and say that each step **fixes what it finds** rather
 than reporting it for later:
 
@@ -322,9 +330,9 @@ than reporting it for later:
    and what is still open. The summary names the commit the result applies to. "Tests pass"
    is not a summary.
 
-**4. `/pr-description`** to open the PR once the chain above is clean.
+**5. `/pr-description`** to open the PR once the chain above is clean.
 
-**5. The next task from `$RUN_DIR/breakdown.md`**, when Phase 1.5 produced one. Name the task
+**6. The next task from `$RUN_DIR/breakdown.md`**, when Phase 1.5 produced one. Name the task
 that comes next so the user does not have to reopen the file.
 
 Then stop. Do not start the implementation yourself.

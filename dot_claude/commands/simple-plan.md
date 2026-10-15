@@ -39,10 +39,15 @@ hand the problem to another command.
    size, with `EXPLAIN` against a seeded dev database when one is reachable.
 4. **Present** — `plannotator annotate --gate`, then `ExitPlanMode`.
 5. **Recommend what comes next, in order** — `/qa-plan` first when a flow or screen changes,
-   since it runs before implementation, then implementation, then the mandatory
-   review-and-QA chain below, then the next task from the breakdown.
+   since it runs before implementation, then implementation, then annotated screenshots of
+   the changed flows, then the mandatory review-and-QA chain below, then the next task from
+   the breakdown.
 
 ## The chain after implementation
+
+When the change alters a flow or a screen, the `annotated-screenshots` skill captures each
+changed flow as soon as the implementation is done. A screen that a later fix changes is
+captured again before `/pr-description`, which embeds the images.
 
 These run by default, in order, and each one **fixes what it finds**:
 
