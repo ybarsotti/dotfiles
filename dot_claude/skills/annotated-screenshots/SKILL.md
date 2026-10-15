@@ -1,6 +1,6 @@
 ---
 name: annotated-screenshots
-description: Produce annotated feature screenshots for a stakeholder, a PR, or a ticket. Captures the live app or a component rendered with fixture data at 2x through agent-browser, lists element boxes, then draws highlight boxes, numbered callouts with leader lines, and a caption banner that says whether the image is the live app or a fixture render. Use when the user asks for screenshots of a feature, annotated or highlighted screenshots, screenshots "with numbers", a visual walkthrough as images, or before/after images of a UI change. For a video, use guided-tour-video instead. For QA evidence tied to a test plan, use qa-test-plan.
+description: Produce annotated feature screenshots for a stakeholder, a PR, or a ticket. Captures the live app or a component rendered with fixture data at 2x through agent-browser, lists element boxes, then draws highlight boxes, numbered callouts with leader lines, and a caption banner that says whether the image is the live app or a fixture render. Use when the user asks for screenshots of a feature, annotated or highlighted screenshots, screenshots "with numbers", a visual walkthrough as images, or before/after images of a UI change. For a narrated demo video, use video-demo instead. For QA evidence tied to a test plan, use qa-test-plan.
 ---
 
 # Annotated Screenshots
@@ -40,7 +40,7 @@ Keep the work in one directory outside the repository, for example `<scratch>/sh
 3. **Capture.** Run `$SKILL/scripts/shoot.sh` for each image:
    ```bash
    # Live page in a logged-in session
-   $SKILL/scripts/shoot.sh https://app.local/orders/123 raw/order.png --session app-login
+   $SKILL/scripts/shoot.sh https://app.local/tasks/123 raw/task.png --session app-login
    # Component render: HTML fragment from the harness, wrapped with the app CSS
    $SKILL/scripts/shoot.sh out/tracker.html raw/tracker.png --css app.css --width 900 --height 760
    # The whole page, for an element below the fold

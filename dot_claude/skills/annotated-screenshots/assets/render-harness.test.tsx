@@ -9,7 +9,7 @@
 // 2. Replace the import and the JSX below. Reuse the project's own render
 //    helper (it usually wraps the providers) and the fixture builders of the
 //    component's existing tests.
-// 3. Set SHOT_DIR=/abs/out SHOT=name TZ=America/New_York on that command.
+// 3. Set SHOT_DIR=/abs/out SHOT=name TZ=UTC on that command.
 import { writeFileSync } from "node:fs";
 import { render } from "@testing-library/react"; // Prefer the project's test-utils render.
 // import { MyComponent } from "@/path/to/MyComponent";

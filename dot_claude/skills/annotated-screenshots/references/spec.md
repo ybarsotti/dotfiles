@@ -13,13 +13,13 @@ All coordinates are CSS px, the unit that `shoot.sh` writes to `*.boxes.txt`.
       "out": "screenshots/01-dashboard-new-cards.png",
       "title": "1 · Dashboard: the two new cards",
       "source": "live",
-      "source_note": "local stack · sales rep persona · October 14, 2026",
+      "source_note": "local stack · demo user · January 5, 2026",
       "crop": [200, 20, 1240, 640],
       "dim": 70,
       "marks": [
         {
           "box": [305, 48, 844, 270],
-          "label": "New card: order open over 30 days",
+          "label": "New card: task overdue for 7 days",
           "label_at": [872, 58],
           "tone": "amber"
         }

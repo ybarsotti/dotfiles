@@ -1,0 +1,9 @@
+node_modules/
+out/
+work/
+public/audio/
+public/sfx/
+public/grain/
+public/clips/
+src/manifest.json
+__pycache__/
