@@ -31,6 +31,30 @@ Static pass, for every changed query, ORM call, or repository method:
   cartesian joins, `OFFSET` pagination on large tables, aggregates with no covering index,
   and functions wrapped around indexed columns, which kill index use.
 
+ORM pass, for every changed query. The project chose an ORM, so a query that leaves it needs a
+reason:
+
+- **Raw SQL the ORM covers.** A raw query, a `.raw()` or `execute()` call, a `WHERE` built by
+  string concatenation, or a hand-written `.sql` file. Ask first whether the ORM expresses the
+  same query. Write the ORM equivalent into the finding. Accept raw SQL only for what the ORM
+  cannot express: a window function the ORM lacks, a recursive CTE, a bulk statement the ORM
+  runs row by row, or a plan the ORM cannot produce. The author must state that reason beside
+  the query. A raw query that interpolates request data is also an injection finding: say so
+  and leave the severity to `security`.
+- **The ORM used against its own idiom.** Rows fetched and then filtered, counted, sorted or
+  aggregated in application code, where the database returns the answer directly. A relation
+  loaded per row where the ORM has an eager-load call. A write loop where the ORM has a bulk
+  call. A fetch of every column where the query reads two. An existence check that loads the
+  rows. Name the ORM call that replaces the code.
+- **Query logic spread across call sites.** The same filter rebuilt in three places instead of
+  one named queryset, scope or repository method the ORM supports. Name the one place it goes.
+
+Before you record an ORM finding, read the framework's own query documentation for the version
+in the manifest. Use the `context7` MCP tool, or search the official documentation. Quote the
+documented call and give the page link in the finding. Do not rely on memory: ORM query APIs
+change between major versions. The project's own code outranks the documentation when the two
+disagree. In that case quote the sibling repository method the project already uses.
+
 Schema pass, for every changed migration, model, or table definition:
 
 - **Column type**: `float` for money, which is a correctness bug; `timestamp` where
