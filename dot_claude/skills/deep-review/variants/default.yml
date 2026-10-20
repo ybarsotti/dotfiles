@@ -99,7 +99,12 @@ personas:
       consumers, and divergence from the plan's architecture, state and ER diagrams.
       Then the annotations that express it: a signature with no annotation at all,
       unparameterized containers, missing return types, malformed generics, primitive
-      obsession, stringly-typed sets — demanded at contracts, not on private locals.
+      obsession, stringly-typed sets — demanded at contracts, not on private locals. Then
+      dependency cycles the diff creates, broken at the ownership mistake and never with a
+      deferred import. Then a removal the diff left half-done: the orphan export, test,
+      flag, config key, doc and dependency, plus proof that a candidate nothing imports is
+      not reached by a route, decorator, registry, signal, template, task name or dynamic
+      import.
     runner: any
 
   - id: simplicity
