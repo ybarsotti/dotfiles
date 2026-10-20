@@ -53,6 +53,13 @@ if [ -z "$DIFF_OUTPUT" ]; then
   err "diff is empty — nothing to review for scope '$SCOPE'"
 fi
 
+# Bind the run to the code it reviewed. A report read after another commit lands is a
+# report about a diff that no longer exists, and nothing else in the run says so.
+# check-stale.sh recomputes this hash and compares.
+sha256() { if command -v sha256sum >/dev/null 2>&1; then sha256sum; else shasum -a 256; fi | cut -d' ' -f1; }
+printf '%s' "$DIFF_OUTPUT" | sha256 > "${RUN_DIR}/diff.sha256"
+printf '%s' "$SCOPE" > "${RUN_DIR}/scope"
+
 # --- File-list + stats ---
 case "$SCOPE" in
   PR-*)

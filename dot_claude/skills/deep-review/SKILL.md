@@ -80,6 +80,25 @@ Always tell the user where the full report lives (`~/.claude/deep-review-runs/<R
 In record mode the raw findings sit beside it as `findings.jsonl`, and `findings.sarif` too
 when `--sarif` was passed — upload that one with `gh code-scanning` to get inline PR alerts.
 
+## Phase 4.4 — Is the report still about this code?
+
+A report is about one diff. Another commit, a rebase or a stash makes the findings read as
+current while the code has moved on. `collect-context.sh` records the sha256 of the reviewed
+diff, and `report.sh` prints it in the summary.
+
+Before you act on a report this session did not just produce — the user names an older run, or
+work happened between the run and now — check it:
+
+```bash
+~/.claude/skills/deep-review/scripts/check-stale.sh ~/.claude/deep-review-runs/<RUN_ID>
+```
+
+Exit 0 means the report is current. Exit 1 names the two hashes and the scope: re-run the panel
+and do not act on the old findings. Exit 2 means the run cannot be checked, because it predates
+the hash or its branch is gone. Say which of the three happened.
+
+Skip it for the run you just finished in this session, where nothing has changed yet.
+
 ## Phase 4.5 — Fix, then re-review
 
 A finding reported and not fixed is not a reviewed change, so this phase is the default rather

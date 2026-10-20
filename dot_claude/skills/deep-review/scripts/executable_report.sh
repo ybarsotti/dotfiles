@@ -45,6 +45,10 @@ printf '## Summary\n\n'
 printf -- '- Findings: %s (%s CRITICAL, %s HIGH, %s MEDIUM, %s LOW)\n' \
   "$TOTAL" "$N_CRITICAL" "$N_HIGH" "$N_MEDIUM" "$N_LOW"
 
+if [ -f "${RUN_DIR}/diff.sha256" ]; then
+  printf -- '- Reviewed diff: sha256:%s\n' "$(cat "${RUN_DIR}/diff.sha256")"
+fi
+
 if [ -f "$STATUS" ]; then
   OK=$(awk -F'\t' '$3=="ok"{n++} END{print n+0}' "$STATUS")
   BAD=$(awk -F'\t' '$3!="ok"{n++} END{print n+0}' "$STATUS")
