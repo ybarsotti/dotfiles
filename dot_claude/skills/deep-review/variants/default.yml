@@ -1,6 +1,6 @@
 name: default
 description: >-
-  Eight-persona review panel. Each persona runs once and records findings by command, so
+  Nine-persona review panel. Each persona runs once and records findings by command, so
   the report is a deterministic transform with no aggregator call. Each persona runs once.
 
 # Reviewers append findings with scripts/record.sh instead of printing YAML.
@@ -19,6 +19,8 @@ record_findings: true
 #   project-fit      absorbed project-patterns, docs-consistency and scope-completeness
 # ui-ux is new, not a merge: nothing owned the project's UI conventions, usability,
 # component boundaries or motion.
+# shortcut-watchdog is new too: every other persona reads the diff as an honest attempt,
+# so nothing owned the gap between the work a change claims and the work it contains.
 personas:
   - id: security
     role: Security engineer with OWASP Top 10 focus
@@ -109,6 +111,21 @@ personas:
       function hand-rolled, a near-copy of a sibling, a new dependency for what an
       installed one covers. Searches with Serena, gitnexus and graphify, never raw grep.
       Declines to force reuse across a real boundary.
+    runner: any
+
+  - id: shortcut-watchdog
+    role: Shortcut watchdog (work claimed against work done)
+    focus: |
+      Whether the change makes a check pass without making the code better. Reads the stated
+      purpose first, then: assertions that cannot fail, a test that passes either way, a test
+      file that only proves existence, the author's paths excluded from a gate, a lowered
+      coverage or size threshold, a weakened tool configuration, every suppression comment the
+      diff adds, a type escape hatch, a swallowed error, a skipped test, a retry hiding a
+      flake. Then deferred work: a marker for work the task assigns, a placeholder body, a
+      known defect shipped, a requirement dropped in silence. Then the convenient path past a
+      documented pattern: a bypassed layer, a missing companion artifact, the unprotected
+      variant of a guarded primitive. Owns the gap between claimed and done work, nothing else.
+    category: shortcut
     runner: any
 
   - id: project-fit
