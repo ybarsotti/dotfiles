@@ -345,6 +345,11 @@ unverified, and why.
 
 ## Phase 4 — Present the plan
 
+0. **When the plan adds machinery, run `Skill(skill="shed-light")` over it first.** Machinery
+   means a service, a queue, a package, a registry, a configuration key, a migration, a CI
+   step or a monitor. The report says what the team will own, the upkeep each piece carries,
+   and the work that leaves the team. Put it beside the plan, so the approval covers the cost
+   and not only the design. Skip it when the plan only changes code the team already owns.
 1. `Skill(skill="plannotator-annotate")`, then `plannotator annotate "$PLAN_PATH" --gate`.
 2. Apply the annotations that come back.
 3. `ExitPlanMode` for the final approval.

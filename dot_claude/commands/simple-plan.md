@@ -44,7 +44,9 @@ hand the problem to another command.
 3.5 **Blindspot** — `blindspot`, over the plan itself. The Phase 3 reviewers share the
    author's reading history. This pass labels every claim READ or INFERRED, then opens the
    surface behind each INFERRED claim or rewrites the claim to what was observed.
-4. **Present** — `plannotator annotate --gate`, then `ExitPlanMode`.
+4. **Present** — when the plan adds machinery, `shed-light` first, so the approval covers
+   the upkeep and not only the design. Then `plannotator annotate --gate`, then
+   `ExitPlanMode`.
 5. **Recommend what comes next, in order** — `/qa-plan` first when a flow or screen changes,
    since it runs before implementation, then implementation, then annotated screenshots of
    the changed flows, then the mandatory review-and-QA chain below, then the next task from
