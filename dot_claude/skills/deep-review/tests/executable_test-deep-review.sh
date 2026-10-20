@@ -27,6 +27,8 @@ RECORD="${ROOT}/dot_claude/skills/deep-review/scripts/executable_record.sh"
 REPORT="${ROOT}/dot_claude/skills/deep-review/scripts/executable_report.sh"
 [ -f "$REPORT" ] || REPORT="${ROOT}/dot_claude/skills/deep-review/scripts/report.sh"
 SARIF="${ROOT}/dot_claude/skills/deep-review/scripts/executable_sarif.sh"
+VERIFY_EVIDENCE="${ROOT}/dot_claude/skills/deep-review/scripts/executable_verify-evidence.sh"
+CHECK_STALE="${ROOT}/dot_claude/skills/deep-review/scripts/executable_check-stale.sh"
 [ -f "$SARIF" ] || SARIF="${ROOT}/dot_claude/skills/deep-review/scripts/sarif.sh"
 
 # ─── Task 12: SKILL.md points at dispatch.sh's own invocation and reuse of ─
@@ -107,7 +109,8 @@ assert_eq "$NO_STEP_LIST" "yes" \
 # source-tree executable bit set, or dispatch.sh fails before chezmoi apply
 # ever gets a chance to fix the mode. dispatch.sh itself is the direct
 # invocation target named in Phase 2 above.
-for script in "$DISPATCH" "$COLLECT_CONTEXT" "$REVIEWER" "$AGGREGATE" "$RECORD" "$REPORT" "$SARIF"; do
+for script in "$DISPATCH" "$COLLECT_CONTEXT" "$REVIEWER" "$AGGREGATE" "$RECORD" "$REPORT" "$SARIF" \
+  "$VERIFY_EVIDENCE" "$CHECK_STALE"; do
   MODE=$(stat -c '%a' "$script" 2>/dev/null || stat -f '%Lp' "$script")
   assert_eq "$MODE" "755" "$(basename "$script"): source-tree executable bit is 755"
 done

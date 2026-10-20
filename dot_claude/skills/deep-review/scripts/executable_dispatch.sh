@@ -431,6 +431,10 @@ PERSIST_DIR="${RUNS_ROOT}/${RUN_ID}"
 mkdir -p "$PERSIST_DIR"
 cp "${RUN_DIR}/report.md" "${PERSIST_DIR}/report.md"
 cp "${RUN_DIR}/context.md" "${PERSIST_DIR}/context.md"
+# Keep the binding between the report and the code it reviewed, so check-stale.sh can
+# answer later whether the findings still describe the working tree.
+cp "${RUN_DIR}/diff.sha256" "${PERSIST_DIR}/diff.sha256" 2>/dev/null || true
+cp "${RUN_DIR}/scope" "${PERSIST_DIR}/scope" 2>/dev/null || true
 log "report saved to ${PERSIST_DIR}/report.md"
 
 if [ "$RECORD_FINDINGS" = "true" ]; then
