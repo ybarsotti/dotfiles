@@ -20,7 +20,7 @@ APPEND_LIMIT=4096
 VALID_SEVERITY="CRITICAL HIGH MEDIUM LOW"
 VALID_CATEGORY="security correctness concurrency db-performance typing architecture
 simplicity code-reuse tests docs project-fit scope frontend observability
-ui-ux accessibility responsiveness"
+ui-ux accessibility responsiveness shortcut"
 
 PERSONA=""; CATEGORY=""; SEVERITY=""; TITLE=""; EVIDENCE=""
 FILE="-"; LINE="0"; DESCRIPTION=""; SUGGESTION=""

@@ -17,7 +17,7 @@ The user typed `/deep-review [args]`, OR the user asked for a multi-agent peer r
 
 Read `$ARGUMENTS` and extract:
 
-- **variant** (positional, default `"default"`): one of `default` (8 personas), `security-focused`, `adversarial-debate`, or any name matching a
+- **variant** (positional, default `"default"`): one of `default` (9 personas), `security-focused`, `adversarial-debate`, or any name matching a
   `variants/<name>.yml` file
 - **--reviewers N** (default: `persona_count` — each persona runs **once**)
 - **--ratio C:X** (default: an even reviewer split)
