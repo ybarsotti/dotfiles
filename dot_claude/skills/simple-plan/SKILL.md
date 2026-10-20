@@ -61,6 +61,35 @@ Gather evidence before you draft. Write the result to `$RUN_DIR/context.md`.
 Every line of the brief carries a path, such as `src/api/orders.py:42`. A line without a
 path is an assumption, and you must mark it **unknown**.
 
+## Phase 0.5 — Recommend the pipeline, and wait for the answer
+
+The brief now says how large the change really is. `simple-plan` is the lean pipeline, and
+`/deep-plan` is the thorough one. Which of the two fits is a decision for the user, made once,
+with the evidence in front of them.
+
+Recommend `simple-plan` when the change is narrow and the behaviour is understood: one module,
+a pattern the repo already has, no new contract.
+
+Recommend `/deep-plan` when the brief shows any of these:
+
+- business behaviour: pricing, billing, an order or an approval path;
+- who may do what: a role, a permission, a policy, a guard;
+- a migration, or any change to a table or a column;
+- a third-party integration, or a new contract with another service;
+- scope the brief could not pin down, with more than one reasonable reading.
+
+Say which you recommend and give the reason in one sentence, with the path from the brief that
+drove it. Then **stop and wait**. Silence is not an answer, and neither is the absence of an
+objection. The user accepts or overrides, and the override is theirs to make without a reason.
+
+Record the exchange in the plan's front matter: what you recommended, the reason, the user's
+words, and the pipeline selected. When the user picks `/deep-plan`, stop this run and say so;
+do not plan the task twice.
+
+**When the scope grows during the run**, recommend again before the work that depends on it.
+Append a second decision. Never rewrite the first one — the record of what was known when the
+choice was made is the point of keeping it.
+
 ## Phase 1 — Brainstorm, only when the task is unclear
 
 Skip this phase when the task is small and unambiguous. Record that you skipped it.
@@ -174,6 +203,22 @@ printf '%s\n' "$PLAN_PATH" > "$RUN_DIR/plan.md"
 Every later phase reads the plan from `$PLAN_PATH`.
 
 ### Required sections
+
+**0. Front matter — the pipeline decision.** The record from Phase 0.5, as YAML at the top of
+the plan. One entry per decision, appended in order:
+
+```yaml
+---
+pipeline_decisions:
+  - recommended: simple-plan
+    reason: One module, a pattern src/api/orders.py:42 already uses, no new contract
+    user_response: "go with simple"
+    selected: simple-plan
+---
+```
+
+`user_response` holds what the user actually said. An empty `user_response` means the run
+never got an answer, and the plan is not ready to present.
 
 **1. Problem** — What is wrong or missing today, in 3 sentences or fewer. Cite the evidence.
 
