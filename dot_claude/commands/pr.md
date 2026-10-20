@@ -17,6 +17,9 @@ model review it, then open (or update) the PR assigned to you.
 - **Permissions** — when the diff changes who may do what (a role, a permission, a policy, a
   guard, a roles migration), a `## Permissions` table with every role as a row, one column per
   changed action, and the `file:line` that enforces each one. Absent when access did not change.
+- **Blindspot** — before the PR opens, every claim in the body is labelled READ or INFERRED.
+  A claim about tests, CI, or a system this PR does not touch is verified or rewritten to what
+  was observed.
 - **Body never** lists changed files or file/line counts — it is about *what we solve*, not *what moved*.
 - A **claude Sonnet** agent writes it; a **codex** agent reviews it. The PR is assigned to you (`@me`).
 
@@ -43,7 +46,7 @@ You are the **orchestrator**. Invoke the `pr-description` skill — do NOT write
 title/body inline yourself. The writer (Sonnet) drafts it, the reviewer (codex) checks
 it, you apply fixes and open the PR.
 
-The skill lives at `~/.claude/skills/pr/SKILL.md`. Follow its phases exactly.
+The skill lives at `~/.claude/skills/pr-description/SKILL.md`. Follow its phases exactly.
 
 ### Quick examples
 
