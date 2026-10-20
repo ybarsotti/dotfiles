@@ -22,6 +22,10 @@ hand the problem to another command.
 0. **Context brief** — read the affected `CLAUDE.md` files, `.claude/rules/`, neighbor files
    of the same kind, the dependency manifest, and the docs of the libraries the change uses.
    Every claim cites a path.
+0.5 **Recommend the pipeline** — with the brief in hand, recommend `simple-plan` or
+   `/deep-plan`, give the reason and the path behind it, then wait. Business behaviour,
+   permissions, a migration, an integration or unpinned scope point at `/deep-plan`. Silence
+   is not an answer. The decision and the user's words go in the plan's front matter.
 1. **Brainstorm** — `superpowers:brainstorming`, only when the task is unclear, and with at
    most 3 questions.
 1.5 **Split** — when the work holds more than one shippable outcome, an agent turns it into

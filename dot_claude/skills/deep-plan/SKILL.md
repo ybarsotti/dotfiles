@@ -105,6 +105,19 @@ threads. Preserve URLs plus one-line relevance. If none exist or access is unava
 where you checked; never fabricate context. `dispatch-planners.sh` and
 `dispatch-reviewers.sh` include this artifact when present.
 
+## Phase 0.4 — Is this the right pipeline?
+
+The code intelligence from Phase 0.2 says how large the change really is. When it turns out
+narrow — one module, a pattern the repo already has, no migration, no permission change, no
+new contract — say so and recommend `/simple-plan` instead, with the path that shows it.
+
+Then stop and wait. The user accepts or overrides, and an override needs no reason. Silence is
+not an answer. Record what you recommended, the reason, the user's words, and the pipeline
+they chose, then continue or stop on their answer.
+
+Say nothing here when the change is genuinely large. `deep-plan` is the default for this
+command, and a recommendation that always fires teaches the user to skip it.
+
 ## Phase 0.5 — Clarifying questions (mandatory)
 
 Before any grill or draft, surface every ambiguity in the task description to the user. Use `AskUserQuestion` with focused options (no open-ended prose questions when a multiple-choice will do).
