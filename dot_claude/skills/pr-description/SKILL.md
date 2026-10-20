@@ -201,6 +201,22 @@ Derive the cells from the code in the diff, not from the ticket's intention. Whe
 disagree, write the table from the code and flag the disagreement — that gap is the most
 valuable thing this section can surface.
 
+## Phase 2.7 — BLINDSPOT (every PR)
+
+The body makes claims about code, about tests, about CI, and about systems this PR does not
+touch. Phase 2 reviewed those claims against the files that were opened. Run the pass that
+covers the rest:
+
+```
+Skill(skill="blindspot")
+```
+
+The artifact is the PR body. Label every claim READ or INFERRED, then open the surface behind
+each INFERRED claim or rewrite the claim to what was observed. The claims this catches most
+often are "the existing tests cover this", "CI runs it", "no consumer reads that field" and a
+`file:line` nobody opened. Rewrite the body before Phase 3. A PR body that overstates its
+evidence costs a reviewer more than a short one.
+
 If `--dry-run`: print the final title + body and **stop here**. Do not open/update.
 
 ## Phase 3 — OPEN / UPDATE PR
@@ -264,6 +280,7 @@ Verify each and report the state to the user:
 - [ ] `permissions-tabled-or-n/a` — access change ⇒ `## Permissions` lists every role in the
       system, one column per changed action, a `file:line` or `denied by default` behind each
       cell, and the source the role names came from; no access change ⇒ section absent
+- [ ] `blindspot-passed` — every claim in the body is READ, or rewritten to what was observed
 - [ ] `assigned-to-me` — PR assignee includes `@me`
 - [ ] `codex-review-applied` — codex reviewer ran and its fixes were applied (or `--no-codex` was set)
 

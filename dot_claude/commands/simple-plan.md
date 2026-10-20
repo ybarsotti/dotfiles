@@ -37,6 +37,9 @@ hand the problem to another command.
    plan touches a table, column, migration or query — the `senior-backend` persona as the data
    reviewer, asking whether the schema shape makes sense and whether the queries hold at real
    size, with `EXPLAIN` against a seeded dev database when one is reachable.
+3.5 **Blindspot** — `blindspot`, over the plan itself. The Phase 3 reviewers share the
+   author's reading history. This pass labels every claim READ or INFERRED, then opens the
+   surface behind each INFERRED claim or rewrites the claim to what was observed.
 4. **Present** — `plannotator annotate --gate`, then `ExitPlanMode`.
 5. **Recommend what comes next, in order** — `/qa-plan` first when a flow or screen changes,
    since it runs before implementation, then implementation, then annotated screenshots of

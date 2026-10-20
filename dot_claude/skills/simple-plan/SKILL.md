@@ -281,6 +281,23 @@ model method of this project, and names the outermost call to mock instead. Exam
 Apply the findings. Re-run the reviewers. **Stop after two rounds.** Record any finding you
 did not apply, with the reason, in a `## Open findings` section at the end of the plan.
 
+## Phase 3.5 — Blindspot pass
+
+The reviewers in Phase 3 read the plan against the files you opened. They cannot see the files
+nobody opened. Run the pass that can:
+
+```
+Skill(skill="blindspot")
+```
+
+The artifact is `$PLAN_PATH`. The pass labels every claim in the plan READ or INFERRED, then
+opens the surface behind each INFERRED claim or rewrites the claim to what you observed. A plan
+that names a table, an endpoint, a job or a configuration key you never opened states a fact it
+did not check.
+
+Apply the rewrites to the plan before Phase 4. Say in the presentation which claims stay
+unverified, and why.
+
 ## Phase 4 — Present the plan
 
 1. `Skill(skill="plannotator-annotate")`, then `plannotator annotate "$PLAN_PATH" --gate`.

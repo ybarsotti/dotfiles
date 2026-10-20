@@ -27,6 +27,9 @@ if [ -f "$FINDINGS_FILE" ]; then
   command -v jq >/dev/null 2>&1 || err "jq not installed (brew install jq)"
   log "building report from $(wc -l < "$FINDINGS_FILE" | tr -d ' ') recorded finding(s)"
   "$(dirname "${BASH_SOURCE[0]}")/report.sh" "$RUN_DIR" > "$REPORT_FILE"
+  # A citation that does not resolve in the working tree is the one blindspot a script can
+  # catch: the reviewer wrote a location it never opened. Appends nothing when all resolve.
+  "$(dirname "${BASH_SOURCE[0]}")/verify-evidence.sh" "$RUN_DIR" >> "$REPORT_FILE"
   log "wrote $REPORT_FILE ($(wc -l < "$REPORT_FILE") lines)"
   cat "$REPORT_FILE"
   exit 0
