@@ -162,6 +162,8 @@ Never plan two tasks in one run. One plan, one task.
 Before drafting, when the task adds or changes a user-facing screen, component, page or
 layout, consult the design intelligence and dispatch one UI/UX agent:
 
+0. Read `~/.claude/skills/_shared/ui-quality.md`. It is the quality bar the plan, the
+   implementer and the reviewers share.
 1. `Skill(skill="ui-ux-pro-max:ui-ux-pro-max")` for this project's stack — styles, palettes,
    font pairings, UX guidelines, motion presets and component guidance.
 2. One `Agent` with the reviewer persona at
@@ -177,8 +179,9 @@ layout, consult the design intelligence and dispatch one UI/UX agent:
 The plan states the breakpoints and the keyboard path as acceptance criteria, not as good
 intentions. A screen whose plan is silent about them gets built without them.
 
-Fold the answer into the plan's `Project fit`, `Affected files` and `Edge cases` sections. The
-plan names the existing component it reuses instead of leaving the implementer to invent one.
+Fold the answer into the plan's `UI design pass` section, and into `Project fit`, `Affected
+files` and `Edge cases`. The plan names the existing component it reuses instead of leaving
+the implementer to invent one.
 `Skill(skill="frontend-design")` applies when the change needs visual direction rather than
 pattern-matching.
 
@@ -243,6 +246,13 @@ table, a column, a stored document, or an on-disk format. Show the new structure
 **7. Flow** — *Only when the flow has three or more actors, or an asynchronous step, or a
 retry.* Show a Mermaid `sequenceDiagram` or `flowchart`. Otherwise omit this section. Do not
 draw a diagram for a straight-line call.
+
+**7b. UI design pass** — *Only when the change touches an interface.* Fill the same fields as
+the `## UI design pass` section of `~/.claude/skills/deep-plan/templates/plan.md`: who uses
+the screen and for which task, the reference screen, reuse, hierarchy, layout and mobile,
+actions, feedback and motion, content, accessibility, shortcuts, and a states table. The
+states table holds loading, error and success at minimum, plus every other state the screen
+has. Each row names the effect, the copy and the action.
 
 **8. Affected files** — A table of path, action (add, edit, delete), and one line of reason.
 Constraint rule 9 applies: the table holds only files the task needs. It lists no refactor,
@@ -373,8 +383,11 @@ of `superpowers:writing-plans` words them: **1. Subagent-Driven (recommended)** 
 - `Skill(skill="superpowers:executing-plans")` against `$PLAN_PATH` in this session.
 - Or `/deep-execute "$PLAN_PATH"` when the user wants parallel lanes.
 
-**3. Annotated screenshots of the flows, when the change alters a user-facing flow or
-screen.** Run this as soon as the implementation is done. Use the `annotated-screenshots`
+**3. The visual pass, then annotated screenshots, when the change alters a user-facing flow
+or screen.** Run this as soon as the implementation is done. First run section 11 of
+`~/.claude/skills/_shared/ui-quality.md`: a screenshot of each state in the plan's UI design
+pass at desktop width and at 390 px, a designer's critique, a fix, and new screenshots. Then
+use the `annotated-screenshots`
 skill to capture each changed flow, one image per step, with highlight boxes and numbered
 callouts. Capture the running app when a local environment is reachable. Otherwise render the
 component with fixture data, and let the banner say so. When a later review or QA fix changes

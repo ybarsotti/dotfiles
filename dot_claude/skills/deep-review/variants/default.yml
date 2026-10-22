@@ -76,8 +76,10 @@ personas:
       business rules inside a presentational component when the project puts them in the page,
       layout, hook or service, and the opposite error of splitting too thin; motion and
       feedback — no pending state where the user waits, animation that costs instead of helps,
-      bespoke transitions where the project has a utility, prefers-reduced-motion ignored.
-      Grounds findings with ui-ux-pro-max guidance, but the project's own code outranks it.
+      bespoke transitions where the project has a utility, prefers-reduced-motion ignored;
+      the rendered screen — visual-pass screenshots at desktop and 390 px judged for
+      hierarchy, icons and interaction styles. Judges against _shared/ui-quality.md and
+      grounds findings with ui-ux-pro-max guidance, but the project's own code outranks it.
     runner: any
 
   - id: correctness

@@ -47,6 +47,11 @@ _no ambiguity_
 - Applies: no
 - Not applicable: fixture has no state machine
 
+## UI design pass
+
+- Applies: no
+- Not applicable: frontend lane is synthetic and has no real interface
+
 ## Product design handoff prompt
 
 - Needed: no

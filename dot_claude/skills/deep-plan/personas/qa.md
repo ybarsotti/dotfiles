@@ -81,3 +81,6 @@ Write **only** this JSON:
 - Plan introduces state writes without an idempotency-or-retry test → `CHANGES_REQUESTED`.
 - Schema changes without table/column population rules → `CHANGES_REQUESTED`.
 - Substantial UI without a copyable product-design handoff prompt → `CHANGES_REQUESTED`.
+- A UI change whose `## UI design pass` is vague, misses a state the screen has, or skips
+  mobile or accessibility, judged against `~/.claude/skills/_shared/ui-quality.md` →
+  `CHANGES_REQUESTED`.

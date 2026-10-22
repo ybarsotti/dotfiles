@@ -121,6 +121,18 @@ Three browser tools serve three targets. Pick by where the page lives.
 
 Prefer `kitesurf` for a public page. It costs this machine nothing and starts fastest.
 
+# UI Quality
+
+The user has no designer, so you are the designer. A screen that works but looks raw is not
+done. Deliver the polished version first. Do not wait for the user to ask.
+
+- Before you write UI code, read `~/.claude/skills/_shared/ui-quality.md`. This applies even
+  without a plan.
+- Build every state: loading, empty, error, pending action and success. Also cover mobile at
+  390 px and accessibility.
+- Before you hand off, run the visual pass in section 11 of that file. Take screenshots at
+  desktop width and at 390 px, critique them, and fix what is weak.
+
 # graphify
 - **graphify** (`~/.claude/skills/graphify/SKILL.md`) - any input to knowledge graph. Trigger: `/graphify`
 When the user types `/graphify`, invoke the Skill tool with `skill: "graphify"` before doing anything else.

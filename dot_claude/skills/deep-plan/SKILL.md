@@ -281,7 +281,7 @@ Confirm the plan includes, at minimum:
 - **Ticket + Slack context** and a point-by-point **Requirements matrix**.
 - A sequenced **User journey** when applicable; otherwise an explicit reason.
 - A **Data model** mapping every affected table/column to its value source, or explicit `no`.
-- A copyable **Product design handoff prompt** for substantial UI, or explicit `no`.
+- A **UI design pass** held to `~/.claude/skills/_shared/ui-quality.md` for any UI change, and a copyable **Product design handoff prompt** for substantial UI; explicit `no` for each otherwise.
 - A **TDD test list** with the outer-boundary-only mocking policy stated.
 - An **Abstractions decision log**.
 - A **Documentation impact** section (docs/ that go stale must be updated, or `none`).
@@ -373,8 +373,8 @@ The four options, each stated to the user with what it costs:
   gates, reviews and commits. Use when the change is one coherent slice and you want a
   second model's hands on the implementation.
 
-Whatever the user picks, the post-build chain is the same and runs unattended:
-`/deep-review default --reviewers 6 --ratio 3:3` → record what was built and what the review
+Whatever the user picks, the post-build chain is the same and runs unattended: the visual pass
+of `_shared/ui-quality.md` §11 when the UI design pass applies → `/deep-review default --reviewers 6 --ratio 3:3` → record what was built and what the review
 changed → QA against a live env with `agent-browser` (`qa-testing` in EXECUTE mode when that
 skill is on this machine; the plan's `qa-plan.yaml` through `/qa-test-plan` when it names one;
 a plain browser agent otherwise) → a **separate** agent fixes the gaps QA found → frozen SHA →
