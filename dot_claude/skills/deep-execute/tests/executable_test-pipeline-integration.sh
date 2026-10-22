@@ -185,6 +185,11 @@ _no ambiguity_
 - Applies: no
 - Not applicable: fixture has no state machine
 
+## UI design pass
+
+- Applies: no
+- Not applicable: integration fixture has no interface changes
+
 ## Product design handoff prompt
 
 - Needed: no

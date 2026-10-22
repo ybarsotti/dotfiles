@@ -1012,6 +1012,10 @@ _no ambiguity_
 - Applies: no
 - Not applicable: refactor introduces no state machine
 
+## UI design pass
+- Applies: no
+- Not applicable: refactor has no interface changes
+
 ## Product design handoff prompt
 - Needed: no
 - Not needed: refactor has no interface changes
@@ -1104,6 +1108,7 @@ no
 - [ ] requirements-matrix-present
 - [ ] user-journey-documented
 - [ ] data-model-documented
+- [ ] ui-design-pass-documented
 - [ ] product-design-handoff-documented
 - [ ] mocking-policy-stated
 - [ ] docs-impact-listed
@@ -1238,7 +1243,7 @@ assert_eq "$(count_unticked_checklist "${FIN_PASS_RUN}/subplans/good.md")" "0" \
 
 FIN_VALID_JSON=$("$VALIDATE" "${FIN_PASS_RUN}/plan.md" --root --json)
 for item in related-context-present requirements-matrix-present user-journey-documented \
-  data-model-documented product-design-handoff-documented; do
+  data-model-documented ui-design-pass-documented product-design-handoff-documented; do
   assert_eq "$(jq -r --arg item "$item" '.[] | select(.item == $item) | .status' <<<"$FIN_VALID_JSON")" \
     pass "finalize-plan.sh: ${item} passes on complete root plan"
 done
@@ -1251,15 +1256,21 @@ sed '/^- Not applicable:/d' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/missing-
 expect_fail_item "user-journey-documented" "${FIN_PASS_RUN}/missing-journey-reason.md"
 sed '/^- None:/d' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/missing-data-reason.md"
 expect_fail_item "data-model-documented" "${FIN_PASS_RUN}/missing-data-reason.md"
+perl -0pe 's/- Not applicable: refactor has no interface changes\n//' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/missing-ui-reason.md"
+expect_fail_item "ui-design-pass-documented" "${FIN_PASS_RUN}/missing-ui-reason.md"
+perl -0pe 's/- Applies: no\n- Not applicable: refactor has no interface changes/- Applies: yes\n- Who and task: Admin renames a widget/' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/partial-ui-pass.md"
+expect_fail_item "ui-design-pass-documented" "${FIN_PASS_RUN}/partial-ui-pass.md"
 sed '/^- Not needed:/d' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/missing-design-reason.md"
 expect_fail_item "product-design-handoff-documented" "${FIN_PASS_RUN}/missing-design-reason.md"
 perl -0pe '
   s/- Applies: no\n- Not applicable: internal refactor has no user interaction flow/- Applies: yes\n1. User opens widget settings\n2. System saves and confirms widget settings/;
   s/- Schema changes: no\n- None: refactor does not touch persistent storage/- Schema changes: yes\n| create | `widgets` | `name` | `text` | required | request payload | written on create |\n\n```mermaid\nerDiagram\n  users ||--o{ widgets : owns\n  widgets {\n    uuid id PK\n    text name\n  }\n```/;
+  s/- Applies: no\n- Not applicable: refactor has no interface changes/- Applies: yes\n- Who and task: Admin renames a widget and checks the result\n- Reference screen: `src\/pages\/settings.tsx`\n- Reuse: `Button` and `Toast` from `src\/ui`\n- Hierarchy: one title, one form group\n- Layout and mobile: two columns on desktop, one column at 390 px\n- Actions: Save on the right of the footer\n- Feedback and motion: spinner in Save, toast on success, fade between states\n- Content: names truncate with a tooltip\n- Accessibility: Tab order follows the form, errors in a live region\n- Shortcuts: none — the task is a single edit\n\n| state | effect | copy | action |\n|---|---|---|---|\n| loading | skeleton of the form | none | none |\n| error | message above the form | Could not save | Retry |\n| success | toast | Saved | none |/;
   s/- Needed: no\n- Not needed: refactor has no interface changes/- Needed: yes\n> Page\/screen: Widget settings\n>\n> Interactions: Edit and save widget name\n>\n> Behavior and states: Loading, validation error, saving and success/;
 ' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/applicable-sections.md"
 APPLICABLE_JSON=$("$VALIDATE" "${FIN_PASS_RUN}/applicable-sections.md" --root --json)
-for item in user-journey-documented data-model-documented product-design-handoff-documented; do
+for item in user-journey-documented data-model-documented ui-design-pass-documented \
+  product-design-handoff-documented; do
   assert_eq "$(jq -r --arg item "$item" '.[] | select(.item == $item) | .status' <<<"$APPLICABLE_JSON")" \
     pass "finalize-plan.sh: ${item} passes when applicable"
 done

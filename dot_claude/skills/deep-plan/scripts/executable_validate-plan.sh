@@ -419,6 +419,28 @@ if [ "$MODE" = "root" ]; then
     record "state-diagram-documented" "fail" "set Applies yes + a stateDiagram with ≥2 transitions and no placeholders, or no + filled Not applicable reason"
   fi
 
+  # The UI design pass holds a UI change to _shared/ui-quality.md: every field
+  # filled, and a states table that covers at least loading, error and success.
+  UI_APPLIES=$(applies_flag "UI design pass")
+  UI_BODY=$(section_body "UI design pass")
+  UI_MISSING=()
+  for field in "Who and task" "Reference screen" "Reuse" "Hierarchy" "Layout and mobile" \
+    "Actions" "Feedback and motion" "Content" "Accessibility" "Shortcuts"; do
+    printf '%s\n' "$UI_BODY" | grep -qE "^- ${field}: [^<[:space:]]" || UI_MISSING+=("$field")
+  done
+  for state in loading error success; do
+    printf '%s\n' "$UI_BODY" | grep -qiE "^\| *${state} *\|" || UI_MISSING+=("state:$state")
+  done
+  if [ "$UI_APPLIES" = "yes" ] && [ ${#UI_MISSING[@]} -eq 0 ] &&
+     ! printf '%s\n' "$UI_BODY" | grep -qE '<[^>]+>'; then
+    record "ui-design-pass-documented" "pass" "every field and the loading/error/success states filled"
+  elif [ "$UI_APPLIES" = "no" ] &&
+    printf '%s\n' "$UI_BODY" | grep -qE '^- Not applicable: [^<[:space:]]'; then
+    record "ui-design-pass-documented" "pass" "not applicable with reason"
+  else
+    record "ui-design-pass-documented" "fail" "set Applies yes + every field and loading/error/success rows with no placeholders (missing: ${UI_MISSING[*]:-placeholders}), or no + filled Not applicable reason"
+  fi
+
   DESIGN_BODY=$(section_body "Product design handoff prompt")
   DESIGN_NEEDED=$(printf '%s\n' "$DESIGN_BODY" | tr '[:upper:]' '[:lower:]' | sed -nE 's/^- needed: *(yes|no).*$/\1/p' | head -1)
   if [ "$DESIGN_NEEDED" = "yes" ] &&

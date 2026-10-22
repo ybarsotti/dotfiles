@@ -95,6 +95,31 @@ erDiagram
   }
 ```
 
+## UI design pass
+<!-- Applies=yes whenever the change adds or alters a user-facing screen, component, page or
+     layout. Fill every line from `~/.claude/skills/_shared/ui-quality.md`, which is the quality
+     bar the implementer and the reviewers hold the screen to. The states table needs a row for
+     at least loading, error and success; add empty, blocked, pending action and permission
+     whenever the screen has them. Applies=no for a change with no interface. -->
+- Applies: <yes|no>
+- Not applicable: <reason, only when Applies is no>
+- Who and task: <who opens the screen and the task they finish on it>
+- Reference screen: <`path` of the existing screen this one follows visually>
+- Reuse: <existing components, tokens and icons this change uses, with `path`>
+- Hierarchy: <title, groups, and what shows once instead of on every row>
+- Layout and mobile: <wide-screen arrangement, and how it stacks at 390 px with no horizontal scroll>
+- Actions: <the one primary action per state, secondary and utility actions, and their placement>
+- Feedback and motion: <response to each action, toasts, transitions, count-up, reduced motion>
+- Content: <long text handling, and locale formatting of numbers, currency and dates>
+- Accessibility: <keyboard path, focus on anything that opens, names of icon-only controls, error announcements>
+- Shortcuts: <the shortcut the real task needs, or `none — reason`>
+
+| state | effect | copy | action |
+|---|---|---|---|
+| loading | <skeleton, spinner or progress, and why> | <text, or none> | <none> |
+| error | <where and how the API error shows> | <message> | <retry, or fix> |
+| success | <visible outcome> | <message> | <next action> |
+
 ## Product design handoff prompt
 <!-- Needed=yes for multiple screens, a new workflow, or a substantial interaction/layout change.
      This is a design-only prompt for claude.design or Codex Product Design. It is NOT an
@@ -332,6 +357,7 @@ docs). Use `### Q:` / `### A:` headers. If `--skip-grill` was passed, write exac
 - [ ] requirements-matrix-present
 - [ ] user-journey-documented
 - [ ] data-model-documented
+- [ ] ui-design-pass-documented
 - [ ] product-design-handoff-documented
 - [ ] docs-impact-listed
 - [ ] qa-flag-set

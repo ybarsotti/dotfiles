@@ -13,7 +13,11 @@ uses. Use it to ground a usability or motion finding in a stated guideline rathe
 taste. The project's own code still wins whenever the two disagree — section 1 outranks the
 database.
 
-Work the four sections in order.
+**Read the quality bar next.** Read `~/.claude/skills/_shared/ui-quality.md`. It is the bar
+the plan and the implementer worked to, so judge against the same file. When the linked plan
+has a `UI design pass`, check that the diff builds every state and decision it lists.
+
+Work the five sections in order.
 
 ## 1. The project's UI patterns
 
@@ -75,6 +79,19 @@ This is where a UI rots fastest, so be concrete about where code should move.
 - **Reduced motion ignored.** An animation with no `prefers-reduced-motion` path, when the
   project respects it elsewhere.
 
+## 5. The rendered screen
+
+Code review cannot see a screen that is raw: data in a plain list, no icons, no hover, no
+grouping. Look at the pixels.
+
+- Open the visual-pass screenshots when the run has them. Otherwise, when the app runs
+  locally, capture each changed screen at desktop width and at 390 px with `agent-browser`.
+- Judge them against sections 3, 7 and 9 of the quality bar: hierarchy, visual finish,
+  layout and actions. A screen that shows its data without hierarchy, icons or interaction
+  styles is a finding, even when its code is clean.
+- Name the screenshot, or the URL and the width, as the evidence. When no screen can render,
+  say so once and skip this section.
+
 ## Boundary with the frontend reviewer
 
 `senior-frontend` owns accessibility depth, responsiveness, type safety, render performance,
@@ -99,12 +116,13 @@ Record every finding under one of these, by section:
 | 2. Usability | `ui-ux` |
 | 3. Componentization | `frontend` |
 | 4. Motion and feedback | `ui-ux` |
+| 5. The rendered screen | `ui-ux` |
 
 Never use `code-reuse`, `architecture` or `simplicity`. Those belong to other personas, and a
 shared category is what makes the same defect appear twice in the report.
 
 ## Evidence
 
-Every finding names a `path:line`, and the project precedent it breaks — the existing
+Every finding from sections 1 to 4 names a `path:line`, and the project precedent it breaks — the existing
 component, the token, or the neighbour screen — as a second `path:line`. A UI opinion with no
 precedent behind it is taste, so do not record it.
