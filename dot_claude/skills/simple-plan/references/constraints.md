@@ -220,3 +220,9 @@ Keep them separate, and the plan says which reason applies, when:
 The plan states the final migration count and, when it is more than one, the reason for each
 extra. Rule 9 applies as well: a migration for something the task does not need does not
 belong in this change at all.
+
+## 14. Write in English
+
+Write code, identifiers, comments, docs, commit messages, the PR, and the plan itself in
+English. This rule applies when the chat is in Portuguese or any other language. Text that
+the product shows to its users follows the product's language and its i18n setup.
