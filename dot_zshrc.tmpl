@@ -176,6 +176,10 @@ case ":$PATH:" in
 esac
 {{- end }}
 
+# agent-browser: an idle daemon shuts down with its Chrome after 15 minutes.
+# Without it, every abandoned --session keeps a Chrome for Testing alive.
+export AGENT_BROWSER_IDLE_TIMEOUT_MS=900000
+
 # Additional Tool Aliases
 {{- if not (lookPath "claude") }}
 # Claude Code alias (fallback to local installation if not in PATH)
