@@ -10,7 +10,7 @@
 #
 # Emits one line of JSON:
 #   {"task_description":"...", "ticket":"...", "max_plan_iter":3,
-#    "no_codex":false, "skip_grill":false, "dry_run":false}
+#    "no_codex":false, "skip_grill":false, "dry_run":false, "roadmap":""}
 # An unrecognized `--flag` exits 2 with a message on stderr, nothing on stdout.
 #
 # --max-plan-iter N must satisfy 1 <= N <= 20 (exits 2 otherwise): 0 would
@@ -18,6 +18,10 @@
 # is `ITER > --max-plan-iter`), and the ceiling keeps an arbitrarily large
 # value from reaching `jq --argjson` un-clamped — 20 iterations already
 # means 100 reviewer-persona invocations.
+#
+# --roadmap PATH names the previous plan of a staged feature (see
+# _shared/stages.md). The path must be an existing file; this run plans the
+# next stage of that roadmap.
 #
 # A flag passed more than once is last-occurrence-wins (no error) — same as
 # a normal shell `getopts`-style loop re-assigning the same variable.
@@ -38,6 +42,7 @@ MAX_PLAN_ITER_CEILING=20
 NO_CODEX=false
 SKIP_GRILL=false
 DRY_RUN=false
+ROADMAP=""
 TASK_DESCRIPTION=""
 
 append_desc() {
@@ -92,6 +97,12 @@ while [ $# -gt 0 ]; do
       fi
       MAX_PLAN_ITER="$MAX_PLAN_ITER_N"
       ;;
+    --roadmap)
+      shift
+      [ $# -gt 0 ] || { echo "parse-args.sh: --roadmap requires a plan path" >&2; exit 2; }
+      [ -f "$1" ] || { echo "parse-args.sh: --roadmap plan not found: '$1'" >&2; exit 2; }
+      ROADMAP="$1"
+      ;;
     --no-codex)   NO_CODEX=true ;;
     --skip-grill) SKIP_GRILL=true ;;
     --dry-run)    DRY_RUN=true ;;
@@ -113,5 +124,6 @@ jq -n \
   --argjson no_codex "$NO_CODEX" \
   --argjson skip_grill "$SKIP_GRILL" \
   --argjson dry_run "$DRY_RUN" \
+  --arg roadmap "$ROADMAP" \
   '{task_description: $task_description, ticket: $ticket, max_plan_iter: $max_plan_iter,
-    no_codex: $no_codex, skip_grill: $skip_grill, dry_run: $dry_run}'
+    no_codex: $no_codex, skip_grill: $skip_grill, dry_run: $dry_run, roadmap: $roadmap}'

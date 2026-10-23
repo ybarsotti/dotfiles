@@ -46,7 +46,8 @@ Run `~/.claude/skills/deep-plan/scripts/parse-args.sh "$ARGUMENTS"` and follow t
 fields: `task_description`, `ticket` (from `--ticket KEY-123`, else auto-detect: branch name,
 last commit body, current Jira/Linear context), `max_plan_iter` (from `--max-plan-iter N`,
 default 3, must be 1-20), `no_codex` (`--no-codex`), `skip_grill` (`--skip-grill`), `dry_run`
-(`--dry-run`). An unknown `--flag`, or `--max-plan-iter` outside 1-20, exits 2 with a message —
+(`--dry-run`), `roadmap` (`--roadmap PLAN`: plan the next stage of that plan's `## Stages`, per
+`~/.claude/skills/_shared/stages.md`; Phase 0.3 copies that section into `related-context.md`). An unknown `--flag`, or `--max-plan-iter` outside 1-20, exits 2 with a message —
 surface it to the user verbatim.
 
 Refuse to proceed when the task is trivially small (typo, single one-line change, rename of a single symbol). Tell the user to just do it inline.
@@ -115,7 +116,9 @@ Then stop and wait. The user accepts or overrides, and an override needs no reas
 not an answer. Record what you recommended, the reason, the user's words, and the pipeline
 they chose, then continue or stop on their answer.
 
-Say nothing here when the change is genuinely large. `deep-plan` is the default for this
+When it is large but splits into working slices that ship in one PR, recommend stages
+(`_shared/stages.md`) in the same question. Say nothing here when the change is genuinely large
+and has no such slices. `deep-plan` is the default for this
 command, and a recommendation that always fires teaches the user to skip it.
 
 ## Phase 0.5 — Clarifying questions (mandatory)
@@ -280,7 +283,8 @@ Confirm the plan includes, at minimum:
 - A **Rationale & key decisions** section (fed by grill-with-docs + brainstorming).
 - **Ticket + Slack context** and a point-by-point **Requirements matrix**.
 - A sequenced **User journey** when applicable; otherwise an explicit reason.
-- A **Data model** mapping every affected table/column to its value source, or explicit `no`.
+- A **Data model** mapping every affected table/column to its value source and the deploy order, or explicit `no`.
+- **Rules**, **Removed contracts** and **Stages** filled or `no` with a reason; edge cases carry `EC-NNN` IDs.
 - A **UI design pass** held to `~/.claude/skills/_shared/ui-quality.md` for any UI change, and a copyable **Product design handoff prompt** for substantial UI; explicit `no` for each otherwise.
 - A **TDD test list** with the outer-boundary-only mocking policy stated.
 - An **Abstractions decision log**.

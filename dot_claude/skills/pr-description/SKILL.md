@@ -65,7 +65,8 @@ Assemble the writer input into `$RUN_DIR/writer-input.md`:
    changed-path domains from `git diff --name-only main...HEAD`, the recent commit
    subjects (`git log --pretty=%s main..HEAD`), and — if a plan exists — the extracted
    `## Context`, `## Ticket and Slack context`, `## Requirements matrix`,
-   `## Flow diagram`, `## Rationale & key decisions` verbatim. Tell writer to reconcile
+   `## Flow diagram`, `## Rationale & key decisions`, `## Stages` and
+   `## Edge cases & failure modes` verbatim. Tell writer to reconcile
    every requirement against finished diff/tests: `✅ Implemented`, `⚠️ Partial`, or
    `❌ Missing`; never carry `✅ Planned` forward blindly.
 
@@ -117,6 +118,8 @@ The reviewer validates, returning concrete fixes:
 - **Slack threads present** (linked when supplied, or explicit `_none found_`)?
 - **Requirements matrix complete** and statuses supported by diff/test evidence?
 - **Key decisions preserved** from plan/ticket context?
+- **Stages and deferred edge cases** — a staged plan's stage table is present with the next
+  stage to review; every `Out of scope` edge case ID from the plan is listed?
 - **Evidence present** — when the diff touches UI, an `## Evidence` section with a flow
   GIF/recording (and before/after for changed screens) or an honest local-asset list; when it
   does not, the explicit `_no UI change — no visual evidence_`?

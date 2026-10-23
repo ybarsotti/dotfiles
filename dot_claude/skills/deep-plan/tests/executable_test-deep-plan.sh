@@ -945,6 +945,12 @@ PARSE_LEADING_ZERO=$("$PARSE_ARGS" "--max-plan-iter 010 build X")
 assert_eq "$(jq -r '.max_plan_iter' <<<"$PARSE_LEADING_ZERO")" "10" \
   "parse-args: a leading-zero value is read as decimal, not octal"
 
+PARSE_ROADMAP=$("$PARSE_ARGS" "--roadmap $PARSE_ARGS plan stage two")
+assert_eq "$(jq -r '.roadmap' <<<"$PARSE_ROADMAP")" "$PARSE_ARGS" \
+  "parse-args: --roadmap carries the previous plan path"
+assert_eq "$(jq -r '.roadmap' <<<"$PARSE_SAMPLE")" "" "parse-args: --roadmap defaults empty"
+assert_exit 2 "$PARSE_ARGS" "--roadmap /no/such/plan.md build X"
+
 # ─── Fix: repeated flags — last occurrence wins (documented convention) ────
 PARSE_REPEATED=$("$PARSE_ARGS" "--ticket PROJ-1 --ticket PROJ-2 build X")
 assert_eq "$(jq -r '.ticket' <<<"$PARSE_REPEATED")" "PROJ-2" \
@@ -996,9 +1002,21 @@ _no ambiguity_
 |---|---|---|---|
 | ✅ Planned | Ship widget refactor | Task 1 changes adapter behavior | targeted shell tests |
 
+## Stages
+- Applies: no
+- Not applicable: refactor ships as one slice
+
+## Rules
+- Sources read: `CLAUDE.md`
+- No rule applies: the refactor changes no governed behavior
+
 ## User journey
 - Applies: no
 - Not applicable: internal refactor has no user interaction flow
+
+## Removed contracts
+- Applies: no
+- Not applicable: refactor removes no route, symbol or key
 
 ## Data model
 - Schema changes: no
@@ -1051,10 +1069,12 @@ sequenceDiagram
 - Mock only the outermost boundaries (network, 3rd-party APIs); inner services run real.
 
 ## Edge cases & failure modes
-- edge one
-- edge two
-- edge three
-- edge four
+| id | case | criticality | decision |
+|---|---|---|---|
+| EC-001 | empty input | High | Cover now |
+| EC-002 | very long name | Medium | Cover now |
+| EC-003 | network failure | Medium | Fail loudly |
+| EC-004 | concurrent writers | Low | Out of scope |
 
 ## Abstractions decision log
 | Decision | Rationale | Alternative |
@@ -1090,6 +1110,9 @@ no
 - [ ] mermaid-has-entry-and-exit
 - [ ] tdd-list-≥3
 - [ ] edges-≥4
+- [ ] stages-documented
+- [ ] rules-documented
+- [ ] removed-contracts-documented
 - [ ] code-intel-bootstrapped
 - [ ] clarifying-questions-asked
 - [ ] tasks-≥1
@@ -1154,10 +1177,12 @@ sequenceDiagram
 - `test three` — checks three
 
 ## Edge cases & failure modes
-- edge one
-- edge two
-- edge three
-- edge four
+| id | case | criticality | decision |
+|---|---|---|---|
+| EC-001 | empty input | High | Cover now |
+| EC-002 | very long name | Medium | Cover now |
+| EC-003 | network failure | Medium | Fail loudly |
+| EC-004 | concurrent writers | Low | Out of scope |
 
 ## Verification
 - run the tests
@@ -1243,7 +1268,8 @@ assert_eq "$(count_unticked_checklist "${FIN_PASS_RUN}/subplans/good.md")" "0" \
 
 FIN_VALID_JSON=$("$VALIDATE" "${FIN_PASS_RUN}/plan.md" --root --json)
 for item in related-context-present requirements-matrix-present user-journey-documented \
-  data-model-documented ui-design-pass-documented product-design-handoff-documented; do
+  data-model-documented ui-design-pass-documented product-design-handoff-documented \
+  stages-documented rules-documented removed-contracts-documented edges-≥4; do
   assert_eq "$(jq -r --arg item "$item" '.[] | select(.item == $item) | .status' <<<"$FIN_VALID_JSON")" \
     pass "finalize-plan.sh: ${item} passes on complete root plan"
 done
@@ -1261,16 +1287,29 @@ expect_fail_item "ui-design-pass-documented" "${FIN_PASS_RUN}/missing-ui-reason.
 perl -0pe 's/- Applies: no\n- Not applicable: refactor has no interface changes/- Applies: yes\n- Who and task: Admin renames a widget/' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/partial-ui-pass.md"
 expect_fail_item "ui-design-pass-documented" "${FIN_PASS_RUN}/partial-ui-pass.md"
 sed '/^- Not needed:/d' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/missing-design-reason.md"
+perl -0pe 's/- Not applicable: refactor ships as one slice\n//' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/missing-stages-reason.md"
+expect_fail_item "stages-documented" "${FIN_PASS_RUN}/missing-stages-reason.md"
+perl -0pe 's/- No rule applies: the refactor changes no governed behavior\n//' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/missing-rules.md"
+expect_fail_item "rules-documented" "${FIN_PASS_RUN}/missing-rules.md"
+perl -0pe 's/- Not applicable: refactor removes no route, symbol or key\n//' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/missing-removed-reason.md"
+expect_fail_item "removed-contracts-documented" "${FIN_PASS_RUN}/missing-removed-reason.md"
+sed 's/| EC-003 | network failure | Medium | Fail loudly |/| network failure | Medium | Fail loudly |/' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/edge-without-id.md"
+expect_fail_item "edges-≥4" "${FIN_PASS_RUN}/edge-without-id.md"
+sed 's/| EC-004 | concurrent writers | Low | Out of scope |/| EC-004 | concurrent writers | Low | maybe later |/' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/edge-bad-decision.md"
+expect_fail_item "edges-≥4" "${FIN_PASS_RUN}/edge-bad-decision.md"
 expect_fail_item "product-design-handoff-documented" "${FIN_PASS_RUN}/missing-design-reason.md"
 perl -0pe '
   s/- Applies: no\n- Not applicable: internal refactor has no user interaction flow/- Applies: yes\n1. User opens widget settings\n2. System saves and confirms widget settings/;
-  s/- Schema changes: no\n- None: refactor does not touch persistent storage/- Schema changes: yes\n| create | `widgets` | `name` | `text` | required | request payload | written on create |\n\n```mermaid\nerDiagram\n  users ||--o{ widgets : owns\n  widgets {\n    uuid id PK\n    text name\n  }\n```/;
+  s/- Schema changes: no\n- None: refactor does not touch persistent storage/- Schema changes: yes\n- Deploy order: the column is nullable, so the previous release keeps writing rows\n| create | `widgets` | `name` | `text` | required | request payload | written on create |\n\n```mermaid\nerDiagram\n  users ||--o{ widgets : owns\n  widgets {\n    uuid id PK\n    text name\n  }\n```/;
+  s/- Applies: no\n- Not applicable: refactor ships as one slice/- Applies: yes\n- Current stage: 1, settings form\n- Cross-stage architecture: one settings page, each stage adds a section\n\n| # | stage | scope | class | status | commit |\n|---|---|---|---|---|---|\n| 1 | Settings form | rename field | light | in progress | - |\n| 2 | Widget limits | limit rule | full | planned | - |/;
+  s/- No rule applies: the refactor changes no governed behavior/| rule | source | applies because | how the plan honors it |\n|---|---|---|---|\n| Names are unique per owner | `docs\/business-rules\/widgets.md` | the form renames a widget | Task 1 validates uniqueness |/;
+  s/- Applies: no\n- Not applicable: refactor removes no route, symbol or key/- Applies: yes\n\n| contract | kind | callers found | search | resolution |\n|---|---|---|---|---|\n| `GET \/widgets\/old` | route | none | `rg -n widgets\/old` | removed |/;
   s/- Applies: no\n- Not applicable: refactor has no interface changes/- Applies: yes\n- Who and task: Admin renames a widget and checks the result\n- Reference screen: `src\/pages\/settings.tsx`\n- Reuse: `Button` and `Toast` from `src\/ui`\n- Hierarchy: one title, one form group\n- Layout and mobile: two columns on desktop, one column at 390 px\n- Actions: Save on the right of the footer\n- Feedback and motion: spinner in Save, toast on success, fade between states\n- Content: names truncate with a tooltip\n- Accessibility: Tab order follows the form, errors in a live region\n- Shortcuts: none — the task is a single edit\n\n| state | effect | copy | action |\n|---|---|---|---|\n| loading | skeleton of the form | none | none |\n| error | message above the form | Could not save | Retry |\n| success | toast | Saved | none |/;
   s/- Needed: no\n- Not needed: refactor has no interface changes/- Needed: yes\n> Page\/screen: Widget settings\n>\n> Interactions: Edit and save widget name\n>\n> Behavior and states: Loading, validation error, saving and success/;
 ' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/applicable-sections.md"
 APPLICABLE_JSON=$("$VALIDATE" "${FIN_PASS_RUN}/applicable-sections.md" --root --json)
 for item in user-journey-documented data-model-documented ui-design-pass-documented \
-  product-design-handoff-documented; do
+  product-design-handoff-documented stages-documented rules-documented removed-contracts-documented; do
   assert_eq "$(jq -r --arg item "$item" '.[] | select(.item == $item) | .status' <<<"$APPLICABLE_JSON")" \
     pass "finalize-plan.sh: ${item} passes when applicable"
 done

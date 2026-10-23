@@ -36,10 +36,17 @@ sequenceDiagram
 - `<test name>` — <intent>
 
 ## Edge cases & failure modes
-- <bullet>
-- <bullet>
-- <bullet>
-- <bullet>
+<!-- One row per edge case, race condition or failure mode, with a stable ID that follows the
+     case from the plan to the PR. Decisions, as in simple-plan constraint rule 7:
+     `Cover now` (handled, and it gets a test that fails without the handling), `Fail loudly`
+     (a clear error, no recovery logic), `Out of scope` (recorded; the PR lists it under
+     `## Deferred edge cases`). At least 4 rows. -->
+| id | case | criticality | decision |
+|---|---|---|---|
+| EC-001 | <empty / null / zero input> | <High|Medium|Low> | <Cover now|Fail loudly|Out of scope> |
+| EC-002 | <boundary value: very long string, unicode, max int> | <criticality> | <decision> |
+| EC-003 | <network or IO failure> | <criticality> | <decision> |
+| EC-004 | <race condition or concurrent writers> | <criticality> | <decision> |
 
 ## Verification
 - <how to confirm this chapter works in isolation>

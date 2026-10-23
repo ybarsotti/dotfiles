@@ -65,6 +65,10 @@ mention is a finding. Name the configuration line and the purpose it does not se
 - **A scope reduction nobody agreed to.** Compare what the task asks for against what the diff
   delivers. Name the requirement with no code behind it. Silence about a dropped requirement is
   the finding, not the drop.
+- **An edge case marked `Cover now` with no test.** When the plan's edge-case table gives each
+  case an ID (`EC-001` and so on), every `Cover now` row needs a test that fails without the
+  handling. Name the ID with no test. A row the diff quietly moved to `Out of scope` without the
+  user's decision is a finding too.
 
 ## 3. Taking the convenient path past a documented pattern
 

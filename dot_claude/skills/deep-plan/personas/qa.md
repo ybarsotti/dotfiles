@@ -84,3 +84,7 @@ Write **only** this JSON:
 - A UI change whose `## UI design pass` is vague, misses a state the screen has, or skips
   mobile or accessibility, judged against `~/.claude/skills/_shared/ui-quality.md` →
   `CHANGES_REQUESTED`.
+- A removed or renamed route, symbol, event or key with no `## Removed contracts` row, or a row
+  whose caller search did not run on the latest base branch → `CHANGES_REQUESTED`.
+- A `## Rules` section that skips a rule source the repository has → `CHANGES_REQUESTED`.
+- A `Cover now` edge case with no matching entry in the TDD test list → `CHANGES_REQUESTED`.

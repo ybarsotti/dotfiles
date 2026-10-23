@@ -28,6 +28,23 @@
 ## Non-goals
 - <what this change explicitly does NOT do>
 
+## Stages
+<!-- Applies=yes for a staged feature: several working slices that ship in one PR, one commit
+     per stage. Follow `~/.claude/skills/_shared/stages.md`. The table is the roadmap; the rest of
+     this plan details only the current stage. A later stage reuses this section through
+     `--roadmap <this plan>`. Class `full` for a stage that changes a business rule, a
+     permission, a migration, a public contract or an integration, or removes a contract;
+     `light` otherwise. Applies=no for a change that ships as one slice. -->
+- Applies: <yes|no>
+- Not applicable: <reason, only when Applies is no>
+- Current stage: <number and name of the stage this plan details>
+- Cross-stage architecture: <what every stage shares: ownership, data loading, shared components and contracts>
+
+| # | stage | scope | class | status | commit |
+|---|---|---|---|---|---|
+| 1 | <name> | <what this stage ships> | <light|full> | <planned|in progress|done> | <sha, or -> |
+| 2 | <name> | <what this stage ships> | <light|full> | <planned|in progress|done> | <sha, or -> |
+
 ## Requirements matrix
 <!-- One row per ticket acceptance criterion or, without a ticket, per concrete user requirement.
      `✅ Planned` means the plan has a concrete implementation + verification mapping; it does
@@ -42,6 +59,18 @@
 |---|---|---|---|
 | ✅ Planned | <requirement> | <task/interface/behavior> | `<runnable command>` or <observed evidence> |
 
+## Rules
+<!-- The repository's own rules for this change. Read every source that exists:
+     `docs/business-rules/`, `docs/technical-rules/`, `docs/adr/`, `.claude/rules/`, `AGENTS.md`,
+     and each CLAUDE.md from the changed paths up to the root. List every rule that applies, with
+     the reason it applies and how the plan honors it. When none applies, delete the table and
+     write `- No rule applies: <reason>`. Never invent a rule to fill the table. -->
+- Sources read: <the rule sources you opened, as paths>
+
+| rule | source | applies because | how the plan honors it |
+|---|---|---|---|
+| <rule id or title> | `<path>` | <the path, behavior or data it governs> | <task or decision that honors it> |
+
 ## User journey
 <!-- Use when the change affects a user/operator flow. Preserve meaningful interaction order. -->
 - Applies: <yes|no>
@@ -54,6 +83,7 @@
      value comes from. For no schema change, set no and explain why. -->
 - Schema changes: <yes|no>
 - None: <reason, only when Schema changes is no>
+- Deploy order: <only when Schema changes is yes: how the previous release keeps working while the migration runs, for example add the column, deploy, then drop the old column in a later release>
 
 | action | table | column | type | nullable / default | filled from | backfill / lifecycle |
 |---|---|---|---|---|---|---|
@@ -121,6 +151,19 @@ erDiagram
 | loading | <skeleton, spinner or progress, and why> | <text, or none> | <none> |
 | error | <where and how the API error shows> | <message> | <retry, or fix> |
 | success | <visible outcome> | <message> | <next action> |
+
+## Removed contracts
+<!-- Applies=yes when the change removes or renames a route, an exported symbol, an event, a
+     queue name, a configuration key or a response field. For each one, search for callers on
+     the latest base branch (`git fetch origin` first), by literal path and by name, and count a
+     test mock or fixture of the removed path as a caller. Repeat the search after the final
+     rebase. Applies=no when nothing is removed or renamed. -->
+- Applies: <yes|no>
+- Not applicable: <reason, only when Applies is no>
+
+| contract | kind | callers found | search | resolution |
+|---|---|---|---|---|
+| <`GET /path` or `symbol`> | <route|symbol|event|config|field> | <`path:line` each, or none> | <`command` that searched> | <callers moved in this change, or the contract stays> |
 
 ## Product design handoff prompt
 <!-- Needed=yes for multiple screens, a new workflow, or a substantial interaction/layout change.
@@ -288,10 +331,17 @@ stateDiagram-v2
 - `<test name>` — <intent>
 
 ## Edge cases & failure modes
-- Empty / null / zero inputs
-- Boundary values (max int, very long strings, unicode/emoji)
-- Network/IO failure
-- Race condition / concurrent writers
+<!-- One row per edge case, race condition or failure mode, with a stable ID that follows the
+     case from the plan to the PR. Decisions, as in simple-plan constraint rule 7:
+     `Cover now` (handled, and it gets a test that fails without the handling), `Fail loudly`
+     (a clear error, no recovery logic), `Out of scope` (recorded; the PR lists it under
+     `## Deferred edge cases`). At least 4 rows. -->
+| id | case | criticality | decision |
+|---|---|---|---|
+| EC-001 | <empty / null / zero input> | <High|Medium|Low> | <Cover now|Fail loudly|Out of scope> |
+| EC-002 | <boundary value: very long string, unicode, max int> | <criticality> | <decision> |
+| EC-003 | <network or IO failure> | <criticality> | <decision> |
+| EC-004 | <race condition or concurrent writers> | <criticality> | <decision> |
 
 ## QA / test-execution
 <!-- Does this change user-facing flows or add/alter screens? Answer yes/no.
@@ -365,6 +415,9 @@ docs). Use `### Q:` / `### A:` headers. If `--skip-grill` was passed, write exac
 - [ ] qa-flag-set
 - [ ] adapter-decision-log-≥1-row
 - [ ] edges-≥4
+- [ ] stages-documented
+- [ ] rules-documented
+- [ ] removed-contracts-documented
 - [ ] affected-files-paths-exist
 - [ ] subplans-section-non-empty
 - [ ] each-subplan-file-exists

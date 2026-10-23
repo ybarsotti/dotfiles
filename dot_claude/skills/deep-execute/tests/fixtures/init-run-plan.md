@@ -27,6 +27,21 @@ _no ambiguity_
 |---|---|---|---|
 | ✅ Planned | Initialize lanes from valid plan | Tasks 1-4 materialize contract and lane inputs | init-run test assertions |
 
+## Stages
+
+- Applies: no
+- Not applicable: fixture ships as one slice
+
+## Rules
+
+- Sources read: `CLAUDE.md`
+- No rule applies: fixture changes no governed behavior
+
+## Removed contracts
+
+- Applies: no
+- Not applicable: fixture removes no route, symbol or key
+
 ## User journey
 
 - Applies: no
@@ -109,10 +124,12 @@ sequenceDiagram
 
 ## Edge cases & failure modes
 
-- Empty input file: `backend/service.sh` must exit non-zero with a clear diagnostic.
-- Malformed contract JSON: `frontend/app.sh` must refuse to start.
-- Concurrent writes: two lanes must never write the same path.
-- Missing acceptance data: `dot_claude/skills/deep-review/checklist.sh` must fail loudly, not silently pass.
+| id | case | criticality | decision |
+|---|---|---|---|
+| EC-001 | Empty input file: `backend/service.sh` must exit non-zero with a clear diagnostic. | Medium | Fail loudly |
+| EC-002 | Malformed contract JSON: `frontend/app.sh` must refuse to start. | Medium | Fail loudly |
+| EC-003 | Concurrent writes: two lanes must never write the same path. | Medium | Cover now |
+| EC-004 | Missing acceptance data: `dot_claude/skills/deep-review/checklist.sh` must fail loudly, not silently pass. | Medium | Fail loudly |
 
 ## Abstractions decision log
 

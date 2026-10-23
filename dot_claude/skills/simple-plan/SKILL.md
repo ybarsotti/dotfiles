@@ -49,7 +49,8 @@ Gather evidence before you draft. Write the result to `$RUN_DIR/context.md`.
 
 1. Find the affected directories from the task description.
 2. Read the root `CLAUDE.md`, and every `CLAUDE.md` inside an affected directory.
-3. Read `.claude/rules/` when the directory exists. Read every rule file that applies.
+3. Read every rule source that exists: `.claude/rules/`, `AGENTS.md`, `docs/business-rules/`,
+   `docs/technical-rules/` and `docs/adr/`. Read every rule file that applies.
 4. Read two or three existing files of the same kind as the files the change touches.
    Record the naming convention, the error style, the dependency-injection style, and the
    test layout.
@@ -143,11 +144,19 @@ can parse it:
 - **Depends on:** Task 1
 ```
 
+When the user chooses stages (below), each task also carries `- **Class:** light|full`,
+`- **Status:** planned` and `- **Commit:** -`, and the file follows
+`~/.claude/skills/_shared/stages.md`.
+
 Task 1 depends on nothing. Every later task depends only on earlier ones.
 
 Copy the list to `docs/superpowers/plans/<YYYY-MM-DD>-<slug>-breakdown.md` inside the project,
 beside where the plans live. `$RUN_DIR` is keyed to this invocation's arguments, so a file left
 only there is unreachable from the next run.
+
+Ask how the tasks ship: one pull request per task, or **stages** of one pull request, with
+one commit per stage and the gate of each stage's class (`_shared/stages.md`). Recommend stages
+when the tasks only make sense together. Record the answer in the breakdown file.
 
 Present the list with `AskUserQuestion` and let the user pick **one** task to plan now. Then
 run Phase 2 for that task alone. In the plan's `## Non-goals`, list the tasks not chosen and
@@ -230,9 +239,15 @@ implementation. It is mandatory and it is never empty.
 
 **3. Approach** — How we solve it, in the fewest steps. For each step, name the rung of
 constraint rule 1 that you stopped at. Example: "reuse `src/shared/result.ts` (rule 1.2)".
+When a step removes or renames a route, an exported symbol, an event, a queue name, a
+configuration key or a response field, list its callers. Search the latest base branch
+(`git fetch origin` first), by path and by name, and count a test mock of the removed path as a
+caller. Give the search command, and say how each caller moves.
 
 **4. Project fit** — The conventions this change follows, each with the path that proves it.
-Name the existing helpers and types it reuses. Name the library idiom it follows.
+Name the existing helpers and types it reuses. Name the library idiom it follows. Then the
+rules: the rule sources you read in Phase 0, and each rule that applies, with its path and how
+the plan honors it. When none applies, say so and name the sources you read.
 
 **5. Types and contracts** — The concrete type declarations the implementation will add or
 change. Show the real fields and the real field types, as code. Show the API request and
@@ -241,7 +256,8 @@ A reviewer reads this section to prove that the typing is real, because a type c
 
 **6. Data structure changes** — *Only when the change alters a persisted structure*, such as a
 table, a column, a stored document, or an on-disk format. Show the new structure as a Mermaid
-`erDiagram` or `classDiagram`. Show the migration step.
+`erDiagram` or `classDiagram`. Show the migration step, and the deploy order that keeps the
+previous release working while the migration runs.
 
 **7. Flow** — *Only when the flow has three or more actors, or an asynchronous step, or a
 retry.* Show a Mermaid `sequenceDiagram` or `flowchart`. Otherwise omit this section. Do not
@@ -261,11 +277,14 @@ nearby logic, it asks the user first and records the answer.
 
 **9. Edge cases** — A table. Constraint rule 7 defines the decisions.
 
-| Case | Criticality | Decision |
-|---|---|---|
-| Two requests update the same order at once | High | Cover now |
-| The upstream API returns a 500 | Medium | Fail loudly |
-| The user has no locale set | Low | Out of scope |
+| ID | Case | Criticality | Decision |
+|---|---|---|---|
+| EC-001 | Two requests update the same order at once | High | Cover now |
+| EC-002 | The upstream API returns a 500 | Medium | Fail loudly |
+| EC-003 | The user has no locale set | Low | Out of scope |
+
+The ID stays with the case from the plan to the PR. The PR lists every `Out of scope` row under
+`## Deferred edge cases`.
 
 Raise race conditions and failure modes here. Do not implement them here. If every row says
 `Cover now`, the plan is not simple. Re-read constraint rule 7 and reduce it.
@@ -410,7 +429,10 @@ than reporting it for later:
    and what is still open. The summary names the commit the result applies to. "Tests pass"
    is not a summary.
 
-**5. `/pr`** to open the PR once the chain above is clean.
+**5. `/pr`** to open the PR once the chain above is clean. Rebase onto the latest base branch
+first, and repeat the caller search for every removed contract in the plan. For stages, run
+steps 2 to 4 once per stage with the gate of its class, commit the stage, and open the PR with
+the stage table (`_shared/stages.md`).
 
 **6. A narrated demo video, when the change adds or alters a feature a person uses.** This
 runs after the PR is open, because the demo goes into the PR body. Use the `video-demo` skill
