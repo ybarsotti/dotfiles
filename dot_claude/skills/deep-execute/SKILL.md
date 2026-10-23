@@ -131,14 +131,8 @@ running anything — obey it rather than calling it a fourth time on your own ju
 
 ## Phase 4 — Review, QA, gap fixes, frozen SHA, PR
 
-Run `set-phase.sh RUN_DIR review`, then run these steps **back to back, unattended**.
-
-**Visual pass first, when the plan's `## UI design pass` says `Applies: yes`.** Run section 11
-of `~/.claude/skills/_shared/ui-quality.md` against the running app: a screenshot of each
-planned state at desktop width and at 390 px, a designer's critique, and a fix. Route each fix
-through the owning lane with `reply.sh`, then capture again. Pass the final screenshots to the
-review in step 1 and to the PR in step 6.
-
+Run `set-phase.sh RUN_DIR review`, then run these steps **back to back, unattended**. Run section
+11 of `_shared/ui-quality.md` first when the UI design pass applies; a `light` stage uses `stage-light`.
 1. **Full peer review.** `Skill(skill="deep-review", args="default --reviewers 6 --ratio 3:3")`
    over the whole run's diff — the one thorough pass; every per-round `round-gate.sh` review
    was intentionally light. Route each required fix back through the **owning lane**

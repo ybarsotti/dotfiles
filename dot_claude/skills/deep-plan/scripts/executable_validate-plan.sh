@@ -155,12 +155,15 @@ else
   record "tdd-list-≥3" "fail" "only $TDD_BULLETS tests (need ≥3)"
 fi
 
-# 4. Edge cases ≥4 bullets
-EDGE_BULLETS=$(section_body "Edge cases & failure modes" | grep -cE '^- ')
-if [ "$EDGE_BULLETS" -ge 4 ]; then
-  record "edges-≥4" "pass" "$EDGE_BULLETS edge cases listed"
+# 4. Edge cases: ≥4 table rows, each with an EC-NNN id, no placeholder, and a
+# decision the TDD list and the PR can act on.
+EDGE_ROWS=$(section_body "Edge cases & failure modes" | grep -E '^\| *EC-[0-9]{3,} *\|')
+EDGE_OK=$(printf '%s\n' "$EDGE_ROWS" | grep -v '<' |
+  grep -ciE '\| *(cover now|fail loudly|out of scope) *\| *$')
+if [ "$EDGE_OK" -ge 4 ]; then
+  record "edges-≥4" "pass" "$EDGE_OK edge cases with an id and a decision"
 else
-  record "edges-≥4" "fail" "only $EDGE_BULLETS edges (need ≥4)"
+  record "edges-≥4" "fail" "only $EDGE_OK filled EC-NNN rows with a Cover now/Fail loudly/Out of scope decision (need ≥4)"
 fi
 
 # 4.4. Code-intel bootstrapped (marker file from bootstrap-codeintel.sh)
@@ -356,12 +359,13 @@ if [ "$MODE" = "root" ]; then
   SCHEMA_CHANGES=$(printf '%s\n' "$DATA_BODY" | tr '[:upper:]' '[:lower:]' | sed -nE 's/^- schema changes: *(yes|no).*$/\1/p' | head -1)
   COLUMN_ROWS=$(printf '%s\n' "$DATA_BODY" | grep -ciE '^\| *(create|alter) *\|')
   if [ "$SCHEMA_CHANGES" = "yes" ] && [ "$COLUMN_ROWS" -ge 1 ] &&
+     printf '%s\n' "$DATA_BODY" | grep -qE '^- Deploy order: [^<[:space:]]' &&
      ! printf '%s\n' "$DATA_BODY" | grep -qE '<[^>]+>'; then
     record "data-model-documented" "pass" "$COLUMN_ROWS affected column row(s)"
   elif [ "$SCHEMA_CHANGES" = "no" ] && printf '%s\n' "$DATA_BODY" | grep -qE '^- None: [^<[:space:]]'; then
     record "data-model-documented" "pass" "no schema change with reason"
   else
-    record "data-model-documented" "fail" "set Schema changes yes + column rows, or no + filled None reason"
+    record "data-model-documented" "fail" "set Schema changes yes + column rows + filled Deploy order, or no + filled None reason"
   fi
 
   # ER diagram rides on the answer above — a plan that changes the schema owes a
@@ -417,6 +421,48 @@ if [ "$MODE" = "root" ]; then
     record "state-diagram-documented" "pass" "not applicable with reason"
   else
     record "state-diagram-documented" "fail" "set Applies yes + a stateDiagram with ≥2 transitions and no placeholders, or no + filled Not applicable reason"
+  fi
+
+  # Stages: a staged plan carries its roadmap (see _shared/stages.md).
+  STAGE_APPLIES=$(applies_flag "Stages")
+  STAGE_BODY=$(section_body "Stages")
+  STAGE_ROWS=$(printf '%s\n' "$STAGE_BODY" |
+    grep -ciE '^\| *[0-9]+ *\|.*\| *(light|full) *\| *(planned|in progress|done) *\|')
+  if [ "$STAGE_APPLIES" = "yes" ] && [ "$STAGE_ROWS" -ge 2 ] &&
+     printf '%s\n' "$STAGE_BODY" | grep -qE '^- Current stage: [^<[:space:]]' &&
+     printf '%s\n' "$STAGE_BODY" | grep -qE '^- Cross-stage architecture: [^<[:space:]]' &&
+     ! printf '%s\n' "$STAGE_BODY" | grep -qE '<[^>]+>'; then
+    record "stages-documented" "pass" "$STAGE_ROWS stage(s) in the roadmap"
+  elif [ "$STAGE_APPLIES" = "no" ] &&
+    printf '%s\n' "$STAGE_BODY" | grep -qE '^- Not applicable: [^<[:space:]]'; then
+    record "stages-documented" "pass" "not applicable with reason"
+  else
+    record "stages-documented" "fail" "set Applies yes + Current stage + Cross-stage architecture + ≥2 rows with a light/full class and a status, or no + filled Not applicable reason"
+  fi
+
+  # Rules: the sources read, then each applicable rule or an explicit none.
+  RULES_BODY=$(section_body "Rules")
+  RULE_ROWS=$(printf '%s\n' "$RULES_BODY" | grep -E '^\|' | grep -cvE '^\| *rule *\||^\|[-| ]+\|$')
+  if printf '%s\n' "$RULES_BODY" | grep -qE '^- Sources read: [^<[:space:]]' &&
+     ! printf '%s\n' "$RULES_BODY" | grep -qE '<[^>]+>' &&
+     { [ "$RULE_ROWS" -ge 1 ] || printf '%s\n' "$RULES_BODY" | grep -qE '^- No rule applies: [^<[:space:]]'; }; then
+    record "rules-documented" "pass" "$RULE_ROWS applicable rule(s)"
+  else
+    record "rules-documented" "fail" "fill '- Sources read:' and ≥1 rule row, or '- No rule applies: <reason>', with no placeholders"
+  fi
+
+  # Removed contracts: every removal lists its callers and the search behind it.
+  REMOVED_APPLIES=$(applies_flag "Removed contracts")
+  REMOVED_BODY=$(section_body "Removed contracts")
+  REMOVED_ROWS=$(printf '%s\n' "$REMOVED_BODY" | grep -E '^\|' | grep -cvE '^\| *contract *\||^\|[-| ]+\|$')
+  if [ "$REMOVED_APPLIES" = "yes" ] && [ "$REMOVED_ROWS" -ge 1 ] &&
+     ! printf '%s\n' "$REMOVED_BODY" | grep -qE '<[^>]+>'; then
+    record "removed-contracts-documented" "pass" "$REMOVED_ROWS removed contract(s) with callers searched"
+  elif [ "$REMOVED_APPLIES" = "no" ] &&
+    printf '%s\n' "$REMOVED_BODY" | grep -qE '^- Not applicable: [^<[:space:]]'; then
+    record "removed-contracts-documented" "pass" "not applicable with reason"
+  else
+    record "removed-contracts-documented" "fail" "set Applies yes + ≥1 filled row (contract, kind, callers, search, resolution), or no + filled Not applicable reason"
   fi
 
   # The UI design pass holds a UI change to _shared/ui-quality.md: every field

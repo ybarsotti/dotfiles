@@ -38,7 +38,8 @@ personas:
       responses leaking internals. Schema design: column types, nullability, missing
       foreign-key, unique and check constraints, JSON holding queryable fields, redundant
       or wrongly ordered indexes, more than one migration file where one would do, and
-      migrations that lock a large table or cannot be reversed. Query performance: N+1, missing indexes, unbounded results, OFFSET
+      migrations that lock a large table or cannot be reversed, and migrations that the
+      previous release cannot survive while it still runs during the deploy. Query performance: N+1, missing indexes, unbounded results, OFFSET
       pagination, non-sargable predicates, verified with live EXPLAIN (ANALYZE) when a dev
       database is reachable. ORM use: raw SQL where the ORM expresses the same query, rows
       filtered or aggregated in application code, a relation loaded per row, a write loop
@@ -106,7 +107,8 @@ personas:
       deferred import. Then a removal the diff left half-done: the orphan export, test,
       flag, config key, doc and dependency, plus proof that a candidate nothing imports is
       not reached by a route, decorator, registry, signal, template, task name or dynamic
-      import.
+      import. Then the surviving callers of anything the diff removes or renames — searched on
+      the latest base branch, with a test mock of a removed path counted as a caller.
     runner: any
 
   - id: simplicity
@@ -129,7 +131,8 @@ personas:
       coverage or size threshold, a weakened tool configuration, every suppression comment the
       diff adds, a type escape hatch, a swallowed error, a skipped test, a retry hiding a
       flake. Then deferred work: a marker for work the task assigns, a placeholder body, a
-      known defect shipped, a requirement dropped in silence. Then the convenient path past a
+      known defect shipped, a requirement dropped in silence, a Cover-now edge case ID with
+      no test. Then the convenient path past a
       documented pattern: a bypassed layer, a missing companion artifact, the unprotected
       variant of a guarded primitive. Owns the gap between claimed and done work, nothing else.
     category: shortcut
@@ -138,8 +141,10 @@ personas:
   - id: project-fit
     role: Project-fit reviewer (repo rules, documentation, task scope)
     focus: |
-      Nearest CLAUDE.md per changed file, .claude/rules/*, .cursor/rules, AGENTS.md and
-      *.rules that point at the changed files; rule→file mapping; naming, layering and
+      Nearest CLAUDE.md per changed file, .claude/rules/*, .cursor/rules, AGENTS.md, *.rules
+      and docs/business-rules, docs/technical-rules and docs/adr that point at the changed
+      files; each rule in the plan's Rules section checked against the diff, and a touched rule
+      the plan missed; rule→file mapping; naming, layering and
       test-location conventions the surrounding files follow; required companion changes.
       Docs the diff made stale, wrong or incomplete, and new behavior the repo's
       conventions say to document. Project layout and naming: a silenced linter such as

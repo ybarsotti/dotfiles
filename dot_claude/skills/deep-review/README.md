@@ -48,6 +48,7 @@ All reviewers run **headless in background** (no cmux panes, no UI clutter). Cla
 | Variant | When to use |
 |---------|-------------|
 | `default` | General PR review with 8 fixed lenses, each run once — `security`, `senior-backend` (data flow, schema and query performance, observability), `senior-frontend` (component quality, accessibility, responsiveness, design fidelity), `ui-ux` (project UI patterns, usability, componentization, motion), `correctness` (edge cases, concurrency, test coverage), `architecture` (structure and type precision), `simplicity` (over-engineering and reinvention), `project-fit` (repo rules, docs, layout and naming, task scope) |
+| `stage-light` | A `light` stage of a staged feature (`_shared/stages.md`): `senior-frontend`, `ui-ux`, `simplicity`, `shortcut-watchdog` |
 | `security-focused` | Anything touching auth, payments, secrets, or external input |
 | `adversarial-debate` | When you want strong arguments both ways before merging a contentious change |
 | `stress-test` | Paranoid mode — 10 personas simulating concrete failure scenarios (races, partial failures, network chaos, time bugs, abuse, etc). Use before shipping anything fragile. |
@@ -140,6 +141,7 @@ This skill lives in `~/.claude/commands/` so it's invoked from Claude. The revie
 │   └── aggregate.sh                  # consolidates results
 └── variants/
     ├── default.yml                   # 16 personas, multi-perspective
+    ├── stage-light.yml               # 4 personas, light stage of a staged feature
     ├── security-focused.yml          # 10 personas, security lens
     └── adversarial-debate.yml        # 5 approver-vs-rejecter pairs
 ```

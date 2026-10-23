@@ -9,12 +9,18 @@ For every file in the diff:
 1. **Nearest CLAUDE.md.** Walk up from the changed file to the repo root and read every
    `CLAUDE.md` and `CLAUDE.local.md` on the way. These are binding.
 2. **Rules that point at this file.** Scan `.claude/rules/*.md`, `.cursor/rules/*`,
-   `.cursorrules`, `AGENTS.md`, and any `*.rules` file. A rule points at a changed file when
+   `.cursorrules`, `AGENTS.md`, any `*.rules` file, and the rule documents under
+   `docs/business-rules/`, `docs/technical-rules/` and `docs/adr/` when they exist. A rule points at a changed file when
    its glob, path, or scope matches that file's path or directory. Build a rule-to-file map.
 3. **Check compliance.** For each mapped rule, verify the diff follows it. Quote the exact
    rule text and name the `file:line` that breaks it. Prefer semantic tools over raw grep
    here — Serena `find_symbol` and `find_referencing_symbols`, gitnexus `context` — because a
    convention is about where a symbol lives and who calls it, which grep cannot see.
+
+4. **The plan's rule lane.** When the linked plan has a `## Rules` section, check each rule it
+   lists against the diff, not against the plan. Then report a rule from step 2 that the diff
+   touches and the plan does not list. A rule the plan missed is a finding even when the diff
+   happens to follow it, because nobody checked it on purpose.
 
 Also flag:
 

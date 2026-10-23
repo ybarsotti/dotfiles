@@ -165,6 +165,21 @@ _no ambiguity_
 |---|---|---|---|
 | ✅ Planned | Initialize parallel run safely | Contract and lane validators gate initialization | integration assertions below |
 
+## Stages
+
+- Applies: no
+- Not applicable: fixture ships as one slice
+
+## Rules
+
+- Sources read: `CLAUDE.md`
+- No rule applies: fixture changes no governed behavior
+
+## Removed contracts
+
+- Applies: no
+- Not applicable: fixture removes no route, symbol or key
+
 ## User journey
 
 - Applies: no
@@ -224,10 +239,12 @@ Mocking policy: mock only the outermost boundaries (network, third-party APIs, e
 
 ## Edge cases & failure modes
 
-- Missing contract file at the declared path.
-- An uncommitted contract or shared file at run-init time.
-- A lane agent not present in the allowlist.
-- A cyclic depends_on graph among lanes.
+| id | case | criticality | decision |
+|---|---|---|---|
+| EC-001 | Missing contract file at the declared path. | Medium | Fail loudly |
+| EC-002 | An uncommitted contract or shared file at run-init time. | Medium | Fail loudly |
+| EC-003 | A lane agent not present in the allowlist. | Medium | Cover now |
+| EC-004 | A cyclic depends_on graph among lanes. | Medium | Fail loudly |
 
 ## Subplans
 

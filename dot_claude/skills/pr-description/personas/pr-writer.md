@@ -34,6 +34,12 @@ after this change. Concrete, not a changelog.>
 
 <relevant thread links with one-line context, or `_none found_`; never invent links>
 
+## Stages
+
+<Only when the plan has a `## Stages` section with Applies yes. The stage table with the
+status and the commit of each stage, the stage to review next, and the line "Do not merge
+before every stage is done." Leave the whole section out otherwise.>
+
 ## Requirements
 
 | status | requirement | how implemented | evidence |
@@ -50,6 +56,11 @@ from the request path the diff touches (entry point → service → repo/DB → 
 
 <why this approach over the alternatives; the key decisions taken and the trade-offs
 accepted. Call out anything a reviewer might otherwise question.>
+
+## Deferred edge cases
+
+<Only when the plan's edge-case table has `Out of scope` rows. One line per row: its ID, the
+case, and why this PR does not handle it. Leave the whole section out otherwise.>
 
 ## Verification
 
@@ -113,6 +124,10 @@ TITLE: <conventional-commit title line>
 
 ...
 
+## Stages
+
+...
+
 ## Requirements
 
 ...
@@ -125,6 +140,10 @@ flowchart TD
 ```
 
 ## Rationale & key decisions
+
+...
+
+## Deferred edge cases
 
 ...
 

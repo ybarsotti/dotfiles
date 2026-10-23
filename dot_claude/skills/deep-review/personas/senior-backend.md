@@ -71,6 +71,14 @@ Schema pass, for every changed migration, model, or table definition:
 - **Migration safety**: an operation that takes a long lock on a large table, such as adding
   an index without `CONCURRENTLY` on Postgres or rewriting a table to add a column; a
   destructive change with no backfill; a migration with no way back.
+- **Old code during the deploy.** The migration runs while instances of the previous release
+  still serve requests. Flag a change that the old code cannot survive: a dropped or renamed
+  column or table that the old code still reads or writes, a `NOT NULL` column with no
+  default that the old code does not fill, a changed column type that the old code writes
+  in the old format, and a removed enum value that old rows or old code still use. Name the
+  safe sequence instead, for example add the new column, deploy the code, then drop the old
+  column in a later release. When the plan's `## Data model` states a deploy order, check the
+  diff against it.
 - **More than one migration in the same change.** Two or more new migration files are usually
   one schema change written in installments. Flag it and name the single migration they should
   become. Accept the split only for a stated reason: one has already run somewhere, an

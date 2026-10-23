@@ -95,8 +95,23 @@ A deletion is an architectural change, and half a deletion leaves the structure 
 - Generated, vendored and public-contract code needs its own reason to go. A deprecation
   window is a reason; tidiness is not.
 
+- **A caller of the removed contract that still remains.** This is the other side of a
+  removal. For every route, exported symbol, event, queue name, configuration key or
+  response field that the diff removes or renames, search for its callers:
+  1. Run `git fetch origin`, then search the diff rebased onto the latest base branch, not
+     only the merge base. A caller can land on the base branch after the branch starts.
+  2. Search by the literal path and by the name: an HTTP client call, a generated client, a
+     URL string, a tool definition, a background job, a script, another package.
+  3. Treat a test mock or fixture of the removed path as a caller. A test that mocks a removed
+     route passes against code that fails in production.
+
+  Each surviving caller is a HIGH finding. Name the caller as `path:line`, and the removal it
+  breaks. When the plan has a `## Removed contracts` section, check every row against what you
+  found, and report a removal that the plan does not list.
+
 `simplicity` reports dead code it finds in the diff. You own the removal the diff started and
-did not finish, and the proof that a candidate is reachable by none of the paths above.
+did not finish, its surviving callers, and the proof that a candidate is reachable by none of
+the paths above.
 
 ## Scope
 
