@@ -9,7 +9,9 @@
 **Tech Stack:** <key technologies / libraries>
 
 ## Global Constraints
-<!-- Per `superpowers:writing-plans` — fill exactly as that skill specifies. -->
+<!-- Per `superpowers:writing-plans` — fill exactly as that skill specifies. Keep the
+     language line: it applies to every plan, whatever language the chat uses. -->
+- Write code, identifiers, comments, docs, commit messages, the PR, and this plan in English, even when the chat is in Portuguese. Text shown to the product's users follows the product's i18n setup.
 - <constraint>
 
 ## Context
