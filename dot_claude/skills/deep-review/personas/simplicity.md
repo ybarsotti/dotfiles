@@ -26,6 +26,19 @@ this one judges what the change did to the code already there:
 
 Recommend the concrete simplification, not the principle.
 
+**Code that does not read top down.** Judge the new code as a reader who opens the file once:
+
+- The public API of the class or module comes first. Its helpers follow, in the order they
+  are called. A reader who must jump up and down the file to follow one call is a finding.
+- A function that mixes levels of abstraction: it orchestrates steps and also does the low
+  detail of one of them. Name the step to extract, and the name it takes.
+- Nesting deeper than 2 levels where a guard clause or an early return removes it. Show the
+  flattened shape.
+- A name that says how the function works instead of what it does in the domain.
+
+The project's own file organization wins. When the neighbour files follow another order, the
+diff follows the neighbours, and this is not a finding.
+
 ## 2. Reinvention
 
 For each function, method, class, constant, type, hook, or helper the diff ADDS, ask whether

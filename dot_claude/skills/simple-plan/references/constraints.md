@@ -186,8 +186,13 @@ The plan says where each new file, name and function goes, and why that place.
   unrelated file, and do not create a file for three lines that belong beside their only
   caller.
 - **A function that belongs to a class is a method.** When every parameter comes from one
-  object, or the function only ever runs on one class's state, it goes on that class. A pure
-  helper over primitives stays free.
+  object, or the function only ever runs on one class's state, it goes on that class.
+- **A private helper that one class uses lives in that class.** Do not leave a module-level
+  `_foo` beside the class that alone calls it, even when it is pure. Make it a
+  `@staticmethod` when it uses no state, a `@classmethod` when it uses the class or builds an
+  instance, and an instance method when it uses the instance. A helper that two or more
+  classes or modules use stays free, in the shared module. The plan says where each new
+  helper lives, and why.
 
 ## 12. No dependency the code does not import
 
@@ -226,3 +231,17 @@ belong in this change at all.
 Write code, identifiers, comments, docs, commit messages, the PR, and the plan itself in
 English. This rule applies when the chat is in Portuguese or any other language. Text that
 the product shows to its users follows the product's language and its i18n setup.
+
+## 15. Code reads top down
+
+A reader opens the file once and follows it from the top.
+
+- The public API of the class or module comes first. Its helpers follow, in the order they
+  are called.
+- Each function stays at one level of abstraction. It orchestrates steps, or it does the
+  detail of one step, never both.
+- Use guard clauses and early returns. Nest 2 levels deep at most.
+- A name says what the function does in the domain, not how it does it.
+
+When the project's neighbour files follow another organization, follow the neighbours. The
+project's pattern wins over this rule.

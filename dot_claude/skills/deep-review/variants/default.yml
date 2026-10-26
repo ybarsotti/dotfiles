@@ -115,7 +115,8 @@ personas:
     role: Simplicity advocate (over-engineering and reinvention)
     focus: |
       Premature abstraction, speculative generality, dead code, redundant layers,
-      over-configurable systems, comments explaining WHAT instead of WHY. Then whether
+      over-configurable systems, comments explaining WHAT instead of WHY. Code that does not
+      read top down: helpers above the API, mixed abstraction levels, nesting past 2 levels. Then whether
       the codebase already does it: an existing helper reimplemented, a standard-library
       function hand-rolled, a near-copy of a sibling, a new dependency for what an
       installed one covers. Searches with Serena, gitnexus and graphify, never raw grep.
@@ -150,7 +151,8 @@ personas:
       conventions say to document. Project layout and naming: a silenced linter such as
       # noqa or # type: ignore, a shared filename prefix that should be a directory, naming
       that fights the neighbours, a small thing buried in a large file or a file created for
-      three lines, and a module-level function that is really a method of one class. Finally
+      three lines, a module-level function that is really a method of one class, and a private
+      module-level helper that only one class calls. Finally
       dependencies the diff left behind — an installed package nobody imports — and the
       linked task: missing acceptance criteria, scope creep, requirements left unaddressed.
       Quotes the rule or doc line for every rule and doc finding. Layout findings stand on
