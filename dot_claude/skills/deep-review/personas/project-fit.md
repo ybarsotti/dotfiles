@@ -83,8 +83,11 @@ These are the ones a diff slips past review most often.
   move on, rather than reopening history.
 - **A function outside its class.** A module-level function whose every parameter comes from
   one object, or that only ever runs on one class's state, is a method in the wrong place.
-  Name the class it belongs to. Do not flag a genuinely free function: a pure helper over
-  primitives, or one deliberately kept out to avoid a dependency.
+  So is a private module-level helper (`_foo`) that only one class calls, even when it is
+  pure. Name the class it belongs to and the form it takes: `@staticmethod` when it uses no
+  state, `@classmethod` when it uses the class or builds an instance, an instance method when
+  it uses the instance. Do not flag a helper that two or more classes or modules call, or one
+  deliberately kept out to avoid a dependency.
 
 ## 5. Dependencies the diff left behind
 

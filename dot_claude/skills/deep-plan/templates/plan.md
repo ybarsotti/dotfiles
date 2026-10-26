@@ -12,6 +12,7 @@
 <!-- Per `superpowers:writing-plans` — fill exactly as that skill specifies. Keep the
      language line: it applies to every plan, whatever language the chat uses. -->
 - Write code, identifiers, comments, docs, commit messages, the PR, and this plan in English, even when the chat is in Portuguese. Text shown to the product's users follows the product's i18n setup.
+- Keep each helper where its callers are: a private helper that one class uses is a `@staticmethod`, `@classmethod` or method of that class, never a module-level `_foo`; only a helper that two or more classes or modules use stays free. Code reads top down: public API first, helpers in call order, one level of abstraction per function, guard clauses, 2 levels of nesting at most. The project's own organization wins (`~/.claude/skills/simple-plan/references/constraints.md` rules 11 and 15).
 - <constraint>
 
 ## Context
