@@ -4,7 +4,13 @@
 # Usage:
 #   record.sh --persona ID --category CAT --severity SEV --title T --evidence E
 #             [--file PATH] [--line N] [--description D] [--suggestion S]
-#             [--findings PATH]
+#             [--remark R] [--findings PATH]
+#   record.sh --persona ID --clean SECTION [--findings PATH]
+#
+# --remark is the finding as one short comment a person can paste on the PR: a question
+# with the fix inside, at most REMARK_LIMIT characters. --clean records that a section of
+# the persona's checklist ran and found nothing; it goes to clean.jsonl beside the
+# findings file, so the report can show what was checked, not only what failed.
 #
 # Appends one compact JSON line to the findings file. Every reviewer appends to the
 # same file concurrently. One printf of a single line under APPEND_LIMIT bytes is an
@@ -17,13 +23,14 @@ set -euo pipefail
 
 APPEND_LIMIT=4096
 
-VALID_SEVERITY="CRITICAL HIGH MEDIUM LOW"
+VALID_SEVERITY="CRITICAL HIGH MEDIUM LOW QUESTION"
+REMARK_LIMIT=160
 VALID_CATEGORY="security correctness concurrency db-performance typing architecture
 simplicity code-reuse tests docs project-fit scope frontend observability
 ui-ux accessibility responsiveness shortcut"
 
 PERSONA=""; CATEGORY=""; SEVERITY=""; TITLE=""; EVIDENCE=""
-FILE="-"; LINE="0"; DESCRIPTION=""; SUGGESTION=""
+FILE="-"; LINE="0"; DESCRIPTION=""; SUGGESTION=""; REMARK=""; CLEAN=""
 FINDINGS="${DEEP_REVIEW_FINDINGS:-}"
 
 err() { printf 'record: ERROR: %s\n' "$*" >&2; exit 1; }
@@ -39,6 +46,8 @@ while [ $# -gt 0 ]; do
     --line)         LINE="$2"; shift 2 ;;
     --description)  DESCRIPTION="$2"; shift 2 ;;
     --suggestion)   SUGGESTION="$2"; shift 2 ;;
+    --remark)       REMARK="$2"; shift 2 ;;
+    --clean)        CLEAN="$2"; shift 2 ;;
     --findings)     FINDINGS="$2"; shift 2 ;;
     *)              err "unknown flag: $1" ;;
   esac
@@ -48,6 +57,14 @@ command -v jq >/dev/null 2>&1 || err "jq not installed (brew install jq)"
 
 [ -n "$FINDINGS" ] || err "no findings file (pass --findings or set DEEP_REVIEW_FINDINGS)"
 [ -n "$PERSONA" ]  || err "--persona is required"
+
+if [ -n "$CLEAN" ]; then
+  jq -cn --arg persona "$PERSONA" --arg clean "$CLEAN" '{persona:$persona,clean:$clean}' \
+    >> "$(dirname "$FINDINGS")/clean.jsonl"
+  printf 'record: %s clean: %s\n' "$PERSONA" "$CLEAN" >&2
+  exit 0
+fi
+
 [ -n "$TITLE" ]    || err "--title is required"
 
 # Evidence is the point of this command. A finding that cannot cite the precedent it
@@ -61,14 +78,17 @@ grep -qw -- "$CATEGORY" <<< "$VALID_CATEGORY" \
   || err "--category must be one of: $(tr '\n' ' ' <<< "$VALID_CATEGORY")(got: '$CATEGORY')"
 
 [[ "$LINE" =~ ^[0-9]+$ ]] || err "--line must be a non-negative integer (got: '$LINE')"
+[ "${#REMARK}" -le "$REMARK_LIMIT" ] \
+  || err "--remark must be ${REMARK_LIMIT} characters or fewer (got ${#REMARK}): one short question with the fix inside"
 
 build_line() {
   jq -cn \
     --arg persona "$PERSONA" --arg category "$CATEGORY" --arg severity "$SEVERITY" \
     --arg title "$TITLE" --arg evidence "$EVIDENCE" --arg file "$FILE" \
-    --argjson line "$LINE" --arg description "$1" --arg suggestion "$2" \
+    --argjson line "$LINE" --arg description "$1" --arg suggestion "$2" --arg remark "$REMARK" \
     '{persona:$persona,category:$category,severity:$severity,file:$file,line:$line,
-      title:$title,evidence:$evidence,description:$description,suggestion:$suggestion}'
+      title:$title,evidence:$evidence,description:$description,suggestion:$suggestion,
+      remark:$remark}'
 }
 
 JSON_LINE=$(build_line "$DESCRIPTION" "$SUGGESTION")

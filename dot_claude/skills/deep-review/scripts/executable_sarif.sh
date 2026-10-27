@@ -19,7 +19,7 @@ FINDINGS="${RUN_DIR}/findings.jsonl"
 # Merge first, with the same rule the report uses. Without it GitHub raises one alert per
 # reviewer on the same line.
 jq -s -f "${SCRIPT_DIR}/merge.jq" "$FINDINGS" | jq '
-  def level: {"CRITICAL":"error","HIGH":"error","MEDIUM":"warning","LOW":"note"}[.] // "warning";
+  def level: {"CRITICAL":"error","HIGH":"error","MEDIUM":"warning","LOW":"note","QUESTION":"note"}[.] // "warning";
 
   . as $findings
   | {

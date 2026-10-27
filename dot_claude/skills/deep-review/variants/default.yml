@@ -43,7 +43,9 @@ personas:
       pagination, non-sargable predicates, verified with live EXPLAIN (ANALYZE) when a dev
       database is reachable. ORM use: raw SQL where the ORM expresses the same query, rows
       filtered or aggregated in application code, a relation loaded per row, a write loop
-      where a bulk call exists. Reads the framework's own query documentation with context7
+      where a bulk call exists. Django traps: related.id over related_id, only() dropping a
+      select_related join, iterator() ignoring prefetch, F() for lost updates, update_fields,
+      null=True on text, external calls inside atomic. Reads the framework's own query documentation with context7
       before recording an ORM finding. Observability: error context, structured logs with correlation
       ids, metrics and spans on new paths.
     runner: any
@@ -116,7 +118,8 @@ personas:
     focus: |
       Premature abstraction, speculative generality, dead code, redundant layers,
       over-configurable systems, comments explaining WHAT instead of WHY. Code that does not
-      read top down: helpers above the API, mixed abstraction levels, nesting past 2 levels. Then whether
+      read top down: helpers above the API, mixed abstraction levels, nesting past 2 levels.
+      Guards (getattr, hasattr, is None, try/except) on values the schema already guarantees. Then whether
       the codebase already does it: an existing helper reimplemented, a standard-library
       function hand-rolled, a near-copy of a sibling, a new dependency for what an
       installed one covers. Searches with Serena, gitnexus and graphify, never raw grep.

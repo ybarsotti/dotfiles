@@ -312,12 +312,13 @@ as text — text is discarded, only recorded findings reach the report.
 ${SCRIPT_DIR}/record.sh \\
   --persona ${persona_id} \\
   --category ${CATEGORY_ARG} \\
-  --severity <CRITICAL|HIGH|MEDIUM|LOW> \\
+  --severity <CRITICAL|HIGH|MEDIUM|LOW|QUESTION> \\
   --file <path> --line <n> \\
   --title "<one line>" \\
   --evidence "<path:line of the precedent in THIS repo, or the exact repo rule the diff breaks>" \\
   --description "<what is wrong and why it matters here>" \\
-  --suggestion "<the concrete fix>"
+  --suggestion "<the concrete fix>" \\
+  --remark "<one comment to paste on the PR: a short question with the fix inside, <=160 chars>"
 \`\`\`
 
 ${CATEGORY_NOTE}
@@ -325,10 +326,19 @@ ${CATEGORY_NOTE}
 \`--evidence\` is mandatory and the command rejects a finding without it. Cite what this
 repository already does, as \`path:line\` — for example a module that holds this kind of
 file, a helper that already exists, or a sibling that handles the same case. When the diff
-breaks a written rule, quote the rule instead. A finding you cannot ground this way is an
-opinion, so do not record it.
+breaks a written rule, quote the rule instead. A finding you cannot ground this way is not
+a defect. Record it as \`QUESTION\` only when its answer would change the code, with the line
+that raised it as evidence; drop it otherwise. \`QUESTION\` never blocks the verdict.
 
-Record nothing when you find nothing. Silence is how you approve; there is no verdict to
+Write \`--remark\` the way a senior reviewer comments: ask with the fix inside and name the
+exact alternative, for example "can't we create those in bulk? \`bulk_create(items)\`". No
+praise, no preamble.
+
+For each numbered section of your checklist that found nothing, run
+\`${SCRIPT_DIR}/record.sh --persona ${persona_id} --clean "<section number and name>"\`, so the
+report shows what you checked, not only what failed.
+
+Record no finding when you find nothing. Silence is how you approve; there is no verdict to
 emit, because severity decides the verdict.
 
 **Prefer a few high-conviction findings to a long list.** When you have a structural finding

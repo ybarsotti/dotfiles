@@ -50,7 +50,8 @@ personas:
     focus: |
       Premature abstraction, speculative generality, dead code, redundant layers,
       over-configurable systems, comments explaining WHAT instead of WHY. Code that does not
-      read top down: helpers above the API, mixed abstraction levels, nesting past 2 levels. Then whether
+      read top down: helpers above the API, mixed abstraction levels, nesting past 2 levels.
+      Guards (getattr, hasattr, is None, try/except) on values the schema already guarantees. Then whether
       the codebase already does it: an existing helper reimplemented, a standard-library
       function hand-rolled, a near-copy of a sibling, a new dependency for what an
       installed one covers. Searches with Serena, gitnexus and graphify, never raw grep.

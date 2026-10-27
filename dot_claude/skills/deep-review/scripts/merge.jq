@@ -6,7 +6,7 @@
 # keeps the first non-empty prose — the reviewer with the worst severity is often not
 # the one who explained it best.
 
-def rank: {"CRITICAL":0,"HIGH":1,"MEDIUM":2,"LOW":3}[.] // 4;
+def rank: {"CRITICAL":0,"HIGH":1,"MEDIUM":2,"LOW":3,"QUESTION":4}[.] // 5;
 def first_nonempty(f): (map(f) | map(select(. != null and . != "")) | first) // "";
 
 # A finding that names no file lands at file "-" and line 0, so file+line+category would
@@ -19,7 +19,8 @@ group_by(if .line > 0 and .file != "-" then [.file, .line, .category] else [.fil
         personas: (map(.persona) | unique),
         evidence: (map(.evidence) | unique | join(" | ")),
         description: first_nonempty(.description),
-        suggestion: first_nonempty(.suggestion)
+        suggestion: first_nonempty(.suggestion),
+        remark: first_nonempty(.remark)
       }
   )
 | sort_by([(.severity | rank), .category, .file])

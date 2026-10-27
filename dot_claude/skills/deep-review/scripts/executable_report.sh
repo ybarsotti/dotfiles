@@ -6,6 +6,7 @@
 # Reads:
 #   <run-dir>/findings.jsonl   one JSON finding per line (written by record.sh)
 #   <run-dir>/status.tsv       persona<TAB>runner<TAB>status  (optional)
+#   <run-dir>/clean.jsonl      {persona, clean} per checklist section with no finding (optional)
 # Writes the report to stdout.
 
 set -euo pipefail
@@ -14,6 +15,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RUN_DIR="$1"
 FINDINGS="${RUN_DIR}/findings.jsonl"
 STATUS="${RUN_DIR}/status.tsv"
+CLEAN="${RUN_DIR}/clean.jsonl"
 
 [ -f "$FINDINGS" ] || { printf 'report: ERROR: missing %s\n' "$FINDINGS" >&2; exit 1; }
 
@@ -26,14 +28,16 @@ N_CRITICAL=$(count_sev CRITICAL)
 N_HIGH=$(count_sev HIGH)
 N_MEDIUM=$(count_sev MEDIUM)
 N_LOW=$(count_sev LOW)
+N_QUESTION=$(count_sev QUESTION)
 
 # Severity decides the verdict. A reviewer that calls something CRITICAL and then votes
-# APPROVE is the contradiction this removes.
+# APPROVE is the contradiction this removes. A QUESTION is a suspicion without proof: it
+# reaches the report for the author to answer, and it never blocks on its own.
 if [ "$N_CRITICAL" -gt 0 ]; then
   VERDICT="REJECT"
 elif [ "$N_HIGH" -gt 0 ]; then
   VERDICT="REQUEST_CHANGES"
-elif [ "$TOTAL" -gt 0 ]; then
+elif [ "$((TOTAL - N_QUESTION))" -gt 0 ]; then
   VERDICT="REQUEST_CHANGES"
 else
   VERDICT="APPROVE"
@@ -42,8 +46,8 @@ fi
 printf '# Review Panel Report\n\n'
 printf '**Verdict: %s**\n\n' "$VERDICT"
 printf '## Summary\n\n'
-printf -- '- Findings: %s (%s CRITICAL, %s HIGH, %s MEDIUM, %s LOW)\n' \
-  "$TOTAL" "$N_CRITICAL" "$N_HIGH" "$N_MEDIUM" "$N_LOW"
+printf -- '- Findings: %s (%s CRITICAL, %s HIGH, %s MEDIUM, %s LOW, %s QUESTION)\n' \
+  "$TOTAL" "$N_CRITICAL" "$N_HIGH" "$N_MEDIUM" "$N_LOW" "$N_QUESTION"
 
 if [ -f "${RUN_DIR}/diff.sha256" ]; then
   printf -- '- Reviewed diff: sha256:%s\n' "$(cat "${RUN_DIR}/diff.sha256")"
@@ -56,14 +60,21 @@ if [ -f "$STATUS" ]; then
 fi
 printf '\n'
 
+print_clean() {
+  [ -s "$CLEAN" ] || return 0
+  printf '\n## Clean\n\n'
+  jq -rs 'group_by(.persona)[] | "- \(.[0].persona): \(map(.clean) | unique | join(", "))"' "$CLEAN"
+}
+
 if [ "$TOTAL" -eq 0 ]; then
   printf 'No reviewer recorded a finding.\n'
+  print_clean
   exit 0
 fi
 
 printf '## By category\n\n'
-printf '| Category | CRITICAL | HIGH | MEDIUM | LOW |\n'
-printf '|---|---|---|---|---|\n'
+printf '| Category | CRITICAL | HIGH | MEDIUM | LOW | QUESTION |\n'
+printf '|---|---|---|---|---|---|\n'
 jq -r '
   group_by(.category)
   | sort_by(-(length))
@@ -72,7 +83,8 @@ jq -r '
     ([.[] | select(.severity=="CRITICAL")] | length | tostring) + " | " +
     ([.[] | select(.severity=="HIGH")]     | length | tostring) + " | " +
     ([.[] | select(.severity=="MEDIUM")]   | length | tostring) + " | " +
-    ([.[] | select(.severity=="LOW")]      | length | tostring) + " |"
+    ([.[] | select(.severity=="LOW")]      | length | tostring) + " | " +
+    ([.[] | select(.severity=="QUESTION")] | length | tostring) + " |"
 ' <<< "$MERGED"
 printf '\n'
 
@@ -97,6 +109,7 @@ jq -r '
     + "\n- **Evidence:** \($f.evidence)"
     + (if ($f.description // "") != "" then "\n\n\($f.description)" else "" end)
     + (if ($f.suggestion // "") != "" then "\n\n**Suggested fix:** \($f.suggestion)" else "" end)
+    + (if ($f.remark // "") != "" then "\n\n**Remark to post:** \($f.remark)" else "" end)
     + "\n"
 ' <<< "$MERGED"
 
@@ -109,8 +122,17 @@ jq -r '
     ([.[] | select(.severity=="CRITICAL")] | length | tostring) + " CRITICAL, " +
     ([.[] | select(.severity=="HIGH")]     | length | tostring) + " HIGH, " +
     ([.[] | select(.severity=="MEDIUM")]   | length | tostring) + " MEDIUM, " +
-    ([.[] | select(.severity=="LOW")]      | length | tostring) + " LOW"
+    ([.[] | select(.severity=="LOW")]      | length | tostring) + " LOW, " +
+    ([.[] | select(.severity=="QUESTION")] | length | tostring) + " QUESTION"
 ' <<< "$MERGED"
+
+if jq -e 'any(.[]; (.remark // "") != "")' <<< "$MERGED" >/dev/null; then
+  printf '\n## Remarks to post\n\n'
+  jq -r '.[] | select((.remark // "") != "")
+    | "- `\(.file)\(if .line > 0 then ":\(.line)" else "" end)` \(.remark)"' <<< "$MERGED"
+fi
+
+print_clean
 
 if [ -f "$STATUS" ]; then
   NOT_OK=$(awk -F'\t' '$3!="ok"' "$STATUS")

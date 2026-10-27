@@ -49,6 +49,33 @@ reason:
 - **Query logic spread across call sites.** The same filter rebuilt in three places instead of
   one named queryset, scope or repository method the ORM supports. Name the one place it goes.
 
+Django pass, when the project uses the Django ORM. These traps pass tests and cost queries or
+data in production. Name the exact call that replaces each one:
+
+- **Load only what you use.** `obj.related.id` where `obj.related_id` exists. `only()` that
+  leaves out the fields of a `select_related` model, which makes Django drop that join.
+  `iterator()` on a queryset that needs its `prefetch_related` (it ignores the prefetch; use
+  `list()`). A prefetch that loads every column where `Prefetch("rel",
+  queryset=Model.objects.only(...))` would do. `__str__`, `__repr__` or an admin column that
+  reads a related object, which runs one query per row on every admin list page.
+- **One statement, not a loop.** `save()` or `create()` in a loop where `bulk_create` or
+  `bulk_update` exists. Get-then-delete or get-then-update where `queryset.delete()` or
+  `queryset.update()` does it in one statement. `.count()` after `.update()`, which already
+  returns the row count. An object fetched only to pass it into another filter, where
+  `relation__field=value` filters directly.
+- **Lost updates.** `obj.x = obj.x + n; obj.save()` where `F("x") + n` is atomic. `save()`
+  with no `update_fields` on a row that other code writes. `select_for_update()` with no
+  write that needs the lock.
+- **Invariants the database should hold.** `null=True` on a `CharField` or `TextField`, which
+  gives two empty values (use `default=""`). `unique_together` where `UniqueConstraint` is
+  the current API. A loose integer id where a `ForeignKey` belongs.
+- **Transactions.** An external API call inside `transaction.atomic()`, which holds the lock
+  while the network waits; move it out or into `transaction.on_commit`. A `try/except` that
+  catches a database error inside `atomic`, which leaves the transaction broken. An `atomic`
+  block around code that writes nothing.
+- **Contract types.** `float` for money where `Decimal` belongs. `POST` for an endpoint that
+  only reads.
+
 Before you record an ORM finding, read the framework's own query documentation for the version
 in the manifest. Use the `context7` MCP tool, or search the official documentation. Quote the
 documented call and give the page link in the finding. Do not rely on memory: ORM query APIs
