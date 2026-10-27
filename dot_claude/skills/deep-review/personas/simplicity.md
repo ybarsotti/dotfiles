@@ -26,6 +26,13 @@ this one judges what the change did to the code already there:
 
 Recommend the concrete simplification, not the principle.
 
+**Guards against what the schema already guarantees.** `getattr(obj, "x", None)`, `hasattr`,
+`if x is None`, `x or default`, or a `try/except` around a value that a non-null column, a
+required foreign key, a check constraint, a validated request schema, or the query's own filter
+already guarantees. The evidence is the model field or constraint, as `path:line`; without it,
+record a `QUESTION`. One exception: `hasattr` on a reverse one-to-one relation is a real check,
+but it runs one query per row unless the query loads that relation.
+
 **Code that does not read top down.** Judge the new code as a reader who opens the file once:
 
 - The public API of the class or module comes first. Its helpers follow, in the order they

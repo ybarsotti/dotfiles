@@ -115,4 +115,27 @@ for script in "$DISPATCH" "$COLLECT_CONTEXT" "$REVIEWER" "$AGGREGATE" "$RECORD" 
   assert_eq "$MODE" "755" "$(basename "$script"): source-tree executable bit is 755"
 done
 
+
+# ─── record.sh + report.sh: QUESTION, --remark and --clean ─────────────────
+# A QUESTION reaches the report but never blocks the verdict; a remark is capped so it stays
+# pasteable; a clean section is listed so the report shows what ran.
+RR_DIR=$(mktemp -d)
+export DEEP_REVIEW_FINDINGS="${RR_DIR}/findings.jsonl"
+"$RECORD" --persona simplicity --category simplicity --severity QUESTION --file app/m.py --line 3 \
+  --title "guard on a non-null field?" --evidence "app/models.py:10" \
+  --remark "isn't this enforced at DB level? read obj.x directly" 2>/dev/null
+"$RECORD" --persona senior-backend --clean "2. Database and queries" 2>/dev/null
+RR_REPORT=$("$REPORT" "$RR_DIR")
+assert_contains "$RR_REPORT" "**Verdict: APPROVE**" "report: a QUESTION alone does not block the verdict"
+# shellcheck disable=SC2016 # literal backticks in the expected markdown, not a command substitution
+assert_contains "$RR_REPORT" '- `app/m.py:3` isn'"'"'t this enforced at DB level?' "report: remarks to post list the file, line and remark"
+assert_contains "$RR_REPORT" "- senior-backend: 2. Database and queries" "report: clean sections are listed per persona"
+"$RECORD" --persona correctness --category correctness --severity LOW --file app/m.py --line 9 \
+  --title "low" --evidence "app/m.py:1" 2>/dev/null
+assert_contains "$("$REPORT" "$RR_DIR")" "**Verdict: REQUEST_CHANGES**" "report: a LOW beside a QUESTION still requests changes"
+assert_exit 1 "$RECORD" --persona x --category simplicity --severity LOW --title t --evidence e \
+  --remark "$(printf '%0161d' 0)"
+unset DEEP_REVIEW_FINDINGS
+rm -rf "$RR_DIR"
+
 assert_summary

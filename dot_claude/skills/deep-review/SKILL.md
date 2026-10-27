@@ -110,7 +110,7 @@ than a question. Do not stop at the report and wait to be asked.
    finding is common, and the second pass is what catches it.
 3. **Stop after two fix rounds.** What survives goes in a `## Open findings` section with the
    reason, and you say plainly which findings remain.
-4. **MEDIUM and LOW are the user's call.** List them and ask; do not fix them silently.
+4. **MEDIUM, LOW and QUESTION are the user's call.** List them and ask; do not fix them silently.
 
 Skip this phase when the run was `--dry-run` or the diff was empty.
 
@@ -149,8 +149,8 @@ Three things follow from that:
    ungrounded opinion never reaches the report.
 2. **`--category` is a closed set**, so the report groups and SARIF gets a stable `ruleId`.
 3. **There is no per-reviewer verdict.** Severity decides it: any CRITICAL is `REJECT`, any
-   HIGH is `REQUEST_CHANGES`, no findings is `APPROVE`. A reviewer cannot report a CRITICAL
-   and vote APPROVE.
+   HIGH is `REQUEST_CHANGES`, no findings is `APPROVE`; a `QUESTION` never blocks. A reviewer
+   cannot report a CRITICAL and vote APPROVE.
 
 `scripts/report.sh` then builds `report.md` as a pure `jq` transform — no aggregator model
 call, so nothing can invent a finding. `scripts/merge.jq` defines what counts as one finding:
