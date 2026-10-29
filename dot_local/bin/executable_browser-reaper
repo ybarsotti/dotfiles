@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Stops headless browsers that AI agents leave behind after demos and QA runs.
+#
+# A browser is abandoned when its root Chrome process runs longer than
+# BROWSER_REAPER_MAX_AGE_SECONDS (default: 2 hours) and uses a throwaway
+# profile from agent-browser, Puppeteer or Playwright. The user's own Chrome
+# uses its default profile, so this script never matches it.
+#
+# The script also exports AGENT_BROWSER_IDLE_TIMEOUT_MS to launchd. GUI apps
+# such as ChatGPT/Codex and Orca do not read ~/.zshrc, so without this their
+# agent-browser daemons never stop when idle.
+#
+# Usage: browser-reaper [--dry-run]
+set -euo pipefail
+
+max_age="${BROWSER_REAPER_MAX_AGE_SECONDS:-7200}"
+profile_pattern='user-data-dir=[^ ]*(agent-browser-chrome-|puppeteer_dev_chrome_profile-|playwright_chromiumdev_profile-)'
+dry_run=false
+[ "${1:-}" = "--dry-run" ] && dry_run=true
+
+launchctl setenv AGENT_BROWSER_IDLE_TIMEOUT_MS 900000 2>/dev/null || true
+
+# Prints "pid ppid age_seconds" for every browser process older than max_age.
+# Pass "roots" to skip the helper processes (renderer, GPU), which carry --type=.
+# The executable must be a Chrome binary, so a shell whose command line only
+# mentions a profile path never matches. ps prints elapsed time as [[dd-]hh:]mm:ss.
+old_browsers() {
+    awk -v max="$max_age" -v pat="$profile_pattern" -v roots="${1:-}" '
+        NR == FNR { pid = $1; sub(/^ *[0-9]+ /, ""); exe[pid] = $0; next }
+        exe[$1] ~ /Chrom|chrome-headless-shell/ && $0 ~ pat && !(roots == "roots" && $0 ~ /--type=/) {
+            n = split($3, t, /[-:]/)
+            secs = t[n] + t[n-1] * 60
+            if (n >= 3) secs += t[n-2] * 3600
+            if (n == 4) secs += t[1] * 86400
+            if (secs > max) print $1, $2, secs
+        }' <(ps -Ao pid=,comm=) <(ps -Ao pid=,ppid=,etime=,args=)
+}
+
+while read -r pid ppid age; do
+    [ -n "$pid" ] || continue
+    parent_args="$(ps -o args= -p "$ppid" 2>/dev/null || true)"
+    echo "$(date '+%F %T') reap pid=$pid age=${age}s parent=$ppid ${parent_args:0:80}"
+    "$dry_run" && continue
+    kill "$pid" 2>/dev/null || true
+    # agent-browser runs one daemon per session. It has no use without its Chrome.
+    case "$parent_args" in
+        *agent-browser*) kill "$ppid" 2>/dev/null || true ;;
+    esac
+done < <(old_browsers roots)
+
+"$dry_run" && exit 0
+
+# Chrome helpers that outlive their root keep the CPU busy. Kill what is left.
+sleep 2
+while read -r pid _ _; do
+    [ -n "$pid" ] && kill -9 "$pid" 2>/dev/null || true
+done < <(old_browsers)

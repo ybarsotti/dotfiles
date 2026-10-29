@@ -1,0 +1,30 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/usr/bin/env bash
+# Loads the LaunchAgent that stops headless browsers abandoned by AI agents.
+# Runs again when the plist or the script changes:
+# plist hash: {{ include "private_Library/LaunchAgents/com.barsotti.browser-reaper.plist.tmpl" | sha256sum }}
+# script hash: {{ include "dot_local/bin/executable_browser-reaper" | sha256sum }}
+set -eufo pipefail
+
+label="com.barsotti.browser-reaper"
+plist="{{ .chezmoi.homeDir }}/Library/LaunchAgents/${label}.plist"
+launch_domain="gui/$(id -u)"
+
+mkdir -p "{{ .chezmoi.homeDir }}/.local/state/browser-reaper"
+
+if [ ! -f "$plist" ]; then
+    echo "browser-reaper: plist missing at ${plist}" >&2
+    exit 1
+fi
+
+plutil -lint "$plist" >/dev/null
+
+if launchctl print "${launch_domain}/${label}" >/dev/null 2>&1; then
+    launchctl bootout "${launch_domain}/${label}"
+fi
+
+launchctl bootstrap "$launch_domain" "$plist"
+launchctl enable "${launch_domain}/${label}"
+
+echo "browser-reaper: LaunchAgent loaded (every 10 minutes)"
+{{ end -}}
