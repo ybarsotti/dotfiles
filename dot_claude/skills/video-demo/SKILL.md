@@ -112,3 +112,7 @@ Give the user the path of each `out/tour-final.mp4` and its length. For chat too
 ```bash
 ffmpeg -i out/tour-final.mp4 -vf scale=1280:-2 -crf 26 -c:a copy out/tour-720p.mp4
 ```
+
+To put the video in a pull request, upload it with `gh pr edit <n> --attach out/tour-720p.mp4`
+(gh 2.99.0 or later). Never commit the video to the repository. The limit is 10 MB on Free and
+100 MB on a paid plan; lower the bitrate with a higher `-crf` value if the file exceeds it.
