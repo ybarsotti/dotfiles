@@ -7,7 +7,9 @@ description: >-
 # scripts/report.sh then builds report.md from findings.jsonl.
 record_findings: true
 
-# Personas. `runner: any` means the dispatcher assigns based on --ratio.
+# Personas. Each one is pinned to a runner, so --ratio does not move them.
+# Codex takes the high-stakes lenses: security, architecture, correctness, backend data
+# flow and shortcut detection. Claude takes conventions, documentation, UI and simplicity.
 # Each persona body is the fixed file at personas/<id>.md.
 #
 # These eight replaced a sixteen-persona panel that ran each persona twice. Every merge below removed a real overlap:
@@ -28,7 +30,7 @@ personas:
       authn/authz holes, hardcoded secrets, input validation gaps, SQL/NoSQL injection,
       XSS, CSRF, BOLA/IDOR, rate-limiting absence, dependency CVEs, error message leakage,
       insecure defaults, missing TLS/cert validation, JWT/cookie handling.
-    runner: any
+    runner: codex
 
   - id: senior-backend
     role: Senior backend engineer (data flow, schema and query performance, observability)
@@ -48,7 +50,7 @@ personas:
       null=True on text, external calls inside atomic. Reads the framework's own query documentation with context7
       before recording an ORM finding. Observability: error context, structured logs with correlation
       ids, metrics and spans on new paths.
-    runner: any
+    runner: codex
 
   - id: senior-frontend
     role: Senior React/TypeScript engineer (component quality and design fidelity)
@@ -65,7 +67,7 @@ personas:
       against the design it followed: layout, hierarchy, states, exact copy, interaction,
       design-system components rebuilt bespoke. A changed screen with no design to check
       against is a HIGH finding.
-    runner: any
+    runner: claude
 
   - id: ui-ux
     role: UI/UX reviewer (project UI patterns, usability, componentization, motion)
@@ -83,7 +85,7 @@ personas:
       the rendered screen — visual-pass screenshots at desktop and 390 px judged for
       hierarchy, icons and interaction styles. Judges against _shared/ui-quality.md and
       grounds findings with ui-ux-pro-max guidance, but the project's own code outranks it.
-    runner: any
+    runner: claude
 
   - id: correctness
     role: Correctness reviewer (edge cases, concurrency, test coverage)
@@ -94,7 +96,7 @@ personas:
       non-idempotent retries, non-atomic transactions, lost updates, deadlocks. Then
       whether a test proves each of those, whether mocks are current, and whether any
       test asserts nothing meaningful.
-    runner: any
+    runner: codex
 
   - id: architecture
     role: Software architect (structure and type precision)
@@ -111,7 +113,7 @@ personas:
       not reached by a route, decorator, registry, signal, template, task name or dynamic
       import. Then the surviving callers of anything the diff removes or renames — searched on
       the latest base branch, with a test mock of a removed path counted as a caller.
-    runner: any
+    runner: codex
 
   - id: simplicity
     role: Simplicity advocate (over-engineering and reinvention)
@@ -124,7 +126,7 @@ personas:
       function hand-rolled, a near-copy of a sibling, a new dependency for what an
       installed one covers. Searches with Serena, gitnexus and graphify, never raw grep.
       Declines to force reuse across a real boundary.
-    runner: any
+    runner: claude
 
   - id: shortcut-watchdog
     role: Shortcut watchdog (work claimed against work done)
@@ -140,7 +142,7 @@ personas:
       documented pattern: a bypassed layer, a missing companion artifact, the unprotected
       variant of a guarded primitive. Owns the gap between claimed and done work, nothing else.
     category: shortcut
-    runner: any
+    runner: codex
 
   - id: project-fit
     role: Project-fit reviewer (repo rules, documentation, task scope)
@@ -160,4 +162,4 @@ personas:
       linked task: missing acceptance criteria, scope creep, requirements left unaddressed.
       Quotes the rule or doc line for every rule and doc finding. Layout findings stand on
       the code itself.
-    runner: any
+    runner: claude

@@ -20,7 +20,9 @@ Read `$ARGUMENTS` and extract:
 - **variant** (positional, default `"default"`): one of `default` (9 personas), `security-focused`, `adversarial-debate`, or any name matching a
   `variants/<name>.yml` file
 - **--reviewers N** (default: `persona_count` — each persona runs **once**)
-- **--ratio C:X** (default: an even reviewer split)
+- **--ratio C:X** (default: an even reviewer split). It moves only `runner: any` personas.
+  `default` pins all: Codex runs security, architecture, correctness, senior-backend and
+  shortcut-watchdog; Claude runs project-fit, simplicity, ui-ux and senior-frontend.
 - **--scope ref** (default `"main...HEAD"`)
 - **--task id** (default: auto-detect)
 - **--timeout secs** (default `600`)
@@ -28,8 +30,7 @@ Read `$ARGUMENTS` and extract:
 - **--no-simplify** (default off): skip the `/simplify` pass that otherwise runs after the report
 - **--keep-artifacts** / **--dry-run** (default off)
 
-Running a persona twice produces duplicate findings by construction and doubles the token
-cost. Ask for it with `--reviewers` only when you mean it.
+A persona run twice duplicates its findings and doubles the cost; use `--reviewers` with care.
 
 `scripts/dispatch.sh` validates all of this itself (variant file exists, `--reviewers` is a
 positive integer, `--ratio` sums correctly, required binaries are present) and exits with a
