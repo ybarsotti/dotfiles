@@ -246,6 +246,16 @@ Mocking policy: mock only the outermost boundaries (network, third-party APIs, e
 | EC-003 | A lane agent not present in the allowlist. | Medium | Cover now |
 | EC-004 | A cyclic depends_on graph among lanes. | Medium | Fail loudly |
 
+## Evidence map
+
+| id | covers | proof | proof kind |
+|---|---|---|---|
+| R-001 | Initialize parallel run safely | `bash tests/test-pipeline-integration.sh` | test |
+| EC-001 | Missing contract file fails loudly | `bash tests/test-pipeline-integration.sh` | test |
+| EC-002 | Uncommitted shared file fails loudly | `bash tests/test-pipeline-integration.sh` | test |
+| EC-003 | Lane agent outside the allowlist is refused | `bash tests/test-pipeline-integration.sh` | test |
+| EC-004 | Cyclic depends_on graph fails loudly | `bash tests/test-pipeline-integration.sh` | test |
+
 ## Subplans
 
 - [planning](subplans/planning.md)

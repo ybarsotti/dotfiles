@@ -1093,6 +1093,14 @@ Chose the adapter approach to isolate vendor churn.
 ## Documentation impact
 none — no docs describe this logic
 
+## Evidence map
+| id | covers | proof | proof kind |
+|---|---|---|---|
+| R-001 | Ship widget refactor | `bash tests/widget.sh` | test |
+| EC-001 | empty input | `bash tests/widget.sh` | test |
+| EC-002 | very long name | `bash tests/widget.sh` | test |
+| EC-003 | network failure | `bash tests/widget.sh` | test |
+
 ## QA / test-execution
 no
 - QA plan: not applicable — validator fixture has no user-facing flow.
@@ -1113,6 +1121,7 @@ no
 - [ ] stages-documented
 - [ ] rules-documented
 - [ ] removed-contracts-documented
+- [ ] evidence-map-complete
 - [ ] code-intel-bootstrapped
 - [ ] clarifying-questions-asked
 - [ ] tasks-≥1
@@ -1269,7 +1278,7 @@ assert_eq "$(count_unticked_checklist "${FIN_PASS_RUN}/subplans/good.md")" "0" \
 FIN_VALID_JSON=$("$VALIDATE" "${FIN_PASS_RUN}/plan.md" --root --json)
 for item in related-context-present requirements-matrix-present user-journey-documented \
   data-model-documented ui-design-pass-documented product-design-handoff-documented \
-  stages-documented rules-documented removed-contracts-documented edges-≥4; do
+  stages-documented rules-documented removed-contracts-documented edges-≥4 evidence-map-complete; do
   assert_eq "$(jq -r --arg item "$item" '.[] | select(.item == $item) | .status' <<<"$FIN_VALID_JSON")" \
     pass "finalize-plan.sh: ${item} passes on complete root plan"
 done
@@ -1297,22 +1306,29 @@ sed 's/| EC-003 | network failure | Medium | Fail loudly |/| network failure | M
 expect_fail_item "edges-≥4" "${FIN_PASS_RUN}/edge-without-id.md"
 sed 's/| EC-004 | concurrent writers | Low | Out of scope |/| EC-004 | concurrent writers | Low | maybe later |/' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/edge-bad-decision.md"
 expect_fail_item "edges-≥4" "${FIN_PASS_RUN}/edge-bad-decision.md"
+sed '/^| EC-003 | network failure | `bash tests\/widget.sh` | test |$/d' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/evidence-missing-edge.md"
+expect_fail_item "evidence-map-complete" "${FIN_PASS_RUN}/evidence-missing-edge.md"
+sed '/^| R-001 | Ship widget refactor/d' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/evidence-missing-requirement.md"
+expect_fail_item "evidence-map-complete" "${FIN_PASS_RUN}/evidence-missing-requirement.md"
 expect_fail_item "product-design-handoff-documented" "${FIN_PASS_RUN}/missing-design-reason.md"
 perl -0pe '
   s/- Applies: no\n- Not applicable: internal refactor has no user interaction flow/- Applies: yes\n1. User opens widget settings\n2. System saves and confirms widget settings/;
   s/- Schema changes: no\n- None: refactor does not touch persistent storage/- Schema changes: yes\n- Deploy order: the column is nullable, so the previous release keeps writing rows\n| create | `widgets` | `name` | `text` | required | request payload | written on create |\n\n```mermaid\nerDiagram\n  users ||--o{ widgets : owns\n  widgets {\n    uuid id PK\n    text name\n  }\n```/;
   s/- Applies: no\n- Not applicable: refactor ships as one slice/- Applies: yes\n- Current stage: 1, settings form\n- Cross-stage architecture: one settings page, each stage adds a section\n\n| # | stage | scope | class | status | commit |\n|---|---|---|---|---|---|\n| 1 | Settings form | rename field | light | in progress | - |\n| 2 | Widget limits | limit rule | full | planned | - |/;
   s/- No rule applies: the refactor changes no governed behavior/| rule | source | applies because | how the plan honors it |\n|---|---|---|---|\n| Names are unique per owner | `docs\/business-rules\/widgets.md` | the form renames a widget | Task 1 validates uniqueness |/;
+  s/(\| EC-001 \| empty input \| `bash tests\/widget.sh`)/| Names are unique per owner | unique names | `bash tests\/widget.sh` | test |\n$1/;
   s/- Applies: no\n- Not applicable: refactor removes no route, symbol or key/- Applies: yes\n\n| contract | kind | callers found | search | resolution |\n|---|---|---|---|---|\n| `GET \/widgets\/old` | route | none | `rg -n widgets\/old` | removed |/;
   s/- Applies: no\n- Not applicable: refactor has no interface changes/- Applies: yes\n- Who and task: Admin renames a widget and checks the result\n- Reference screen: `src\/pages\/settings.tsx`\n- Reuse: `Button` and `Toast` from `src\/ui`\n- Hierarchy: one title, one form group\n- Layout and mobile: two columns on desktop, one column at 390 px\n- Actions: Save on the right of the footer\n- Feedback and motion: spinner in Save, toast on success, fade between states\n- Content: names truncate with a tooltip\n- Accessibility: Tab order follows the form, errors in a live region\n- Shortcuts: none — the task is a single edit\n\n| state | effect | copy | action |\n|---|---|---|---|\n| loading | skeleton of the form | none | none |\n| error | message above the form | Could not save | Retry |\n| success | toast | Saved | none |/;
   s/- Needed: no\n- Not needed: refactor has no interface changes/- Needed: yes\n> Page\/screen: Widget settings\n>\n> Interactions: Edit and save widget name\n>\n> Behavior and states: Loading, validation error, saving and success/;
 ' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/applicable-sections.md"
 APPLICABLE_JSON=$("$VALIDATE" "${FIN_PASS_RUN}/applicable-sections.md" --root --json)
 for item in user-journey-documented data-model-documented ui-design-pass-documented \
-  product-design-handoff-documented stages-documented rules-documented removed-contracts-documented; do
+  product-design-handoff-documented stages-documented rules-documented removed-contracts-documented evidence-map-complete; do
   assert_eq "$(jq -r --arg item "$item" '.[] | select(.item == $item) | .status' <<<"$APPLICABLE_JSON")" \
     pass "finalize-plan.sh: ${item} passes when applicable"
 done
+sed '/^| Names are unique per owner | unique names/d' "${FIN_PASS_RUN}/applicable-sections.md" >"${FIN_PASS_RUN}/evidence-missing-rule.md"
+expect_fail_item "evidence-map-complete" "${FIN_PASS_RUN}/evidence-missing-rule.md"
 assert_eq "$(jq -r '.[] | select(.item == "er-diagram-when-schema-changes") | .status' <<<"$APPLICABLE_JSON")" \
   pass "er-diagram-when-schema-changes: passes with a relationship and a table block"
 

@@ -193,6 +193,17 @@ RUN_HAPPY="$(mktemp -d)/run"
 assert_exit 0 "$INIT_RUN" "$FIXTURE_PLAN" "$RUN_HAPPY" "$REPO_HAPPY" "surface:test"
 
 assert_exit 0 test -f "${RUN_HAPPY}/manifest.json"
+
+# A stamped plan starts while it matches its approval and is refused once its
+# approved text changes. Edits under `## Deviations` keep the stamp valid.
+STAMP_DIR=$(mktemp -d)
+cp -R "$(dirname "$FIXTURE_PLAN")/." "$STAMP_DIR/"
+STAMP_PLAN="${STAMP_DIR}/$(basename "$FIXTURE_PLAN")"
+bash "${ROOT}/dot_claude/skills/_shared/executable_plan-stamp.sh" approve "$STAMP_PLAN" >/dev/null
+printf '\n## Deviations\n| D-001 | a | b | c | executor |\n' >>"$STAMP_PLAN"
+assert_exit 0 "$INIT_RUN" "$STAMP_PLAN" "$(mktemp -d)/run" "$(new_repo)" "surface:test"
+sed -i '' 's/Initialize lanes from valid plan/Initialize lanes from any plan/' "$STAMP_PLAN"
+assert_exit 1 "$INIT_RUN" "$STAMP_PLAN" "$(mktemp -d)/run" "$(new_repo)" "surface:test"
 assert_exit 0 jq -e . "${RUN_HAPPY}/manifest.json"
 assert_eq "$(jq -r '.schema_version' "${RUN_HAPPY}/manifest.json")" "1.0.0" "manifest schema_version"
 assert_eq "$(jq -r '.contract.path' "${RUN_HAPPY}/manifest.json")" "contract.schema.json" "manifest contract path"

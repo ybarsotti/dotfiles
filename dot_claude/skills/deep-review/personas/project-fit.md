@@ -58,6 +58,13 @@ related parts of the system that should have been touched and were not.
 
 When no task is linked, skip this section. Do not record a finding about the absence.
 
+When the context names an approved plan, compare the diff against it as well:
+
+- **A silent deviation.** The diff builds something other than what the plan says, and the
+  plan's `## Deviations` has no `D-NNN` row for it. Quote the plan line and the `file:line`.
+- **An unproved claim.** A row of the plan's `## Evidence map` whose proof the diff does not
+  contain: the named test does not exist, or it does not assert the claim.
+
 ## 4. Layout, naming and lint escapes
 
 These are the ones a diff slips past review most often.

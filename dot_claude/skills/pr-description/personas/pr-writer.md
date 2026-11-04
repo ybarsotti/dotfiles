@@ -57,6 +57,21 @@ from the request path the diff touches (entry point → service → repo/DB → 
 <why this approach over the alternatives; the key decisions taken and the trade-offs
 accepted. Call out anything a reviewer might otherwise question.>
 
+## Evidence by requirement
+
+| id | claim | proof | result |
+|---|---|---|---|
+| R-001 | <claim> | <test name, command or QA link> | pass at `<short sha>` |
+
+<One row per line of `evidence.tsv`, in its order, copied with its result. Never upgrade a
+result: `fail` and `not run` stay as written. A proof is a test name, a command or a link, not a
+file list.>
+
+## Deviations from the plan
+
+<One line per `D-NNN` row in the plan's `## Deviations`: what the plan said, what was built, and
+why. Write `None` when the plan has no deviation, and leave the section out without a plan.>
+
 ## Deferred edge cases
 
 <Only when the plan's edge-case table has `Out of scope` rows. One line per row: its ID, the
@@ -140,6 +155,14 @@ flowchart TD
 ```
 
 ## Rationale & key decisions
+
+...
+
+## Evidence by requirement
+
+...
+
+## Deviations from the plan
 
 ...
 

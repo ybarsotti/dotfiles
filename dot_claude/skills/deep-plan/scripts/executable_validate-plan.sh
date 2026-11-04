@@ -465,6 +465,31 @@ if [ "$MODE" = "root" ]; then
     record "removed-contracts-documented" "fail" "set Applies yes + ≥1 filled row (contract, kind, callers, search, resolution), or no + filled Not applicable reason"
   fi
 
+  # Evidence map: a proof for every requirement, rule and acted-on edge case
+  # (_shared/spec-evidence.md section 4). R-NNN counts against the requirements matrix.
+  EVIDENCE_BODY=$(section_body "Evidence map")
+  EVIDENCE_IDS=$(printf '%s\n' "$EVIDENCE_BODY" | grep -E '^\|' |
+    grep -vE '^\| *id *\||^\|[-| ]+\|$' | awk -F'|' '{gsub(/^ +| +$/, "", $2); print $2}')
+  REQ_ROWS=$(section_body "Requirements matrix" | grep -E '^\|' |
+    grep -cvE '^\| *status *\||^\|[-| ]+\|$')
+  EVIDENCE_REQ=$(printf '%s\n' "$EVIDENCE_IDS" | grep -cE '^R-[0-9]{3,}$')
+  EVIDENCE_MISSING=""
+  while IFS= read -r want; do
+    [ -n "$want" ] || continue
+    printf '%s\n' "$EVIDENCE_IDS" | grep -qxF "$want" || EVIDENCE_MISSING="$EVIDENCE_MISSING $want"
+  done < <(
+    printf '%s\n' "$RULES_BODY" | grep -E '^\|' | grep -vE '^\| *rule *\||^\|[-| ]+\|$' |
+      awk -F'|' '{gsub(/^ +| +$/, "", $2); print $2}'
+    section_body "Edge cases & failure modes" | grep -iE '\| *(cover now|fail loudly) *\| *$' |
+      awk -F'|' '{gsub(/^ +| +$/, "", $2); print $2}'
+  )
+  if [ -n "$EVIDENCE_IDS" ] && ! printf '%s\n' "$EVIDENCE_BODY" | grep -qE '<[^>]+>' &&
+     [ "$EVIDENCE_REQ" -ge "$REQ_ROWS" ] && [ -z "$EVIDENCE_MISSING" ]; then
+    record "evidence-map-complete" "pass" "$(printf '%s\n' "$EVIDENCE_IDS" | grep -c .) claim(s) mapped to a proof"
+  else
+    record "evidence-map-complete" "fail" "need one filled row per requirement ($EVIDENCE_REQ of $REQ_ROWS R-NNN rows), per rule and per Cover now/Fail loudly edge case; missing:${EVIDENCE_MISSING:- none}"
+  fi
+
   # The UI design pass holds a UI change to _shared/ui-quality.md: every field
   # filled, and a states table that covers at least loading, error and success.
   UI_APPLIES=$(applies_flag "UI design pass")

@@ -17,7 +17,8 @@ its concrete fixes, and open/update the PR.
 
 - **Title = Conventional Commit**: `type(scope): summary`, `type` ∈ `feat` `fix` `refactor` `perf` `docs` `test` `chore`, ≤ 70 chars.
 - **Body contains**: what it solves, **Mermaid**, ticket, Slack threads, requirements matrix,
-  rationale/key decisions, verification, and — whenever the change touches UI — an
+  rationale/key decisions, verification, **`## Evidence by requirement`** (see Phase 0.5),
+  `## Deviations from the plan`, and — whenever the change touches UI — an
   **`## Evidence`** section (see Phase 2.5), and — whenever it touches who may do what — an
   **`## Permissions`** section (see Phase 2.6).
 - **Body must NOT contain**: a changed-file list, file paths as an inventory, or file/line counts. Objective about *what we solve*, not *what moved*.
@@ -55,6 +56,24 @@ links from ticket/task context plus diff; never invent missing Slack threads.
 
 If `--dry-run`, note it — you will stop after Phase 2.
 
+## Phase 0.5 — Spec check and proofs
+
+Follow sections 2, 4 and 5 of `~/.claude/skills/_shared/spec-evidence.md`.
+
+1. **The plan is still the approved one.** With `--plan`, run
+   `~/.claude/skills/_shared/plan-stamp.sh check <plan>`. Exit 1 stops here: report the changed
+   plan to the user and open nothing. Exit 2 continues, and `## Verification` says the plan
+   carries no approval stamp.
+2. **Run each proof at HEAD.** Take the plan's `## Evidence map`. Without one, build the rows
+   from the requirements matrix, the `## Rules` table and the `Cover now`/`Fail loudly` edge
+   cases, and find the test that proves each one in the diff. Run every `test` and `command`
+   proof. Link every `qa` proof to the `--evidence` artifact. Write one line per row to
+   `$RUN_DIR/evidence.tsv`: id, claim, proof, result (`pass`, `fail`, `not run: <reason>`),
+   and the short SHA of HEAD.
+3. **A failed or missing proof blocks the PR.** Fix it, or ask the user to defer the row with a
+   reason. Never write `pass` for a proof that did not run.
+4. **Deviations.** Copy the plan's `## Deviations` rows, or `None`.
+
 ## Phase 1 — WRITE (claude Sonnet)
 
 Assemble the writer input into `$RUN_DIR/writer-input.md`:
@@ -66,7 +85,8 @@ Assemble the writer input into `$RUN_DIR/writer-input.md`:
    subjects (`git log --pretty=%s main..HEAD`), and — if a plan exists — the extracted
    `## Context`, `## Ticket and Slack context`, `## Requirements matrix`,
    `## Flow diagram`, `## Rationale & key decisions`, `## Stages` and
-   `## Edge cases & failure modes` verbatim. Tell writer to reconcile
+   `## Edge cases & failure modes` verbatim, plus `$RUN_DIR/evidence.tsv` and the plan's
+   `## Deviations`. Tell writer to reconcile
    every requirement against finished diff/tests: `✅ Implemented`, `⚠️ Partial`, or
    `❌ Missing`; never carry `✅ Planned` forward blindly.
 
@@ -123,6 +143,8 @@ The reviewer validates, returning concrete fixes:
 - **Evidence present** — when the diff touches UI, an `## Evidence` section with a flow
   GIF/recording (and before/after for changed screens) or an honest local-asset list; when it
   does not, the explicit `_no UI change — no visual evidence_`?
+- **Evidence by requirement** — one row per `evidence.tsv` line, each result naming the SHA
+  it ran at, that SHA equal to HEAD, and no `pass` without a proof that ran?
 - Body is objective about *what we solve* (not a changelog of the diff)?
 
 Read `$RUN_DIR/review.md` and **apply every concrete fix** to the title / `pr-body.md`.
@@ -230,6 +252,8 @@ Mirror the opener logic in
 auto-detect, and CODEOWNERS reviewer detection. Reuse those, but the **title + body come
 from Phases 1-2** — do not regenerate them from a template.
 
+0. **The proofs still match HEAD.** When HEAD moved after Phase 0.5, run the proofs again and
+   update `## Evidence by requirement` before you open or update the PR.
 1. Ensure the title already carries a conventional-commit type. If somehow it doesn't,
    infer the type from recent commits / changed paths (as pr-open.sh does) and prefix it.
 2. Compute `--reviewer` flags from `.github/CODEOWNERS` (or `CODEOWNERS`) matching the
@@ -265,6 +289,10 @@ gh pr edit <n> \
 
 Print the PR URL and a one-line summary, e.g.:
 `opened PR #1421 — feat(webhooks): prevent duplicate delivery — assigned to @me, ticket PROJ-2982`.
+
+When the repository has no CI check that a pull request matches its plan, and the user owns that
+CI, suggest once a job that runs `plan-stamp.sh check` and fails on a missing evidence row
+(`_shared/spec-evidence.md` section 6). Do not add it unless the user asks.
 
 ## Checklist (orchestrator ticks after Phase 3)
 

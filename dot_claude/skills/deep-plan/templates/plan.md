@@ -344,6 +344,19 @@ stateDiagram-v2
 | EC-003 | <network or IO failure> | <criticality> | <decision> |
 | EC-004 | <race condition or concurrent writers> | <criticality> | <decision> |
 
+## Evidence map
+<!-- The proof for each claim, as in `~/.claude/skills/_shared/spec-evidence.md` section 4.
+     One row per requirement (R-001 is the first requirements-matrix row, R-002 the second),
+     per rule in `## Rules`, and per edge case decided Cover now or Fail loudly. The PR turns
+     each row into a line of `## Evidence by requirement`, with its result at the shipped SHA.
+     `proof kind`: test | command | qa | review. Use `review` only when no runnable proof
+     exists, and say why in `proof`. -->
+| id | covers | proof | proof kind |
+|---|---|---|---|
+| R-001 | <requirement> | `<test node id or command>` | <test|command|qa|review> |
+| <rule id> | <rule> | `<test or check>` | <proof kind> |
+| EC-001 | <edge case> | `<test node id>` | <proof kind> |
+
 ## QA / test-execution
 <!-- Does this change user-facing flows or add/alter screens? Answer yes/no.
      If yes, deep-plan MUST create a reviewed structured plan via `/qa-plan`.
@@ -355,6 +368,12 @@ stateDiagram-v2
 ## Verification
 - <command or sequence to validate end-to-end>
 - <how to confirm metrics / logs / UX>
+
+## Deviations
+<!-- Empty at approval. Execution adds one D-NNN row per departure from this plan, as in
+     `~/.claude/skills/_shared/spec-evidence.md` section 3. plan-stamp.sh ignores this section,
+     so adding rows keeps the approval valid; editing any other section does not. -->
+- None
 
 ## Subplans
 <populated by subplan-fanout.sh — one bullet per chapter>
@@ -419,6 +438,7 @@ docs). Use `### Q:` / `### A:` headers. If `--skip-grill` was passed, write exac
 - [ ] stages-documented
 - [ ] rules-documented
 - [ ] removed-contracts-documented
+- [ ] evidence-map-complete
 - [ ] affected-files-paths-exist
 - [ ] subplans-section-non-empty
 - [ ] each-subplan-file-exists

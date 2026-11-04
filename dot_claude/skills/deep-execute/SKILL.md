@@ -93,11 +93,11 @@ past.
 - **`timeout`** — nothing fired within the bound; call `monitor-events.sh` again unless the
   silence itself looks like a stall worth investigating.
 
-`decision` events never reach you as a trigger — a lane recording why it chose something is
-for Phase 5's report to read, not a reason to interrupt a round. But they are the one thing in
-the run that dies with the worker session, so if a lane answers a `question` with a real design
-choice, or reports working around something the plan missed, tell it in the `reply.sh` to record
-that through `decision.sh` before moving on.
+`decision` events never interrupt a round; Phase 5's report reads them. They die with the worker
+session, so when a lane makes a real design choice or works around something the plan missed,
+tell it in `reply.sh` to record it through `decision.sh`, then add a `D-NNN` row to the plan's
+`## Deviations` yourself (`_shared/spec-evidence.md` §3). A deviation that changes a requirement,
+rule, edge-case decision or contract goes to `AskUserQuestion` before the lane builds it.
 
 ## Phase 3 — Round gate
 
@@ -157,9 +157,9 @@ Run `set-phase.sh RUN_DIR review`, then run these steps **back to back, unattend
    once the lanes are torn down), record the fix, then re-run the QA agent. A gap closes when
    QA says so, not when the fixer does. Loop 3 → 4 until QA is clean, capped at 3 QA rounds;
    at the cap, `AskUserQuestion` with the surviving findings.
-5. **Freeze.** Commit, record the full `git rev-parse HEAD`. QA evidence binds the commit it
-   ran against — any later change invalidates it. Never finish on missing, blocked or stale
-   evidence; surface a blocker when the URL or the commit proof is unavailable.
+5. **Freeze.** Commit, record the full `git rev-parse HEAD`, run `plan-stamp.sh check PLAN`. QA
+   evidence binds the commit it ran against — a later change invalidates it. Never finish on a
+   changed plan, or on missing, blocked or stale evidence; surface the blocker instead.
 6. Run `set-phase.sh RUN_DIR delivery`, then **open the PR.**
    `Skill(skill="pr-description", args="--plan <plan.md> --ticket <KEY-123> --evidence <qa-index.html>")`
    — requirements reconciled against the finished diff, Mermaid, key decisions, and the

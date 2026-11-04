@@ -372,6 +372,11 @@ did not check.
 Apply the rewrites to the plan before Phase 4. Say in the presentation which claims stay
 unverified, and why.
 
+**12. Evidence map** — One row per requirement (`R-001` onward), per applicable rule and per
+`Cover now` or `Fail loudly` edge case, with the test, command or QA step that proves it. The
+format is in section 4 of `~/.claude/skills/_shared/spec-evidence.md`. The PR turns each row
+into a line of evidence, so a row with no runnable proof says why.
+
 ## Phase 4 — Present the plan
 
 0. **When the plan adds machinery, run `Skill(skill="shed-light")` over it first.** Machinery
@@ -382,6 +387,8 @@ unverified, and why.
 1. `Skill(skill="plannotator-annotate")`, then `plannotator annotate "$PLAN_PATH" --gate`.
 2. Apply the annotations that come back.
 3. `ExitPlanMode` for the final approval.
+4. Stamp the approved plan: `~/.claude/skills/_shared/plan-stamp.sh approve "$PLAN_PATH"`.
+   Commit the plan and its `.approved` stamp together.
 
 ## Phase 5 — Recommend the next commands, in order
 
@@ -401,6 +408,10 @@ of `superpowers:writing-plans` words them: **1. Subagent-Driven (recommended)** 
 
 - `Skill(skill="superpowers:executing-plans")` against `$PLAN_PATH` in this session.
 - Or `/deep-execute "$PLAN_PATH"` when the user wants parallel lanes.
+
+Tell the implementer to record every departure from the plan as a `D-NNN` row under the plan's
+`## Deviations` (section 3 of `_shared/spec-evidence.md`), and to ask before a departure that
+changes a requirement, a rule, an edge-case decision or a contract.
 
 **3. The visual pass, then annotated screenshots, when the change alters a user-facing flow
 or screen.** Run this as soon as the implementation is done. First run section 11 of
@@ -430,7 +441,8 @@ than reporting it for later:
    is not a summary.
 
 **5. `/pr`** to open the PR once the chain above is clean. Rebase onto the latest base branch
-first, and repeat the caller search for every removed contract in the plan. For stages, run
+first, and repeat the caller search for every removed contract in the plan. Run
+`plan-stamp.sh check "$PLAN_PATH"`; the PR body proves each evidence-map row at the shipped SHA. For stages, run
 steps 2 to 4 once per stage with the gate of its class, commit the stage, and open the PR with
 the stage table (`_shared/stages.md`).
 

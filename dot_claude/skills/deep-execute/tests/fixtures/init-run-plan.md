@@ -152,6 +152,16 @@ sequenceDiagram
 
 - none — this is a test fixture, no docs describe it.
 
+## Evidence map
+
+| id | covers | proof | proof kind |
+|---|---|---|---|
+| R-001 | Initialize lanes from valid plan | `bash tests/test-deep-execute.sh` | test |
+| EC-001 | Empty input file fails loudly | `bash tests/test-deep-execute.sh` | test |
+| EC-002 | Malformed contract JSON refuses to start | `bash tests/test-deep-execute.sh` | test |
+| EC-003 | Two lanes never write the same path | `bash tests/test-deep-execute.sh` | test |
+| EC-004 | Missing acceptance data fails loudly | `bash tests/test-deep-execute.sh` | test |
+
 ## QA / test-execution
 
 - QA flag: no — this fixture never runs against a real UI or user flow.

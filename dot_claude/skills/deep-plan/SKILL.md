@@ -288,6 +288,7 @@ Confirm the plan includes, at minimum:
 - A **UI design pass** held to `~/.claude/skills/_shared/ui-quality.md` for any UI change, and a copyable **Product design handoff prompt** for substantial UI; explicit `no` for each otherwise.
 - A **TDD test list** with the outer-boundary-only mocking policy stated.
 - An **Abstractions decision log**.
+- An **Evidence map**: one proof per requirement, rule and Cover now/Fail loudly edge case.
 - A **Documentation impact** section (docs/ that go stale must be updated, or `none`).
 - A **QA / test-execution** flag ("changes flows or adds screens? yes/no").
 - A **Verification** section.
@@ -347,6 +348,11 @@ The plan is approved; **how** it gets built is a separate decision, and it is th
 root — so run it there, now: `(cd "$PROJECT_ROOT" && validate-plan.sh "$RUN_DIR/plan.md" --root
 --json)`. Any `fail` goes back to `finalize-plan.sh`. Never offer option A on a plan that
 `init-run.sh` will reject; that failure belongs here, not after the user asks to build.
+
+**Publish and stamp the approved plan** (`~/.claude/skills/_shared/spec-evidence.md` sections 1–2).
+Copy `plan.md` and `subplans/` to `$PROJECT_ROOT/docs/superpowers/plans/YYYY-MM-DD-<slug>/`, run
+`plan-stamp.sh approve` on the copy, and commit both. That copy is `$PLAN` from here on: every
+handoff below names it, and execution appends to its `## Deviations`.
 
 Write `$RUN_DIR/execution-recommendation.md` — recommendation first, then the four options
 with the trade-off that decides between them — and put the same four to the user through
@@ -420,8 +426,8 @@ Option B is the single explicit opt-out, and it must come from the user through 
 
 Hand off according to the Phase 3.5 choice, then stop:
 
-- **A** → print `/deep-execute "$RUN_DIR/plan.md"`.
-- **B** → print `Skill(skill="superpowers:executing-plans")` against `$RUN_DIR/plan.md`.
+- **A** → print `/deep-execute "$PLAN"`.
+- **B** → print `Skill(skill="superpowers:executing-plans")` against `$PLAN`.
 - **C** → print the `Workflow` phase shape the plan implies (one stage per lane, verify stage).
 - **D** → print the Codex dispatch plus the same post-build chain.
 

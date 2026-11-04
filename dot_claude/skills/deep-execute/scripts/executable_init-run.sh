@@ -87,6 +87,19 @@ VALIDATE_JSON=$(cd "$CWD" && "$VALIDATE_PLAN" "$PLAN" --root --json) || {
   exit 1
 }
 
+# A stamped plan must still be the approved text (_shared/spec-evidence.md
+# section 2). An unstamped plan only warns: older plans and fixtures have none.
+PLAN_STAMP="${SKILL_DIR}/../_shared/plan-stamp.sh"
+[ -f "$PLAN_STAMP" ] || PLAN_STAMP="${SKILL_DIR}/../_shared/executable_plan-stamp.sh"
+if [ -f "${PLAN}.approved" ]; then
+  bash "$PLAN_STAMP" check "$PLAN" >/dev/null || {
+    echo "init-run.sh: refusing to start — the plan changed after its approval (plan-stamp.sh check)" >&2
+    exit 1
+  }
+else
+  echo "init-run.sh: warning — $PLAN has no approval stamp" >&2
+fi
+
 # ─── Step 2: parse the plan (own source of truth, not re-derived by hand) ──
 
 PLAN_JSON=$("$PARSER" "$PLAN") || {
