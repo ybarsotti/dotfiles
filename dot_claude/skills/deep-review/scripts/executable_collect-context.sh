@@ -21,6 +21,7 @@ log() { printf 'collect-context: %s\n' "$*" >&2; }
 
 REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || err "not in a git repo"
 REPO_NAME=$(basename "$REPO_ROOT")
+REPO_REMOTE=$(git -C "$REPO_ROOT" remote get-url origin 2>/dev/null || echo none)
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 COMMIT=$(git rev-parse --short HEAD)
 
@@ -136,6 +137,7 @@ cat > "$OUT" <<EOF
 
 ## Repo
 - name: ${REPO_NAME}
+- remote: ${REPO_REMOTE}
 - branch: ${BRANCH}
 - commit: ${COMMIT}
 - scope: ${SCOPE_DESC}

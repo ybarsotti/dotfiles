@@ -138,4 +138,23 @@ assert_exit 1 "$RECORD" --persona x --category simplicity --severity LOW --title
 unset DEEP_REVIEW_FINDINGS
 rm -rf "$RR_DIR"
 
+# ─── recurring.sh: a finding seen in two earlier runs of the same repo ─────
+RECURRING="${ROOT}/dot_claude/skills/deep-review/scripts/executable_recurring.sh"
+RC_ROOT=$(mktemp -d)
+rc_run() { # rc_run NAME REMOTE TITLE
+  mkdir -p "${RC_ROOT}/$1"
+  printf '## Repo\n- remote: %s\n' "$2" >"${RC_ROOT}/$1/context.md"
+  jq -nc --arg t "$3" '{title:$t, severity:"HIGH"}' >"${RC_ROOT}/$1/findings.jsonl"
+}
+rc_run run-a git@x:me/app "Service layer raises HttpError for validation"
+rc_run run-b git@x:me/app "Repository raises HttpError on validation failure"
+rc_run run-c git@x:me/other "Service layer raises HttpError for validation"
+rc_run run-now git@x:me/app "Service raises HttpError on validation"
+RC_OUT=$("$RECURRING" "${RC_ROOT}/run-now" "$RC_ROOT")
+assert_contains "$RC_OUT" "| 2 | HIGH | Service raises HttpError on validation |" \
+  "recurring: counts earlier runs of the same repository only"
+rc_run run-now git@x:me/app "Checkout button lacks a focus ring"
+assert_eq "$("$RECURRING" "${RC_ROOT}/run-now" "$RC_ROOT")" "" "recurring: a new problem prints nothing"
+rm -rf "$RC_ROOT"
+
 assert_summary

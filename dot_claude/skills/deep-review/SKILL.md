@@ -76,9 +76,8 @@ When the dispatcher finishes, the report is already on stdout. Just summarize th
 - If `REQUEST_CHANGES` → "N findings (X CRITICAL, Y HIGH). Top issue: <title>. Fixing now."
 - If `REJECT` → "Critical blockers found. Top issue: <title>. Fixing the blockers before anything else."
 
-Always tell the user where the full report lives (`~/.claude/deep-review-runs/<RUN_ID>/report.md`).
-In record mode the raw findings sit beside it as `findings.jsonl`, and `findings.sarif` too
-when `--sarif` was passed — upload that one with `gh code-scanning` to get inline PR alerts.
+Name the report path (`~/.claude/deep-review-runs/<RUN_ID>/report.md`); `findings.jsonl` and,
+with `--sarif`, `findings.sarif` (for `gh code-scanning`) sit beside it.
 
 ## Phase 4.4 — Is the report still about this code?
 
@@ -112,10 +111,15 @@ than a question. Do not stop at the report and wait to be asked.
    reason, and you say plainly which findings remain.
 4. **MEDIUM, LOW and QUESTION are the user's call.** List them and ask; do not fix them silently.
 
-Skip this phase when the run was `--dry-run` or the diff was empty.
+Skip it after `--dry-run` or an empty diff. The fixer is a separate `Agent`, never the reviewer.
 
-The fixer must not be the reviewer that found the issue. Dispatch a separate `Agent` for the
-fix, so nothing grades its own repair.
+## Phase 4.6 — Turn a recurring finding into a rule
+
+A `## Recurring findings` section means earlier reviews of this repository already reported it.
+Read the earlier titles and drop rows that share words but not the problem. For each real one,
+propose one sentence of rule, where it goes (nearest `CLAUDE.md`, `.claude/rules/`, the repo's
+rule docs) and its check (lint rule, architecture test, diff script, or "rule only"). Ask in one
+multi-select `AskUserQuestion`; write only what the user picks, as a normal reviewed diff.
 
 ## Phase 5 — Simplify pass (default; skip with `--no-simplify`)
 

@@ -346,6 +346,19 @@ and several cosmetic ones, record the structural one and drop the cosmetics — 
 with nits buries the finding that mattered. Never record something a formatter or a linter
 already owns, and never record a renaming preference.
 
+**Do not record these.** Across 190 earlier reviews they recurred often and almost never
+changed the code:
+
+- A missing rate limit, unless the endpoint is public, unauthenticated, or costly per call.
+- At LOW: a missing direct unit test for a private helper or a configuration bound, or a
+  request for one more boundary-case test.
+- At LOW: a duplicated doc or comment, and an unused or single-use abstraction.
+- Test-style conventions a linter could own: factory style, \`noqa\` placement,
+  \`transaction=True\`, \`userEvent\` over \`fireEvent\`.
+- A hardcoded currency, locale or copy string, unless the product ships more than one locale.
+- Doc housekeeping: an index entry, a "last updated" date, a line number in a citation.
+- The prose style of a doc or a comment.
+
 When every finding is recorded, print one line: \`done: <n> finding(s)\`. Then exit.
 
 The diff and repo context follow below the separator.
@@ -454,6 +467,14 @@ if [ "$RECORD_FINDINGS" = "true" ]; then
     "${SCRIPT_DIR}/sarif.sh" "$RUN_DIR" > "${PERSIST_DIR}/findings.sarif"
     log "sarif saved to ${PERSIST_DIR}/findings.sarif"
   fi
+fi
+
+# A finding that earlier reviews of this repository already reported is a candidate for a
+# standing rule plus a check. The section goes into both copies of the report.
+RECURRING=$("${SCRIPT_DIR}/recurring.sh" "$PERSIST_DIR" "$RUNS_ROOT" 2>/dev/null || true)
+if [ -n "$RECURRING" ]; then
+  printf '\n%s\n' "$RECURRING" | tee -a "${PERSIST_DIR}/report.md" >> "${RUN_DIR}/report.md"
+  log "recurring findings appended to the report"
 fi
 
 if [ "$KEEP_ARTIFACTS" = 0 ]; then
