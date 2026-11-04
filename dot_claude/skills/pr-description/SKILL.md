@@ -34,6 +34,7 @@ Read `$ARGUMENTS`. Extract:
 - `--update <pr-number>` — update this PR instead of creating (else create)
 - `--draft` — open as draft (create only)
 - `--no-codex` — skip the codex reviewer, Sonnet self-review only
+- `--no-watch` — open the PR and stop; skip Phase 5
 - `--evidence <path>` — a QA evidence dir or `index.html` (screenshots, recordings) to source
   the `## Evidence` section from. Repeatable. When omitted, look for the newest
   `.qa-reports/*/execute/*/index.html` and the calling run's `--qa` artifact before concluding
@@ -300,6 +301,32 @@ Print the PR URL and a one-line summary, e.g.:
 When the repository has no CI check that a pull request matches its plan, and the user owns that
 CI, suggest once a job that runs `plan-stamp.sh check` and fails on a missing evidence row
 (`_shared/spec-evidence.md` section 6). Do not add it unless the user asks.
+
+## Phase 5 — Watch and address feedback (default; skip with `--no-watch`)
+
+An open PR is not done. Watch it until reviewers and CI go quiet. Skip this phase for
+`--draft`, `--dry-run` and `--no-watch`.
+
+1. **Poll every 5 minutes** with the `Monitor` tool. Do not poll in a foreground loop. Read:
+   ```bash
+   gh pr view <n> --json state,reviews,comments,statusCheckRollup
+   gh api repos/<owner>/<repo>/pulls/<n>/comments   # inline review comments
+   ```
+   Keep the ids you already handled in `$RUN_DIR/handled-comments.txt`.
+2. **Address each new review comment** from a human or a bot with
+   `Skill(skill="superpowers:receiving-code-review")`. Verify the claim against the code
+   before you change anything. Fix what is right, and push back on what is wrong with evidence.
+3. **Reply in the thread** to every comment: the fix commit SHA, or the reason you did not
+   change the code. Use `gh api repos/<owner>/<repo>/pulls/<n>/comments/<id>/replies -F body=...`.
+4. **A failing check** goes through `superpowers:systematic-debugging`. Do not patch blindly.
+5. **Ask the user first** when a comment changes scope, a requirement or a contract, or when
+   two reviewers disagree.
+6. After each push, rerun Phase 0.5 proofs and update `## Evidence by requirement` if a
+   result changed.
+
+Stop when the PR merges or closes. Also stop when CI is green and one full poll after your last
+push brings no new comment. Report what you fixed, what you declined and why, and what waits on
+the user.
 
 ## Checklist (orchestrator ticks after Phase 3)
 

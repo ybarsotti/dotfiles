@@ -374,7 +374,8 @@ Fetch inline comments with:
 gh api repos/<owner>/<repo>/pulls/<pr-number>/comments
 ```
 
-For every new comment (compare `commit_id` against what's already been addressed):
+For every new comment (compare `commit_id` against what's already been addressed), run
+`Skill(skill="superpowers:receiving-code-review")` first, then:
 
 1. Read the comment carefully. Classify as valid / invalid / stylistic.
 2. If valid, make the fix. If stylistic and the project doesn't enforce it, skip with a
