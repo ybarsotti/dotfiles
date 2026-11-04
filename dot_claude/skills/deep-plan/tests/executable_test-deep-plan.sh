@@ -1306,7 +1306,7 @@ sed 's/| EC-003 | network failure | Medium | Fail loudly |/| network failure | M
 expect_fail_item "edges-≥4" "${FIN_PASS_RUN}/edge-without-id.md"
 sed 's/| EC-004 | concurrent writers | Low | Out of scope |/| EC-004 | concurrent writers | Low | maybe later |/' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/edge-bad-decision.md"
 expect_fail_item "edges-≥4" "${FIN_PASS_RUN}/edge-bad-decision.md"
-sed '/^| EC-003 | network failure | `bash tests\/widget.sh` | test |$/d' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/evidence-missing-edge.md"
+sed '/^| EC-003 | network failure | .* | test |$/d' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/evidence-missing-edge.md"
 expect_fail_item "evidence-map-complete" "${FIN_PASS_RUN}/evidence-missing-edge.md"
 sed '/^| R-001 | Ship widget refactor/d' "${FIN_PASS_RUN}/plan.md" >"${FIN_PASS_RUN}/evidence-missing-requirement.md"
 expect_fail_item "evidence-map-complete" "${FIN_PASS_RUN}/evidence-missing-requirement.md"
