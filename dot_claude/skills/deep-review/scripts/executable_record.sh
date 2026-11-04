@@ -18,6 +18,9 @@
 # overwrite another's finding.
 #
 # The findings file comes from --findings or $DEEP_REVIEW_FINDINGS.
+#
+# A persona records at most LOW_LIMIT LOW findings ($DEEP_REVIEW_LOW_LIMIT, default 3).
+# The next one is rejected, so a report cannot fill up with nits.
 
 set -euo pipefail
 
@@ -25,6 +28,7 @@ APPEND_LIMIT=4096
 
 VALID_SEVERITY="CRITICAL HIGH MEDIUM LOW QUESTION"
 REMARK_LIMIT=160
+LOW_LIMIT="${DEEP_REVIEW_LOW_LIMIT:-3}"
 VALID_CATEGORY="security correctness concurrency db-performance typing architecture
 simplicity code-reuse tests docs project-fit scope frontend observability
 ui-ux accessibility responsiveness shortcut"
@@ -90,6 +94,12 @@ build_line() {
       title:$title,evidence:$evidence,description:$description,suggestion:$suggestion,
       remark:$remark}'
 }
+
+if [ "$SEVERITY" = LOW ] && [ -f "$FINDINGS" ]; then
+  lows=$(jq -c --arg p "$PERSONA" 'select(.persona == $p and .severity == "LOW")' "$FINDINGS" | wc -l)
+  [ "$lows" -lt "$LOW_LIMIT" ] \
+    || err "${PERSONA} already has ${LOW_LIMIT} LOW findings; record no more LOW findings"
+fi
 
 JSON_LINE=$(build_line "$DESCRIPTION" "$SUGGESTION")
 

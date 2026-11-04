@@ -17,8 +17,7 @@ The user typed `/deep-review [args]`, OR the user asked for a multi-agent peer r
 
 Read `$ARGUMENTS` and extract:
 
-- **variant** (positional, default `"default"`): one of `default` (9 personas), `security-focused`, `adversarial-debate`, or any name matching a
-  `variants/<name>.yml` file
+- **variant** (positional, default `"default"`): `default`, `security-focused`, `adversarial-debate`, or any `variants/<name>.yml`
 - **--reviewers N** (default: `persona_count` — each persona runs **once**)
 - **--ratio C:X** (default: an even reviewer split). It moves only `runner: any` personas.
   `default` pins all: Codex runs security, architecture, correctness, senior-backend and
@@ -29,6 +28,11 @@ Read `$ARGUMENTS` and extract:
 - **--sarif** (default off): also write `findings.sarif` for GitHub code scanning
 - **--no-simplify** (default off): skip the `/simplify` pass that otherwise runs after the report
 - **--keep-artifacts** / **--dry-run** (default off)
+- **--lens PATH** (repeatable): a review skill the repository owns. Run `--dry-run` first; it
+  lists them. Pass at most 2 read-only lenses that fit the diff's stack. Skip plan reviewers,
+  skills that start other agents, and skills that post to GitHub.
+
+A persona with `only_when_changed` runs only when a changed file matches; each records ≤ 3 LOW.
 
 A persona run twice duplicates its findings and doubles the cost; use `--reviewers` with care.
 
@@ -57,17 +61,13 @@ Call the dispatcher with the parsed args:
 `--no-simplify` is yours, not the dispatcher's. Strip it from the args before you call
 `dispatch.sh`, which rejects flags it does not know, and act on it in Phase 5.
 
-`dispatch.sh` handles everything end-to-end: context collection, persona assignment, prompt
-generation, fanning reviewers out as background processes, waiting for them, and aggregating
-the result into `report.md`.
-
-You should run the dispatcher in the **foreground** so you see progress live. Don't background it.
+`dispatch.sh` handles everything end-to-end: context, persona assignment, prompts, reviewers
+in the background, and the `report.md`. Run it in the **foreground** to see progress. Don't background it.
 
 ## Phase 3 — Watch progress (non-dry-run only)
 
-The dispatcher streams per-reviewer dispatch/completion lines to stderr as it runs. If a
-reviewer fails (timeout, non-zero exit), the dispatcher continues with whoever finished and
-flags the failure in the report — that's informational, not fatal.
+The dispatcher streams per-reviewer progress to stderr. A failed reviewer (timeout, non-zero
+exit) is flagged in the report and does not stop the run.
 
 ## Phase 4 — Present the report
 

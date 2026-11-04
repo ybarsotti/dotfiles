@@ -8,6 +8,7 @@ description: >-
 record_findings: true
 
 # Personas. Each one is pinned to a runner, so --ratio does not move them.
+# `only_when_changed` skips a persona when no changed file matches its regex.
 # Codex takes the high-stakes lenses: security, architecture, correctness, backend data
 # flow and shortcut detection. Claude takes conventions, documentation, UI and simplicity.
 # Each persona body is the fixed file at personas/<id>.md.
@@ -50,6 +51,7 @@ personas:
       null=True on text, external calls inside atomic. Reads the framework's own query documentation with context7
       before recording an ORM finding. Observability: error context, structured logs with correlation
       ids, metrics and spans on new paths.
+    only_when_changed: '\.(py|go|rb|java|kt|rs|php|cs|ex|exs|sql)$|(^|/)(migrations|server|backend|api)/'
     runner: codex
 
   - id: senior-frontend
@@ -67,6 +69,7 @@ personas:
       against the design it followed: layout, hierarchy, states, exact copy, interaction,
       design-system components rebuilt bespoke. A changed screen with no design to check
       against is a HIGH finding.
+    only_when_changed: '\.(tsx|jsx|vue|svelte|astro|html|css|scss|sass|less)$'
     runner: claude
 
   - id: ui-ux
@@ -85,6 +88,7 @@ personas:
       the rendered screen — visual-pass screenshots at desktop and 390 px judged for
       hierarchy, icons and interaction styles. Judges against _shared/ui-quality.md and
       grounds findings with ui-ux-pro-max guidance, but the project's own code outranks it.
+    only_when_changed: '\.(tsx|jsx|vue|svelte|astro|html|css|scss|sass|less)$'
     runner: claude
 
   - id: correctness

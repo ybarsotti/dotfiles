@@ -157,4 +157,35 @@ rc_run run-now git@x:me/app "Checkout button lacks a focus ring"
 assert_eq "$("$RECURRING" "${RC_ROOT}/run-now" "$RC_ROOT")" "" "recurring: a new problem prints nothing"
 rm -rf "$RC_ROOT"
 
+# ─── record.sh: a persona records at most 3 LOW findings ───────────────────
+LOW_FILE="$(mktemp -d)/findings.jsonl"
+for n in 1 2 3; do
+  "$RECORD" --findings "$LOW_FILE" --persona p --category tests --severity LOW --title "t$n" \
+    --evidence e 2>/dev/null
+done
+assert_exit 1 "$RECORD" --findings "$LOW_FILE" --persona p --category tests --severity LOW \
+  --title t4 --evidence e
+assert_exit 0 "$RECORD" --findings "$LOW_FILE" --persona q --category tests --severity LOW \
+  --title other --evidence e
+rm -rf "$(dirname "$LOW_FILE")"
+
+# ─── dispatch.sh: only_when_changed skips a persona; --lens adds a reviewer ─
+LENS_REPO=$(mktemp -d)
+git -C "$LENS_REPO" init -q -b main
+mkdir -p "${LENS_REPO}/.agents/skills/team-review" "${LENS_REPO}/src"
+echo "# lens" >"${LENS_REPO}/.agents/skills/team-review/SKILL.md"
+echo a >"${LENS_REPO}/src/x.py"
+git -C "$LENS_REPO" add -A
+git -C "$LENS_REPO" -c user.email=t@t -c user.name=t commit -qm init
+echo b >>"${LENS_REPO}/src/x.py"
+LENS_OUT=$(cd "$LENS_REPO" && "$DISPATCH" default --dry-run --scope HEAD \
+  --lens "${LENS_REPO}/.agents/skills/team-review/SKILL.md" 2>/dev/null)
+assert_contains "$LENS_OUT" "senior-frontend                no changed file matches" \
+  "dispatch: a frontend persona is skipped on a backend-only diff"
+assert_contains "$LENS_OUT" "lens-team-review               → claude" \
+  "dispatch: --lens adds the repository lens as a Claude reviewer"
+assert_contains "$LENS_OUT" ".agents/skills/team-review/SKILL.md" \
+  "dispatch: --dry-run lists the repository lenses"
+rm -rf "$LENS_REPO"
+
 assert_summary
