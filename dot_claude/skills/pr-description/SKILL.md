@@ -174,13 +174,20 @@ Source them, in order of preference: the `--evidence` artifacts; the QA run this
 videos); a fresh `agent-browser` pass over the changed flow if neither exists and the app runs
 locally.
 
-**Embedding.** Inline the asset with `![alt](url)` when a URL that GitHub can actually fetch
-exists — an asset committed on the branch of a public repo, or an already-hosted report. When
-one does not (private repo, local-only artifacts), do **not** fake it: list each asset by
-filename with a one-line description of what it demonstrates, link the QA report path, and say
-plainly that the media is local. Then attach the same list as a `gh pr comment` so the
-reviewer sees it on the PR, and tell the user in Phase 4 which files to drag in if they want
-them rendered inline.
+**Embedding.** Never commit media to the repository, on any branch. Upload it with the
+`--attach` flag of `gh pr create` or `gh pr edit` (gh 2.99.0 or later):
+
+1. Write the body with relative references, such as `![Login error state](./qa/login.png)`.
+2. Pass each referenced file once: `--attach ./qa/login.png`.
+
+gh uploads each file to `github.com/user-attachments/assets/` and rewrites the reference to that
+URL. The asset has the repository's visibility, so a private repository stays private. Formats:
+PNG, JPEG, GIF, WebP, SVG, MP4, MOV and WebM. Size: 10 MB per image, and 10 MB per video on Free
+or 100 MB on a paid plan. Compress a GIF or video that exceeds the limit; do not drop it.
+
+When `gh` exits nonzero, read which files failed and retry them with `gh pr edit --attach`. When
+`gh` is older than 2.99.0 or the host is GitHub Enterprise Server, list each asset by filename
+with what it demonstrates, say the media is local, and tell the user in Phase 4 to drag it in.
 
 Evidence is captured against the frozen SHA. If the branch moved after the capture, say so
 rather than presenting stale media as current.
