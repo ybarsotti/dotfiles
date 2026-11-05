@@ -18,9 +18,7 @@
 [core]
     editor = nvim
     whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
-    # hunk pager auto-detects diffs (git diff/show) and shows the review UI;
-    # non-diff output (git log text) passes through. delta config kept below as fallback.
-    pager = hunk pager
+    pager = delta
     excludesfile = ~/.gitignore_global
     trustctime = false
     untrackedCache = true
@@ -98,14 +96,10 @@
 [difftool "p4merge"]
     cmd = /Applications/p4merge.app/Contents/MacOS/p4merge "$LOCAL" "$REMOTE"
 
-[difftool "hunk"]
-    cmd = hunk difftool "$LOCAL" "$REMOTE"
-
 [diff]
     algorithm = histogram
     colorMoved = default
-    # hunk is review-only (no conflict resolution) -> difftool yes, mergetool no
-    tool = hunk
+    tool = p4merge
 
 [push]
     default = current
