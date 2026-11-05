@@ -191,6 +191,12 @@ layout, consult the design intelligence and dispatch one UI/UX agent:
 The plan states the breakpoints and the keyboard path as acceptance criteria, not as good
 intentions. A screen whose plan is silent about them gets built without them.
 
+3. Start the `ui-designer` agent as an Orca worker with `--keep-open`
+   (`~/.claude/skills/_shared/after-approval.md`, "Parallel agents run in Orca"). It maps the
+   project's design system from the code, then draws the screens on a Design canvas while you
+   draft. The user can iterate on the canvas in parallel. Record its `Canvas:` and
+   `Design system:` URLs in the UI design pass.
+
 Fold the answer into the plan's `UI design pass` section, and into `Project fit`, `Affected
 files` and `Edge cases`. The plan names the existing component it reuses instead of leaving
 the implementer to invent one.

@@ -1,6 +1,6 @@
 ---
 name: deep-execute
-description: Runs an approved deep-plan parallel plan as lane workers in one shared git worktree. Use when invoked via /deep-execute, or when the user has an approved plan whose Execution shape declares disjoint lanes and an API contract and wants it built by parallel agents instead of one session. Coordinates fan-out, the event/reply protocol, round gating, contract drift and escalation — it does not write plans (deep-plan) or review code itself (deep-review, invoked once per run at the end).
+description: Runs an approved deep-plan parallel plan as lane workers in one shared git worktree. Use when invoked via /deep-execute, or when the user has an approved plan whose Execution shape declares disjoint lanes and an API contract and wants it built by parallel agents instead of one session. Coordinates fan-out, the event/reply protocol, round gating, contract drift and escalation — it does not write plans (deep-plan) or review code itself (deep-review, invoked after each round and once over the whole run).
 ---
 
 # deep-execute
@@ -55,12 +55,10 @@ inside the SAME shared worktree. You commit, you gate, you reply — you don't e
 3. If the user passed `--max-rounds N` and `N` differs from the default, patch
    `RUN_DIR/manifest.json`'s `max_rounds` field now — `round-gate.sh` reads that field, never a
    hardcoded number, so this is the only place the override needs to land.
-4. Launch confirmed specs through `wave-launch.sh RUN_DIR/wave CWD SPEC...`. It runs each lane
-   through `worker-loop.sh`, names its block, stacks lanes, and starts the Wave status watcher.
-5. Read the first `block_ref` from `RUN_DIR/wave/manifest.json`. Open Hunk to its right with
-   `wave-hunk --split-right <block> --name "Diff · <task>" CWD <baseline_commit>`, then open
-   `wave-chat` below Hunk for this worktree's exact llmessage session. Visual failures never
-   block lanes. Without macOS Accessibility control, Wave keeps names/order but places blocks.
+4. Launch confirmed specs through `orca-launch.sh RUN_DIR/wave CWD SPEC...`. It opens one Orca
+   terminal per lane in the run's workspace, runs `worker-loop.sh` in it, and records the
+   terminal handle as the lane's `block_ref`. Run the build inside an Orca workspace
+   (`orca worktree current`). Outside Orca, `wave-launch.sh` takes the same arguments.
 
 ## Phase 2 — Monitor and react
 
@@ -117,13 +115,14 @@ anything reaches the human. Only a genuine hard-gate failure that survives a fix
 the max-rounds cap below, is worth `AskUserQuestion`.
 
 Once a round passes, commit it (`git add -A && git commit`) — workers never run `git`; the
-orchestrator is the sole committer, between rounds. Then bump `manifest.json`'s `round` and
-either start the next round (more tasks remain) or move to Phase 4.
+orchestrator is the sole committer, between rounds.
 
-**Annotate the diff pane after that commit**, when Phase 1 opened one. Turn this round's
-`decision.sh` entries into inline notes, one per decision, on the line it produced — the human
-reads them while the next round runs. The `hunk-review` skill holds the commands; re-anchor
-against a fresh `hunk session review` first, because a commit moves line numbers.
+**Then review the part that round finished.** Every round closes with a `/deep-review` scoped
+to that round's commit: `Skill(skill="deep-review", args="default --scope <previous round
+commit>..HEAD")`. The light reviewer in `round-gate.sh` does not replace it. Route each
+CRITICAL and HIGH fix back through the owning lane with `reply.sh`, re-run `round-gate.sh`, and
+commit the fix. The next round starts on reviewed code, so the code stays organized as it grows. Then bump `manifest.json`'s `round` and
+either start the next round (more tasks remain) or move to Phase 4.
 
 **After three rounds, stop and `AskUserQuestion`.** `round-gate.sh RUN_DIR 4` (or whatever
 exceeds `max_rounds`) already refuses outright with its own escalation record instead of
@@ -134,24 +133,17 @@ running anything — obey it rather than calling it a fourth time on your own ju
 Run `set-phase.sh RUN_DIR review`, then run these steps **back to back, unattended**. Run section
 11 of `_shared/ui-quality.md` first when the UI design pass applies; a `light` stage uses `stage-light`.
 1. **Full peer review.** `Skill(skill="deep-review", args="default --reviewers 6 --ratio 3:3")`
-   over the whole run's diff — the one thorough pass; every per-round `round-gate.sh` review
-   was intentionally light. Route each required fix back through the **owning lane**
+   over the whole run's diff. Each round already had its own scoped `/deep-review`; this pass
+   checks how the parts fit together. Route each required fix back through the **owning lane**
    (`reply.sh`), never your own editor; rerun the relevant verification, commit.
 2. **Record it while it is still true.** Through `decision.sh`, per lane and for the review
    itself: what was built, which findings landed, which were rejected and why. A fix nobody
    recorded is a fix the Phase 5 report cannot show.
-3. Run `set-phase.sh RUN_DIR qa`, then start the **QA agent** — its own agent, whose only job is
-   to test. Pick the pass by what this machine actually has, checking in this order:
-   - `~/.claude/skills/qa-testing/SKILL.md` exists → `Skill(skill="qa-testing")` in EXECUTE
-     mode, driving a real browser through `agent-browser` over every flow and screen the plan
-     touched, capturing screenshots and recordings. Give it the running URL and the current
-     SHA; it verifies side effects in every system, not just the happy path on screen.
-   - The plan's `## QA / test-execution` names a `qa-plan.yaml` → also run the scripted pass,
-     after the exploratory one:
-     `Skill(skill="qa-test-plan", args="--phase execute --qa-plan <path> --url <url> --commit <sha>")`.
-   - **Neither available** → still QA it: dispatch a plain agent with `agent-browser` over the
-     plan's flows, and say in the report which pass was skipped and why. A missing skill
-     downgrades the evidence; it never cancels the QA step.
+3. Run `set-phase.sh RUN_DIR qa`, then run steps 3 to 5 of
+   `~/.claude/skills/_shared/after-approval.md`: check that the app URL answers, then start the
+   `qa-ui` agent when the plan has a UI design pass and the `qa-business` agent, in parallel.
+   Give each the running URL and the current SHA. When the URL does not answer, the report
+   says QA was skipped and why.
 4. **Gap fixes by a different agent.** The agent that tested never fixes what it found — hand
    each gap, with its evidence and reproduction, to the owning lane (or a fresh implementer
    once the lanes are torn down), record the fix, then re-run the QA agent. A gap closes when

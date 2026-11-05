@@ -33,13 +33,8 @@ commit the contract and shared files before fanout, scaffold and launch the lane
 opens `/goal` on the finished state, so it goes end to end and stops only on a blocker no agent
 can settle alone.
 
-Phase 1 opens a Hunk diff pane in Wave beside the run, pointed at the shared worktree and diffed
-against the baseline commit. Every round gate refreshes it and writes that round's decisions onto
-the lines that produced them, so the user reads the change as it lands. Use `/hunk-watch` to open
-the same pane on any other worktree.
-
-Every task uses one Wave tab. Lane blocks have names and form one vertical column. Hunk opens to
-the right, and the task's llmessage chat opens below Hunk. The orchestrator header shows current
+Every task uses one Wave tab. Lane blocks have names and form one vertical column. The task's llmessage chat opens
+beside them. The orchestrator header shows current
 phase, task completion, percentage, and elapsed time; tab badge shows running, blocked, or complete.
 
 Once the lanes are done, the tail runs back to back:

@@ -179,7 +179,12 @@ Skill(skill="superpowers:writing-plans")
 ~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR" writing-plans
 ```
 
-**Step 3 — dispatch:**
+**Step 3 — start the designer, when the change touches an interface.** Start the
+`ui-designer` agent as an Orca worker with `--keep-open` (`_shared/after-approval.md`, "Parallel
+agents run in Orca"). Give it the ticket, the task and `$RUN_DIR/design/`. It draws while the
+planners draft. Put its `Canvas:` and `Design system:` URLs in the UI design pass before Phase 3.
+
+**Step 4 — dispatch:**
 ```
 ~/.claude/skills/deep-plan/scripts/dispatch-planners.sh "$RUN_DIR" "$TASK_DESC"
 ```
@@ -382,7 +387,7 @@ The four options, each stated to the user with what it costs:
 
 Then run `~/.claude/skills/_shared/after-approval.md` end to end, without waiting for the user:
 build, `/deep-review` with fixes, the `qa-ui` and `qa-business` agents when the environment
-answers, fix and re-test, `/pr`, and the HTML report. It opens `/goal` and the Hunk pane first.
+answers, fix and re-test, `/pr`, and the HTML report. It opens `/goal` first.
 
 Record the chosen option in `$RUN_DIR/execution-recommendation.md` under `## Chosen`.
 

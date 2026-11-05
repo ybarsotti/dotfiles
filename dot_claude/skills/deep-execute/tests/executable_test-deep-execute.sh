@@ -1258,6 +1258,29 @@ assert_contains "$README_MD_TEXT" "--resume RUN_DIR" "README.md: documents resum
 assert_contains "$README_MD_TEXT" "self-declared and" "README.md: states the attribution limit honestly"
 assert_contains "$README_MD_TEXT" "Artifacts produced" "README.md: documents the artifacts produced"
 
+# ─── orca-launch.sh: one Orca terminal per lane, handle recorded ───────────
+
+ORCA_LAUNCH="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_orca-launch.sh"
+OL_TMP=$(mktemp -d)
+mkdir -p "${OL_TMP}/run/wave" "${OL_TMP}/bin" "${OL_TMP}/cwd"
+printf 'prompt' >"${OL_TMP}/run/wave/worker-api.prompt.md"
+jq -n --arg p "${OL_TMP}/run/wave/worker-api.prompt.md" '{workers: [{name: "api", prompt_file: $p}]}' \
+  >"${OL_TMP}/run/wave/manifest.json"
+cat >"${OL_TMP}/bin/orca" <<'STUB'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"$(dirname "$0")/calls.log"
+printf '{"ok":true,"result":{"terminal":{"handle":"term_abc"}}}\n'
+STUB
+chmod +x "${OL_TMP}/bin/orca"
+OL_OUT=$(PATH="${OL_TMP}/bin:${PATH}" "$ORCA_LAUNCH" "${OL_TMP}/run/wave" "${OL_TMP}/cwd" api:claude:sonnet 2>&1)
+assert_eq "$?" "0" "orca-launch.sh: exits 0 when every lane launches"
+assert_contains "$OL_OUT" '"launched": true' "orca-launch.sh: reports the lane as launched"
+assert_eq "$(jq -r '.workers[0].block_ref' "${OL_TMP}/run/wave/manifest.json")" "term_abc" \
+  "orca-launch.sh: records the Orca terminal handle as the lane's block_ref"
+assert_contains "$(cat "${OL_TMP}/bin/calls.log")" "--worktree path:${OL_TMP}/cwd" \
+  "orca-launch.sh: opens the terminal in the run's workspace"
+rm -rf "$OL_TMP"
+
 # ─── Command file delegates and does not restate the protocol ─────────────
 
 COMMAND_MD_TEXT=$(cat "$COMMAND_MD")

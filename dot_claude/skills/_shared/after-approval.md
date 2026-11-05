@@ -14,9 +14,28 @@ Stop early only in these cases:
 
 1. Open `/goal`. State the objective as the finished result: "built, reviewed, QA green,
    PR open, report delivered". Name the plan path in it.
-2. Open the diff pane: `wave-hunk "$PROJECT_ROOT" <base-ref>`.
-3. Record each decision you make on the way in `$RUN_DIR/decisions.md`: the decision, the
+2. Record each decision you make on the way in `$RUN_DIR/decisions.md`: the decision, the
    rejected alternative, and the reason. The report reads this file.
+
+## Parallel agents run in Orca
+
+Start each agent that runs beside this session as an Orca worker: the QA agents, the
+`ui-designer`, a Codex implementer. An Orca worker is a full interactive session, so it has the
+`Artifact` tool that `claude -p` lacks. Load the guide once with `orca skills get
+orchestration`, then start the worker:
+
+```bash
+orca orchestration worker-start --worktree current --agent claude --json \
+  --spec "Read ~/.claude/agents/qa-ui.md and follow it. <the inputs it lists>"
+```
+
+- Start every independent worker, then end your turn. Orca wakes you with each `worker_done`.
+- Add `--keep-open` when the user will talk to the worker, as with the `ui-designer`.
+- A worker that must run without permission prompts starts in its own terminal:
+  `orca terminal create --worktree current --command "claude --dangerously-skip-permissions" --json`,
+  then `orca orchestration worker-start --task <task_id> --terminal <handle>`.
+- Outside an Orca workspace (`orca worktree current` fails), use the `Agent` tool with the same
+  agent name. Never use `claude -p` for an agent that needs the `Artifact` tool.
 
 ## 1. Build
 
@@ -32,11 +51,18 @@ Take the recommended execution option of the plan. Do not ask for it again.
 The session that planned orchestrates. It does not write feature code. Build with strict
 TDD. Record each departure from the plan as a `D-NNN` row under the plan's `## Deviations`.
 
+**Review each part when it is done.** A part is a task in option B, a round in option A, a
+stage, or a slice in options C and D. Before the next part starts, run
+`/deep-review default --scope <commit before the part>..HEAD`. Fix every CRITICAL and HIGH
+finding through the agent that wrote the part, then commit. The next part builds on reviewed
+code.
+
 `/deep-execute` runs steps 2 to 6 itself. For options B, C and D, run them from this session.
 
 ## 2. Review
 
-1. Run `/deep-review default`. Its Phase 4.5 fixes every CRITICAL and HIGH finding and
+1. Run `/deep-review default` over the whole change. Each part had its own review; this pass
+   checks how the parts fit together. Its Phase 4.5 fixes every CRITICAL and HIGH finding and
    re-runs the panel, for 2 fix rounds at most.
 2. A separate agent applies the fixes. The reviewer never fixes its own finding.
 3. Fix a MEDIUM finding when the fix is local and does not change behavior. Record every
@@ -59,7 +85,7 @@ Run this step when the plan has a UI design pass. Dispatch the `qa-ui` agent wit
 - the app URL and the routes of the changed screens;
 - the output folder `$RUN_DIR/qa/ui/`.
 
-The agent screenshots each new or changed element at desktop width and at 390 px. When a
+Run it as an Orca worker. It reads the canvas with the `Artifact` tool. The agent screenshots each new or changed element at desktop width and at 390 px. When a
 canvas exists, it compares each element with its artboard. The implementation must match the
 artboard: layout, spacing, copy, color, type, states and icons. The agent returns one row per
 difference.

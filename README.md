@@ -618,52 +618,6 @@ llmessage sessions            # every session, newest first
   `.chezmoiexternal.toml` entry yet, because there is no published release to pin a SHA256
   against; that follows the obscura pattern once the repo has one.
 
-#### Following an agent's diff — `wave-hunk`
-
-`~/.local/bin/wave-hunk` opens a [Hunk](https://github.com/modem-dev/hunk) diff pane in Wave for a
-git worktree, so you watch the code as an agent writes it:
-
-```bash
-wave-hunk                            # whole branch of the current repo
-wave-hunk ~/Developer/proj/wt        # whole branch of another worktree
-wave-hunk ~/Developer/proj/wt abc123 # everything since commit abc123
-wave-hunk ~/Developer/proj/wt HEAD   # uncommitted changes only
-wave-hunk --exec .                   # run hunk HERE, no new block (the widget's mode)
-```
-
-A leading option is not a target, so `wave-hunk . --mode auto` still gets the default base. Only a
-bare ref overrides it.
-
-- It reuses a live Hunk session for the same worktree instead of stacking panes. A second call
-  reloads the existing one.
-- **The default base is the merge base with the upstream, or with the remote default branch —
-  not the working tree.** This is the whole point. Agents commit as they finish each piece, and
-  a bare `hunk diff` compares the index to the working tree, so the pane empties on every commit
-  and the work vanishes as it lands. `hunk diff <ref>` compares a ref to the *working tree*
-  (confirmed in hunk's own range resolution: a single positive revision returns
-  `{old: git-ref, new: worktree}`), so one base ref holds the commits and the uncommitted edits
-  in one view. `/deep-execute` passes its `baseline_commit` to scope this to the run instead of
-  the branch. Pass `HEAD` to get the uncommitted-only view back.
-- Where no upstream and no `main`/`master` resolve, it falls back to the plain working-tree view,
-  which does empty on commit. Pass a ref explicitly there.
-- The pane runs through `/bin/zsh -lc`, for the same reason the widgets do: a Wave block starts
-  with no `/opt/homebrew/bin`, so `hunk` is otherwise not found.
-- It waits for the Hunk daemon to register the session and prints the session id, so the caller
-  can drive `hunk session ...` immediately.
-- Outside Wave there is no `wsh`; the script says so and asks you to run `hunk diff --watch`
-  yourself.
-- The **`hunk` widget** runs `wave-widget wave-hunk --exec . --mode auto --transparent-bg`. The
-  `--exec` mode resolves the base ref and then runs hunk in the widget's own block instead of
-  spawning a second one, so the widget and the script share one copy of the base rule. The widget
-  used to call `hunk diff --watch` directly, which is why its pane went blank the moment an agent
-  committed.
-
-Agents annotate that live pane through `hunk session comment apply`, which is what the bundled
-`hunk-review` skill (symlinked into `~/.claude/skills/`) exists for. `/hunk-watch` does both
-steps: open the pane, then explain the diff on the lines that carry each decision. `/deep-execute`
-opens the pane in Phase 1 and rewrites the notes at every round gate from the lanes' recorded
-decisions.
-
 **Useful commands:**
 ```bash
 wsh editconfig                 # open settings.json in Wave's editor
@@ -693,8 +647,6 @@ provider resolves the endpoint and secret name automatically.
   - `/deep-plan` - Multi-agent planning pipeline (see below)
   - `/deep-execute` - Runs an approved deep-plan parallel plan as lane workers (see below)
   - `/deep-review` - Multi-persona peer review of a diff
-  - `/hunk-watch` - Open a Hunk diff pane in Wave for a worktree, then annotate that live diff
-    with the reasoning behind each change (see "Following an agent's diff" under Wave Terminal)
   - `/pr-description` - Conventional-commit PR title/body with requirements matrix, Mermaid,
     decisions and **UI evidence** (flow GIF/recording + before/after screenshots), then opens
     the PR assigned to you
@@ -749,8 +701,6 @@ Before it offers those options it **re-runs `validate-plan.sh --root` from the p
 the exact check `/deep-execute`'s `init-run.sh` will run. Phase 3 already validated before
 presenting the plan, but Plannotator's second pass can edit it afterwards, so a shape failure
 would otherwise surface only once you asked to build. It now fails at the recommendation instead.
-Whichever mode wins, the session also opens a Hunk pane with `wave-hunk` so you watch the build
-land; option A does it in its own Phase 1.
 
 The four modes:
 

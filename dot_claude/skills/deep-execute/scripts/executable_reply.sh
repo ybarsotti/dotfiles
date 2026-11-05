@@ -95,7 +95,7 @@ for lane in "${TARGET_LANES[@]}"; do
 
   # The write above IS the wake: worker-loop.sh blocks on this file's mtime and
   # resumes the lane's session when it moves. Nothing is typed into the worker,
-  # because Wave has no way to type into a block — see wave-launch.sh's header.
+  # because neither Wave nor a worker-loop terminal reads typed input — see wave-launch.sh.
   #
   # A reply only reaches a lane whose loop is still alive, so the block is checked
   # too. A dead block means the reply landed on disk and nobody will read it, which
@@ -109,7 +109,16 @@ for lane in "${TARGET_LANES[@]}"; do
     continue
   fi
 
-  if ! command -v wsh >/dev/null 2>&1; then
+  if [ "${BLOCK#term_}" != "$BLOCK" ] && command -v orca >/dev/null 2>&1; then
+    if orca terminal show --terminal "$BLOCK" --json 2>/dev/null | jq -e '.ok == true' >/dev/null; then
+      jq -n --arg lane "$lane" --arg detail "reply written; ${BLOCK} is alive and watching" \
+        '{lane: $lane, reply_written: true, woken: true, detail: $detail}'
+    else
+      FAILED=1
+      jq -n --arg lane "$lane" --arg detail "${BLOCK} is gone — the reply is on disk with no loop to read it" \
+        '{lane: $lane, reply_written: true, woken: false, detail: $detail}'
+    fi
+  elif ! command -v wsh >/dev/null 2>&1; then
     jq -n --arg lane "$lane" --arg detail "reply written for ${BLOCK}; wsh absent, so liveness is unverified" \
       '{lane: $lane, reply_written: true, woken: true, detail: $detail}'
   elif wsh blocks list 2>/dev/null | grep -qF "${BLOCK#block:}"; then

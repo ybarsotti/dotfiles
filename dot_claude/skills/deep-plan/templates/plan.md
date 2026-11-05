@@ -140,6 +140,8 @@ erDiagram
 - Not applicable: <reason, only when Applies is no>
 - Who and task: <who opens the screen and the task they finish on it>
 - Reference screen: <`path` of the existing screen this one follows visually>
+- Canvas: <Design canvas URL from the `ui-designer` agent, or `none — reason`>
+- Design system: <the project's Design System artifact URL, or `none — reason`>
 - Reuse: <existing components, tokens and icons this change uses, with `path`>
 - Hierarchy: <title, groups, and what shows once instead of on every row>
 - Layout and mobile: <wide-screen arrangement, and how it stacks at 390 px with no horizontal scroll>

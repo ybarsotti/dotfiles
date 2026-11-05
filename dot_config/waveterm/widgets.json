@@ -216,22 +216,6 @@
       }
     }
   },
-  "hunk": {
-    "display:order": 15,
-    "icon": "code-compare",
-    "color": "#cba6f7",
-    "label": "hunk",
-    "description": "Hunk diff viewer - pick a repo or worktree and watch the whole branch, commits included",
-    "blockdef": {
-      "meta": {
-        "view": "term",
-        "controller": "cmd",
-        "cmd": "/bin/zsh -lc 'wave-widget wave-hunk --exec . --mode auto --transparent-bg'",
-        "cmd:shell": true,
-        "cmd:clearonstart": true
-      }
-    }
-  },
   "llmessage": {
     "display:order": 16,
     "icon": "comments",

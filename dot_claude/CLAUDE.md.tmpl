@@ -83,24 +83,6 @@ Use these project-aware code-intelligence tools when they are available. Do not 
 - Exact symbol reads/edits: Serena first.
 - Project-specific `CLAUDE.md` instructions override this global fallback when they are more specific.
 
-# Showing the Diff — Hunk in Wave
-
-The user works in Wave Terminal and follows changes in a Hunk pane beside the session.
-
-- `~/.local/bin/wave-hunk [worktree] [base-ref]` opens that pane, or reuses a live session for
-  the same worktree. `/hunk-watch` runs it and then annotates the diff.
-- It defaults to the merge base with the branch you forked from, and `hunk diff <ref>` compares
-  a ref to the **working tree**. So the pane holds your commits and your uncommitted edits
-  together. Keep committing in small steps; the work stays on screen.
-- Add one note per commit you make, naming what that commit closed. The user sees one
-  cumulative diff, so the commit boundary is invisible without it.
-- **Never run `hunk diff` or `hunk show` yourself.** Those own the user's screen. Drive a live
-  pane with `hunk session ...` and the `hunk-review` skill.
-- Write notes that explain the why, the rejected alternative, and the assumption a reviewer must
-  confirm. The user already sees the lines, so a note that restates them wastes the space.
-- Read `hunk session comment list --repo <worktree> --type user` before answering a question
-  about the diff. Those notes are the user's review feedback.
-
 # Browser and Web Navigation
 
 Three browser tools serve three targets. Pick by where the page lives.
