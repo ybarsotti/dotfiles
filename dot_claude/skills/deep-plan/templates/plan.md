@@ -60,6 +60,8 @@
 |---|---|---|---|
 | ✅ Planned | <requirement> | <task/interface/behavior> | `<runnable command>` or <observed evidence> |
 
+Ticket coverage: <N of M ticket criteria planned; each criterion left out, with the reason and where it goes (non-goal, later stage, question). `no ticket` when none exists>
+
 ## Rules
 <!-- The repository's own rules for this change. Read every source that exists:
      `docs/business-rules/`, `docs/technical-rules/`, `docs/adr/`, `.claude/rules/`, `AGENTS.md`,
@@ -259,6 +261,20 @@ stateDiagram-v2
      rules for it. One line per file: path — the single responsibility it owns. -->
 - `path/to/file.ext` — <what changes; what it is responsible for>
 - `path/to/new_file.ext` — <new; single responsibility>
+
+## Work size
+<!-- Name the piece of the larger work this plan covers: the current stage, a breakdown task,
+     or the whole ticket. One row per piece of this plan. Base each estimate on a similar
+     commit in this repository (`git show --stat <sha>`), or mark it `guess`. Size: S under
+     100 changed lines, M 100 to 400, L over 400. -->
+- This plan covers: <current stage, breakdown task, or the whole ticket>
+
+| piece | what it is | files | estimated lines | precedent |
+|---|---|---|---|---|
+| <piece> | <one sentence> | <count> | <~N> | <sha, or `guess`> |
+| **Total** | | <count> | <~N (production ~N, tests ~N)> | |
+
+- Size: <S|M|L>
 
 ## Execution shape
 <!-- Only required when this plan will run through `/deep-execute` in lane-parallel mode.

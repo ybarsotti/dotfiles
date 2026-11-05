@@ -1,6 +1,6 @@
 ---
 name: simple-plan
-description: Lean planning pipeline for a small or medium change. Use when invoked via /simple-plan, or when the user wants a short reviewed plan that writes the least code possible, follows the project's own patterns, types everything strictly, and validates API input. Produces one plan with a problem statement, an approach, conditional diagrams, an edge-case decision table, a TDD test list, and QA validation steps. Stops at the approved plan and does not implement.
+description: Lean planning pipeline for a small or medium change. Use when invoked via /simple-plan, or when the user wants a short reviewed plan that writes the least code possible, follows the project's own patterns, types everything strictly, and validates API input. Produces one plan with a problem statement, ticket requirements and their coverage, an approach, a work-size estimate, conditional diagrams, an edge-case decision table, a TDD test list, and QA validation steps. Stops at the approved plan and does not implement.
 ---
 
 # simple-plan
@@ -58,6 +58,8 @@ Gather evidence before you draft. Write the result to `$RUN_DIR/context.md`.
 6. Read the documentation of each of those libraries for the parts the change touches. Use
    the Context7 MCP server when it is available. Record the idiom the library expects.
 7. Use Serena and GitNexus for symbol lookup and blast radius when the project is indexed.
+8. When the task names a ticket, or the branch name holds a ticket key, read the ticket. Copy
+   each acceptance criterion and each stated requirement into the brief, word for word.
 
 Every line of the brief carries a path, such as `src/api/orders.py:42`. A line without a
 path is an assumption, and you must mark it **unknown**.
@@ -234,6 +236,20 @@ never got an answer, and the plan is not ready to present.
 
 **1. Problem** — What is wrong or missing today, in 3 sentences or fewer. Cite the evidence.
 
+**1b. Ticket requirements** — *Only when the plan comes from a ticket.* Give the ticket key and
+link. Then write one row per acceptance criterion or stated requirement, quoted from the ticket:
+
+| ID | Requirement (from the ticket) | Coverage | Where |
+|---|---|---|---|
+| R1 | "Admins can export orders as CSV" | Covered | Approach step 2, test `test_export_csv` |
+| R2 | "The export includes refunds" | Partial | Approach step 2; the refund reason is a non-goal |
+| R3 | "Email the file when it is ready" | Not covered | Task 2 of the breakdown |
+
+A `Covered` row names the approach step and the test that proves it. A `Partial` or
+`Not covered` row says why, and where the rest goes: a non-goal, a breakdown task, or a
+question for the user. End with one line, such as `Coverage: 1 of 3 covered, 1 partial, 1 not
+covered.` An approach step that serves no requirement is scope creep. Remove it, or ask the user.
+
 **2. Non-goals** — What this change does not do. This section blocks scope creep during
 implementation. It is mandatory and it is never empty.
 
@@ -274,6 +290,23 @@ has. Each row names the effect, the copy and the action.
 Constraint rule 9 applies: the table holds only files the task needs. It lists no refactor,
 no rename, and no reformat that the task does not require. When the plan wants to change
 nearby logic, it asks the user first and records the answer.
+
+**8b. Work size** — How big the work is, piece by piece. First name the piece of the larger
+work that this plan covers, such as `Task 2 of 4 in <breakdown path>`, or `the whole ticket`.
+Then write one row per piece of this plan, such as a migration, an endpoint, a component, or
+the tests:
+
+| Piece | What it is | Files | Estimated lines |
+|---|---|---|---|
+| Model and migration | `refund_total` column on `Order` | 2 | ~40 |
+| Export endpoint | CSV stream for admins | 2 | ~80 |
+| Tests | TDD plan rows 1 to 4 | 2 | ~120 |
+| **Total** | | **6** | **~240 (production ~120, tests ~120)** |
+
+Base each estimate on a similar change in this repository. Name its commit and the line count
+from `git show --stat <sha>`. Mark an estimate without a precedent as `guess`. Then give the size:
+**S** under 100 changed lines, **M** 100 to 400, **L** over 400. An L plan returns to Phase 1.5
+for a split.
 
 **9. Edge cases** — A table. Constraint rule 7 defines the decisions.
 

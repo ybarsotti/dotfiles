@@ -281,7 +281,7 @@ Confirm the plan includes, at minimum:
 > never pass. Install it once so broken syntax fails here instead of reaching Plannotator and
 > the PR as a blank box: `npm i -g @zabaca/mermaid-validate`.
 - A **Rationale & key decisions** section (fed by grill-with-docs + brainstorming).
-- **Ticket + Slack context** and a point-by-point **Requirements matrix**.
+- **Ticket + Slack context**, a point-by-point **Requirements matrix** with its ticket coverage line, and a **Work size** table.
 - A sequenced **User journey** when applicable; otherwise an explicit reason.
 - A **Data model** mapping every affected table/column to its value source and the deploy order, or explicit `no`.
 - **Rules**, **Removed contracts** and **Stages** filled or `no` with a reason; edge cases carry `EC-NNN` IDs.
