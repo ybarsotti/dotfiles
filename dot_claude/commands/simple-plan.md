@@ -4,8 +4,9 @@ description: Lean plan — least code that works, project patterns, strict typin
 
 # /simple-plan
 
-Plan a small or medium change and stop at an approved plan. `/simple-plan` does not build,
-review code, or open a pull request.
+Plan a small or medium change. When you approve the plan, the same session builds it,
+reviews it, runs QA, opens the PR and delivers an HTML report, without waiting for you
+(`~/.claude/skills/_shared/after-approval.md`). Say "only plan" to stop at the approved plan.
 
 It plans **one task**. When the work is bigger than that, the skill splits it into
 deliverable tasks ordered from the foundation up and plans the one you pick — it does not
@@ -47,29 +48,17 @@ hand the problem to another command.
 4. **Present** — when the plan adds machinery, `shed-light` first, so the approval covers
    the upkeep and not only the design. Then `plannotator annotate --gate`, then
    `ExitPlanMode`.
-5. **Recommend what comes next, in order** — `/qa-plan` first when a flow or screen changes,
-   since it runs before implementation, then implementation, then annotated screenshots of
-   the changed flows, then the mandatory review-and-QA chain below, then the next task from
-   the breakdown.
+5. **Build to PR** — `/qa-plan` first when a flow or screen changes, then the
+   after-approval chain end to end, then the next task from the breakdown.
 
 ## The chain after implementation
 
-When the change alters a flow or a screen, the `annotated-screenshots` skill captures each
-changed flow as soon as the implementation is done. A screen that a later fix changes is
-captured again before `/pr`, which embeds the images.
-
-These run by default, in order, and each one **fixes what it finds**:
-
-`/deep-review` (with its `/simplify` pass) → fix every CRITICAL and HIGH, re-review the fix →
-`/qa-execute` or `/qa-testing` → fix every failure with a different agent than the one that
-tested, re-run QA → one summary of what was tested, what failed, what was fixed and what is
-open → `/pr` → the `video-demo` skill, whose narrated video goes into the PR body
-under `## Demo`.
-
-The demo comes last because it needs the PR to exist. Skip it for a change with no
-user-facing flow, and say why.
-
-A finding reported and not fixed is not a reviewed change.
+`~/.claude/skills/_shared/after-approval.md` runs by default, and each step **fixes what it
+finds**: build with TDD → `/deep-review` with fixes → when the app URL answers, the `qa-ui`
+agent (visual parity with the plan and the Design canvas, desktop and 390 px) and the
+`qa-business` agent (requirements and edge cases end to end, with video) → a separate agent
+fixes, QA re-runs → `/pr` → the `video-demo` skill for a user-facing feature → the HTML report
+with decisions, tests, screenshots and videos.
 
 ## What you must do
 

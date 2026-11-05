@@ -225,11 +225,12 @@ the deep-plan loop before continuing. Set `cmux set-progress 0.30 --label "Plan 
 
 ## 3. Execute approved plan
 
-deep-plan's last phase already recommended an execution mode and had the user pick one —
-read `~/.claude/deep-plan-runs/<RUN_ID>/execution-recommendation.md` and follow the `## Chosen`
-option rather than re-deciding here. Options **A** (`/deep-execute`), **C** (Claude `Workflow`)
-and **D** (Codex implementer) all keep you in the orchestrator seat; only **B** authorizes this
-session to write the code itself, and only because the user asked for it.
+After approval, deep-plan picks the execution mode and runs
+`~/.claude/skills/_shared/after-approval.md` itself: build, `/deep-review`, the `qa-ui` and
+`qa-business` agents, fixes, `/pr`, and the HTML report. Run that chain once. The steps below
+add the Jira parts to it; they do not start a second build. The chosen mode is in
+`~/.claude/deep-plan-runs/<RUN_ID>/execution-recommendation.md` under `## Chosen`. Every option
+keeps you in the orchestrator seat; write feature code only when the user asks for it.
 
 If that file is missing (an older run), fall back to the plan's `## Execution shape` — its
 `Mode:` line plus lane count decides. `/deep-execute` itself refuses to start on anything but

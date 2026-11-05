@@ -4,9 +4,10 @@ description: Deep planning with Opus+Codex, requirement/journey/data/UI-design t
 
 # /deep-plan
 
-Drive a non-trivial task through a hardened **deep-planning** pipeline and stop at an
-approved plan — deep-plan does NOT build, review, or open the PR itself. It hands off to
-`/deep-execute` (which you run next, or which `jira-workflow` runs for you).
+Drive a non-trivial task through a hardened **deep-planning** pipeline. When you approve the
+plan, the same session builds it, reviews it, runs QA, opens the PR and delivers an HTML
+report, without waiting for you (`~/.claude/skills/_shared/after-approval.md`). Say "only
+plan" to stop at the approved plan.
 
 0. **Plan mode** — `EnterPlanMode` first; every phase up to approval runs inside it, no
    project file is touched.
@@ -24,9 +25,8 @@ approved plan — deep-plan does NOT build, review, or open the PR itself. It ha
 6. **Present** — `finalize-plan.sh` validate/repair/tick gate, then **Plannotator**:
    `plannotator annotate <plan> --gate` for the full plan, then `ExitPlanMode` (its hook
    re-opens the UI for final approval).
-7. **Execution recommendation** — recommend one of four ways to build it and let the user
-   pick via `AskUserQuestion` (see below).
-8. **Handoff** — print the entry point for the chosen option and stop.
+7. **Execution recommendation** — pick one of four ways to build it from the plan (see below).
+8. **Build to PR** — run the after-approval chain end to end.
 
 **Arguments:** `$ARGUMENTS`
 
@@ -59,42 +59,32 @@ present an assumption as fact or approve a plan that depends on an unverified cl
 
 ## Execution recommendation (Phase 7)
 
-deep-plan reads the approved plan's `## Execution shape` and recommends **one** of these,
-then asks you to confirm with `AskUserQuestion`:
+deep-plan reads the approved plan's `## Execution shape`, picks **one** of these, and starts:
 
 | | Option | Fits when |
 |---|---|---|
 | **A** | `/deep-execute "$RUN_DIR/plan.md"` — parallel lane workers, one shared worktree | `Mode: parallel`, ≥ 2 disjoint lanes, a real contract |
-| **B** | Sequential in **this** session (`superpowers:executing-plans`) | serial plan, one lane, or lanes too coupled for a contract |
+| **B** | Serial, one implementer agent per task (`superpowers:subagent-driven-development`) | serial plan, one lane, or lanes too coupled for a contract |
 | **C** | Claude `Workflow` — deterministic script fan-out | many uniform mechanical slices (migration, codemod, sweep) |
 | **D** | Codex-only implementer, this session orchestrates and reviews | one coherent slice you want a second model to write |
 
 **The planning session orchestrates; it does not implement.** It directs workers, answers
 their questions, gates rounds, routes review findings back to the owning agent, and commits.
-**Option B is the only opt-out**, and it only counts when *you* pick it — never when the
-session decides the change looks small enough to just do.
+It writes feature code only when you ask for that in so many words.
 
 ## What runs after the plan is approved
 
-Same chain regardless of which option you pick — `/deep-execute` runs it itself; for B, C and
-D the planning session drives it. It is wrapped in **`/goal`** (built into Claude Code and
-Codex) with the objective stated as the finished state, so it runs **end to end without
-stopping** and halts only on a blocker no agent can decide alone:
+`~/.claude/skills/_shared/after-approval.md` is the chain. It runs end to end under `/goal` and
+stops only on a decision that changes a requirement, a rule, a contract or the scope:
 
-1. `superpowers:using-git-worktrees` → isolate.
-2. Build with strict TDD (mock only outermost boundaries; inner services/repos run real).
-3. `/simplify` ×2.
-4. `/deep-review default --reviewers 6 --ratio 3:3` + fixes → `superpowers:verification-before-completion`.
-5. Record what was built and what the review changed.
-6. A QA agent drives `agent-browser` against a live env — `/qa-testing` (EXECUTE) when that
-   skill is installed, `/qa-execute` for a plan's `qa-plan.yaml`, a plain browser agent otherwise.
-7. A **separate, non-tester** agent fixes every gap QA found; QA re-runs on the fix.
-8. Freeze final commit SHA; `/qa-execute` for the approved QA plan when one exists.
-9. `/pr` — title + ticket/Slack + requirements + Mermaid + decisions + **evidence**
-   (screenshots/GIF when UI changed), assigned to you.
-10. HTML run report: what was built, decisions, trade-offs, assumptions, tests, screenshots,
-    recordings, PR link.
-11. CI + Copilot watch → `superpowers:finishing-a-development-branch`.
+1. Build with strict TDD through the chosen option.
+2. `/deep-review default`, with the CRITICAL and HIGH findings fixed and re-reviewed.
+3. When the app URL answers: the `qa-ui` agent compares each new element with the plan and
+   the Design canvas at desktop width and at 390 px, and the `qa-business` agent runs the
+   requirements and edge cases end to end with video.
+4. A separate agent fixes what QA found. QA re-runs, for 3 rounds at most.
+5. `/pr` with the evidence attached, then the PR watch.
+6. An HTML report with the decisions, the tests, the screenshots and the videos.
 
 ### Quick examples
 

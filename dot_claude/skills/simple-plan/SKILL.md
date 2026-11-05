@@ -1,6 +1,6 @@
 ---
 name: simple-plan
-description: Lean planning pipeline for a small or medium change. Use when invoked via /simple-plan, or when the user wants a short reviewed plan that writes the least code possible, follows the project's own patterns, types everything strictly, and validates API input. Produces one plan with a problem statement, ticket requirements and their coverage, an approach, a work-size estimate, conditional diagrams, an edge-case decision table, a TDD test list, and QA validation steps. Stops at the approved plan and does not implement.
+description: Lean planning pipeline for a small or medium change. Use when invoked via /simple-plan, or when the user wants a short reviewed plan that writes the least code possible, follows the project's own patterns, types everything strictly, and validates API input. Produces one plan with a problem statement, ticket requirements and their coverage, an approach, a work-size estimate, conditional diagrams, an edge-case decision table, a TDD test list, and QA validation steps. After approval it builds, reviews, runs QA, opens the PR and delivers an HTML report unless the user said to stop at the plan.
 ---
 
 # simple-plan
@@ -8,7 +8,8 @@ description: Lean planning pipeline for a small or medium change. Use when invok
 Plan a change so that the implementation writes the **least code that solves the problem**,
 and still respects the project's patterns, its frameworks, and strict typing.
 
-`simple-plan` stops at an approved plan. It does not write production code.
+`simple-plan` plans, and after your approval it drives the build to an open PR through
+`~/.claude/skills/_shared/after-approval.md`. The planning session does not write production code.
 
 `simple-plan` runs one drafter, two reviewers, and at most two review rounds. It plans **one
 task**, never a programme of work.
@@ -423,81 +424,33 @@ into a line of evidence, so a row with no runnable proof says why.
 4. Stamp the approved plan: `~/.claude/skills/_shared/plan-stamp.sh approve "$PLAN_PATH"`.
    Commit the plan and its `.approved` stamp together.
 
-## Phase 5 — Recommend the next commands, in order
+## Phase 5 — Build to PR, without waiting
 
-The plan is approved. Print `$PLAN_PATH`, then recommend the commands that come next **in the
-order they must run**. The user runs them; this session does not start the implementation.
+The approval of the plan is the go. Print `$PLAN_PATH`, then run these steps in order. Do not
+stop to recommend commands. Stop at the plan only when the user said so, such as "only plan".
 
-**1. `/qa-plan` — when the change alters a user-facing flow or screen.** This runs *before*
-implementation, not after it. It maps the plan's requirements into a reviewed `qa-plan.yaml`,
-which the Validation section of `$PLAN_PATH` then references, so the implementer knows what
-QA will check before writing the first line. Say plainly that skipping it means QA writes its
-own criteria later, from the finished code. When the change touches no flow and no screen, say
-why you are not recommending it.
+1. **`/qa-plan` first, when the change alters a user-facing flow or screen.** It runs before
+   the implementation. It maps the plan's requirements into a reviewed `qa-plan.yaml`, and the
+   Validation section of `$PLAN_PATH` references it. When the change touches no flow and no
+   screen, say why you skip it.
+2. **Then the chain in `~/.claude/skills/_shared/after-approval.md`.** Take option B
+   (`superpowers:subagent-driven-development`), or `/deep-execute` when the plan declares
+   parallel lanes. The chain builds with TDD, runs `/deep-review` with fixes, runs the `qa-ui`
+   and `qa-business` agents when the app URL answers, fixes and re-tests, opens `/pr`, and
+   delivers the HTML report.
 
-**2. Then implementation.** Offer the two options exactly as the "Execution Handoff" section
-of `superpowers:writing-plans` words them: **1. Subagent-Driven (recommended)** and
-**2. Inline Execution**.
+Rules for this pipeline inside that chain:
 
-- `Skill(skill="superpowers:executing-plans")` against `$PLAN_PATH` in this session.
-- Or `/deep-execute "$PLAN_PATH"` when the user wants parallel lanes.
-
-Tell the implementer to record every departure from the plan as a `D-NNN` row under the plan's
-`## Deviations` (section 3 of `_shared/spec-evidence.md`), and to ask before a departure that
-changes a requirement, a rule, an edge-case decision or a contract.
-
-**3. The visual pass, then annotated screenshots, when the change alters a user-facing flow
-or screen.** Run this as soon as the implementation is done. First run section 11 of
-`~/.claude/skills/_shared/ui-quality.md`: a screenshot of each state in the plan's UI design
-pass at desktop width and at 390 px, a designer's critique, a fix, and new screenshots. Then
-use the `annotated-screenshots`
-skill to capture each changed flow, one image per step, with highlight boxes and numbered
-callouts. Capture the running app when a local environment is reachable. Otherwise render the
-component with fixture data, and let the banner say so. When a later review or QA fix changes
-a captured screen, capture that screen again before `/pr`, which embeds the images
-as UI evidence. When the change touches no flow and no screen, say why you skip this step.
-
-**4. Review and QA, which are not optional.** State this chain as the default that runs
-after implementation, in this order, and say that each step **fixes what it finds** rather
-than reporting it for later:
-
-1. `/deep-review` on the implemented change. Its `/simplify` pass is part of the default.
-2. **Fix every CRITICAL and HIGH finding, then re-run the review** on the fix. A finding
-   left in the report is not a reviewed change. Record a finding you deliberately do not
-   fix, with the reason, under `## Open findings`.
-3. QA: `/qa-execute` against the approved `qa-plan.yaml` when step 1 produced one, otherwise
-   `/qa-testing` in EXECUTE mode.
-4. **Fix every QA failure, then re-run QA** on the fix. A separate agent fixes what QA found;
-   the agent that tested does not grade its own repair.
-5. Return one summary covering: what was tested, what passed, what failed, what was fixed,
-   and what is still open. The summary names the commit the result applies to. "Tests pass"
-   is not a summary.
-
-**5. `/pr`** to open the PR once the chain above is clean. Rebase onto the latest base branch
-first, and repeat the caller search for every removed contract in the plan. Run
-`plan-stamp.sh check "$PLAN_PATH"`; the PR body proves each evidence-map row at the shipped SHA. For stages, run
-steps 2 to 4 once per stage with the gate of its class, commit the stage, and open the PR with
-the stage table (`_shared/stages.md`).
-
-**6. A narrated demo video, when the change adds or alters a feature a person uses.** This
-runs after the PR is open, because the demo goes into the PR body. Use the `video-demo` skill
-to record the real flow with narration, then add the video to the PR description under a
-`## Demo` heading. Render the 720p copy as well, because the full-size file often exceeds what
-a PR body accepts.
-
-GitHub has no API that uploads a video into a PR body. So either give the user the file path
-and ask them to drop it into the PR on the web, which produces the
-`user-images.githubusercontent.com` link, or link a video that already has a URL. Say which of
-the two you did. Never claim the demo is in the PR until the body shows the link.
-
-Skip this step for a change with no user-facing flow: a refactor, a migration on its own, or
-an internal API. Say why you skip it. The `annotated-screenshots` images from step 3 stay in
-the PR either way; the video adds to them and does not replace them.
-
-**7. The next task from `$RUN_DIR/breakdown.md`**, when Phase 1.5 produced one. Name the task
-that comes next so the user does not have to reopen the file.
-
-Then stop. Do not start the implementation yourself.
+- Before `/pr`, rebase onto the latest base branch. Repeat the caller search for every removed
+  contract in the plan. Run `plan-stamp.sh check "$PLAN_PATH"`; the PR body proves each
+  evidence-map row at the shipped SHA.
+- For stages, run the build, review and QA once per stage with the gate of its class, commit
+  the stage, and open the PR with the stage table (`_shared/stages.md`).
+- When the change adds or alters a feature a person uses, record a narrated demo with the
+  `video-demo` skill after the PR is open. Attach it with `gh pr edit <n> --attach` under a
+  `## Demo` heading, and link it in the report. Skip it for a refactor, a lone migration or
+  an internal API, and say why.
+- When Phase 1.5 produced `$RUN_DIR/breakdown.md`, end by naming the next task in it.
 
 ## Failure handling
 

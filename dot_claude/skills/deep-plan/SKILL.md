@@ -1,6 +1,6 @@
 ---
 name: deep-plan
-description: Multi-agent deep-planning pipeline with ticket/Slack context, requirements traceability, user journey, data model and product-design handoff. Use when invoked via /deep-plan, or when the user wants a deeply reviewed plan before code for a non-trivial feature, refactor or architecture change. Parallel Opus + Codex planners and five reviewers converge before Plannotator approval and /deep-execute handoff. Stops at approved plan; does not implement or open PR.
+description: Multi-agent deep-planning pipeline with ticket/Slack context, requirements traceability, user journey, data model and product-design handoff. Use when invoked via /deep-plan, or when the user wants a deeply reviewed plan before code for a non-trivial feature, refactor or architecture change. Parallel Opus + Codex planners and five reviewers converge before Plannotator approval. After approval it builds, reviews, runs QA, opens the PR and delivers an HTML report unless the user said to stop at the plan.
 ---
 
 # deep-plan
@@ -341,7 +341,7 @@ is what the user reads; Plannotator carries the detail.
 
 ## Phase 3.5 — Execution recommendation (mandatory)
 
-The plan is approved; **how** it gets built is a separate decision, and it is the user's.
+The plan is approved, and the approval is the go. Pick **how** it gets built from the plan, then build.
 
 **Re-gate first.** Plannotator's second pass can edit the plan after the last
 `finalize-plan.sh`, and `/deep-execute`'s `init-run.sh` re-runs the same check from the project
@@ -355,8 +355,7 @@ Copy `plan.md` and `subplans/` to `$PROJECT_ROOT/docs/superpowers/plans/YYYY-MM-
 handoff below names it, and execution appends to its `## Deviations`.
 
 Write `$RUN_DIR/execution-recommendation.md` — recommendation first, then the four options
-with the trade-off that decides between them — and put the same four to the user through
-`AskUserQuestion`, recommended option first.
+with the trade-off that decides between them. Do not ask the user: the recommended option runs.
 
 Read the plan's `## Execution shape` and pick the recommendation from what is actually there:
 
@@ -372,10 +371,8 @@ The four options, each stated to the user with what it costs:
 - **A — `/deep-execute "$RUN_DIR/plan.md"`.** Parallel lane workers in one shared cmux
   worktree, round gating, contract drift handling, one full `/deep-review`, QA, run report,
   PR. Most machinery, most parallelism; needs disjoint lanes and a real contract.
-- **B — sequential in this session** via `superpowers:executing-plans` (or
-  `subagent-driven-development` when the tasks are independent enough to farm out). One
-  worktree, one thread of control, strict TDD per task. **This is the only option where the
-  session that planned may also write code — and only because the user picked it here.**
+- **B — serial** via `superpowers:subagent-driven-development`: one implementer agent per
+  task, in order, in one worktree, strict TDD per task. This session reviews each task.
 - **C — Claude `Workflow`.** Deterministic script-driven fan-out (`pipeline()`/`parallel()`)
   over a known work-list, with an adversarial verify stage. Best when the slices are uniform
   and the orchestration shape is known up front; no cmux panes, no per-round human gate.
@@ -383,35 +380,15 @@ The four options, each stated to the user with what it costs:
   gates, reviews and commits. Use when the change is one coherent slice and you want a
   second model's hands on the implementation.
 
-Whatever the user picks, the post-build chain is the same and runs unattended: the visual pass
-of `_shared/ui-quality.md` §11 when the UI design pass applies → `/deep-review default --reviewers 6 --ratio 3:3` → record what was built and what the review
-changed → QA against a live env with `agent-browser` (`qa-testing` in EXECUTE mode when that
-skill is on this machine; the plan's `qa-plan.yaml` through `/qa-test-plan` when it names one;
-a plain browser agent otherwise) → a **separate** agent fixes the gaps QA found → frozen SHA →
-`/pr` with evidence → HTML run report. `/deep-execute` runs that chain itself; for
-B, C and D you drive the same sequence from this session.
+Then run `~/.claude/skills/_shared/after-approval.md` end to end, without waiting for the user:
+build, `/deep-review` with fixes, the `qa-ui` and `qa-business` agents when the environment
+answers, fix and re-test, `/pr`, and the HTML report. It opens `/goal` and the Hunk pane first.
 
-**Open `/goal` before the build starts, whichever option won.** It is built into Claude Code and
-Codex, and it keeps the chain above running to the end instead of stopping at the first natural
-pause. State the objective as the finished result — reviewed, QA-green, PR open — and let it stop
-only on a blocker no agent can settle alone. Option A opens it in Phase 0; B, C and D open it here.
-
-**Open the diff pane too, whichever option won:** `wave-hunk "$PROJECT_ROOT" <HEAD>` puts a Hunk
-pane in Wave beside the build, so the user reads the change as it lands. Pass the base ref — a
-bare working-tree diff empties on every commit the build makes. Annotate it through the
-`hunk-review` skill. Option A opens it in Phase 1; B, C and D open it here.
-
-State one asymmetry with the options: the self-contained **HTML run report** — what was built,
-every decision with its rejected alternatives and accepted tradeoffs, drift, evidence, PR — is a
-`/deep-execute` artifact, because `build-run-report.sh` reads a deep-execute run directory. B, C
-and D deliver the QA evidence report and the PR body instead.
-
-Record the chosen option in `$RUN_DIR/execution-recommendation.md` under `## Chosen`, with
-the user's reason if they gave one.
+Record the chosen option in `$RUN_DIR/execution-recommendation.md` under `## Chosen`.
 
 ### The planning session is an orchestrator, not an implementer
 
-Default and non-negotiable unless the user picks option B above: the session that ran
+Default and non-negotiable: the session that ran
 `/deep-plan` **directs and reviews**; it does not write feature code. It dispatches lanes /
 workers / Codex, answers their questions, gates their rounds, applies review findings by
 routing them back to the agent that owns the code, and commits. If you catch yourself about
@@ -419,20 +396,12 @@ to edit a project file that no worker owns, stop — that edit belongs to a lane
 yourself destroys both the ownership boundary `validate-run-state.sh` enforces and the record
 of who decided what.
 
-Option B is the single explicit opt-out, and it must come from the user through the
-`AskUserQuestion` above — never from your own read of "this is small enough, I'll just do it".
+The session writes feature code only when the user asks for that in so many words.
 
-## Phase 4 — Handoff (deep-plan stops here)
+## Phase 4 — Build, review, QA, PR
 
-Hand off according to the Phase 3.5 choice, then stop:
-
-- **A** → print `/deep-execute "$PLAN"`.
-- **B** → print `Skill(skill="superpowers:executing-plans")` against `$PLAN`.
-- **C** → print the `Workflow` phase shape the plan implies (one stage per lane, verify stage).
-- **D** → print the Codex dispatch plus the same post-build chain.
-
-> Tip: for a Jira ticket, `/deep-plan` is invoked **inside** the `jira-workflow` skill, which
-> then drives the chosen execution mode automatically after approval.
+Follow `~/.claude/skills/_shared/after-approval.md`. Option A runs `/deep-execute "$PLAN"`, which
+runs the chain itself. Stop at the plan only when the user said so.
 
 ## Reuse
 
