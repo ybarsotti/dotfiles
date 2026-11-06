@@ -130,6 +130,15 @@ erDiagram
   }
 ```
 
+## Query cost
+<!-- One row per query the change adds or changes, including ORM calls and serializers that
+     load a relation. Rules: ~/.claude/skills/_shared/query-check.md. Write the optimization
+     now. Ask for the production check when the cost depends on production volume.
+     When no query changes, write `Query cost: no` and the reason, and delete the table. -->
+| query | where | runs | queries per request | rows at production size | index | measured | optimization |
+|---|---|---|---|---|---|---|---|
+| <name> | `<path or task>` | <per request/per row/batch> | <after (before)> | <rows read> | `<index>` or none | <production EXPLAIN/seeded dev EXPLAIN/static> | <fix> |
+
 ## UI design pass
 <!-- Applies=yes whenever the change adds or alters a user-facing screen, component, page or
      layout. Fill every line from `~/.claude/skills/_shared/ui-quality.md`, which is the quality

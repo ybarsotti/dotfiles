@@ -125,6 +125,16 @@ the costly node.
 When no database is reachable, say so and fall back to static findings. Include the exact
 `EXPLAIN` command a human should run. Never mutate real or production data.
 
+Production check request. A dev database does not show how a query runs on production volume.
+Follow `~/.claude/skills/_shared/query-check.md`, section 2. For each N+1, missing index or
+heavy query whose cost depends on that volume:
+
+1. Record the finding with the optimization in `--suggestion`. Do not wait for production data.
+2. Record one `QUESTION` finding titled `prod-check: <query>`, with the read-only SQL of
+   section 4 of that file in `--description`. The orchestrator asks the user and runs it.
+
+Never connect to a production database yourself.
+
 ## 3. Errors and observability
 
 - Every error path wrapped with context.

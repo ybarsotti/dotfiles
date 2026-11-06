@@ -282,6 +282,13 @@ table, a column, a stored document, or an on-disk format. Show the new structure
 `erDiagram` or `classDiagram`. Show the migration step, and the deploy order that keeps the
 previous release working while the migration runs.
 
+**6b. Query cost** — *Only when the change adds or changes a query*, including an ORM call or a
+serializer that loads a relation. Fill the query cost table of
+`~/.claude/skills/_shared/query-check.md`: where each query runs, the queries per request, the
+rows it reads at production size, the index it uses, and the optimization. Write the
+optimization now. When the cost depends on production volume, ask the user for the
+read-only production check of that file before you present the plan.
+
 **7. Flow** — *Only when the flow has three or more actors, or an asynchronous step, or a
 retry.* Show a Mermaid `sequenceDiagram` or `flowchart`. Otherwise omit this section. Do not
 draw a diagram for a straight-line call.
@@ -375,7 +382,10 @@ Point it at the plan, not at a diff, and tell it to answer two questions:
    that will exist after the migration: a query with no supporting index, an N+1 the plan sets
    up, an unbounded result set, `OFFSET` pagination on a table that grows. When a dev database
    is reachable, it reconstructs the SQL and runs `EXPLAIN (ANALYZE)` on a seeded table rather
-   than guessing; when it is not, it says so and gives the exact `EXPLAIN` to run.
+   than guessing; when it is not, it says so and gives the exact `EXPLAIN` to run. It checks
+   the section 6b table, and it names each query that needs the production check of
+   `~/.claude/skills/_shared/query-check.md`. You ask the user for that check, run it, and
+   update the table.
 
 A finding here is cheap now and expensive later: a wrong column type ships as a migration, and
 a missing index ships as an outage. The plan states the final schema, the indexes and the

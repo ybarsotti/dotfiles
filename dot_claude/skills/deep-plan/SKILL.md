@@ -209,6 +209,8 @@ Loop, starting at iteration 1:
 1. Run `~/.claude/skills/deep-plan/scripts/dispatch-reviewers.sh "$RUN_DIR" "$ITER"`. It launches in parallel:
    - Claude **Sonnet** reviewers: `personas/architect.md`, `personas/project-developer.md`, `personas/ticket-matcher.md`
    - Codex reviewers: `personas/flow-mapper.md`, `personas/qa.md` *(use Claude/Sonnet when `--no-codex`)*
+   - When the plan has a `## Query cost` table or a schema change, also run the data reviewer of
+     `simple-plan` Phase 3 as an `Agent`. Treat its findings as `proposed_edits`.
 
    Reviewers are always **Sonnet** on the Claude side; the Codex side runs `gpt-6-sol` at
    `model_reasoning_effort=high` (pinned in `scripts/runner.sh`, overridable with
@@ -288,7 +290,7 @@ Confirm the plan includes, at minimum:
 - A **Rationale & key decisions** section (fed by grill-with-docs + brainstorming).
 - **Ticket + Slack context**, a point-by-point **Requirements matrix** with its ticket coverage line, and a **Work size** table.
 - A sequenced **User journey** when applicable; otherwise an explicit reason.
-- A **Data model** mapping every affected table/column to its value source and the deploy order, or explicit `no`.
+- A **Data model** mapping every affected table/column to its value source and the deploy order, or explicit `no`, and a **Query cost** table per `_shared/query-check.md`, or `no`.
 - **Rules**, **Removed contracts** and **Stages** filled or `no` with a reason; edge cases carry `EC-NNN` IDs.
 - A **UI design pass** held to `~/.claude/skills/_shared/ui-quality.md` for any UI change, and a copyable **Product design handoff prompt** for substantial UI; explicit `no` for each otherwise.
 - A **TDD test list** with the outer-boundary-only mocking policy stated.

@@ -104,8 +104,8 @@ Skip it for the run you just finished in this session, where nothing has changed
 A finding reported and not fixed is not a reviewed change, so this phase is the default rather
 than a question. Do not stop at the report and wait to be asked.
 
-1. **Fix every CRITICAL and HIGH.** Each finding names a file, a line and a suggestion, so
-   work from the report rather than re-deriving the problem.
+1. **Fix every CRITICAL and HIGH**, from each finding's file, line and suggestion. First run
+   each `prod-check:` QUESTION by `~/.claude/skills/_shared/query-check.md` §2; it can move a severity.
 2. **Re-run the panel on the fix**, scoped to the changed files. A fix that introduces its own
    finding is common, and the second pass is what catches it.
 3. **Stop after two fix rounds.** What survives goes in a `## Open findings` section with the
