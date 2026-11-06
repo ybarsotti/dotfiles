@@ -195,8 +195,7 @@ graph LR
 
 Three chained slash commands (`dot_claude/commands/deep-plan.md`, `deep-execute.md`,
 `deep-review.md`, backed by skills under `dot_claude/skills/deep-plan/`,
-`dot_claude/skills/deep-execute/`, `dot_claude/skills/deep-review/`, and
-`dot_claude/skills/cmux-orchestrator/`) take a non-trivial task from planning through
+`dot_claude/skills/deep-execute/`, and `dot_claude/skills/deep-review/`) take a non-trivial task from planning through
 parallel, multi-agent execution to a reviewed diff:
 
 ```mermaid
@@ -205,7 +204,7 @@ graph TD
 
     subgraph "/deep-execute (orchestrator)"
         INIT["init-run.sh<br/>validate-plan.sh --root, scaffold RUN_DIR/manifest.json"]
-        LAUNCH["cmux-orchestrator: launch-workers.sh<br/>one pane per non-orchestrator lane"]
+        LAUNCH["orca-launch.sh<br/>one Orca terminal per non-orchestrator lane"]
         LANES["Lane workers (parallel, ONE shared worktree)<br/>each owns disjoint path globs"]
         MON["monitor-events.sh<br/>event.sh / board.sh / reply.sh"]
         GATE["round-gate.sh<br/>lane tests → contract → run-state → light review"]
@@ -240,7 +239,7 @@ graph TD
   validation, lane/ownership boundaries, the event/reply protocol, round gating, and an
   end-to-end integration test that walks a real plan through `validate-plan.sh` →
   `init-run.sh` → `validate-contract.sh` → `validate-run-state.sh` with no real agent
-  launched (cmux/claude/codex/reviewer are stubbed).
+  launched (orca/wsh/claude/codex/reviewer are stubbed).
 
 ## Key Design Decisions
 

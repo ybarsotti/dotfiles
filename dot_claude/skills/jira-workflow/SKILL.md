@@ -10,7 +10,7 @@ description: |
   (`atlassian.net/browse/<CODE>`), phrases like "jira ticket", "this is related to
   jira", "start on this", "let's pick up", "work on the ticket", or any mention of a
   ticket the user wants to work on. The workflow covers: reading + clarifying the
-  ticket, renaming the cmux tab, creating a branch (main repo or new worktree),
+  ticket, naming the Orca terminal tab, creating a branch (main repo or new worktree),
   transitioning the Jira status to "Under investigation", then delegating the deep
   planning to /deep-plan (grilling + domain-modeling → brainstorming → writing-plans → 5-persona
   review incl. ticket-matcher → plannotator → approved plan), then executing it — via
@@ -18,8 +18,8 @@ description: |
   tests, run-state validation, orchestrator commits, one final /deep-review), or the
   superpowers execution workflow under strict TDD otherwise — running /qa-test-plan when
   flows or screens change, opening the PR via /pr (conventional title,
-  Mermaid, no file list, assigned to the user), and looping on CI + Copilot feedback
-  until both are clean.
+  Mermaid, no file list, assigned to the user), and watching the PR for review feedback
+  and CI until it merges or closes.
 ---
 
 # Jira Ticket Workflow
@@ -50,8 +50,7 @@ items.
 
 - [ ] **Intake**: parse ticket ID + fetch ticket via Atlassian MCP
 - [ ] **Clarity check**: is the ticket self-sufficient? If not, ask targeted questions
-- [ ] **cmux tab**: `cmux rename-tab "<CODE>: <Summary>"` + `cmux set-status jira <CODE>`
-- [ ] **cmux notify (start)**: `cmux notify --title "Starting <CODE>" --body "<summary>"`
+- [ ] **Orca tab**: `orca terminal rename --title "<CODE>: <Summary>"` (skip outside Orca)
 - [ ] **Location decision**: main repo or new git worktree?
 - [ ] **Worktree (if chosen)**: create from `origin/main` at `.claude/worktrees/<slug>`
 - [ ] **Branch**: `<type>/<CODE>-<kebab-description>` (see `.claude/rules/branching.md`)
@@ -73,22 +72,8 @@ items.
 - [ ] **Re-run tests**: every test (new + existing) must be green
 - [ ] **`/pr`**: title + ticket/Slack + reconciled requirements + Mermaid +
       decisions, **no file list**, assigned to me
-- [ ] **cmux notify (PR opened)**
-- [ ] **Wait for CI green** (in parallel with Copilot loop)
-- [ ] **Copilot review loop** — keep checking until **zero new comments**; address every
-      actionable one and reply in-thread
-- [ ] **cmux notify (ready to merge)** + `cmux clear-status jira`
-
-Use `cmux set-progress` at natural boundaries:
-
-| Phase complete | Progress |
-|---|---|
-| Intake + clarity | 0.10 |
-| Branch created | 0.15 |
-| Plan approved (`/deep-plan`) | 0.30 |
-| Plan executed (`/deep-execute`, or superpowers build + `/simplify` + `/deep-review`) | 0.75 |
-| PR opened (`/pr`) | 0.85 |
-| CI + Copilot clean | 1.00 |
+- [ ] **PR watch** — `/pr` Phase 5 watches CI and every review comment, human or bot,
+      until the PR merges or closes (see §7)
 
 ---
 
@@ -138,20 +123,15 @@ that gets coded on assumptions is the most expensive kind of rework.
 If the ticket is clear, summarize what you understood back to the user in 2–3 bullets
 and move on. This is an implicit confirmation.
 
-### 1.4 Update cmux chrome
+### 1.4 Name the Orca tab
 
-Run these in order (silently — don't narrate each one):
+Inside an Orca terminal, name the tab after the ticket, silently:
 
 ```bash
-cmux rename-tab "<CODE>: <Summary>"
-cmux set-status jira "<CODE>" --icon "briefcase" --color "#0052CC"
-cmux notify --title "Starting <CODE>" --body "<Summary>"
-cmux set-progress 0.10 --label "Intake"
+orca terminal rename --title "<CODE>: <Summary>"
 ```
 
-The `CMUX_WORKSPACE_ID` / `CMUX_TAB_ID` env vars are auto-set in cmux terminals, so no
-explicit targeting is needed. Use `set-status` with key `jira` so multiple workflows
-don't clobber each other.
+Outside Orca (`orca worktree current` fails), skip this step.
 
 ### 1.5 Ask: main repo or worktree?
 
@@ -181,7 +161,7 @@ git checkout -b <type>/<CODE>-<description>
 
 Branch-type prefix follows `.claude/rules/branching.md` (`feat/`, `fix/`, `refactor/`,
 `docs/`, `chore/`). Derive it from the ticket's issuetype + description — Bug →
-`fix/`, Story → `feat/`, etc. Set `cmux set-progress 0.15 --label "Branch ready"`.
+`fix/`, Story → `feat/`, etc.
 
 ### 1.6 Transition Jira to "Under investigation"
 
@@ -221,7 +201,7 @@ acceptance criteria → plannotator → an approved plan at
 
 Do NOT hand-trace, hand-write tests, or plan inline here — that duplicates deep-plan. If the
 ticket-matcher flags the plan as vague or missing an acceptance criterion, resolve it inside
-the deep-plan loop before continuing. Set `cmux set-progress 0.30 --label "Plan approved"`.
+the deep-plan loop before continuing.
 
 ## 3. Execute approved plan
 
@@ -274,8 +254,7 @@ end of its last round. See `dot_claude/skills/deep-execute/SKILL.md` (and
   findings.
 
 **Either path:** `Skill(skill="superpowers:verification-before-completion")` once execution
-reports complete, before any PR work. Set `cmux set-progress 0.75 --label "Plan executed"`
-when tests are green and (for the parallel path) `/deep-review` came back clean.
+reports complete, before any PR work.
 
 **Don't stop between these steps.** Build → review → record → QA → gap fixes → PR runs
 straight through; pause only for a blocker no agent can settle alone (an ambiguous product
@@ -294,7 +273,7 @@ changed or a screen was added), run:
 ```
 
 It writes a manual test plan to the project's `./tmp/`, has a codex agent review it, then
-drives `agent-browser` (codex worker via cmux) to execute the steps and record a video,
+drives `agent-browser` (a codex worker in an Orca terminal) to execute the steps and record a video,
 returning a pass/fail report. Reference the report + video path on the PR/ticket.
 
 ## 5. Verification
@@ -338,7 +317,7 @@ before/after screenshots when the UI changed). It contains **no file list and no
 A codex agent reviews the draft,
 the PR is opened **assigned to you** (`--assignee @me`), and CODEOWNERS reviewers are added.
 
-`cmux notify --title "<CODE> PR opened" --body "<PR URL>"` + `set-progress 0.85`.
+Send a `PushNotification`: `<CODE> PR opened` and the PR URL.
 
 ### 6.3 Jira comment (optional but nice)
 
@@ -350,60 +329,16 @@ mcp__atlassian__addCommentToJiraIssue(cloudId, issueIdOrKey=<CODE>, commentBody=
 
 ---
 
-## 7. CI + Copilot loop
+## 7. Watch the PR
 
-Both run concurrently. Keep looping until **both** converge.
+`/pr` Phase 5 owns the watch: CI, every review comment from a human or a bot, the review
+state, and merge conflicts, until the PR merges or closes. Do not run a second loop here.
+The jira-workflow parts are these:
 
-### 7.1 CI watcher
+- When the PR is ready to merge, send a `PushNotification`: `<CODE> ready to merge`.
+- When the PR merges, offer to move the ticket to its next Jira status.
 
-```bash
-gh pr view <pr-number> --json statusCheckRollup \
-  --jq '.statusCheckRollup[] | {name, status, conclusion}'
-```
-
-Wait for all checks to be `COMPLETED`. If anything fails, don't hot-patch blindly — drive it
-through `superpowers:systematic-debugging` (reproduce the failure locally, minimise,
-hypothesise, fix, add a regression test), then push and the loop resumes. Don't close the loop
-while anything is `IN_PROGRESS`.
-
-### 7.2 Copilot review loop
-
-Copilot's PR review arrives within ~5 min of the PR being opened (sometimes sooner).
-Fetch inline comments with:
-
-```bash
-gh api repos/<owner>/<repo>/pulls/<pr-number>/comments
-```
-
-For every new comment (compare `commit_id` against what's already been addressed), run
-`Skill(skill="superpowers:receiving-code-review")` first, then:
-
-1. Read the comment carefully. Classify as valid / invalid / stylistic.
-2. If valid, make the fix. If stylistic and the project doesn't enforce it, skip with a
-   short thread reply explaining.
-3. Reply to the comment via:
-   ```bash
-   gh api repos/<owner>/<repo>/pulls/<pr-number>/comments/<comment-id>/replies \
-     -F body='Fixed in <commit-sha>. <one-line rationale>.'
-   ```
-4. Push the fix.
-
-After every push, Copilot may post a *new* review on the new commit. **Keep looping** —
-wait 3–5 min, re-fetch comments, address anything new. The loop ends when a fetch
-returns no unaddressed comments.
-
-### 7.3 Wrap-up
-
-When CI is green AND Copilot has no new comments for at least one full iteration after
-the last fix:
-
-```bash
-cmux notify --title "<CODE> ready to merge" --body "All checks green, Copilot clean"
-cmux set-progress 1.0 --label "Ready to merge"
-cmux clear-status jira
-```
-
-Then hand control back to the user — the actual merge is their call.
+The merge is the user's call.
 
 ---
 
@@ -414,11 +349,9 @@ Then hand control back to the user — the actual merge is their call.
   resume with the plan, decisions, and run dir intact — no re-derivation.
 - **Docs, not just code**: Acme repos keep real logic in `docs/`. Confirm the change
   updates the affected docs (the `/deep-plan` plan lists them; `/deep-review` flags stale ones).
-- **Scheduling**: for the CI + Copilot loop, use `ScheduleWakeup` with ~240s delays
-  (stays inside the 5-minute prompt cache TTL). Don't poll tighter than that.
 - **Worktree cleanup**: after merge, offer to run `git worktree remove .claude/worktrees/<slug>`.
 - **Commit size**: if review feedback produces 3+ unrelated fixes, one commit per fix
-  makes the Copilot reply history cleaner.
+  makes the review reply history cleaner.
 - **When codex is unauthenticated**: `codex login status` exits 0 when authenticated.
   If not, prompt the user to run `codex login` — don't try to auth silently.
 - **When Atlassian MCP errors**: most common cause is the cloudId being wrong. Re-fetch

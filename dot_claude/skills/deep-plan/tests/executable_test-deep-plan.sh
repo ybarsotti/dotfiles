@@ -1422,8 +1422,7 @@ assert_contains "$(cat "$SKILL_MD")" "orchestrator, not an implementer" \
 # recurring defect shape when it silently vanishes: the honest-receipts
 # framing, the hard-gate rule, outer-boundary-only mocking, the sole
 # authority to tick a Superpowers box, and the flag names themselves.
-# When task 8 (cmux-orchestrator) and task 12 (deep-review) apply the same
-# slimming to their own SKILL.md, extend THIS block — not the line-count
+# When deep-review applies the same slimming to its own SKILL.md, extend THIS block — not the line-count
 # check — with the equivalent load-bearing phrases from those files.
 
 SKILL_MD_TEXT="$(cat "$SKILL_MD")"

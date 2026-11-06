@@ -112,7 +112,7 @@ When a fix changes code that the review saw, run `/deep-review` once more on the
 
 1. Freeze the commit SHA. Every result in the report names this SHA.
 2. Run `/pr`. It attaches the screenshots and the video with `gh --attach`, and it watches
-   the PR for review comments and CI.
+   the PR for review comments and CI until the PR merges or closes.
 
 ## 8. Deliver the report
 

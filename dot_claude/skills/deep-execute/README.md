@@ -45,8 +45,8 @@ different manifest shape than this skill's own `RUN_DIR/manifest.json`) and `wav
 launches each lane there as a Wave block running `worker-loop.sh`.
 
 **Why a loop instead of a REPL.** Wave has no way to type into a live block — `wsh run`
-launches one and `wsh termscrollback` reads one, but there is no `wsh send`. cmux had
-`cmux send`, which is how a `waiting` lane used to be woken. So the wake is a file:
+launches one and `wsh termscrollback` reads one, but there is no `wsh send`. So the wake
+is a file:
 `worker-loop.sh` blocks on `lanes/<lane>/reply.md` and resumes the lane's session when it
 moves. Each lane is pinned to its own `--session-id` UUID, because every lane shares one
 worktree and resuming "the last session" would cross lanes. Codex lanes are stateless per

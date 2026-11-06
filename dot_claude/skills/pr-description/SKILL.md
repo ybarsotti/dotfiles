@@ -304,12 +304,13 @@ CI, suggest once a job that runs `plan-stamp.sh check` and fails on a missing ev
 
 ## Phase 5 — Watch and address feedback (default; skip with `--no-watch`)
 
-An open PR is not done. Watch it until reviewers and CI go quiet. Skip this phase for
+An open PR is not done. Watch it until it merges or closes. Skip this phase for
 `--draft`, `--dry-run` and `--no-watch`.
 
-1. **Poll every 5 minutes** with the `Monitor` tool. Do not poll in a foreground loop. Read:
+1. **Poll every 5 minutes** with the `Monitor` tool while CI runs and bots review. Do not
+   poll in a foreground loop. Read:
    ```bash
-   gh pr view <n> --json state,reviews,comments,statusCheckRollup
+   gh pr view <n> --json state,reviewDecision,reviews,comments,statusCheckRollup,mergeable
    gh api repos/<owner>/<repo>/pulls/<n>/comments   # inline review comments
    ```
    Keep the ids you already handled in `$RUN_DIR/handled-comments.txt`.
@@ -324,9 +325,22 @@ An open PR is not done. Watch it until reviewers and CI go quiet. Skip this phas
 6. After each push, rerun Phase 0.5 proofs and update `## Evidence by requirement` if a
    result changed.
 
-Stop when the PR merges or closes. Also stop when CI is green and one full poll after your last
-push brings no new comment. Report what you fixed, what you declined and why, and what waits on
-the user.
+7. **A merge conflict** (`mergeable: CONFLICTING`): rebase on the base branch, rerun the
+   tests, and push. Ask the user first when the conflict touches logic that another PR changed.
+
+**Two stages.** Human reviewers answer hours later, so a quiet CI does not end the watch.
+
+- *Active*: the 5-minute `Monitor` poll above. It ends when CI is green and one full poll
+  after your last push brings no new comment. Report what you fixed, what you declined and
+  why, and what waits on the user.
+- *Long*: then run `Skill(skill="loop", args="<the watch prompt>")` with no interval, so the
+  loop paces itself with `ScheduleWakeup` at 1200 to 1800 seconds. The watch prompt names the
+  PR URL, `handled-comments.txt`, and steps 1 to 7. A new comment, a `CHANGES_REQUESTED`
+  review, a red check or a conflict starts the active stage again.
+
+Send a `PushNotification` when the PR is approved and green, and when a review needs the user.
+Stop the loop when the PR merges or closes. The loop lives in this session: when the session
+ends, the watch ends. Say so in the final report.
 
 ## Checklist (orchestrator ticks after Phase 3)
 

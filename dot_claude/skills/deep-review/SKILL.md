@@ -190,7 +190,7 @@ says; don't work around a failure it already reported.
 
 ## Constraints
 
-- **Headless only.** Do NOT spawn reviewers in cmux panes or Orca terminals. Use `claude -p`
+- **Headless only.** Do NOT spawn reviewers in Orca terminals. Use `claude -p`
   and `codex exec` — an interactive pane costs more and buys nothing a log does not.
 - **Reviewers are non-interactive.** They read context, record findings, exit. No follow-up.
 - **No aggregator call in record mode.** `report.sh` is a `jq` transform. Variants without

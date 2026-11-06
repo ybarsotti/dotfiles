@@ -585,13 +585,13 @@ assert_eq "$(jq -r '.msg' <<<"$TRIGGER_RACE")" "landed during the pre-tail delay
 # ─── Vanished block: termscrollback fails for the lane's block_ref ─────────
 
 MON_VANISHED=$(mon_run_with_surface)
-CMUX_BIN_CRASH=$(mktemp -d)
-cat >"${CMUX_BIN_CRASH}/wsh" <<'STUB'
+STUB_BIN_CRASH=$(mktemp -d)
+cat >"${STUB_BIN_CRASH}/wsh" <<'STUB'
 #!/usr/bin/env bash
 exit 1
 STUB
-chmod +x "${CMUX_BIN_CRASH}/wsh"
-TRIGGER_VANISHED=$(PATH="${CMUX_BIN_CRASH}:${PATH}" MONITOR_LIVENESS_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "$MON_VANISHED")
+chmod +x "${STUB_BIN_CRASH}/wsh"
+TRIGGER_VANISHED=$(PATH="${STUB_BIN_CRASH}:${PATH}" MONITOR_LIVENESS_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "$MON_VANISHED")
 assert_eq "$(jq -r '.type' <<<"$TRIGGER_VANISHED")" vanished_pane "monitor-events.sh: termscrollback failing produces a vanished_pane trigger"
 assert_eq "$(jq -r '.lane' <<<"$TRIGGER_VANISHED")" backend "monitor-events.sh: vanished_pane trigger names the lane"
 assert_contains "$(jq -r '.msg' <<<"$TRIGGER_VANISHED")" "block:1" "monitor-events.sh: vanished_pane trigger names the block that failed"
@@ -600,15 +600,15 @@ assert_contains "$(jq -r '.msg' <<<"$TRIGGER_VANISHED")" "block:1" "monitor-even
 # contains a known-fatal signature.
 
 MON_FATAL=$(mon_run_with_surface)
-CMUX_BIN_FATAL=$(mktemp -d)
-cat >"${CMUX_BIN_FATAL}/wsh" <<'STUB'
+STUB_BIN_FATAL=$(mktemp -d)
+cat >"${STUB_BIN_FATAL}/wsh" <<'STUB'
 #!/usr/bin/env bash
 echo "some ordinary output"
 echo "panic: something exploded"
 exit 0
 STUB
-chmod +x "${CMUX_BIN_FATAL}/wsh"
-TRIGGER_FATAL=$(PATH="${CMUX_BIN_FATAL}:${PATH}" MONITOR_LIVENESS_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "$MON_FATAL")
+chmod +x "${STUB_BIN_FATAL}/wsh"
+TRIGGER_FATAL=$(PATH="${STUB_BIN_FATAL}:${PATH}" MONITOR_LIVENESS_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "$MON_FATAL")
 assert_eq "$(jq -r '.type' <<<"$TRIGGER_FATAL")" fatal_signature "monitor-events.sh: a fatal signature in fresh block output produces a fatal_signature trigger"
 assert_eq "$(jq -r '.lane' <<<"$TRIGGER_FATAL")" backend "monitor-events.sh: fatal_signature trigger names the lane"
 assert_contains "$(jq -r '.msg' <<<"$TRIGGER_FATAL")" "panic: something exploded" "monitor-events.sh: fatal_signature trigger quotes the matched line"
@@ -648,8 +648,8 @@ reply_run() {
 
 # wsh stub for the "every lane is alive" side of the run — `wsh blocks list`
 # lists both launched blocks, so reply.sh finds a loop still watching each file.
-CMUX_BIN_OK=$(mktemp -d)
-cat >"${CMUX_BIN_OK}/wsh" <<'STUB'
+STUB_BIN_OK=$(mktemp -d)
+cat >"${STUB_BIN_OK}/wsh" <<'STUB'
 #!/usr/bin/env bash
 if [ "${1:-}" = "blocks" ]; then
   echo "1"
@@ -657,7 +657,7 @@ if [ "${1:-}" = "blocks" ]; then
 fi
 exit 0
 STUB
-chmod +x "${CMUX_BIN_OK}/wsh"
+chmod +x "${STUB_BIN_OK}/wsh"
 
 # ─── --all across 3 lanes: two wake, one has no block_ref (reported, ───────
 # not swallowed) — this is exactly the "waiting forever" failure mode the
@@ -666,7 +666,7 @@ chmod +x "${CMUX_BIN_OK}/wsh"
 
 RUN_R=$(reply_run)
 REPLY_RC=0
-REPLY_OUT=$(PATH="${CMUX_BIN_OK}:${PATH}" "$REPLY" "$RUN_R" --all "Contract 1.0.1 published" 2>/dev/null) || REPLY_RC=$?
+REPLY_OUT=$(PATH="${STUB_BIN_OK}:${PATH}" "$REPLY" "$RUN_R" --all "Contract 1.0.1 published" 2>/dev/null) || REPLY_RC=$?
 assert_eq "$REPLY_RC" 1 "reply.sh --all: exits 1 when at least one of 3 lanes fails to wake"
 
 assert_exit 0 grep -q 'Contract 1.0.1 published' "${RUN_R}/lanes/backend/reply.md"
@@ -690,16 +690,16 @@ assert_contains "$(jq -r '.detail' <<<"$REPLY_REVIEW")" "review" "reply.sh --all
 # reported with its own distinguishable detail. This is the stranded lane:
 # the reply is on disk and nobody will ever read it.
 
-CMUX_BIN_FAIL=$(mktemp -d)
-cat >"${CMUX_BIN_FAIL}/wsh" <<'STUB'
+STUB_BIN_FAIL=$(mktemp -d)
+cat >"${STUB_BIN_FAIL}/wsh" <<'STUB'
 #!/usr/bin/env bash
 exit 0
 STUB
-chmod +x "${CMUX_BIN_FAIL}/wsh"
+chmod +x "${STUB_BIN_FAIL}/wsh"
 
 RUN_R2=$(reply_run)
 REPLY_RC2=0
-REPLY_OUT2=$(PATH="${CMUX_BIN_FAIL}:${PATH}" "$REPLY" "$RUN_R2" backend "urgent update" 2>/dev/null) || REPLY_RC2=$?
+REPLY_OUT2=$(PATH="${STUB_BIN_FAIL}:${PATH}" "$REPLY" "$RUN_R2" backend "urgent update" 2>/dev/null) || REPLY_RC2=$?
 assert_eq "$REPLY_RC2" 1 "reply.sh: a single-lane call whose block is gone exits 1"
 assert_eq "$(jq -r '.woken' <<<"$REPLY_OUT2")" false "reply.sh: a dead block is reported as woken:false"
 assert_contains "$(jq -r '.detail' <<<"$REPLY_OUT2")" "is gone" "reply.sh: the detail distinguishes a dead block from 'no block_ref'"
@@ -1238,7 +1238,7 @@ assert_contains "$SKILL_MD_TEXT" "mid-edit" "SKILL.md: resume names the specific
 
 # ─── Judgement, not procedure: this doc must stay well short of the other ──
 # slimmed deep-* skills' combined length (693 lines across deep-plan +
-# deep-review + cmux-orchestrator) — a length ceiling alone doesn't prove
+# deep-review) — a length ceiling alone doesn't prove
 # judgement-only prose, but a doc that blows past every sibling's line
 # count is a strong signal it re-derived procedure instead of naming scripts.
 

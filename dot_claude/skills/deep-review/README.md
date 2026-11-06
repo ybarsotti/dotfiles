@@ -41,7 +41,7 @@ scripts/dispatch.sh  — parses args, builds run dir, fans out, aggregates
    └── scripts/aggregate.sh        — single claude -p call to consolidate findings
 ```
 
-All reviewers run **headless in background** (no cmux panes, no UI clutter). Claude-side reviewers and the aggregator both run on **Sonnet**; the Codex side runs on Codex. Each reviewer's prompt is a **fixed file** at `personas/<id>.md` — the orchestrator never writes reviewer prompts; the dispatcher loads the file and appends the variant's role/focus + output schema. After aggregation, the skill runs a `/simplify` cleanup pass on the reviewed scope.
+All reviewers run **headless in background** (no Orca terminals, no UI clutter). Claude-side reviewers and the aggregator both run on **Sonnet**; the Codex side runs on Codex. Each reviewer's prompt is a **fixed file** at `personas/<id>.md` — the orchestrator never writes reviewer prompts; the dispatcher loads the file and appends the variant's role/focus + output schema. After aggregation, the skill runs a `/simplify` cleanup pass on the reviewed scope.
 
 ## Variants
 

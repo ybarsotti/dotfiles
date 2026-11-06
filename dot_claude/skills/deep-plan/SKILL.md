@@ -375,14 +375,14 @@ Read the plan's `## Execution shape` and pick the recommendation from what is ac
 
 The four options, each stated to the user with what it costs:
 
-- **A — `/deep-execute "$RUN_DIR/plan.md"`.** Parallel lane workers in one shared cmux
+- **A — `/deep-execute "$RUN_DIR/plan.md"`.** Parallel lane workers in Orca terminals, one shared
   worktree, round gating, contract drift handling, one full `/deep-review`, QA, run report,
   PR. Most machinery, most parallelism; needs disjoint lanes and a real contract.
 - **B — serial** via `superpowers:subagent-driven-development`: one implementer agent per
   task, in order, in one worktree, strict TDD per task. This session reviews each task.
 - **C — Claude `Workflow`.** Deterministic script-driven fan-out (`pipeline()`/`parallel()`)
   over a known work-list, with an adversarial verify stage. Best when the slices are uniform
-  and the orchestration shape is known up front; no cmux panes, no per-round human gate.
+  and the orchestration shape is known up front; no lane terminals, no per-round human gate.
 - **D — Codex-only implementer.** `codex exec` writes the code; this session orchestrates,
   gates, reviews and commits. Use when the change is one coherent slice and you want a
   second model's hands on the implementation.

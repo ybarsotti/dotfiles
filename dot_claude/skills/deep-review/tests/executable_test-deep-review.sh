@@ -12,8 +12,8 @@ ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)
 SKILL_MD="${ROOT}/dot_claude/skills/deep-review/SKILL.md"
 
 # Scripts resolve both the source-tree name (executable_foo.sh) and the
-# deployed name (foo.sh) — same convention as deep-plan/cmux-orchestrator's
-# suites, so this test keeps working after `chezmoi apply` strips the prefix.
+# deployed name (foo.sh) — same convention as the deep-plan
+# suite, so this test keeps working after `chezmoi apply` strips the prefix.
 DISPATCH="${ROOT}/dot_claude/skills/deep-review/scripts/executable_dispatch.sh"
 [ -f "$DISPATCH" ] || DISPATCH="${ROOT}/dot_claude/skills/deep-review/scripts/dispatch.sh"
 COLLECT_CONTEXT="${ROOT}/dot_claude/skills/deep-review/scripts/executable_collect-context.sh"
@@ -57,10 +57,9 @@ assert_contains "$SKILL_MD_TEXT" "single-persona per-round reviewer for \`/deep-
 # deleted and they'd stay green. Each assertion below pins one rule a prior
 # reviewer identified as load-bearing for this skill: don't silently repair
 # bad args, run the dispatcher in the foreground (so progress is visible),
-# never fabricate findings, headless-only reviewers (no cmux panes), and
+# never fabricate findings, headless-only reviewers (no Orca terminals), and
 # exactly one aggregator call. Matches the pattern set by
-# deep-plan/tests/executable_test-deep-plan.sh ("Task 6") and
-# cmux-orchestrator/tests/executable_test-cmux-orchestrator.sh (task 8) —
+# deep-plan/tests/executable_test-deep-plan.sh ("Task 6") —
 # extend THIS block, not the line-count check, if this file is slimmed again.
 
 assert_contains "$SKILL_MD_TEXT" "Do not try to repair invalid args silently" \
@@ -71,8 +70,8 @@ assert_contains "$SKILL_MD_TEXT" "Never invent findings" \
   "SKILL.md: must-survive — never invent findings when a reviewer fails"
 assert_contains "$SKILL_MD_TEXT" "Headless only" \
   "SKILL.md: must-survive — headless only"
-assert_contains "$SKILL_MD_TEXT" "Do NOT spawn reviewers in cmux panes" \
-  "SKILL.md: must-survive — do not spawn reviewers in cmux panes"
+assert_contains "$SKILL_MD_TEXT" "Do NOT spawn reviewers in Orca terminals" \
+  "SKILL.md: must-survive — do not spawn reviewers in Orca terminals"
 assert_contains "$SKILL_MD_TEXT" "No aggregator call in record mode" \
   "SKILL.md: must-survive — no aggregator call when reviewers record findings"
 assert_contains "$SKILL_MD_TEXT" "still use a single \`claude -p\` aggregator" \

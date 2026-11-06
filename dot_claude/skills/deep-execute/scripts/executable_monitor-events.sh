@@ -12,8 +12,7 @@
 #
 # WARNING: every trigger except `timeout` (and `monitor_error`) exits 0 —
 # detecting `blocked`, an invalid line, a vanished pane or a fatal signature
-# is this script doing its job, not failing at it, exactly like
-# cmux-orchestrator's monitor-workers.sh. Callers MUST branch on the JSON
+# is this script doing its job, not failing at it. Callers MUST branch on the JSON
 # `.type` field, never on the exit code, to tell triggers apart.
 #
 # Usage:
@@ -196,7 +195,7 @@ done < <(jq -r '.workers[]?.lane // empty' "$MANIFEST" 2>/dev/null)
 # launch manifest does not exist yet — this script's primary job is watching
 # events.jsonl; block health is a supplementary signal layered on top.
 #
-# `wsh termscrollback -b <block>` replaces cmux's `capture-pane`. The event name
+# `wsh termscrollback -b <block>` reads the block. The event name
 # stays `vanished_pane` because every caller's filter already branches on it, and
 # renaming a trigger silently is how a monitor goes deaf.
 do_liveness_check() {

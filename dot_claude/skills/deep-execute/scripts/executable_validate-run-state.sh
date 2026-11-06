@@ -69,7 +69,7 @@
 # Lane ownership (`owns` globs) is not duplicated into manifest.json — it
 # lives in the plan, and plan-to-json.sh is re-invoked here to read it, the
 # same way validate-plan.sh does. The orchestrator lane is excluded from the
-# ownership set entirely: it isn't a monitored cmux worker (it's the one
+# ownership set entirely: it isn't a monitored lane worker (it's the one
 # running this script), so any change under its own territory mid-round is
 # itself suspicious, not exempt — it correctly shows up as "unowned". This
 # assumes the orchestrator lane's own `owns` (if the plan gives it any at

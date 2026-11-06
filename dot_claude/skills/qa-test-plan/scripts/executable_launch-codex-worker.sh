@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# launch-codex-worker.sh — Launch a codex worker in a cmux pane for visibility.
+# launch-codex-worker.sh — Launch a codex worker in an Orca terminal for visibility.
 #
-# The bundled cmux-orchestrator launch-workers.sh launches *claude* workers only, so
-# the qa-test-plan browser executor (a codex worker driving agent-browser) needs its
-# own launcher built on raw cmux primitives.
+# The qa-test-plan browser executor is a codex worker that drives agent-browser. It runs
+# in its own Orca terminal, so the user can watch it.
 #
 # Usage:
 #   launch-codex-worker.sh <run_dir> <cwd> <worker-name> <task-file>
@@ -11,18 +10,18 @@
 # Arguments:
 #   run_dir      — orchestration run directory (holds done markers, prompts)
 #   cwd          — working directory for the worker (the project under test)
-#   worker-name  — kebab-case name, used for the tab label
+#   worker-name  — kebab-case name, used for the terminal title
 #   task-file    — path to the markdown task the codex worker executes
 #
 # Output:
-#   Prints JSON with pane_ref + surface_ref (or "mode":"headless" on fallback) to stdout.
+#   Prints JSON with the terminal handle (or "mode":"headless" on fallback) to stdout.
 #   All progress/diagnostic output goes to stderr.
 #
 # Behaviour:
-#   Opens one pane split-right, cd's to <cwd>, and runs
+#   Opens one Orca terminal in <cwd> that runs
 #     codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check - < <task-file>
-#   If any cmux primitive is unavailable, falls back to a plain background codex exec
-#   (no pane, no visibility) and says so on stderr.
+#   Outside an Orca workspace, falls back to a plain background codex exec
+#   (no terminal, no visibility) and says so on stderr.
 
 set -uo pipefail
 
@@ -48,13 +47,13 @@ fi
 
 mkdir -p "$RUN_DIR"
 
-# The command the worker runs inside the pane. Reads the task from the file on stdin.
-CODEX_CMD="cd ${CWD} && codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check - < ${TASK_FILE}"
+# The command the worker runs inside the terminal. Reads the task from the file on stdin.
+CODEX_CMD="cd $(printf %q "$CWD") && codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check - < $(printf %q "$TASK_FILE")"
 
-# --- Headless fallback: no cmux, or cmux not usable here -------------------------------
+# --- Headless fallback: no Orca workspace here ----------------------------------------
 fallback_headless() {
   local reason="$1"
-  echo "Warning: ${reason} — falling back to headless codex exec (no pane, no visibility)." >&2
+  echo "Warning: ${reason} — falling back to headless codex exec (no terminal, no visibility)." >&2
   local log="${RUN_DIR}/${WORKER}.log"
   ( cd "${CWD}" && codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check - < "${TASK_FILE}" ) \
     >"${log}" 2>&1 &
@@ -63,44 +62,30 @@ fallback_headless() {
   printf '{"mode":"headless","pid":%s,"log":"%s"}\n' "${pid}" "${log}"
 }
 
-if ! command -v cmux >/dev/null 2>&1; then
-  fallback_headless "cmux CLI not found"
+if ! command -v orca >/dev/null 2>&1; then
+  fallback_headless "orca CLI not found"
   exit 0
 fi
 
-if ! cmux identify --json >/dev/null 2>&1; then
-  fallback_headless "not running inside cmux"
+if ! orca worktree current --json >/dev/null 2>&1; then
+  fallback_headless "not inside an Orca workspace"
   exit 0
 fi
 
-# --- Visible path: open a pane and drive codex there ----------------------------------
-echo "Creating codex worker pane (split right)..." >&2
+# --- Visible path: open an Orca terminal that runs codex ------------------------------
+echo "Creating codex worker terminal..." >&2
 
-PANE_JSON=$(cmux --json new-pane --direction right 2>/dev/null)
-if [ -z "${PANE_JSON}" ]; then
-  fallback_headless "cmux new-pane failed"
+if ! OUT=$(orca terminal create --worktree "path:${CWD}" --title "w: ${WORKER}" --command "$CODEX_CMD" --json 2>&1); then
+  fallback_headless "orca terminal create failed: ${OUT}"
   exit 0
 fi
 
-PANE_REF=$(echo "${PANE_JSON}" | jq -r '.pane_ref // empty' 2>/dev/null)
-SURFACE_REF=$(echo "${PANE_JSON}" | jq -r '.surface_ref // empty' 2>/dev/null)
-
-if [ -z "${SURFACE_REF}" ]; then
-  fallback_headless "could not read surface_ref from cmux new-pane"
+HANDLE=$(printf '%s' "$OUT" | jq -r '[.. | .handle? // empty | strings] | first // empty' 2>/dev/null)
+if [ -z "${HANDLE}" ]; then
+  fallback_headless "could not read the terminal handle from orca terminal create"
   exit 0
 fi
 
-echo "Worker pane: ${PANE_REF} (surface ${SURFACE_REF})" >&2
+echo "Codex worker ${WORKER} started in ${HANDLE}" >&2
 
-# Label the tab (best-effort — do not fail the launch if rename is unsupported).
-cmux rename-tab --surface "${SURFACE_REF}" "w: ${WORKER}" 2>/dev/null || true
-
-# Send the codex command; trailing \n auto-submits (Enter).
-if ! cmux send --surface "${SURFACE_REF}" -- "${CODEX_CMD}\n"; then
-  fallback_headless "cmux send failed"
-  exit 0
-fi
-
-echo "Codex worker ${WORKER} started in ${SURFACE_REF}" >&2
-
-printf '{"mode":"pane","pane_ref":"%s","surface_ref":"%s"}\n' "${PANE_REF}" "${SURFACE_REF}"
+printf '{"mode":"terminal","terminal":"%s"}\n' "${HANDLE}"

@@ -5,8 +5,8 @@
 #   worker-loop.sh RUN_DIR LANE SESSION_ID RUNNER MODEL PROMPT_FILE
 #
 # Why a loop and not an interactive REPL. Wave's `wsh` can launch a block but cannot
-# type into one — there is no `wsh send`, and `wsh termscrollback` only reads. cmux had
-# `cmux send`, which is how a `waiting` lane used to be woken. So the wake is a FILE
+# type into one — there is no `wsh send`, and `wsh termscrollback` only reads. So the
+# wake is a FILE
 # here: reply.sh writes `lanes/<lane>/reply.md`, and this loop resumes the lane when
 # that file changes. The agent still never polls; the loop waits, the agent does not.
 #

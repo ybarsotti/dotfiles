@@ -139,7 +139,7 @@ ticket, plan ID, and attempt in `manifest.json`.
 Confirm deployed environment represents exact SHA. If environment cannot prove SHA, mark run
 blocked; do not present evidence as commit-bound.
 
-Verify binaries: `git`, `codex`, `agent-browser`, `uv`. Prefer visible cmux worker; use existing
+Verify binaries: `git`, `codex`, `agent-browser`, `uv`. Prefer a visible Orca terminal; use the
 headless fallback with explicit visibility warning.
 
 ## Phase 3: execute with agent-browser
@@ -206,7 +206,7 @@ Return:
 - failed scenario and step IDs with observed result;
 - tested commit SHA and URL;
 - paths to `qa-plan.yaml`, `results.json`, `index.html`, and `evidence/`;
-- explicit note when cmux visibility, commit proof, video, screenshot, console, or network
+- explicit note when Orca terminal visibility, commit proof, video, screenshot, console, or network
   evidence was unavailable.
 
 ## Completion gates

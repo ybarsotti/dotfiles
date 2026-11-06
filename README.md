@@ -373,7 +373,7 @@ For databases and heavy services (PostgreSQL, Kafka, Spark, etc.), use Docker Co
 
 **Browsers:** Arc, Brave, Firefox
 
-**Development:** Apidog (API testing), Beekeeper Studio (SQL editor), cmux (Claude Code terminal session manager), Conductor (Claude Code + GitHub), OrbStack (containers and Linux VMs), Figma, Ghostty (terminal emulator), Wave Terminal (block/widget terminal with local-LLM AI panel), Visual Studio Code, P4Merge (visual merge tool)
+**Development:** Apidog (API testing), Beekeeper Studio (SQL editor), Conductor (Claude Code + GitHub), OrbStack (containers and Linux VMs), Figma, Ghostty (terminal emulator), Wave Terminal (block/widget terminal with local-LLM AI panel), Visual Studio Code, P4Merge (visual merge tool)
 
 **Productivity:** Alt-Tab (window switcher), Raycast (launcher), BetterDisplay, Stats (menu bar monitor), Slack, Notion
 
@@ -420,7 +420,7 @@ This repository includes a `Justfile` with convenient commands for common tasks.
   panics on startup under Wave). Also runs as part of `just full-update`.
 - **`just install-hooks`** - Install pre-commit hooks
 - **`just pre-commit`** - Run pre-commit hooks on all files
-- **`just test-deep-pipeline`** - Run the deep-plan / deep-execute / deep-review / cmux-orchestrator shell test suites (see "Deep-* Agent Pipeline" under Claude Code, below)
+- **`just test-deep-pipeline`** - Run the deep-plan / deep-execute / deep-review shell test suites (see "Deep-* Agent Pipeline" under Claude Code, below)
 - **`just format`** - Format all shell scripts and YAML files
 - **`just clean`** - Clean up temporary files and caches
 - **`just info`** - Show system information
@@ -433,7 +433,7 @@ Run `just` to see the full list of available commands.
 Homebrew 6 refuses to load formulae or casks from a third-party tap until that tap is trusted, so
 `run_onchange_01_homebrew_taps.sh.tmpl` runs `brew trust --tap` on each one after tapping. Without
 it a fresh install taps everything and then fails on `agent-deck`, `peon-ping`, `oh-my-posh`,
-`borders` and `cmux`. Trust means Homebrew will load and run that tap's Ruby formula code; it is
+and `borders`. Trust means Homebrew will load and run that tap's Ruby formula code; it is
 recorded in `~/.config/homebrew/trust.json` and reversed with `brew untrust <tap>`. The script
 guards on `brew trust --help`, so it stays a no-op on Homebrew 5 and earlier.
 
@@ -667,8 +667,8 @@ Three slash commands chain together for planning and parallel execution of non-t
   handoff. Stops at an **approved plan** — it never builds or reviews code itself. Its last
   phase is an **execution recommendation** (below).
 - **`/deep-execute <plan.md>`** - Runs an approved parallel plan as lane workers sharing ONE
-  git worktree, in parallel **Wave Terminal blocks** (`wave-launch.sh`). Wave has no way to
-  type into a live block — there is no `wsh send`, which cmux provided — so each lane runs
+  git worktree, in parallel **Orca terminals** (`orca-launch.sh`; Wave blocks through
+  `wave-launch.sh` outside Orca). The orchestrator never types into a live terminal, so each lane runs
   `worker-loop.sh`: it takes its first prompt as an argument and every later one from
   `lanes/<lane>/reply.md`, and the write of that file is the wake. Each lane is pinned to its
   own `claude --session-id` UUID, because all lanes share one worktree and resuming "the last

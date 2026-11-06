@@ -37,7 +37,7 @@ FLAGS
   --update <pr-number> update an existing PR instead of creating one
   --draft             open the PR as a draft
   --no-codex          skip the codex reviewer (Sonnet self-review only)
-  --no-watch          open the PR and stop (default: watch reviews + CI and address feedback)
+  --no-watch          open the PR and stop (default: watch reviews + CI until merge or close)
   --dry-run           print the drafted title + body, do not open/update the PR
 ```
 

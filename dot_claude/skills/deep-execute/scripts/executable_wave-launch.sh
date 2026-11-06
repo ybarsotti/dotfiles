@@ -12,9 +12,8 @@
 # That scaffolding is transport-agnostic — prepare-run.sh launches nothing — so it
 # is reused as-is and only the transport differs here.
 #
-# What replaces cmux. cmux opened a pane per lane and typed into it with `cmux send`.
-# Wave has no equivalent: `wsh run` launches a block and `wsh termscrollback` reads
-# one, but nothing types into a live block. So each lane runs worker-loop.sh instead,
+# Why worker-loop.sh. `wsh run` launches a block and `wsh termscrollback` reads one,
+# but nothing types into a live block. So each lane runs worker-loop.sh instead,
 # which takes its first prompt as an argument and takes every later one from
 # `lanes/<lane>/reply.md`. reply.sh writes that file; the file is the wake.
 #

@@ -24,7 +24,6 @@ third_party_taps=(
     # tap name. Nothing here installs from it either; opencode now ships in homebrew/core.
     "felixkratz/formulae"
     "veirt/veirt"
-    "manaflow-ai/cmux"
     "PeonPing/tap"
     "stablyai/orca"
 )
@@ -37,7 +36,7 @@ EOF
 
 # Homebrew 6 refuses to load formulae/casks from a third-party tap until it is trusted, so
 # tapping alone is no longer enough — without this a fresh install taps everything and then
-# fails on agent-deck, peon-ping, oh-my-posh, borders, cmux and the hashicorp formulae.
+# fails on agent-deck, peon-ping, oh-my-posh, borders and the hashicorp formulae.
 # Trusting means Homebrew will load and run each tap's Ruby formula code; that is the same
 # code these packages already install from. Reversible with `brew untrust <tap>`.
 # `brew trust` does not exist before Homebrew 6, hence the capability check.
