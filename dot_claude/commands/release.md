@@ -20,7 +20,7 @@ With no argument, the release covers every app that changed, and the bump is `au
 
 Invoke the `release` skill. The skill lives at `~/.claude/skills/release/SKILL.md` and holds
 the full procedure: the mechanism detection, the review of what ships, the version rules, the
-checks, the confirmation and the hand-off to `release-notes`.
+checks, the confirmation and the hand-off to `release-announce`.
 
 The command authorizes the review only. Merging a Release PR, pushing a tag and publishing a
 release each wait for your confirmation of that exact version. It never force-pushes and never

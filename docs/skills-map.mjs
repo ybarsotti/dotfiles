@@ -43,7 +43,7 @@ const CLUSTERS = {
     "jira-workflow",
     "follow-up-jira",
     "release",
-    "release-notes",
+    "release-announce",
   ],
   workflow: [
     "workflow-mode",

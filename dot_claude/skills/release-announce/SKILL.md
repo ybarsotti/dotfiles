@@ -1,6 +1,6 @@
 ---
-name: release-notes
-description: Use when the user asks for a release message, release notes, an announcement for a version that shipped, "what do I tell the team", a changelog or GitHub release body, or wants each ticket reporter told that their ticket shipped, or types /release-notes. Reads a tag or a commit range, resolves each commit to its pull request and its linked tickets (GitHub issues, Jira or Linear keys), and drafts a team announcement in the user's own voice, one comment per ticket, and a changelog body. Returns drafts only. Never posts and never comments.
+name: release-announce
+description: Use when the user asks for a release message, release notes, an announcement for a version that shipped, "what do I tell the team", a changelog or GitHub release body, or wants each ticket reporter told that their ticket shipped, or types /release-announce. Reads a tag or a commit range, resolves each commit to its pull request and its linked tickets (GitHub issues, Jira or Linear keys), and drafts a team announcement in the user's own voice, one comment per ticket, and a changelog body. Returns drafts only. Never posts and never comments.
 ---
 
 # Release notes

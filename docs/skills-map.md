@@ -453,13 +453,13 @@ flowchart LR
     direction TB
     c_pr(["/pr"]):::command
     c_release(["/release"]):::command
-    c_release_notes(["/release-notes"]):::command
+    c_release_announce(["/release-announce"]):::command
     s_address_pr_comments("address-pr-comments"):::skill
     s_follow_up_jira("follow-up-jira"):::skill
     s_jira_workflow("jira-workflow"):::skill
     s_pr_description("pr-description"):::skill
     s_release("release"):::skill
-    s_release_notes("release-notes"):::skill
+    s_release_announce("release-announce"):::skill
   end
   subgraph cl_qa["qa"]
     direction TB
@@ -481,7 +481,7 @@ flowchart LR
   end
   c_pr --> s_pr_description
   c_release --> s_release
-  c_release_notes --> s_release_notes
+  c_release_announce --> s_release_announce
   s_follow_up_jira --> s_pr_description
   s_jira_workflow -.-> c_deep_execute
   s_jira_workflow -.-> c_deep_plan
@@ -500,8 +500,8 @@ flowchart LR
   s_pr_description --> s_blindspot
   s_pr_description --> x_loop
   s_pr_description --> x_superpowers_systematic_debugging
-  s_release --> s_release_notes
-  s_release_notes --o d_inbox
+  s_release --> s_release_announce
+  s_release_announce --o d_inbox
   linkStyle 0 stroke:#2563eb
   linkStyle 1 stroke:#2563eb
   linkStyle 2 stroke:#2563eb
@@ -910,7 +910,7 @@ References to skills, agents or shared docs that this repository does not define
 | /qa-plan | invokes skill | qa-test-plan | `dot_claude/commands/qa-plan.md:16` |
 | /qa-test-plan | invokes skill | qa-test-plan | `dot_claude/commands/qa-test-plan.md:18` |
 | /release | invokes skill | release | `dot_claude/commands/release.md:21` |
-| /release-notes | invokes skill | release-notes | `dot_claude/commands/release-notes.md:21` |
+| /release-announce | invokes skill | release-announce | `dot_claude/commands/release-announce.md:21` |
 | /shed-light | invokes skill | shed-light | `dot_claude/commands/shed-light.md:20` |
 | /simple-plan | runs command | /deep-plan | `dot_claude/commands/simple-plan.md:26` |
 | /simple-plan | runs command | /qa-plan | `dot_claude/commands/simple-plan.md:50` |
@@ -1002,8 +1002,8 @@ References to skills, agents or shared docs that this repository does not define
 | pr-description | invokes skill | blindspot | `dot_claude/skills/pr-description/SKILL.md:244` |
 | pr-description | invokes skill | loop | `dot_claude/skills/pr-description/SKILL.md:333` |
 | pr-description | invokes skill | superpowers:systematic-debugging | `dot_claude/skills/pr-description/SKILL.md:320` |
-| release | invokes skill | release-notes | `dot_claude/skills/release/SKILL.md:168` |
-| release-notes | reads shared doc | inbox.md | `dot_claude/skills/release-notes/SKILL.md:122` |
+| release | invokes skill | release-announce | `dot_claude/skills/release/SKILL.md:168` |
+| release-announce | reads shared doc | inbox.md | `dot_claude/skills/release-announce/SKILL.md:122` |
 | simple-plan | spawns agent | ui-designer | `dot_claude/skills/simple-plan/SKILL.md:173` |
 | simple-plan | runs command | /deep-plan | `dot_claude/skills/simple-plan/SKILL.md:71` |
 | simple-plan | runs command | /pr | `dot_claude/skills/simple-plan/SKILL.md:440` |

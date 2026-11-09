@@ -1,6 +1,6 @@
 ---
 name: release
-description: Use when the user asks to cut, ship or tag a release of the current repository, bump a version, merge a release-please Release PR, or asks what the next version is or what a release would ship. Detects the release mechanism (a release-please Release PR, another release tool, or plain semver tags per app), reviews what ships, runs the project's checks, and creates the tag and the GitHub release only after the user confirms. Then hands off to the release-notes skill. Works in any repository. Never force-pushes and never tags without confirmation.
+description: Use when the user asks to cut, ship or tag a release of the current repository, bump a version, merge a release-please Release PR, or asks what the next version is or what a release would ship. Detects the release mechanism (a release-please Release PR, another release tool, or plain semver tags per app), reviews what ships, runs the project's checks, and creates the tag and the GitHub release only after the user confirms. Then hands off to the release-announce skill. Works in any repository. Never force-pushes and never tags without confirmation.
 ---
 
 # Release
@@ -165,7 +165,7 @@ first, open a PR with the bump, wait for its merge, and tag the merge commit.
 
 ## 8. Hand off
 
-1. Invoke the `release-notes` skill with the new tags. It drafts the team announcement, one
+1. Invoke the `release-announce` skill with the new tags. It drafts the team announcement, one
    comment per ticket and the changelog body. It never posts.
 2. Report: the tags, the release URLs, the post-release steps in order, and what to watch
    after the deploy.

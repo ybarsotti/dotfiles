@@ -3,7 +3,7 @@ description: Draft the release announcement, one comment per ticket, and the cha
 argument-hint: [tag | from..to] [pt|en]
 ---
 
-# /release-notes
+# /release-announce
 
 Draft the texts for a release that shipped: the team announcement in your own voice, one
 comment per ticket that the release addressed, and the changelog or GitHub release body.
@@ -11,14 +11,14 @@ comment per ticket that the release addressed, and the changelog or GitHub relea
 **Arguments:** `$ARGUMENTS`
 
 ```text
-/release-notes [tag | from..to] [pt|en]
+/release-announce [tag | from..to] [pt|en]
 ```
 
 With no argument, the release is the newest release tag.
 
 ## What you must do
 
-Invoke the `release-notes` skill. The skill lives at `~/.claude/skills/release-notes/SKILL.md`
+Invoke the `release-announce` skill. The skill lives at `~/.claude/skills/release-announce/SKILL.md`
 and holds the full contract: the voice, the commit-to-PR-to-ticket steps, the three drafts and
 the list of uncertain points.
 
