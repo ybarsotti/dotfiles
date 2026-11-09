@@ -3,31 +3,44 @@
 
 # run_onchange_09_install_plannotator.sh.tmpl
 #
-# Installs the pinned Plannotator standalone binary with the official install script.
-# chezmoi runs this script again when PLANNOTATOR_VERSION changes, so a version bump here
-# upgrades the binary. A run_once script never upgraded it, which left an old binary on PATH.
+# Installs the Plannotator standalone binary with the official install script.
+# PLANNOTATOR_VERSION is the minimum version. chezmoi runs this script again when the value
+# changes, and the script upgrades an older binary. It never downgrades a newer binary, so a
+# manual `plannotator` update survives the next apply.
 # The Claude Code plugin is installed and updated separately.
 
 set -eufo pipefail
 
-PLANNOTATOR_VERSION="v0.28.51"
+PLANNOTATOR_VERSION="v0.28.57"
 
 export PATH="$HOME/.local/bin:$PATH"
 
-current="$(plannotator --version 2>/dev/null | awk '{print $2}' || true)"
-if [ "v${current}" = "$PLANNOTATOR_VERSION" ]; then
-    echo "✅ Plannotator ${PLANNOTATOR_VERSION} already installed"
+# Prints the installed version as vX.Y.Z, or nothing when the binary is missing.
+installed_version() {
+    local v
+    v="$(plannotator --version 2>/dev/null | awk '{print $2}' || true)"
+    [ -n "$v" ] && echo "v${v#v}"
+}
+
+# Returns 0 when $1 >= $2 (vMAJOR.MINOR.PATCH).
+version_ge() {
+    [ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | tail -n 1)" = "$1" ]
+}
+
+current="$(installed_version)"
+if [ -n "$current" ] && version_ge "$current" "$PLANNOTATOR_VERSION"; then
+    echo "✅ Plannotator ${current} installed (minimum ${PLANNOTATOR_VERSION})"
     exit 0
 fi
 
 echo "📥 Installing Plannotator ${PLANNOTATOR_VERSION} (found: ${current:-none})..."
 curl -fsSL https://plannotator.ai/install.sh | bash -s -- --version "$PLANNOTATOR_VERSION"
 
-installed="$(plannotator --version 2>/dev/null | awk '{print $2}' || true)"
-if [ "v${installed}" = "$PLANNOTATOR_VERSION" ]; then
-    echo "✅ Plannotator ${PLANNOTATOR_VERSION} installed: $(command -v plannotator)"
+current="$(installed_version)"
+if [ -n "$current" ] && version_ge "$current" "$PLANNOTATOR_VERSION"; then
+    echo "✅ Plannotator ${current} installed: $(command -v plannotator)"
 else
-    echo "⚠️  Expected Plannotator ${PLANNOTATOR_VERSION}, found: ${installed:-none}"
+    echo "⚠️  Expected Plannotator ${PLANNOTATOR_VERSION} or newer, found: ${current:-none}"
     exit 1
 fi
 
