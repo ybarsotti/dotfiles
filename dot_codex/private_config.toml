@@ -86,6 +86,15 @@ enabled = true
 enabled = true
 
 [tui]
+status_line = [
+    "model-with-reasoning",
+    "project-name",
+    "git-branch",
+    "branch-changes",
+    "context-used",
+    "weekly-limit",
+]
+status_line_use_colors = true
 screen_reader_detection_done = true
 
 [tui.model_availability_nux]
