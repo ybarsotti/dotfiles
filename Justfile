@@ -228,3 +228,8 @@ update-gh-extensions:
 # Full update (git, brew, packages, gh extensions, apply)
 full-update: update-brew update-gh-extensions update
     @echo "✅ Full update complete"
+
+# Regenerate the map of Claude skills, commands and agents (docs/skills-map.md and .html)
+skills-map:
+    node docs/skills-map.mjs
+    node --test docs/skills-map.test.mjs

@@ -9,3 +9,6 @@ Library/
 # ai-memory runtime state may contain prompts, source excerpts, and credentials.
 private_Library/**/ai-memory/
 private_Library/**/private_ai-memory/
+
+# Local blocklist of work terms for docs/skills-map.mjs. It must never be committed.
+docs/.skills-map-blocklist
