@@ -29,6 +29,8 @@ REPORT="${ROOT}/dot_claude/skills/deep-review/scripts/executable_report.sh"
 SARIF="${ROOT}/dot_claude/skills/deep-review/scripts/executable_sarif.sh"
 VERIFY_EVIDENCE="${ROOT}/dot_claude/skills/deep-review/scripts/executable_verify-evidence.sh"
 CHECK_STALE="${ROOT}/dot_claude/skills/deep-review/scripts/executable_check-stale.sh"
+TEST_SIGNALS="${ROOT}/dot_claude/skills/deep-review/scripts/executable_test-signals.sh"
+[ -f "$TEST_SIGNALS" ] || TEST_SIGNALS="${ROOT}/dot_claude/skills/deep-review/scripts/test-signals.sh"
 [ -f "$SARIF" ] || SARIF="${ROOT}/dot_claude/skills/deep-review/scripts/sarif.sh"
 
 # ─── Task 12: SKILL.md points at dispatch.sh's own invocation and reuse of ─
@@ -109,7 +111,7 @@ assert_eq "$NO_STEP_LIST" "yes" \
 # ever gets a chance to fix the mode. dispatch.sh itself is the direct
 # invocation target named in Phase 2 above.
 for script in "$DISPATCH" "$COLLECT_CONTEXT" "$REVIEWER" "$AGGREGATE" "$RECORD" "$REPORT" "$SARIF" \
-  "$VERIFY_EVIDENCE" "$CHECK_STALE"; do
+  "$VERIFY_EVIDENCE" "$CHECK_STALE" "$TEST_SIGNALS"; do
   MODE=$(stat -c '%a' "$script" 2>/dev/null || stat -f '%Lp' "$script")
   assert_eq "$MODE" "755" "$(basename "$script"): source-tree executable bit is 755"
 done
@@ -174,6 +176,8 @@ git -C "$LENS_REPO" init -q -b main
 mkdir -p "${LENS_REPO}/.agents/skills/team-review" "${LENS_REPO}/src"
 echo "# lens" >"${LENS_REPO}/.agents/skills/team-review/SKILL.md"
 echo a >"${LENS_REPO}/src/x.py"
+mkdir -p "${LENS_REPO}/web"
+echo a >"${LENS_REPO}/web/cart.test.ts"
 git -C "$LENS_REPO" add -A
 git -C "$LENS_REPO" -c user.email=t@t -c user.name=t commit -qm init
 echo b >>"${LENS_REPO}/src/x.py"
@@ -185,6 +189,39 @@ assert_contains "$LENS_OUT" "lens-team-review               → claude" \
   "dispatch: --lens adds the repository lens as a Claude reviewer"
 assert_contains "$LENS_OUT" ".agents/skills/team-review/SKILL.md" \
   "dispatch: --dry-run lists the repository lenses"
+assert_contains "$LENS_OUT" "test-quality                   no changed file matches" \
+  "dispatch: test-quality is skipped when no test file changes"
+echo b >>"${LENS_REPO}/web/cart.test.ts"
+LENS_OUT=$(cd "$LENS_REPO" && "$DISPATCH" default --dry-run --scope HEAD 2>/dev/null)
+assert_contains "$LENS_OUT" "test-quality                   → claude" \
+  "dispatch: test-quality runs on Claude when a test file changes"
 rm -rf "$LENS_REPO"
+
+# ─── test-quality: registered on Claude, owns the mock-boundary rule ───────
+PERSONAS_DIR="${ROOT}/dot_claude/skills/deep-review/personas"
+DEFAULT_YML="${ROOT}/dot_claude/skills/deep-review/variants/default.yml"
+assert_eq "$(yq -r '.personas[] | select(.id == "test-quality") | .runner' "$DEFAULT_YML")" claude \
+  "default.yml: test-quality is registered with runner claude"
+MOCK_HEADING="Mock only the outermost call to an external service"
+assert_eq "$(grep -c "$MOCK_HEADING" "${PERSONAS_DIR}/correctness.md" || true)" 0 \
+  "correctness.md: the mock-boundary block moved out"
+assert_contains "$(cat "${PERSONAS_DIR}/test-quality.md" 2>/dev/null)" "$MOCK_HEADING" \
+  "test-quality.md: owns the mock-boundary block"
+
+# ─── test-signals.sh: silent without recipes, headed output with them ──────
+SIG_REPO=$(mktemp -d)
+assert_eq "$("$TEST_SIGNALS" "$SIG_REPO" 2>&1; echo "exit=$?")" "exit=0" \
+  "test-signals: no justfile prints nothing and exits 0"
+printf 'lint:\n\techo lint-ran\n' >"${SIG_REPO}/justfile"
+assert_eq "$("$TEST_SIGNALS" "$SIG_REPO" 2>&1; echo "exit=$?")" "exit=0" \
+  "test-signals: a justfile without the recipes prints nothing and exits 0"
+printf 'mutate:\n\t@echo survivor-at-app.py:3\ntest-overlap:\n\t@echo overlap-found; exit 1\n' \
+  >"${SIG_REPO}/justfile"
+SIG_OUT=$("$TEST_SIGNALS" "$SIG_REPO"; echo "exit=$?")
+assert_contains "$SIG_OUT" "### just mutate" "test-signals: mutate output has a heading"
+assert_contains "$SIG_OUT" "survivor-at-app.py:3" "test-signals: mutate output is included"
+assert_contains "$SIG_OUT" "overlap-found" "test-signals: a failing recipe still shows its output"
+assert_contains "$SIG_OUT" "exit=0" "test-signals: a failing recipe does not fail the script"
+rm -rf "$SIG_REPO"
 
 assert_summary

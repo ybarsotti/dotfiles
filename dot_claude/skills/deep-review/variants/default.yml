@@ -1,6 +1,6 @@
 name: default
 description: >-
-  Nine-persona review panel. Each persona runs once and records findings by command, so
+  Ten-persona review panel. Each persona runs once and records findings by command, so
   the report is a deterministic transform with no aggregator call. Each persona runs once.
 
 # Reviewers append findings with scripts/record.sh instead of printing YAML.
@@ -10,7 +10,8 @@ record_findings: true
 # Personas. Each one is pinned to a runner, so --ratio does not move them.
 # `only_when_changed` skips a persona when no changed file matches its regex.
 # Codex takes the high-stakes lenses: security, architecture, correctness, backend data
-# flow and shortcut detection. Claude takes conventions, documentation, UI and simplicity.
+# flow and shortcut detection. Claude takes conventions, documentation, UI, simplicity and
+# test quality.
 # Each persona body is the fixed file at personas/<id>.md.
 #
 # These eight replaced a sixteen-persona panel that ran each persona twice. Every merge below removed a real overlap:
@@ -24,6 +25,8 @@ record_findings: true
 # component boundaries or motion.
 # shortcut-watchdog is new too: every other persona reads the diff as an honest attempt,
 # so nothing owned the gap between the work a change claims and the work it contains.
+# test-quality is new too: it took the mock-boundary rule from correctness, so the two never
+# report the same mock.
 personas:
   - id: security
     role: Security engineer with OWASP Top 10 focus
@@ -99,7 +102,7 @@ personas:
       threads or await contexts, async ordering assumptions, double-fired side effects,
       non-idempotent retries, non-atomic transactions, lost updates, deadlocks. Then
       whether a test proves each of those, whether mocks are current, and whether any
-      test asserts nothing meaningful.
+      test asserts nothing meaningful. Where a test mocks belongs to test-quality.
     runner: codex
 
   - id: architecture
@@ -147,6 +150,19 @@ personas:
       variant of a guarded primitive. Owns the gap between claimed and done work, nothing else.
     category: shortcut
     runner: codex
+
+  - id: test-quality
+    role: Test-quality reviewer (needed, well built, right boundary)
+    focus: |
+      Whether each new or changed test is needed, well built and at the right boundary: a
+      duplicate test, a fact a type, schema or constraint already guarantees, cases to
+      collapse into one parametrized test, a library that checks the rule better, a mock at
+      the wrong boundary or of the project's own code, a test at the wrong level, coupling to
+      the implementation, a test of the framework, a surviving mutant on a changed line,
+      non-determinism and snapshot spam. Reads the Test signals section of the context.
+    only_when_changed: '(^|/)(tests?|__tests__|e2e)/|_test\.go$|\.(test|spec)\.[jt]sx?$|conftest\.py$'
+    category: tests
+    runner: claude
 
   - id: project-fit
     role: Project-fit reviewer (repo rules, documentation, task scope)

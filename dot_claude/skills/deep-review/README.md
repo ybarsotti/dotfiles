@@ -47,7 +47,7 @@ All reviewers run **headless in background** (no Orca terminals, no UI clutter).
 
 | Variant | When to use |
 |---------|-------------|
-| `default` | General PR review with 8 fixed lenses, each run once — `security`, `senior-backend` (data flow, schema and query performance, observability), `senior-frontend` (component quality, accessibility, responsiveness, design fidelity), `ui-ux` (project UI patterns, usability, componentization, motion), `correctness` (edge cases, concurrency, test coverage), `architecture` (structure and type precision), `simplicity` (over-engineering and reinvention), `project-fit` (repo rules, docs, layout and naming, task scope) |
+| `default` | General PR review with 10 fixed lenses, each run once — `security`, `senior-backend` (data flow, schema and query performance, observability), `senior-frontend` (component quality, accessibility, responsiveness, design fidelity), `ui-ux` (project UI patterns, usability, componentization, motion), `correctness` (edge cases, concurrency, test coverage), `architecture` (structure and type precision), `simplicity` (over-engineering and reinvention), `project-fit` (repo rules, docs, layout and naming, task scope), `shortcut-watchdog` (work claimed against work done), `test-quality` (needed, well built, right boundary; only when test files change) |
 | `stage-light` | A `light` stage of a staged feature (`_shared/stages.md`): `senior-frontend`, `ui-ux`, `simplicity`, `shortcut-watchdog` |
 | `security-focused` | Anything touching auth, payments, secrets, or external input |
 | `adversarial-debate` | When you want strong arguments both ways before merging a contentious change |

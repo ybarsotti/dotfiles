@@ -180,4 +180,8 @@ ${DIFF_OUTPUT}
 \`\`\`
 EOF
 
+# Mutation survivors and overlapping tests, when the repository has the recipes.
+"$(dirname "${BASH_SOURCE[0]}")/test-signals.sh" "$REPO_ROOT" "$SCOPE" "$FILES" >> "$OUT" \
+  || log "test signals unavailable"
+
 log "wrote $OUT (${FILE_COUNT} files, $(wc -l < "$OUT") lines)"

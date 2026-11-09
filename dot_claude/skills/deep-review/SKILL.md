@@ -21,7 +21,7 @@ Read `$ARGUMENTS` and extract:
 - **--reviewers N** (default: `persona_count` — each persona runs **once**)
 - **--ratio C:X** (default: an even reviewer split). It moves only `runner: any` personas.
   `default` pins all: Codex runs security, architecture, correctness, senior-backend and
-  shortcut-watchdog; Claude runs project-fit, simplicity, ui-ux and senior-frontend.
+  shortcut-watchdog; Claude runs project-fit, simplicity, ui-ux, senior-frontend and test-quality.
 - **--scope ref** (default `"main...HEAD"`)
 - **--task id** (default: auto-detect)
 - **--timeout secs** (default `600`)
