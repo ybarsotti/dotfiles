@@ -12,7 +12,7 @@ The generator reads `dot_claude/skills/**/*.md`, `dot_claude/commands/*.md`, `do
 It writes `docs/skills-map.md` and `docs/skills-map.html`. A second run gives no diff.
 Run `node --test docs/skills-map.test.mjs` to test the edge extraction.
 
-Counts: 24 skills, 14 commands, 3 agents, 10 shared docs, 16 external references. 157 edges: 73 invokes skill, 6 spawns agent, 33 runs command, 45 reads shared doc.
+Counts: 25 skills, 15 commands, 3 agents, 10 shared docs, 16 external references. 160 edges: 74 invokes skill, 6 spawns agent, 35 runs command, 45 reads shared doc.
 
 ## Diagram 1: the main chains
 
@@ -764,6 +764,8 @@ flowchart LR
   subgraph cl_pr_ticket["pr-ticket"]
     direction TB
     c_pr(["/pr"]):::command
+    c_release(["/release"]):::command
+    c_release_announce(["/release-announce"]):::command
   end
   subgraph cl_shared_docs["shared-docs"]
     direction TB
@@ -772,11 +774,16 @@ flowchart LR
   end
   subgraph cl_workflow["workflow"]
     direction TB
+    c_init_project(["/init-project"]):::command
+    s_init_project("init-project"):::skill
     s_workflow_finish("workflow-finish"):::skill
     s_workflow_mode("workflow-mode"):::skill
     s_workflow_post_implementation("workflow-post-implementation"):::skill
     s_workflow_post_plan("workflow-post-plan"):::skill
   end
+  c_init_project --> s_init_project
+  s_init_project -.-> c_release
+  s_init_project -.-> c_release_announce
   s_workflow_finish -.-> c_pr
   s_workflow_finish --o d_workflow_artifacts
   s_workflow_finish --> s_workflow_mode
@@ -794,23 +801,26 @@ flowchart LR
   s_workflow_post_plan --o d_workflow_artifacts
   s_workflow_post_plan --> s_workflow_mode
   s_workflow_post_plan --> s_workflow_post_implementation
-  linkStyle 0 stroke:#16a34a
-  linkStyle 1 stroke:#9ca3af
-  linkStyle 2 stroke:#2563eb
-  linkStyle 3 stroke:#2563eb
-  linkStyle 4 stroke:#2563eb
-  linkStyle 5 stroke:#16a34a
-  linkStyle 6 stroke:#16a34a
-  linkStyle 7 stroke:#9ca3af
-  linkStyle 8 stroke:#9ca3af
-  linkStyle 9 stroke:#2563eb
-  linkStyle 10 stroke:#2563eb
+  linkStyle 0 stroke:#2563eb
+  linkStyle 1 stroke:#16a34a
+  linkStyle 2 stroke:#16a34a
+  linkStyle 3 stroke:#16a34a
+  linkStyle 4 stroke:#9ca3af
+  linkStyle 5 stroke:#2563eb
+  linkStyle 6 stroke:#2563eb
+  linkStyle 7 stroke:#2563eb
+  linkStyle 8 stroke:#16a34a
+  linkStyle 9 stroke:#16a34a
+  linkStyle 10 stroke:#9ca3af
   linkStyle 11 stroke:#9ca3af
   linkStyle 12 stroke:#2563eb
   linkStyle 13 stroke:#2563eb
   linkStyle 14 stroke:#9ca3af
   linkStyle 15 stroke:#2563eb
   linkStyle 16 stroke:#2563eb
+  linkStyle 17 stroke:#9ca3af
+  linkStyle 18 stroke:#2563eb
+  linkStyle 19 stroke:#2563eb
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
@@ -905,6 +915,7 @@ References to skills, agents or shared docs that this repository does not define
 | /deep-plan | invokes skill | superpowers:writing-plans | `dot_claude/commands/deep-plan.md:17` |
 | /deep-review | runs command | /simplify | `dot_claude/commands/deep-review.md:43` |
 | /deep-review | invokes skill | deep-review | `dot_claude/commands/deep-review.md:56` |
+| /init-project | invokes skill | init-project | `dot_claude/commands/init-project.md:29` |
 | /pr | invokes skill | pr-description | `dot_claude/commands/pr.md:46` |
 | /qa-execute | invokes skill | qa-test-plan | `dot_claude/commands/qa-execute.md:16` |
 | /qa-plan | invokes skill | qa-test-plan | `dot_claude/commands/qa-plan.md:16` |
@@ -985,6 +996,8 @@ References to skills, agents or shared docs that this repository does not define
 | implement | invokes skill | superpowers:subagent-driven-development | `dot_claude/skills/implement/SKILL.md:20` |
 | implement | invokes skill | superpowers:systematic-debugging | `dot_claude/skills/implement/SKILL.md:26` |
 | implement | invokes skill | superpowers:test-driven-development | `dot_claude/skills/implement/SKILL.md:23` |
+| init-project | runs command | /release | `dot_claude/skills/init-project/SKILL.md:233` |
+| init-project | runs command | /release-announce | `dot_claude/skills/init-project/SKILL.md:233` |
 | jira-workflow | runs command | /deep-execute | `dot_claude/skills/jira-workflow/SKILL.md:17` |
 | jira-workflow | runs command | /deep-plan | `dot_claude/skills/jira-workflow/SKILL.md:15` |
 | jira-workflow | runs command | /deep-review | `dot_claude/skills/jira-workflow/SKILL.md:18` |

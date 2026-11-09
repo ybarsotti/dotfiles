@@ -50,6 +50,7 @@ const CLUSTERS = {
     "workflow-post-plan",
     "workflow-post-implementation",
     "workflow-finish",
+    "init-project",
   ],
   "media-design": [
     "annotated-screenshots",
