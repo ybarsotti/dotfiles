@@ -21,3 +21,4 @@ The table lists flows that two or more files defined at the first review. Each r
 | 15 | The demo video ran only in one pipeline. | Resolved | The `video-demo` step moved into `after-approval.md` section 7, so every pipeline runs it. |
 | 16 | Two screenshot annotators. | Kept | The descriptions split the use: QA evidence and stakeholder images. |
 | 17 | The name `plan` had two meanings. | Resolved | The journal skills `log`, `plan` and `retro` are deleted, with the journal system. |
+| 18 | `deep-execute` had its own delivery tail (review, QA, PR, report) beside `after-approval.md`, and its per-round `/deep-review` ran its own fixer. | Resolved | `deep-execute` Phase 4 runs `after-approval.md` steps 2 to 9. Every `/deep-review` inside it runs `--no-fix --no-simplify`, and the owning lane applies each fix. The PR opens with `--no-watch`; the watch is step 9, after the report. |
