@@ -27,7 +27,13 @@ const terms = fs.existsSync(BLOCKLIST)
 const BLOCKED = terms.length ? new RegExp(terms.join("|"), "i") : /(?!)/;
 
 const CLUSTERS = {
-  planning: ["deep-plan", "simple-plan", "deep-execute", "explore-options"],
+  planning: [
+    "deep-plan",
+    "simple-plan",
+    "deep-execute",
+    "implement",
+    "explore-options",
+  ],
   review: ["deep-review", "simplify", "shed-light", "blindspot"],
   qa: ["qa-plan", "qa-execute", "qa-test-plan", "qa-business", "qa-ui"],
   "pr-ticket": [
@@ -49,7 +55,7 @@ const CLUSTERS = {
     "ui-designer",
     "hallmark",
   ],
-  journal: ["log", "plan", "retro", "anki"],
+  study: ["anki"],
 };
 const CLUSTER_OF = Object.fromEntries(
   Object.entries(CLUSTERS).flatMap(([c, names]) => names.map((n) => [n, c])),
@@ -352,7 +358,8 @@ const PHASES = [
 ];
 const CHAIN_NODES = [
   ["jw", "intake", "jira-workflow", "s_jira_workflow"],
-  ["jw_setup", "intake", "ticket, branch, Jira status", null],
+  ["jw_setup", "intake", "ticket, branch", null],
+  ["ts", "intake", "_shared/ticket-start.md", "d_ticket_start"],
   ["wm", "intake", "workflow-mode", "s_workflow_mode"],
   ["dp", "plan", "/deep-plan", "c_deep_plan"],
   ["sp", "plan", "/simple-plan", "c_simple_plan"],
@@ -360,14 +367,9 @@ const CHAIN_NODES = [
   ["pa", "plan", "Plannotator approval", null],
   ["wpp", "plan", "workflow-post-plan", "s_workflow_post_plan"],
   ["aa", "build", "_shared/after-approval.md", "d_after_approval"],
+  ["rt", "build", "_shared/plan-routing.md", "d_plan_routing"],
   ["de", "build", "/deep-execute (option A)", "c_deep_execute"],
-  [
-    "sdd",
-    "build",
-    "superpowers:subagent-driven-development (option B)",
-    "x_superpowers_subagent_driven_development",
-  ],
-  ["jw_serial", "build", "jira-workflow serial path", "s_jira_workflow"],
+  ["impl", "build", "implement (option B)", "s_implement"],
   ["fast", "build", "fast mode: implement and test", null],
   ["dr", "review", "/deep-review", "c_deep_review"],
   ["simp", "review", "simplify", "s_simplify"],
@@ -397,14 +399,18 @@ const CHAINS = [
       ["dp", "qap", "Phase 2.4"],
       ["qap", "pa"],
       ["sp", "pa"],
+      ["dp", "rt", "Phase 0.4"],
+      ["sp", "rt", "Phase 0.5"],
       ["pa", "aa", "approved"],
-      ["aa", "de", "A"],
-      ["aa", "sdd", "B"],
+      ["aa", "rt", "executor"],
+      ["rt", "de", "A"],
+      ["rt", "impl", "B"],
       ["de", "dr"],
-      ["sdd", "dr"],
+      ["impl", "dr"],
       ["dr", "simp", "Phase 5"],
       ["dr", "qaui"],
       ["dr", "qabiz"],
+      ["qabiz", "qtp", "qa-plan.yaml"],
       ["qaui", "fix"],
       ["qabiz", "fix"],
       ["fix", "pr"],
@@ -418,6 +424,7 @@ const CHAINS = [
     name: "workflow stage chain",
     color: "#16a34a",
     edges: [
+      ["wm", "rt", "criteria"],
       ["wm", "dp", "standard"],
       ["wm", "sp", "standard"],
       ["pa", "wpp"],
@@ -434,13 +441,11 @@ const CHAINS = [
     color: "#ea580c",
     edges: [
       ["jw", "jw_setup"],
-      ["jw_setup", "dp", "--ticket"],
-      ["dp", "jw_serial", "serial mode"],
-      ["jw_serial", "simp", "x2"],
-      ["jw_serial", "dr"],
-      ["jw_serial", "qtp", "section 4"],
-      ["qtp", "pr"],
+      ["jw_setup", "ts"],
+      ["ts", "dp", "--ticket"],
+      ["sp", "ts", "Jira key"],
       ["watch", "fuj", "after deploy"],
+      ["fuj", "pr", "new PR"],
     ],
   },
 ];
@@ -534,7 +539,7 @@ function markdown(g) {
     "Green is the workflow stage chain for a repository with `.workflow/config.json`.",
   );
   L.push(
-    "Orange is the extra path of `jira-workflow`. Dashed white boxes are steps, not files.",
+    "Orange is the Jira path: `jira-workflow` claims the ticket, then hands off to the blue chain. Dashed white boxes are steps, not files.",
     "",
   );
   L.push(fence(chainDiagram(g.byId)), "");

@@ -4,12 +4,228 @@
   "graph": {},
   "nodes": [
     {
+      "label": "skills-map.test.mjs",
+      "file_type": "code",
+      "source_file": "docs/skills-map.test.mjs",
+      "source_location": "L1",
+      "id": "docs_skills_map_test_mjs",
+      "community": 3,
+      "norm_label": "skills-map.test.mjs"
+    },
+    {
+      "label": "edges()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.test.mjs",
+      "source_location": "L13",
+      "id": "docs_skills_map_test_edges",
+      "community": 3,
+      "norm_label": "edges()"
+    },
+    {
+      "label": "skills-map.mjs",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L1",
+      "id": "docs_skills_map_mjs",
+      "community": 3,
+      "norm_label": "skills-map.mjs"
+    },
+    {
+      "label": "rel()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L66",
+      "id": "docs_skills_map_rel",
+      "community": 3,
+      "norm_label": "rel()"
+    },
+    {
+      "label": "exists()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L67",
+      "id": "docs_skills_map_exists",
+      "community": 3,
+      "norm_label": "exists()"
+    },
+    {
+      "label": "listMd()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L69",
+      "id": "docs_skills_map_listmd",
+      "community": 3,
+      "norm_label": "listmd()"
+    },
+    {
+      "label": "frontmatter()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L81",
+      "id": "docs_skills_map_frontmatter",
+      "community": 3,
+      "norm_label": "frontmatter()"
+    },
+    {
+      "label": "scan()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L101",
+      "id": "docs_skills_map_scan",
+      "community": 3,
+      "norm_label": "scan()"
+    },
+    {
+      "label": "byName()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L147",
+      "id": "docs_skills_map_byname",
+      "community": 3,
+      "norm_label": "byname()"
+    },
+    {
+      "label": "nodeId()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L148",
+      "id": "docs_skills_map_nodeid",
+      "community": 3,
+      "norm_label": "nodeid()"
+    },
+    {
+      "label": "extractEdges()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L161",
+      "id": "docs_skills_map_extractedges",
+      "community": 3,
+      "norm_label": "extractedges()"
+    },
+    {
+      "label": "buildGraph()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L208",
+      "id": "docs_skills_map_buildgraph",
+      "community": 3,
+      "norm_label": "buildgraph()"
+    },
+    {
+      "label": "cmp()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L279",
+      "id": "docs_skills_map_cmp",
+      "community": 3,
+      "norm_label": "cmp()"
+    },
+    {
+      "label": "typeRank()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L280",
+      "id": "docs_skills_map_typerank",
+      "community": 3,
+      "norm_label": "typerank()"
+    },
+    {
+      "label": "countOfType()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L282",
+      "id": "docs_skills_map_countoftype",
+      "community": 3,
+      "norm_label": "countoftype()"
+    },
+    {
+      "label": "clusterOf()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L284",
+      "id": "docs_skills_map_clusterof",
+      "community": 3,
+      "norm_label": "clusterof()"
+    },
+    {
+      "label": "shape()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L307",
+      "id": "docs_skills_map_shape",
+      "community": 3,
+      "norm_label": "shape()"
+    },
+    {
+      "label": "graphDiagram()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L323",
+      "id": "docs_skills_map_graphdiagram",
+      "community": 3,
+      "norm_label": "graphdiagram()"
+    },
+    {
+      "label": "chainDiagram()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L453",
+      "id": "docs_skills_map_chaindiagram",
+      "community": 3,
+      "norm_label": "chaindiagram()"
+    },
+    {
+      "label": "fence()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L480",
+      "id": "docs_skills_map_fence",
+      "community": 3,
+      "norm_label": "fence()"
+    },
+    {
+      "label": "orphans()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L482",
+      "id": "docs_skills_map_orphans",
+      "community": 3,
+      "norm_label": "orphans()"
+    },
+    {
+      "label": "markdown()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L493",
+      "id": "docs_skills_map_markdown",
+      "community": 3,
+      "norm_label": "markdown()"
+    },
+    {
+      "label": "html()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L640",
+      "id": "docs_skills_map_html",
+      "community": 3,
+      "norm_label": "html()"
+    },
+    {
+      "label": "t()",
+      "file_type": "code",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L703",
+      "id": "docs_skills_map_t",
+      "community": 3,
+      "norm_label": "t()"
+    },
+    {
       "label": "keys.lua",
       "file_type": "code",
       "source_file": "dot_config/wezterm/keys.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_keys_lua",
-      "community": 5,
+      "community": 10,
       "norm_label": "keys.lua"
     },
     {
@@ -18,7 +234,7 @@
       "source_file": "dot_config/wezterm/keys.lua",
       "source_location": "L19",
       "id": "wezterm_keys_m_setup",
-      "community": 5,
+      "community": 10,
       "norm_label": "m.setup()"
     },
     {
@@ -27,7 +243,7 @@
       "source_file": "dot_config/wezterm/wezterm.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_wezterm_lua",
-      "community": 10,
+      "community": 18,
       "norm_label": "wezterm.lua"
     },
     {
@@ -36,7 +252,7 @@
       "source_file": "dot_config/wezterm/fonts.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_fonts_lua",
-      "community": 6,
+      "community": 11,
       "norm_label": "fonts.lua"
     },
     {
@@ -45,7 +261,7 @@
       "source_file": "dot_config/wezterm/fonts.lua",
       "source_location": "L5",
       "id": "wezterm_fonts_m_setup",
-      "community": 6,
+      "community": 11,
       "norm_label": "m.setup()"
     },
     {
@@ -54,7 +270,7 @@
       "source_file": "dot_config/wezterm/plugins/zen-mode-vim.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_plugins_zen_mode_vim_lua",
-      "community": 11,
+      "community": 19,
       "norm_label": "zen-mode-vim.lua"
     },
     {
@@ -63,7 +279,7 @@
       "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_plugins_workspace_switcher_lua",
-      "community": 7,
+      "community": 12,
       "norm_label": "workspace-switcher.lua"
     },
     {
@@ -72,7 +288,7 @@
       "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
       "source_location": "L7",
       "id": "plugins_workspace_switcher_m_setup",
-      "community": 7,
+      "community": 12,
       "norm_label": "m.setup()"
     },
     {
@@ -81,7 +297,7 @@
       "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_plugins_move_workspace_lua",
-      "community": 8,
+      "community": 13,
       "norm_label": "move_workspace.lua"
     },
     {
@@ -90,7 +306,7 @@
       "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
       "source_location": "L5",
       "id": "plugins_move_workspace_m_setup",
-      "community": 8,
+      "community": 13,
       "norm_label": "m.setup()"
     },
     {
@@ -99,7 +315,7 @@
       "source_file": "dot_config/wezterm/plugins/bar.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_plugins_bar_lua",
-      "community": 9,
+      "community": 14,
       "norm_label": "bar.lua"
     },
     {
@@ -108,7 +324,7 @@
       "source_file": "dot_config/wezterm/plugins/bar.lua",
       "source_location": "L5",
       "id": "plugins_bar_m_setup",
-      "community": 9,
+      "community": 14,
       "norm_label": "m.setup()"
     },
     {
@@ -117,7 +333,7 @@
       "source_file": "dot_config/wezterm/themes/melange_dark.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_themes_melange_dark_lua",
-      "community": 12,
+      "community": 20,
       "norm_label": "melange_dark.lua"
     },
     {
@@ -126,7 +342,7 @@
       "source_file": "dot_config/wezterm/themes/kanagawa-dragon.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_themes_kanagawa_dragon_lua",
-      "community": 13,
+      "community": 21,
       "norm_label": "kanagawa-dragon.lua"
     },
     {
@@ -135,7 +351,7 @@
       "source_file": "dot_config/wezterm/themes/cyberdream.lua",
       "source_location": "L1",
       "id": "dot_config_wezterm_themes_cyberdream_lua",
-      "community": 14,
+      "community": 22,
       "norm_label": "cyberdream.lua"
     },
     {
@@ -144,7 +360,7 @@
       "source_file": "dot_config/yazi/plugins/smart-tab.yazi/init.lua",
       "source_location": "L1",
       "id": "dot_config_yazi_plugins_smart_tab_yazi_init_lua",
-      "community": 15,
+      "community": 23,
       "norm_label": "init.lua"
     },
     {
@@ -153,7 +369,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L1",
       "id": "dot_claude_skills_qa_test_plan_scripts_executable_qa_artifacts_py",
-      "community": 3,
+      "community": 5,
       "norm_label": "executable_qa_artifacts.py"
     },
     {
@@ -162,7 +378,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L44",
       "id": "scripts_executable_qa_artifacts_validate_plan",
-      "community": 3,
+      "community": 5,
       "norm_label": "validate_plan()"
     },
     {
@@ -171,7 +387,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L53",
       "id": "scripts_executable_qa_artifacts_render_plan",
-      "community": 3,
+      "community": 5,
       "norm_label": "render_plan()"
     },
     {
@@ -180,7 +396,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L65",
       "id": "scripts_executable_qa_artifacts_validate_results",
-      "community": 3,
+      "community": 5,
       "norm_label": "validate_results()"
     },
     {
@@ -189,7 +405,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L75",
       "id": "scripts_executable_qa_artifacts_render_report",
-      "community": 3,
+      "community": 5,
       "norm_label": "render_report()"
     },
     {
@@ -198,7 +414,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L87",
       "id": "scripts_executable_qa_artifacts_write_schemas",
-      "community": 3,
+      "community": 5,
       "norm_label": "write_schemas()"
     },
     {
@@ -207,7 +423,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L47",
       "id": "scripts_executable_qa_artifacts_rationale_47",
-      "community": 3,
+      "community": 5,
       "norm_label": "parse a qa plan and reject invalid or dangling references."
     },
     {
@@ -216,7 +432,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L57",
       "id": "scripts_executable_qa_artifacts_rationale_57",
-      "community": 3,
+      "community": 5,
       "norm_label": "render human-readable markdown from the structured qa plan."
     },
     {
@@ -225,7 +441,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L69",
       "id": "scripts_executable_qa_artifacts_rationale_69",
-      "community": 3,
+      "community": 5,
       "norm_label": "parse results and prove complete scenario/step coverage against the plan."
     },
     {
@@ -234,7 +450,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L80",
       "id": "scripts_executable_qa_artifacts_rationale_80",
-      "community": 3,
+      "community": 5,
       "norm_label": "render html, webvtt captions, and annotated screenshots from a bound run."
     },
     {
@@ -243,7 +459,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/executable_qa_artifacts.py",
       "source_location": "L88",
       "id": "scripts_executable_qa_artifacts_rationale_88",
-      "community": 3,
+      "community": 5,
       "norm_label": "write versioned json schemas for qa plan and results contracts."
     },
     {
@@ -486,7 +702,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
       "source_location": "L1",
       "id": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_binding_py",
-      "community": 3,
+      "community": 5,
       "norm_label": "binding.py"
     },
     {
@@ -495,7 +711,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
       "source_location": "L16",
       "id": "qa_artifacts_lib_binding_load_plan",
-      "community": 3,
+      "community": 5,
       "norm_label": "load_plan()"
     },
     {
@@ -504,7 +720,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
       "source_location": "L21",
       "id": "qa_artifacts_lib_binding_load_results",
-      "community": 3,
+      "community": 5,
       "norm_label": "load_results()"
     },
     {
@@ -513,7 +729,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/binding.py",
       "source_location": "L25",
       "id": "qa_artifacts_lib_binding_bind_run",
-      "community": 3,
+      "community": 5,
       "norm_label": "bind_run()"
     },
     {
@@ -522,7 +738,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L1",
       "id": "dot_claude_skills_qa_test_plan_scripts_qa_artifacts_lib_report_py",
-      "community": 4,
+      "community": 7,
       "norm_label": "report.py"
     },
     {
@@ -585,7 +801,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L79",
       "id": "qa_artifacts_lib_report_render_plan",
-      "community": 4,
+      "community": 7,
       "norm_label": "render_plan()"
     },
     {
@@ -594,7 +810,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L85",
       "id": "qa_artifacts_lib_report_render_report",
-      "community": 4,
+      "community": 7,
       "norm_label": "render_report()"
     },
     {
@@ -603,7 +819,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L100",
       "id": "qa_artifacts_lib_report_build_scenario_views",
-      "community": 4,
+      "community": 7,
       "norm_label": "_build_scenario_views()"
     },
     {
@@ -612,7 +828,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L135",
       "id": "qa_artifacts_lib_report_build_step_view",
-      "community": 4,
+      "community": 7,
       "norm_label": "_build_step_view()"
     },
     {
@@ -621,7 +837,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L156",
       "id": "qa_artifacts_lib_report_annotate_screenshot",
-      "community": 4,
+      "community": 7,
       "norm_label": "_annotate_screenshot()"
     },
     {
@@ -630,7 +846,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L203",
       "id": "qa_artifacts_lib_report_write_vtt",
-      "community": 4,
+      "community": 7,
       "norm_label": "_write_vtt()"
     },
     {
@@ -639,7 +855,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L225",
       "id": "qa_artifacts_lib_report_vtt_time",
-      "community": 4,
+      "community": 7,
       "norm_label": "_vtt_time()"
     },
     {
@@ -648,7 +864,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L233",
       "id": "qa_artifacts_lib_report_overall_status",
-      "community": 4,
+      "community": 7,
       "norm_label": "_overall_status()"
     },
     {
@@ -657,7 +873,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L244",
       "id": "qa_artifacts_lib_report_status_counts",
-      "community": 4,
+      "community": 7,
       "norm_label": "_status_counts()"
     },
     {
@@ -666,7 +882,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L251",
       "id": "qa_artifacts_lib_report_requirement_views",
-      "community": 4,
+      "community": 7,
       "norm_label": "_requirement_views()"
     },
     {
@@ -675,7 +891,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L274",
       "id": "qa_artifacts_lib_report_status_color",
-      "community": 4,
+      "community": 7,
       "norm_label": "_status_color()"
     },
     {
@@ -684,7 +900,7 @@
       "source_file": "dot_claude/skills/qa-test-plan/scripts/qa_artifacts_lib/report.py",
       "source_location": "L278",
       "id": "qa_artifacts_lib_report_template_environment",
-      "community": 4,
+      "community": 7,
       "norm_label": "_template_environment()"
     },
     {
@@ -693,7 +909,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L1",
       "id": "dot_claude_skills_deep_execute_scripts_executable_run_viewer_py",
-      "community": 2,
+      "community": 4,
       "norm_label": "executable_run-viewer.py"
     },
     {
@@ -702,7 +918,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L56",
       "id": "scripts_executable_run_viewer_resolve_run_dir",
-      "community": 2,
+      "community": 4,
       "norm_label": "resolve_run_dir()"
     },
     {
@@ -711,7 +927,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L74",
       "id": "scripts_executable_run_viewer_parse_event",
-      "community": 2,
+      "community": 4,
       "norm_label": "parse_event()"
     },
     {
@@ -720,7 +936,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L100",
       "id": "scripts_executable_run_viewer_invalid",
-      "community": 2,
+      "community": 4,
       "norm_label": "_invalid()"
     },
     {
@@ -729,7 +945,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L110",
       "id": "scripts_executable_run_viewer_read_events",
-      "community": 2,
+      "community": 4,
       "norm_label": "read_events()"
     },
     {
@@ -738,7 +954,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L163",
       "id": "scripts_executable_run_viewer_read_decisions",
-      "community": 2,
+      "community": 4,
       "norm_label": "read_decisions()"
     },
     {
@@ -747,7 +963,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L191",
       "id": "scripts_executable_run_viewer_build_snapshot",
-      "community": 2,
+      "community": 4,
       "norm_label": "build_snapshot()"
     },
     {
@@ -756,7 +972,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L234",
       "id": "scripts_executable_run_viewer_list_runs",
-      "community": 2,
+      "community": 4,
       "norm_label": "list_runs()"
     },
     {
@@ -765,7 +981,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L255",
       "id": "scripts_executable_run_viewer_handler",
-      "community": 2,
+      "community": 4,
       "norm_label": "handler"
     },
     {
@@ -774,7 +990,7 @@
       "source_file": "",
       "source_location": "",
       "id": "basehttprequesthandler",
-      "community": 2,
+      "community": 4,
       "norm_label": "basehttprequesthandler"
     },
     {
@@ -783,7 +999,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L263",
       "id": "scripts_executable_run_viewer_handler_do_get",
-      "community": 2,
+      "community": 4,
       "norm_label": ".do_get()"
     },
     {
@@ -792,7 +1008,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L274",
       "id": "scripts_executable_run_viewer_handler_serve_snapshot",
-      "community": 2,
+      "community": 4,
       "norm_label": "._serve_snapshot()"
     },
     {
@@ -801,7 +1017,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L286",
       "id": "scripts_executable_run_viewer_handler_send_json",
-      "community": 2,
+      "community": 4,
       "norm_label": "._send_json()"
     },
     {
@@ -810,7 +1026,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L290",
       "id": "scripts_executable_run_viewer_handler_send",
-      "community": 2,
+      "community": 4,
       "norm_label": "._send()"
     },
     {
@@ -819,7 +1035,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L300",
       "id": "scripts_executable_run_viewer_handler_log_message",
-      "community": 2,
+      "community": 4,
       "norm_label": ".log_message()"
     },
     {
@@ -828,7 +1044,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L309",
       "id": "scripts_executable_run_viewer_main",
-      "community": 2,
+      "community": 4,
       "norm_label": "main()"
     },
     {
@@ -837,7 +1053,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L57",
       "id": "scripts_executable_run_viewer_rationale_57",
-      "community": 2,
+      "community": 4,
       "norm_label": "return the absolute run directory, or none when it is not a real run.      this"
     },
     {
@@ -846,7 +1062,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L75",
       "id": "scripts_executable_run_viewer_rationale_75",
-      "community": 2,
+      "community": 4,
       "norm_label": "turn one events.jsonl line into an event dict.      anything that is not a well-"
     },
     {
@@ -855,7 +1071,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L111",
       "id": "scripts_executable_run_viewer_rationale_111",
-      "community": 2,
+      "community": 4,
       "norm_label": "read every event, plus the streaming lane-status fold.      board.sh:56-64 group"
     },
     {
@@ -864,7 +1080,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L164",
       "id": "scripts_executable_run_viewer_rationale_164",
-      "community": 2,
+      "community": 4,
       "norm_label": "every decision record a lane wrote, oldest id first.      absence here is meanin"
     },
     {
@@ -873,7 +1089,7 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L192",
       "id": "scripts_executable_run_viewer_rationale_192",
-      "community": 2,
+      "community": 4,
       "norm_label": "assemble everything the page needs in one read."
     },
     {
@@ -882,15 +1098,654 @@
       "source_file": "dot_claude/skills/deep-execute/scripts/executable_run-viewer.py",
       "source_location": "L235",
       "id": "scripts_executable_run_viewer_rationale_235",
-      "community": 2,
+      "community": 4,
       "norm_label": "every directory under runs_dir holding a manifest.json, newest first."
+    },
+    {
+      "label": "chapters.py",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/chapters.py",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_scripts_chapters_py",
+      "community": 15,
+      "norm_label": "chapters.py"
+    },
+    {
+      "label": "One still per chapter of the rendered tour into work/verify/chapters.png (run by",
+      "file_type": "rationale",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/chapters.py",
+      "source_location": "L1",
+      "id": "scripts_chapters_rationale_1",
+      "community": 15,
+      "norm_label": "one still per chapter of the rendered tour into work/verify/chapters.png (run by"
+    },
+    {
+      "label": "sfx.py",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_scripts_sfx_py",
+      "community": 6,
+      "norm_label": "sfx.py"
+    },
+    {
+      "label": "write()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L12",
+      "id": "scripts_sfx_write",
+      "community": 6,
+      "norm_label": "write()"
+    },
+    {
+      "label": "seconds()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L25",
+      "id": "scripts_sfx_seconds",
+      "community": 6,
+      "norm_label": "seconds()"
+    },
+    {
+      "label": "bandpass_noise()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L29",
+      "id": "scripts_sfx_bandpass_noise",
+      "community": 6,
+      "norm_label": "bandpass_noise()"
+    },
+    {
+      "label": "envelope()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L42",
+      "id": "scripts_sfx_envelope",
+      "community": 6,
+      "norm_label": "envelope()"
+    },
+    {
+      "label": "tone()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L51",
+      "id": "scripts_sfx_tone",
+      "community": 6,
+      "norm_label": "tone()"
+    },
+    {
+      "label": "whoosh()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L57",
+      "id": "scripts_sfx_whoosh",
+      "community": 6,
+      "norm_label": "whoosh()"
+    },
+    {
+      "label": "click()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L67",
+      "id": "scripts_sfx_click",
+      "community": 6,
+      "norm_label": "click()"
+    },
+    {
+      "label": "tick()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L74",
+      "id": "scripts_sfx_tick",
+      "community": 6,
+      "norm_label": "tick()"
+    },
+    {
+      "label": "riser()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L80",
+      "id": "scripts_sfx_riser",
+      "community": 6,
+      "norm_label": "riser()"
+    },
+    {
+      "label": "ding()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L92",
+      "id": "scripts_sfx_ding",
+      "community": 6,
+      "norm_label": "ding()"
+    },
+    {
+      "label": "swell()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L97",
+      "id": "scripts_sfx_swell",
+      "community": 6,
+      "norm_label": "swell()"
+    },
+    {
+      "label": "thud()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L105",
+      "id": "scripts_sfx_thud",
+      "community": 6,
+      "norm_label": "thud()"
+    },
+    {
+      "label": "chime()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L113",
+      "id": "scripts_sfx_chime",
+      "community": 6,
+      "norm_label": "chime()"
+    },
+    {
+      "label": "tts.py",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_scripts_tts_py",
+      "community": 8,
+      "norm_label": "tts.py"
+    },
+    {
+      "label": "seconds()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L18",
+      "id": "scripts_tts_seconds",
+      "community": 8,
+      "norm_label": "seconds()"
+    },
+    {
+      "label": "plain()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L26",
+      "id": "scripts_tts_plain",
+      "community": 8,
+      "norm_label": "plain()"
+    },
+    {
+      "label": "align()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L31",
+      "id": "scripts_tts_align",
+      "community": 8,
+      "norm_label": "align()"
+    },
+    {
+      "label": "words_from_characters()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L62",
+      "id": "scripts_tts_words_from_characters",
+      "community": 8,
+      "norm_label": "words_from_characters()"
+    },
+    {
+      "label": "merge_spelled()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L82",
+      "id": "scripts_tts_merge_spelled",
+      "community": 8,
+      "norm_label": "merge_spelled()"
+    },
+    {
+      "label": "edge()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L99",
+      "id": "scripts_tts_edge",
+      "community": 8,
+      "norm_label": "edge()"
+    },
+    {
+      "label": "eleven()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L117",
+      "id": "scripts_tts_eleven",
+      "community": 8,
+      "norm_label": "eleven()"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L134",
+      "id": "scripts_tts_main",
+      "community": 8,
+      "norm_label": "main()"
+    },
+    {
+      "label": "grain.py",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/grain.py",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_scripts_grain_py",
+      "community": 24,
+      "norm_label": "grain.py"
+    },
+    {
+      "label": "stitch.py",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/stitch.py",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_scripts_stitch_py",
+      "community": 16,
+      "norm_label": "stitch.py"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/stitch.py",
+      "source_location": "L10",
+      "id": "scripts_stitch_main",
+      "community": 16,
+      "norm_label": "main()"
+    },
+    {
+      "label": "Tour.tsx",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Tour.tsx",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_src_tour_tsx",
+      "community": 2,
+      "norm_label": "tour.tsx"
+    },
+    {
+      "label": "Captions.tsx",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Captions.tsx",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_src_captions_tsx",
+      "community": 17,
+      "norm_label": "captions.tsx"
+    },
+    {
+      "label": "chunkWords()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Captions.tsx",
+      "source_location": "L7",
+      "id": "src_captions_chunkwords",
+      "community": 17,
+      "norm_label": "chunkwords()"
+    },
+    {
+      "label": "Grade.tsx",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Grade.tsx",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_src_grade_tsx",
+      "community": 2,
+      "norm_label": "grade.tsx"
+    },
+    {
+      "label": "Vignette()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Grade.tsx",
+      "source_location": "L5",
+      "id": "src_grade_vignette",
+      "community": 2,
+      "norm_label": "vignette()"
+    },
+    {
+      "label": "Grain()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Grade.tsx",
+      "source_location": "L14",
+      "id": "src_grade_grain",
+      "community": 2,
+      "norm_label": "grain()"
+    },
+    {
+      "label": "Letterbox()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Grade.tsx",
+      "source_location": "L33",
+      "id": "src_grade_letterbox",
+      "community": 2,
+      "norm_label": "letterbox()"
+    },
+    {
+      "label": "timing.ts",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_src_timing_ts",
+      "community": 2,
+      "norm_label": "timing.ts"
+    },
+    {
+      "label": "segmentFrames()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L69",
+      "id": "src_timing_segmentframes",
+      "community": 2,
+      "norm_label": "segmentframes()"
+    },
+    {
+      "label": "segmentStart()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L71",
+      "id": "src_timing_segmentstart",
+      "community": 2,
+      "norm_label": "segmentstart()"
+    },
+    {
+      "label": "normalize()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L76",
+      "id": "src_timing_normalize",
+      "community": 2,
+      "norm_label": "normalize()"
+    },
+    {
+      "label": "triggerSeconds()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L83",
+      "id": "src_timing_triggerseconds",
+      "community": 2,
+      "norm_label": "triggerseconds()"
+    },
+    {
+      "label": "triggerFrame()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L101",
+      "id": "src_timing_triggerframe",
+      "community": 2,
+      "norm_label": "triggerframe()"
+    },
+    {
+      "label": "clipPlayback()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L105",
+      "id": "src_timing_clipplayback",
+      "community": 2,
+      "norm_label": "clipplayback()"
+    },
+    {
+      "label": "findTargetBox()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L123",
+      "id": "src_timing_findtargetbox",
+      "community": 2,
+      "norm_label": "findtargetbox()"
+    },
+    {
+      "label": "Root.tsx",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Root.tsx",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_src_root_tsx",
+      "community": 25,
+      "norm_label": "root.tsx"
+    },
+    {
+      "label": "Sfx.tsx",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Sfx.tsx",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_src_sfx_tsx",
+      "community": 2,
+      "norm_label": "sfx.tsx"
+    },
+    {
+      "label": "push()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Sfx.tsx",
+      "source_location": "L6",
+      "id": "src_sfx_push",
+      "community": 2,
+      "norm_label": "push()"
+    },
+    {
+      "label": "clipCues()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Sfx.tsx",
+      "source_location": "L12",
+      "id": "src_sfx_clipcues",
+      "community": 2,
+      "norm_label": "clipcues()"
+    },
+    {
+      "label": "buildCues()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Sfx.tsx",
+      "source_location": "L33",
+      "id": "src_sfx_buildcues",
+      "community": 2,
+      "norm_label": "buildcues()"
+    },
+    {
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/index.ts",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_src_index_ts",
+      "community": 26,
+      "norm_label": "index.ts"
+    },
+    {
+      "label": "theme.ts",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/theme.ts",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_src_theme_ts",
+      "community": 27,
+      "norm_label": "theme.ts"
+    },
+    {
+      "label": "ui.tsx",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/ui.tsx",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_src_ui_tsx",
+      "community": 2,
+      "norm_label": "ui.tsx"
+    },
+    {
+      "label": "useReveal()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/ui.tsx",
+      "source_location": "L6",
+      "id": "src_ui_usereveal",
+      "community": 2,
+      "norm_label": "usereveal()"
+    },
+    {
+      "label": "Reveal()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/ui.tsx",
+      "source_location": "L17",
+      "id": "src_ui_reveal",
+      "community": 2,
+      "norm_label": "reveal()"
+    },
+    {
+      "label": "Title.tsx",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/Title.tsx",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_src_scenes_title_tsx",
+      "community": 2,
+      "norm_label": "title.tsx"
+    },
+    {
+      "label": "ClipScene.tsx",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/ClipScene.tsx",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_src_scenes_clipscene_tsx",
+      "community": 2,
+      "norm_label": "clipscene.tsx"
+    },
+    {
+      "label": "cameraAt()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/ClipScene.tsx",
+      "source_location": "L14",
+      "id": "scenes_clipscene_cameraat",
+      "community": 2,
+      "norm_label": "cameraat()"
+    },
+    {
+      "label": "cursorAt()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/ClipScene.tsx",
+      "source_location": "L32",
+      "id": "scenes_clipscene_cursorat",
+      "community": 2,
+      "norm_label": "cursorat()"
+    },
+    {
+      "label": "Cards.tsx",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/Cards.tsx",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_src_scenes_cards_tsx",
+      "community": 2,
+      "norm_label": "cards.tsx"
+    },
+    {
+      "label": "Compare.tsx",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/Compare.tsx",
+      "source_location": "L1",
+      "id": "dot_claude_skills_video_demo_assets_template_src_scenes_compare_tsx",
+      "community": 2,
+      "norm_label": "compare.tsx"
+    },
+    {
+      "label": "source()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/Compare.tsx",
+      "source_location": "L6",
+      "id": "scenes_compare_source",
+      "community": 2,
+      "norm_label": "source()"
+    },
+    {
+      "label": "label()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/Compare.tsx",
+      "source_location": "L17",
+      "id": "scenes_compare_label",
+      "community": 2,
+      "norm_label": "label()"
+    },
+    {
+      "label": "boxes.js",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/boxes.js",
+      "source_location": "L1",
+      "id": "dot_claude_skills_annotated_screenshots_scripts_boxes_js",
+      "community": 28,
+      "norm_label": "boxes.js"
+    },
+    {
+      "label": "executable_annotate.py",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L1",
+      "id": "dot_claude_skills_annotated_screenshots_scripts_executable_annotate_py",
+      "community": 9,
+      "norm_label": "executable_annotate.py"
+    },
+    {
+      "label": "load_font()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L49",
+      "id": "scripts_executable_annotate_load_font",
+      "community": 9,
+      "norm_label": "load_font()"
+    },
+    {
+      "label": "pad()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L56",
+      "id": "scripts_executable_annotate_pad",
+      "community": 9,
+      "norm_label": "pad()"
+    },
+    {
+      "label": "shift()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L60",
+      "id": "scripts_executable_annotate_shift",
+      "community": 9,
+      "norm_label": "shift()"
+    },
+    {
+      "label": "default_label_at()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L64",
+      "id": "scripts_executable_annotate_default_label_at",
+      "community": 9,
+      "norm_label": "default_label_at()"
+    },
+    {
+      "label": "annotate()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L80",
+      "id": "scripts_executable_annotate_annotate",
+      "community": 9,
+      "norm_label": "annotate()"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L185",
+      "id": "scripts_executable_annotate_main",
+      "community": 9,
+      "norm_label": "main()"
+    },
+    {
+      "label": "Place a callout right of the box, else left, else above, else under (CSS px).",
+      "file_type": "rationale",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L65",
+      "id": "scripts_executable_annotate_rationale_65",
+      "community": 9,
+      "norm_label": "place a callout right of the box, else left, else above, else under (css px)."
+    },
+    {
+      "label": "render-harness.test.tsx",
+      "file_type": "code",
+      "source_file": "dot_claude/skills/annotated-screenshots/assets/render-harness.test.tsx",
+      "source_location": "L1",
+      "id": "dot_claude_skills_annotated_screenshots_assets_render_harness_test_tsx",
+      "community": 29,
+      "norm_label": "render-harness.test.tsx"
     },
     {
       "label": "test.rs",
       "file_type": "code",
       "source_file": "test.rs",
       "source_location": "L1",
-      "community": 16,
+      "community": 30,
       "norm_label": "test.rs",
       "id": "test_rs"
     },
@@ -1214,7 +2069,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/keys.lua",
       "source_location": "L1",
-      "community": 5,
+      "community": 10,
       "norm_label": "keys.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_keys_lua"
     },
@@ -1223,7 +2078,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/wezterm.lua",
       "source_location": "L1",
-      "community": 17,
+      "community": 31,
       "norm_label": "wezterm.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_wezterm_lua"
     },
@@ -1232,7 +2087,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/fonts.lua",
       "source_location": "L1",
-      "community": 6,
+      "community": 11,
       "norm_label": "fonts.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_fonts_lua"
     },
@@ -1241,7 +2096,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/zen-mode-vim.lua",
       "source_location": "L1",
-      "community": 18,
+      "community": 32,
       "norm_label": "zen-mode-vim.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_zen_mode_vim_lua"
     },
@@ -1250,7 +2105,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/workspace-switcher.lua",
       "source_location": "L1",
-      "community": 7,
+      "community": 12,
       "norm_label": "workspace-switcher.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_workspace_switcher_lua"
     },
@@ -1259,7 +2114,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/move_workspace.lua",
       "source_location": "L1",
-      "community": 8,
+      "community": 13,
       "norm_label": "move_workspace.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_move_workspace_lua"
     },
@@ -1268,7 +2123,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/plugins/bar.lua",
       "source_location": "L1",
-      "community": 9,
+      "community": 14,
       "norm_label": "bar.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_plugins_bar_lua"
     },
@@ -1277,7 +2132,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/themes/melange_dark.lua",
       "source_location": "L1",
-      "community": 19,
+      "community": 33,
       "norm_label": "melange_dark.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_themes_melange_dark_lua"
     },
@@ -1286,7 +2141,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/themes/kanagawa-dragon.lua",
       "source_location": "L1",
-      "community": 20,
+      "community": 34,
       "norm_label": "kanagawa-dragon.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_themes_kanagawa_dragon_lua"
     },
@@ -1295,7 +2150,7 @@
       "file_type": "code",
       "source_file": "dot_config/wezterm/themes/cyberdream.lua",
       "source_location": "L1",
-      "community": 21,
+      "community": 35,
       "norm_label": "cyberdream.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_wezterm_themes_cyberdream_lua"
     },
@@ -1304,12 +2159,441 @@
       "file_type": "code",
       "source_file": "dot_config/yazi/plugins/smart-tab.yazi/init.lua",
       "source_location": "L1",
-      "community": 22,
+      "community": 36,
       "norm_label": "init.lua",
       "id": "users_barsotti_local_share_chezmoi_dot_config_yazi_plugins_smart_tab_yazi_init_lua"
     }
   ],
   "links": [
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.test.mjs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "docs_skills_map_test_mjs",
+      "target": "docs_skills_map_mjs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.test.mjs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "docs_skills_map_test_mjs",
+      "target": "docs_skills_map_extractedges",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.test.mjs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "docs_skills_map_test_mjs",
+      "target": "docs_skills_map_frontmatter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.test.mjs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "docs_skills_map_test_mjs",
+      "target": "docs_skills_map_test_edges",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "docs/skills-map.test.mjs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "docs_skills_map_test_edges",
+      "target": "docs_skills_map_extractedges"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L66",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_rel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_exists",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_listmd",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L81",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_frontmatter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L101",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_scan",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L147",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_byname",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L148",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_nodeid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L161",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_extractedges",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L208",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_buildgraph",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L279",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_cmp",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L280",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_typerank",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L282",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_countoftype",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L284",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_clusterof",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L307",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_shape",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L323",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_graphdiagram",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L453",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_chaindiagram",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L480",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_fence",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L482",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_orphans",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L493",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_markdown",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L640",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_html",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L703",
+      "weight": 1.0,
+      "source": "docs_skills_map_mjs",
+      "target": "docs_skills_map_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L122",
+      "weight": 1.0,
+      "source": "docs_skills_map_scan",
+      "target": "docs_skills_map_exists",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L494",
+      "weight": 1.0,
+      "source": "docs_skills_map_markdown",
+      "target": "docs_skills_map_exists",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L128",
+      "weight": 1.0,
+      "source": "docs_skills_map_scan",
+      "target": "docs_skills_map_listmd",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L209",
+      "weight": 1.0,
+      "source": "docs_skills_map_buildgraph",
+      "target": "docs_skills_map_scan",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L147",
+      "weight": 1.0,
+      "source": "docs_skills_map_byname",
+      "target": "docs_skills_map_cmp",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L234",
+      "weight": 1.0,
+      "source": "docs_skills_map_buildgraph",
+      "target": "docs_skills_map_nodeid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L232",
+      "weight": 1.0,
+      "source": "docs_skills_map_buildgraph",
+      "target": "docs_skills_map_extractedges",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L703",
+      "weight": 1.0,
+      "source": "docs_skills_map_t",
+      "target": "docs_skills_map_countoftype",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L328",
+      "weight": 1.0,
+      "source": "docs_skills_map_graphdiagram",
+      "target": "docs_skills_map_clusterof",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L337",
+      "weight": 1.0,
+      "source": "docs_skills_map_graphdiagram",
+      "target": "docs_skills_map_shape",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L556",
+      "weight": 1.0,
+      "source": "docs_skills_map_markdown",
+      "target": "docs_skills_map_graphdiagram",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L545",
+      "weight": 1.0,
+      "source": "docs_skills_map_markdown",
+      "target": "docs_skills_map_chaindiagram",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L545",
+      "weight": 1.0,
+      "source": "docs_skills_map_markdown",
+      "target": "docs_skills_map_fence",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L588",
+      "weight": 1.0,
+      "source": "docs_skills_map_markdown",
+      "target": "docs_skills_map_orphans",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "docs/skills-map.mjs",
+      "source_location": "L634",
+      "weight": 1.0,
+      "source": "docs_skills_map_markdown",
+      "target": "scenes_compare_label"
+    },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -3302,6 +4586,1111 @@
       "target": "scripts_executable_run_viewer_handler_send"
     },
     {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/chapters.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "scripts_chapters_rationale_1",
+      "target": "dot_claude_skills_video_demo_assets_template_scripts_chapters_py",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_sfx_py",
+      "target": "scripts_sfx_write",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_sfx_py",
+      "target": "scripts_sfx_seconds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_sfx_py",
+      "target": "scripts_sfx_bandpass_noise",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_sfx_py",
+      "target": "scripts_sfx_envelope",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L51",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_sfx_py",
+      "target": "scripts_sfx_tone",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L57",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_sfx_py",
+      "target": "scripts_sfx_whoosh",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_sfx_py",
+      "target": "scripts_sfx_click",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_sfx_py",
+      "target": "scripts_sfx_tick",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L80",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_sfx_py",
+      "target": "scripts_sfx_riser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L92",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_sfx_py",
+      "target": "scripts_sfx_ding",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L97",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_sfx_py",
+      "target": "scripts_sfx_swell",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L105",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_sfx_py",
+      "target": "scripts_sfx_thud",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L113",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_sfx_py",
+      "target": "scripts_sfx_chime",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "scripts_sfx_bandpass_noise",
+      "target": "scripts_sfx_seconds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "scripts_sfx_envelope",
+      "target": "scripts_sfx_seconds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L52",
+      "weight": 1.0,
+      "source": "scripts_sfx_tone",
+      "target": "scripts_sfx_seconds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L60",
+      "weight": 1.0,
+      "source": "scripts_sfx_whoosh",
+      "target": "scripts_sfx_seconds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L82",
+      "weight": 1.0,
+      "source": "scripts_sfx_riser",
+      "target": "scripts_sfx_seconds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L99",
+      "weight": 1.0,
+      "source": "scripts_sfx_swell",
+      "target": "scripts_sfx_seconds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L107",
+      "weight": 1.0,
+      "source": "scripts_sfx_thud",
+      "target": "scripts_sfx_seconds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "scripts_sfx_whoosh",
+      "target": "scripts_sfx_bandpass_noise",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "scripts_sfx_click",
+      "target": "scripts_sfx_bandpass_noise",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L76",
+      "weight": 1.0,
+      "source": "scripts_sfx_tick",
+      "target": "scripts_sfx_bandpass_noise",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L83",
+      "weight": 1.0,
+      "source": "scripts_sfx_riser",
+      "target": "scripts_sfx_bandpass_noise",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L109",
+      "weight": 1.0,
+      "source": "scripts_sfx_thud",
+      "target": "scripts_sfx_bandpass_noise",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L71",
+      "weight": 1.0,
+      "source": "scripts_sfx_click",
+      "target": "scripts_sfx_envelope",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L77",
+      "weight": 1.0,
+      "source": "scripts_sfx_tick",
+      "target": "scripts_sfx_envelope",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L70",
+      "weight": 1.0,
+      "source": "scripts_sfx_click",
+      "target": "scripts_sfx_tone",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L86",
+      "weight": 1.0,
+      "source": "scripts_sfx_riser",
+      "target": "scripts_sfx_tone",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L94",
+      "weight": 1.0,
+      "source": "scripts_sfx_ding",
+      "target": "scripts_sfx_tone",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/sfx.py",
+      "source_location": "L119",
+      "weight": 1.0,
+      "source": "scripts_sfx_chime",
+      "target": "scripts_sfx_tone",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_tts_py",
+      "target": "scripts_tts_seconds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_tts_py",
+      "target": "scripts_tts_plain",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_tts_py",
+      "target": "scripts_tts_align",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L62",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_tts_py",
+      "target": "scripts_tts_words_from_characters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L82",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_tts_py",
+      "target": "scripts_tts_merge_spelled",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L99",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_tts_py",
+      "target": "scripts_tts_edge",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L117",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_tts_py",
+      "target": "scripts_tts_eleven",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L134",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_tts_py",
+      "target": "scripts_tts_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L162",
+      "weight": 1.0,
+      "source": "scripts_tts_main",
+      "target": "scripts_tts_seconds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L34",
+      "weight": 1.0,
+      "source": "scripts_tts_align",
+      "target": "scripts_tts_plain",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L114",
+      "weight": 1.0,
+      "source": "scripts_tts_edge",
+      "target": "scripts_tts_align",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L131",
+      "weight": 1.0,
+      "source": "scripts_tts_eleven",
+      "target": "scripts_tts_words_from_characters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/tts.py",
+      "source_location": "L159",
+      "weight": 1.0,
+      "source": "scripts_tts_main",
+      "target": "scripts_tts_merge_spelled",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/scripts/stitch.py",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_scripts_stitch_py",
+      "target": "scripts_stitch_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Tour.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_tour_tsx",
+      "target": "src_grade_grain",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Tour.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_tour_tsx",
+      "target": "src_grade_letterbox",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Tour.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_tour_tsx",
+      "target": "src_grade_vignette",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Tour.tsx",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_tour_tsx",
+      "target": "src_timing_segmentframes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Captions.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_captions_tsx",
+      "target": "src_captions_chunkwords",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Grade.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_grade_tsx",
+      "target": "src_grade_vignette",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Grade.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_grade_tsx",
+      "target": "src_grade_grain",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Grade.tsx",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_grade_tsx",
+      "target": "src_grade_letterbox",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_timing_ts",
+      "target": "src_timing_segmentframes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L71",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_timing_ts",
+      "target": "src_timing_segmentstart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L76",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_timing_ts",
+      "target": "src_timing_normalize",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L83",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_timing_ts",
+      "target": "src_timing_triggerseconds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L101",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_timing_ts",
+      "target": "src_timing_triggerframe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L105",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_timing_ts",
+      "target": "src_timing_clipplayback",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L123",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_timing_ts",
+      "target": "src_timing_findtargetbox",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L117",
+      "weight": 1.0,
+      "source": "src_timing_clipplayback",
+      "target": "src_timing_segmentframes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Sfx.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_sfx_tsx",
+      "target": "src_timing_segmentframes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/ClipScene.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_scenes_clipscene_tsx",
+      "target": "src_timing_segmentframes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/Cards.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_scenes_cards_tsx",
+      "target": "src_timing_segmentframes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/Compare.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_scenes_compare_tsx",
+      "target": "src_timing_segmentframes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Sfx.tsx",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "src_sfx_clipcues",
+      "target": "src_timing_segmentframes"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Sfx.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_sfx_tsx",
+      "target": "src_timing_segmentstart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "src_timing_triggerseconds",
+      "target": "src_timing_normalize",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/timing.ts",
+      "source_location": "L101",
+      "weight": 1.0,
+      "source": "src_timing_triggerframe",
+      "target": "src_timing_triggerseconds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Sfx.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_sfx_tsx",
+      "target": "src_timing_triggerframe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/ui.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_ui_tsx",
+      "target": "src_timing_triggerframe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/Title.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_scenes_title_tsx",
+      "target": "src_timing_triggerframe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/ClipScene.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_scenes_clipscene_tsx",
+      "target": "src_timing_triggerframe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/Cards.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_scenes_cards_tsx",
+      "target": "src_timing_triggerframe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/Compare.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_scenes_compare_tsx",
+      "target": "src_timing_triggerframe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Sfx.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_sfx_tsx",
+      "target": "src_timing_clipplayback",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/ClipScene.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_scenes_clipscene_tsx",
+      "target": "src_timing_clipplayback",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Sfx.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "src_sfx_clipcues",
+      "target": "src_timing_clipplayback"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/ClipScene.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_scenes_clipscene_tsx",
+      "target": "src_timing_findtargetbox",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Sfx.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_sfx_tsx",
+      "target": "src_sfx_push",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Sfx.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_sfx_tsx",
+      "target": "src_sfx_clipcues",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Sfx.tsx",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_sfx_tsx",
+      "target": "src_sfx_buildcues",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/Sfx.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "src_sfx_clipcues",
+      "target": "src_sfx_push",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/ui.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_ui_tsx",
+      "target": "src_ui_usereveal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/ui.tsx",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_ui_tsx",
+      "target": "src_ui_reveal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/ui.tsx",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "src_ui_reveal",
+      "target": "src_ui_usereveal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/Cards.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_scenes_cards_tsx",
+      "target": "src_ui_usereveal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/Title.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_scenes_title_tsx",
+      "target": "src_ui_reveal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/ClipScene.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_scenes_clipscene_tsx",
+      "target": "scenes_clipscene_cameraat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/ClipScene.tsx",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_scenes_clipscene_tsx",
+      "target": "scenes_clipscene_cursorat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/Compare.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_scenes_compare_tsx",
+      "target": "scenes_compare_source",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/video-demo/assets/template/src/scenes/Compare.tsx",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "dot_claude_skills_video_demo_assets_template_src_scenes_compare_tsx",
+      "target": "scenes_compare_label",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L49",
+      "weight": 1.0,
+      "source": "dot_claude_skills_annotated_screenshots_scripts_executable_annotate_py",
+      "target": "scripts_executable_annotate_load_font",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L56",
+      "weight": 1.0,
+      "source": "dot_claude_skills_annotated_screenshots_scripts_executable_annotate_py",
+      "target": "scripts_executable_annotate_pad",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L60",
+      "weight": 1.0,
+      "source": "dot_claude_skills_annotated_screenshots_scripts_executable_annotate_py",
+      "target": "scripts_executable_annotate_shift",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L64",
+      "weight": 1.0,
+      "source": "dot_claude_skills_annotated_screenshots_scripts_executable_annotate_py",
+      "target": "scripts_executable_annotate_default_label_at",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L80",
+      "weight": 1.0,
+      "source": "dot_claude_skills_annotated_screenshots_scripts_executable_annotate_py",
+      "target": "scripts_executable_annotate_annotate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L185",
+      "weight": 1.0,
+      "source": "dot_claude_skills_annotated_screenshots_scripts_executable_annotate_py",
+      "target": "scripts_executable_annotate_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L113",
+      "weight": 1.0,
+      "source": "scripts_executable_annotate_annotate",
+      "target": "scripts_executable_annotate_load_font",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L106",
+      "weight": 1.0,
+      "source": "scripts_executable_annotate_annotate",
+      "target": "scripts_executable_annotate_pad",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L92",
+      "weight": 1.0,
+      "source": "scripts_executable_annotate_annotate",
+      "target": "scripts_executable_annotate_shift",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L125",
+      "weight": 1.0,
+      "source": "scripts_executable_annotate_annotate",
+      "target": "scripts_executable_annotate_default_label_at",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L65",
+      "weight": 1.0,
+      "source": "scripts_executable_annotate_rationale_65",
+      "target": "scripts_executable_annotate_default_label_at",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py",
+      "source_location": "L199",
+      "weight": 1.0,
+      "source": "scripts_executable_annotate_main",
+      "target": "scripts_executable_annotate_annotate",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "dot_config/opencode/plugins/private_ai-memory.ts",
@@ -4017,5 +6406,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "2a9dc7f8eaf644bba2e9c8deb26731dd2e7e24fe"
+  "built_at_commit": "263fadc3ef64ea9ab6afafeda1e9a984cf9f2155"
 }

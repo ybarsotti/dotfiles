@@ -1,16 +1,4 @@
 {
-  "/Users/barsotti/.local/share/chezmoi/dot_local/bin/executable_wave-hunk": {
-    "mtime": 1787342223.258187,
-    "hash": "ed93f5df71bb86bc815fdfbd45ded251"
-  },
-  "/Users/barsotti/.local/share/chezmoi/dot_local/bin/executable_journal": {
-    "mtime": 1785172226.5718482,
-    "hash": "1ddb8d1cd2d00e9049a3535f481d329a"
-  },
-  "/Users/barsotti/.local/share/chezmoi/dot_local/bin/executable_notify-claude": {
-    "mtime": 1787342215.3723025,
-    "hash": "425f59626952d711b228f52e25354d11"
-  },
   "/Users/barsotti/.local/share/chezmoi/dot_local/bin/executable_wave-widget": {
     "mtime": 1785351228.7042387,
     "hash": "0d26615e3acaaa025ce978e5ad3e883a"
@@ -19,17 +7,25 @@
     "mtime": 1786743316.2027993,
     "hash": "0e1dcc4c4e6ef6145b7107e1f98ff9bb"
   },
+  "/Users/barsotti/.local/share/chezmoi/dot_local/bin/executable_browser-reaper": {
+    "mtime": 1793822107.0338717,
+    "hash": "1a4bf36318676ad26512041a17e01a05"
+  },
   "/Users/barsotti/.local/share/chezmoi/dot_local/bin/executable_wave-split-run": {
     "mtime": 1786744694.5449321,
     "hash": "0ca43154175594ca5704328aa2210a84"
   },
-  "/Users/barsotti/.local/share/chezmoi/dot_local/bin/executable_journal-nudge": {
-    "mtime": 1785161322.3713553,
-    "hash": "52c4ad576c115d0d75aa111d9a2a1873"
-  },
   "/Users/barsotti/.local/share/chezmoi/dot_local/libexec/gh-nocolor/executable_gh": {
     "mtime": 1785417307.146115,
     "hash": "f69189adceb98c2d653df2318342e69b"
+  },
+  "/Users/barsotti/.local/share/chezmoi/docs/skills-map.test.mjs": {
+    "mtime": 1794249445.4659812,
+    "hash": "6ecfae855b67140316deeaeefca68753"
+  },
+  "/Users/barsotti/.local/share/chezmoi/docs/skills-map.mjs": {
+    "mtime": 1794250390.0377066,
+    "hash": "b642d4949bbec2565f0414ab21f62ec2"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_config/wezterm/keys.lua": {
     "mtime": 1771866079.22293,
@@ -95,33 +91,125 @@
     "mtime": 1786124893.019107,
     "hash": "bf83b109bb5f820db0ed337865e2595d"
   },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/scripts/chapters.py": {
+    "mtime": 1792024181.0397456,
+    "hash": "e0b3760efe14d93b28f0a8defe235560"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/scripts/sfx.py": {
+    "mtime": 1792024181.0420158,
+    "hash": "baa17deb47c689325f58a15cc1de08d0"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/scripts/tts.py": {
+    "mtime": 1792024181.0433116,
+    "hash": "218fd772251582514e10b49e2368caef"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/scripts/grain.py": {
+    "mtime": 1792024181.044027,
+    "hash": "5298ae465ed6276057b9210f6a99e9ce"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/scripts/stitch.py": {
+    "mtime": 1792024181.0455267,
+    "hash": "93c22738bc593aa25d7ffba9afae0ea3"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/src/Tour.tsx": {
+    "mtime": 1792024619.3632476,
+    "hash": "cfc05bef08874f1b5f57cef7e32f109d"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/src/Captions.tsx": {
+    "mtime": 1792024619.3638792,
+    "hash": "b6f58d6ad2af33f6463ac17568a50f4d"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/src/Grade.tsx": {
+    "mtime": 1792024632.093226,
+    "hash": "5a48d38b4f7f425cce8359326ce1554b"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/src/timing.ts": {
+    "mtime": 1792024619.363122,
+    "hash": "a36233c6e964c6b60bc335bfc441ff62"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/src/Root.tsx": {
+    "mtime": 1792024181.0506845,
+    "hash": "33f3a54bb7da444dbfec5718e9bcc872"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/src/Sfx.tsx": {
+    "mtime": 1792024619.3633301,
+    "hash": "89daf9a456ffd8e2019535ad26dc14ce"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/src/index.ts": {
+    "mtime": 1792024181.0511637,
+    "hash": "c96add9e4c09d452ec267482e9d4629c"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/src/theme.ts": {
+    "mtime": 1792024619.3629017,
+    "hash": "85cff884db088c9a3df317d6b55e4908"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/src/ui.tsx": {
+    "mtime": 1792024628.46276,
+    "hash": "764b3b9eead7a0fd40e76bf29aa7be14"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/src/scenes/Title.tsx": {
+    "mtime": 1792024619.3641713,
+    "hash": "75617b598e3a3fd923b88b3f1a592279"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/src/scenes/ClipScene.tsx": {
+    "mtime": 1792024628.463445,
+    "hash": "bfcd8e8fe65a54329db30c55a6f95cac"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/src/scenes/Cards.tsx": {
+    "mtime": 1792024619.3643522,
+    "hash": "d14927befc73eb7ef3bb6e9876b93719"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/src/scenes/Compare.tsx": {
+    "mtime": 1792024628.4630501,
+    "hash": "b8a5081f4ae6a4bae840fe684ca3d1fe"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/annotated-screenshots/scripts/boxes.js": {
+    "mtime": 1792023349.1819963,
+    "hash": "cf6f1b3d306b20523bb033c9da405a51"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/annotated-screenshots/scripts/executable_annotate.py": {
+    "mtime": 1792023309.9064555,
+    "hash": "54e0a874759eb17dfb7ff5296192b96e"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/annotated-screenshots/assets/render-harness.test.tsx": {
+    "mtime": 1792024990.873591,
+    "hash": "72cc4ec67786e796edc2fab0b5909ec0"
+  },
   "/Users/barsotti/.local/share/chezmoi/dot_pre-commit-config.yaml": {
     "mtime": 1784586245.5015094,
     "hash": "1bb5962e701b841a7a48eb1b9932ae43"
   },
   "/Users/barsotti/.local/share/chezmoi/ARCHITECTURE.md": {
-    "mtime": 1784660236.7376711,
-    "hash": "f9584b64c6c8f4b1b6235c599a1f2911"
+    "mtime": 1794008541.187644,
+    "hash": "47af90a3202baa7d0f4df099d72812ce"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_gitmessage.txt": {
     "mtime": 1772456226.6855614,
     "hash": "5a56d9dc1f920277b1b4e8198f2c9003"
   },
   "/Users/barsotti/.local/share/chezmoi/README.md": {
-    "mtime": 1786668993.6268418,
-    "hash": "37c8f48dc1f48ce27422dd2f9a379783"
+    "mtime": 1794008541.1871443,
+    "hash": "a6df3f4c8e4428402cbe339ac7cd9c99"
   },
   "/Users/barsotti/.local/share/chezmoi/AGENTS.md": {
-    "mtime": 1787253124.9131906,
-    "hash": "36b4e51823dbee020c780d935e7e4ded"
+    "mtime": 1788723151.8798022,
+    "hash": "b08279640a8bde862288f21cc576b26a"
   },
   "/Users/barsotti/.local/share/chezmoi/CLAUDE.md": {
-    "mtime": 1787253124.9135451,
-    "hash": "ba8ec61c1bd9dce03ef8a2d46be70850"
+    "mtime": 1790187662.520785,
+    "hash": "7f2ec532e8a54c6bd7e199b6aed1d18d"
   },
-  "/Users/barsotti/.local/share/chezmoi/docs/2026-07-26-journal-obsidian-design.md": {
-    "mtime": 1785162322.9608605,
-    "hash": "714f869768d6c5c707e76e34797c6002"
+  "/Users/barsotti/.local/share/chezmoi/docs/skills-map.html": {
+    "mtime": 1794250431.8137228,
+    "hash": "bcb61d1d3ccb176424c063a11091f486"
+  },
+  "/Users/barsotti/.local/share/chezmoi/docs/skills-map.md": {
+    "mtime": 1794250431.8130817,
+    "hash": "20c7eb6abee7f9663ee09db338ff7cea"
+  },
+  "/Users/barsotti/.local/share/chezmoi/docs/skills-map.notes.md": {
+    "mtime": 1794250430.6079586,
+    "hash": "377ce467cd231a41e54c803d04b4eb28"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_codex/AGENTS.md": {
     "mtime": 1786453273.7051077,
@@ -175,61 +263,509 @@
     "mtime": 1785951756.6660254,
     "hash": "67a8d795ec08dce4cbea34ea5974968f"
   },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/SKILL.md": {
+    "mtime": 1788953611.638318,
+    "hash": "b0c244a2109106db625c310c1ee8765f"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/slop-test.md": {
+    "mtime": 1788953611.5471523,
+    "hash": "ea593a8e8430901b9164c3143a0674d7"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/assets.md": {
+    "mtime": 1788953611.5483801,
+    "hash": "ce3a11964f1fef2724dee0bc4d123d41"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/preview-examples.md": {
+    "mtime": 1788953611.5489185,
+    "hash": "b22c67d3624ea0942f9420e7e72bbe9b"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/design-md.md": {
+    "mtime": 1788953611.5495548,
+    "hash": "fab0440c7f7aa90df90641879f67c9dd"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/structure.md": {
+    "mtime": 1788953611.55012,
+    "hash": "f1f6d73d9e86baa74937a4761ee5ec6e"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/motion.md": {
+    "mtime": 1788953611.550612,
+    "hash": "523c3f80196adc0481cd801a27df4622"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/component-cookbook.md": {
+    "mtime": 1788953763.9874983,
+    "hash": "b76b1f12fbb3e26dbc28a722c8e1157e"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/layout-and-space.md": {
+    "mtime": 1788953611.5542047,
+    "hash": "35a5bed31d873466adaf6b8cd57c6729"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/responsive.md": {
+    "mtime": 1788953611.554677,
+    "hash": "1feab02ca04e8e127757b06108b4f1eb"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/study.md": {
+    "mtime": 1788953611.555618,
+    "hash": "fd54014965800869ca251fb95abd9abe"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/floating-nav.md": {
+    "mtime": 1788953611.5560937,
+    "hash": "b6920074b60a4127fd4922892409d08f"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/contract.md": {
+    "mtime": 1788953611.5566835,
+    "hash": "06ac74311f3ed93eff0b0fb976cd135d"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/export-formats.md": {
+    "mtime": 1788953611.5572467,
+    "hash": "e296d00e158e109f6a122b15e358a851"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/color.md": {
+    "mtime": 1788953611.557868,
+    "hash": "44fbab05183fdd789b0d3df3d1ccd607"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/anti-patterns.md": {
+    "mtime": 1788953611.5929263,
+    "hash": "2fa2dc36cea12fa66cd6d32b80f30357"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/imagery-kit.md": {
+    "mtime": 1788953611.594548,
+    "hash": "7dc95e04ac3d1a37e0c8424ec24090d2"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/interaction-and-states.md": {
+    "mtime": 1788953611.59568,
+    "hash": "5e6ef1d5812550560ef7e8c565017d69"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/typography.md": {
+    "mtime": 1788953611.5962875,
+    "hash": "05ceb234183f5ff20403634c2bcf4507"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/copy.md": {
+    "mtime": 1788953611.5969222,
+    "hash": "800197e34e6c78ab168f0f7fbae2d3b2"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures.md": {
+    "mtime": 1788953611.597578,
+    "hash": "c62acc3069a9baac8984bd3997775ef6"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/custom-theme.md": {
+    "mtime": 1788953611.5984972,
+    "hash": "0b21d825cba38b383c795a5654c483ce"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/hero-enrichment.md": {
+    "mtime": 1788953611.619501,
+    "hash": "258bdb3e95186cb4762d0e89e5b0e348"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/custom-craft.md": {
+    "mtime": 1788953611.620348,
+    "hash": "812bb642de2ac44c9c19e84c4ac3d359"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/microinteractions.md": {
+    "mtime": 1788953611.6369398,
+    "hash": "2e9d9eb8f5c46f2ebb2a4c478e7051e9"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/genres/editorial.md": {
+    "mtime": 1788953611.5520897,
+    "hash": "12a63081ade222922691625f770c7522"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/genres/modern-minimal.md": {
+    "mtime": 1788953611.5525477,
+    "hash": "fad3e013a69dafedb6b4d4ebcecb5eae"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/genres/playful.md": {
+    "mtime": 1788953611.5532372,
+    "hash": "7adfab557cfec53605abd7e1004df620"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/genres/atmospheric.md": {
+    "mtime": 1788953611.553691,
+    "hash": "e16e108eaebb2b315f9df79529502831"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/c4-sticky-bottom-bar.md": {
+    "mtime": 1788953611.5593233,
+    "hash": "f64e39fe5799915de6d317256ed3388a"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/t1-pull-quote-with-marginalia.md": {
+    "mtime": 1788953611.5599346,
+    "hash": "ca271b7cfc899f8099d3aa6de03adda1"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/h4-stat-led.md": {
+    "mtime": 1788953611.5607955,
+    "hash": "692b31ec73f02f61d9ee2e05c322be2b"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/f5-annotated-screenshot.md": {
+    "mtime": 1788953611.5612438,
+    "hash": "de9dc3a81f033051abbd5cfd7c3de009"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/f4-step-sequence.md": {
+    "mtime": 1788953611.56168,
+    "hash": "2919199cbe9de7df6816b76e88e465e3"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/h3-quote-led.md": {
+    "mtime": 1788953611.5621305,
+    "hash": "3d2564ff0239a10d4432e9bfd4a79d73"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/ft5-statement.md": {
+    "mtime": 1788953611.562559,
+    "hash": "dbf97aba47bfcf60a5ce0ade82717fa0"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/n1b-saas-three-section.md": {
+    "mtime": 1788953611.5630825,
+    "hash": "86e9304f68270badddbfcb6cf182d870"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/t4-numbered-stat-strip.md": {
+    "mtime": 1788953611.5637016,
+    "hash": "ba4488724914a82aed03b428d95cfebf"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/n13-inline-cmdk-pill.md": {
+    "mtime": 1788953611.5641987,
+    "hash": "b22a06e7c022b4246434cf3123fd8da2"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/ft3-index-style-category-list.md": {
+    "mtime": 1788953611.5647118,
+    "hash": "e7f70ef0d77e1d67f8f337c5bd8a1e1a"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/h8-mockup-split-browser-framed.md": {
+    "mtime": 1788953611.5651228,
+    "hash": "839fa71fd613a80c790d220f103a5e52"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/c3-typographic-link.md": {
+    "mtime": 1788953611.5655856,
+    "hash": "4af3515c363b6e0b051f4cab72623e37"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/h6-photographic-fold.md": {
+    "mtime": 1788953611.5661345,
+    "hash": "fb099a42ea497add84c25c5423a73bc9"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/ft8-marquee-scroll.md": {
+    "mtime": 1788953611.566594,
+    "hash": "2e45d1c43e5b688a4b9123f0594234d4"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/s1-left-margin-numbered.md": {
+    "mtime": 1788953611.5670018,
+    "hash": "3c60b2ccd31023df63c973bc65346d2b"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/s4-inline-no-break.md": {
+    "mtime": 1788953611.5674214,
+    "hash": "1567d7a469dd75fdbf872f55aaa4a107"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/n8-terminal-command.md": {
+    "mtime": 1788953611.5678182,
+    "hash": "aefce0b553385d5eaac91ab767a4afc1"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/s5-bottom-anchored.md": {
+    "mtime": 1788953611.5682504,
+    "hash": "c68de2aea793dea3a10eb1c7eb04b47f"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/t3-single-huge-quote.md": {
+    "mtime": 1788953611.5686376,
+    "hash": "f9cede2913767f00d723470b44e8cbef"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/h1-marquee.md": {
+    "mtime": 1788953611.5690346,
+    "hash": "bddb24c995bac678b3ff306c9e70006c"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/c2-inline-form-as-cta.md": {
+    "mtime": 1788953611.5695329,
+    "hash": "7a126848d4bf34e1dacd8bb07b093e09"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/n10-floating-on-scroll-morph.md": {
+    "mtime": 1788953611.5701113,
+    "hash": "b1638599a770dee530d2382ce948546c"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/n4-hidden-behind-k.md": {
+    "mtime": 1788953611.570794,
+    "hash": "32fb914c5b4b1e9cd26736279cd01e8a"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/n11-mega-menu.md": {
+    "mtime": 1788953611.5713823,
+    "hash": "6fc7810ad89330c10b7b296568e3b76a"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/h5-letter-hero.md": {
+    "mtime": 1788953611.571956,
+    "hash": "074daff2e0d842e02216d3eaf2e4998c"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/n7-brutal-slab.md": {
+    "mtime": 1788953611.572455,
+    "hash": "dd79d0a44aa34d6f44325c0762925d64"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/n5-floating-pill.md": {
+    "mtime": 1788953611.5728738,
+    "hash": "bdc92ab773ca21fea091b5ecdd64ed44"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/h2-split-diptych.md": {
+    "mtime": 1788953611.573484,
+    "hash": "d9a14f7dfc72a1ebda76b8a039867d7a"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/n1-wordmark-2-links.md": {
+    "mtime": 1788953611.5744557,
+    "hash": "6d60fe94844d8cb88b5ee8d7e50e2189"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/n9-edge-aligned-minimal.md": {
+    "mtime": 1788953611.5752423,
+    "hash": "adb4a3eea6fed78d24c75837a44315f4"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/n2-floating-chip.md": {
+    "mtime": 1788953611.5759315,
+    "hash": "9fc5be2b79d391d81a1775d38eb2a236"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/f1-bento-grid.md": {
+    "mtime": 1788953611.5764675,
+    "hash": "38ec8a63576bf9ccad804446453e136c"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/n3-side-rail.md": {
+    "mtime": 1788953611.5770612,
+    "hash": "ed6a440d78f29f6253e8f299dece4957"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/h9-custom-illustration-centerpiece.md": {
+    "mtime": 1788953611.5776172,
+    "hash": "86fcff9b639eac397c02490c6b8dff11"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/n6-newspaper-masthead.md": {
+    "mtime": 1788953611.5781612,
+    "hash": "df11a33be87826c6efa88a40308c89fe"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/c1-outlined-chip.md": {
+    "mtime": 1788953611.578747,
+    "hash": "dd9b65aedcf41f76f3a86e2dedb24ff9"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/s2-hanging.md": {
+    "mtime": 1788953611.5793211,
+    "hash": "93d36d3d96a3d9fc3cc8b2f87ee5710d"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/f2-sticky-scroll-stack.md": {
+    "mtime": 1788953611.580208,
+    "hash": "92c51c4919c1ac531fc33567de0841bb"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/f3-tabular-spec-sheet.md": {
+    "mtime": 1788953611.5812645,
+    "hash": "28d02aaa0fc2b4669082167f7da830aa"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/ft7-newsletter-first.md": {
+    "mtime": 1788953611.5820677,
+    "hash": "23960b5ed8c88d3cf1905d18e5c4b938"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/ft1-mast-headed.md": {
+    "mtime": 1788953611.5831308,
+    "hash": "e59d073359da0233d50d82c4c35f231f"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/ft6-letter-close.md": {
+    "mtime": 1788953611.5855026,
+    "hash": "ce67301d01490895532bd3beded4a503"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/f6-product-card-grid.md": {
+    "mtime": 1788953611.5872908,
+    "hash": "13d2f913d9e0a99a3fd6677ef72a7f68"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/t2-logo-wall-hairline.md": {
+    "mtime": 1788953611.5884006,
+    "hash": "98a3d00bdaaef49708450829aacede7a"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/ft4-dense-typographic.md": {
+    "mtime": 1788953611.5890152,
+    "hash": "a395857fd4df8b899efb7ca675120ea0"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/s3-sticky-pinned.md": {
+    "mtime": 1788953611.5896018,
+    "hash": "c9b74397e2839c9bba50420364f49147"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/n12-banner-retract.md": {
+    "mtime": 1788953611.590375,
+    "hash": "fb31da543acb8951cea3362fce100dc9"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/ft2-inline-rule-single-line.md": {
+    "mtime": 1788953611.5912478,
+    "hash": "574c04b88d61470ef066136444d0ef27"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/components/h7-demo-video-clipped-by-viewport-edge.md": {
+    "mtime": 1788953611.5918987,
+    "hash": "ce86f0e5b3124e3de257889427146066"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/verbs/redesign.md": {
+    "mtime": 1788953611.599719,
+    "hash": "ff60f01f8b318d1f964baef96cb0e22f"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/verbs/audit.md": {
+    "mtime": 1788953611.6008735,
+    "hash": "1bec03d2750baad4efb957813d00a813"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/14-narrative-workflow.md": {
+    "mtime": 1788953611.602287,
+    "hash": "d4e5a4168f1cceda890e08b9e3494a12"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/06-conversational-faq.md": {
+    "mtime": 1788953611.603233,
+    "hash": "fa404d01202899e213d05fbd440dc737"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/01-bento-grid.md": {
+    "mtime": 1788953611.6040154,
+    "hash": "5e651f9e32b8450e487850a3b788a229"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/12-letter.md": {
+    "mtime": 1788953611.6048923,
+    "hash": "78524ae29bd9c74e1d0cd467a635b128"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/15-split-studio.md": {
+    "mtime": 1788953611.6057367,
+    "hash": "d73499866a632bf39d25e589b947952b"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/20-ecosystem-index.md": {
+    "mtime": 1788953611.6066287,
+    "hash": "fa122566098bf960c578a530e85bbef6"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/09-quote-led.md": {
+    "mtime": 1788953611.6072233,
+    "hash": "2adb745d5476fafbf0a8b50ce7aac05d"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/17-type-specimen.md": {
+    "mtime": 1788953611.6080065,
+    "hash": "cc3413d1c46a377133ca033e93d30872"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/13-index-first.md": {
+    "mtime": 1788953611.6087682,
+    "hash": "690a9621838c22216761ecf58c2458ae"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/07-manifesto.md": {
+    "mtime": 1788953611.6095307,
+    "hash": "e54a38bdf1894da354d68892d95ece19"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/10-specimen.md": {
+    "mtime": 1788953611.6101823,
+    "hash": "9c43a3e13bddb03101a2ab0adc6126a6"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/11-catalogue.md": {
+    "mtime": 1788953611.610849,
+    "hash": "a4551f43c2f38e12dafb82be4f2347e9"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/18-portfolio-grid.md": {
+    "mtime": 1788953611.6114695,
+    "hash": "71191ce1e613ded38085010d71ba24e5"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/03-marquee-hero.md": {
+    "mtime": 1788953611.6120124,
+    "hash": "a32ebb015054c481a0d861f10328440e"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/05-workbench.md": {
+    "mtime": 1788953611.612723,
+    "hash": "7f4e58f5186ed958e4945a02daf0af52"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/19-map-diagram.md": {
+    "mtime": 1788953611.6131775,
+    "hash": "eb42c75624d03891e622d8be81fdbe01"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/08-photographic.md": {
+    "mtime": 1788953611.6137857,
+    "hash": "2b7a929a6c61f22e9ab94320697e150d"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/21-component-playground.md": {
+    "mtime": 1788953611.6147053,
+    "hash": "ba12f4677c273ba10a52c31e885dae23"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/02-long-document.md": {
+    "mtime": 1788953611.6158452,
+    "hash": "653446853af763d22824afa1744b1bb3"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/16-feature-stack.md": {
+    "mtime": 1788953611.6171408,
+    "hash": "09e4813eaeaa132345044049a89e4991"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/macrostructures/04-stat-led.md": {
+    "mtime": 1788953611.6184661,
+    "hash": "b0a09c97d2763b9ba0a565f1516287e8"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/themes/carnival.md": {
+    "mtime": 1788953611.621463,
+    "hash": "ef8b60b3d7fb4f4fa082b9aa7538e34a"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/themes/cobalt.md": {
+    "mtime": 1788953611.622213,
+    "hash": "41a19044dd65f3c24de245e22198271a"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/themes/lumen.md": {
+    "mtime": 1788953611.6243837,
+    "hash": "26c9b3fa7574d3e6d41e62285a866154"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/themes/hum.md": {
+    "mtime": 1788953611.6261787,
+    "hash": "4e71cdf39b916359aa44b6eec0eaf23e"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_agents/skills/hallmark/references/themes/grid.md": {
+    "mtime": 1788953611.6356804,
+    "hash": "f5f6d3159f6ee7ccae0579c368871e93"
+  },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/RTK.md": {
-    "mtime": 1777991614.4850304,
+    "mtime": 1792078596.3463576,
     "hash": "e5c0084e0dd62f39beb77640ef022d26"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/output-styles/eli5.md": {
-    "mtime": 1786020715.4052243,
+    "mtime": 1792078596.347009,
     "hash": "aa1eb92775fe4d291e7646b2ed70fcdd"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/output-styles/architect.md": {
-    "mtime": 1786020175.2436552,
+    "mtime": 1792078596.3474836,
     "hash": "fe317d97ce268a154e20ff12f7a482fa"
   },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/pr-description.md": {
-    "mtime": 1785951756.6607187,
-    "hash": "a4ca216896905d3dd1bfc93ef9aceb08"
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/agents/ui-designer.md": {
+    "mtime": 1793902472.4933496,
+    "hash": "087429d94de067daf7ceeddbee5d6132"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/agents/qa-ui.md": {
+    "mtime": 1793901189.5715778,
+    "hash": "cf3daaca20ba910fcc725f6a3c287651"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/agents/qa-business.md": {
+    "mtime": 1794250344.9432662,
+    "hash": "31f4dfc9a5d2570442d76c776848c48e"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/simple-plan.md": {
+    "mtime": 1794250287.5774083,
+    "hash": "61ad4b9a3e71e5a960b94a0cc41e98c5"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/qa-test-plan.md": {
-    "mtime": 1785164210.4502647,
+    "mtime": 1792078596.3487356,
     "hash": "3e5e47827904c165a0cf33a8493e7dda"
   },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/hunk-watch.md": {
-    "mtime": 1786453273.7166338,
-    "hash": "9873fe2cc00bdc2d89867eb34d4243da"
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/pr.md": {
+    "mtime": 1794008640.5728307,
+    "hash": "1672cc72396bef5363ff85f72e66e255"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/deep-plan.md": {
-    "mtime": 1785951756.6604538,
-    "hash": "c41a0d861f196abf7fc0f2dd65941719"
+    "mtime": 1794250287.576754,
+    "hash": "c669d9390ad52dbe20f1257eafeb1fac"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/shed-light.md": {
+    "mtime": 1792505451.5197408,
+    "hash": "97c6e584bc0e2193668afb2042d91aae"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/blindspot.md": {
+    "mtime": 1792504698.1383028,
+    "hash": "ae8dc3038ba969822a473bba4ca1c572"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/deep-review.md": {
-    "mtime": 1786668995.0704803,
-    "hash": "83a37323d886bfce807aac48c8969c4f"
+    "mtime": 1792078596.3512044,
+    "hash": "47804c972d526754bd4cc3dbc664729c"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/anki.md": {
-    "mtime": 1773060823.7624447,
+    "mtime": 1792078596.351682,
     "hash": "aa6737acb0f0ca74d781b606fc460984"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/qa-execute.md": {
-    "mtime": 1785164210.450062,
+    "mtime": 1792078596.3521705,
     "hash": "cac89dad7d7cd04663afa8983d50dfe0"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/deep-execute.md": {
-    "mtime": 1787342223.2573173,
-    "hash": "330bb461ba321c8bc3cc943dc92a9c56"
+    "mtime": 1794250287.57789,
+    "hash": "e6894ea7e8d2e41641f2dcc1a0996880"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/simplify.md": {
-    "mtime": 1783969881.322273,
-    "hash": "8ac2188bedab6aad4137c86cd3a9e30f"
+    "mtime": 1792078596.3529167,
+    "hash": "34217cb6a257142179b55abbb9f99823"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/commands/qa-plan.md": {
-    "mtime": 1785164210.450175,
+    "mtime": 1792078596.353357,
     "hash": "cc1b92a86ac421e281149e2bb9324e6f"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/qa-test-plan/SKILL.md": {
-    "mtime": 1786641631.7033355,
-    "hash": "dfb8ae1f3cedb84890c344d047f38d7d"
+    "mtime": 1794250352.049071,
+    "hash": "5fb3ff844bb62c7a60b804b1e8510624"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/qa-test-plan/tests/fixtures/qa-plan.yaml": {
     "mtime": 1785164210.451697,
@@ -240,7 +776,7 @@
     "hash": "7fec04872d22eb86459db532a917393b"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/qa-test-plan/templates/qa-plan.md": {
-    "mtime": 1784913502.3808987,
+    "mtime": 1792078596.3858013,
     "hash": "8bdf82f6b7bca720e3026a3867b2c5af"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/qa-test-plan/templates/qa-plan.yaml": {
@@ -251,269 +787,337 @@
     "mtime": 1784913502.3814235,
     "hash": "1ae70aaadb743fc0dee5d479b395cba3"
   },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/workflow-post-implementation/SKILL.md": {
+    "mtime": 1794248628.96902,
+    "hash": "003227136741175a6ce68e5bdf30ab24"
+  },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/follow-up-jira/SKILL.md": {
-    "mtime": 1786651411.5477698,
-    "hash": "de756fd4fd352792d1fa69820149859b"
+    "mtime": 1794250344.9453928,
+    "hash": "b0ad486d4010477fc5896688a8a88e01"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/explore-options/SKILL.md": {
+    "mtime": 1794246480.5024965,
+    "hash": "8d68e638c2c2b1c40de8cd8a22da6cc8"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/README.md": {
-    "mtime": 1787342223.2576816,
-    "hash": "276a0ee1e2e6fdca2120507691795415"
+    "mtime": 1794008551.3403485,
+    "hash": "a8ae385a3849d1073ee63ab0967a9281"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/SKILL.md": {
-    "mtime": 1787342223.2577608,
-    "hash": "f7748a1528b5ab7a5e6d8f6fb7b859ec"
+    "mtime": 1793902322.2888744,
+    "hash": "542cd2f6265774ae3861902aa465c97a"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/tests/fixtures/init-run-plan.md": {
-    "mtime": 1786108837.493502,
-    "hash": "48a8980f7ad20ccee814ff4715f98f65"
+    "mtime": 1793822107.24423,
+    "hash": "f226cc0f1f856d73316b06b3c97b2ed3"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/tests/fixtures/subplans/orchestrator.md": {
-    "mtime": 1784660236.759463,
+    "mtime": 1792078596.3891432,
     "hash": "ed936389bccfe5c3779439c236a18944"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/tests/fixtures/subplans/backend.md": {
-    "mtime": 1784660236.7584934,
+    "mtime": 1792078596.3895998,
     "hash": "a543156584defa7d723bdf2c2fab2478"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/tests/fixtures/subplans/frontend.md": {
-    "mtime": 1784660236.7589748,
+    "mtime": 1792078596.3899047,
     "hash": "fdf53b011634f1f4477bbc205a5ef03c"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/tests/fixtures/subplans/review.md": {
-    "mtime": 1784660236.7598743,
+    "mtime": 1792078596.390169,
     "hash": "62fa559adaa060ae3af06d11b96d6da5"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-execute/templates/worker-system-prompt.txt": {
     "mtime": 1786573651.01426,
     "hash": "dcd7460cf0fa96f3f93995c9daa15972"
   },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/plan/SKILL.md": {
-    "mtime": 1785167081.6049688,
-    "hash": "e4960da158475d6462a439b18c9bf9ab"
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/SKILL.md": {
+    "mtime": 1793822108.5735817,
+    "hash": "71f504c79584c8477f08e4d2c6409226"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/references/playbook.md": {
+    "mtime": 1792078596.3862596,
+    "hash": "329b89d8c10410709811b5a67f2085cb"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/workflow-finish/SKILL.md": {
+    "mtime": 1794248639.299657,
+    "hash": "b923cfc368fc55892d9266914ff10c2e"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/annotated-screenshots/SKILL.md": {
+    "mtime": 1792078596.3606277,
+    "hash": "84818e8161a69d16152eeb6f9674844c"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/annotated-screenshots/references/capture.md": {
+    "mtime": 1792078596.3867347,
+    "hash": "60e0381837a4c8a878f418f5cdd96677"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/annotated-screenshots/references/spec.md": {
+    "mtime": 1792078596.3874161,
+    "hash": "0755666eeacde1cf02f1e2c95b725d41"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/find-skills/SKILL.md": {
-    "mtime": 1785789366.5233154,
+    "mtime": 1792078596.3616567,
     "hash": "62b297abdee9aea84c577ab2e04e1974"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/README.md": {
-    "mtime": 1785164210.450611,
-    "hash": "2e996859e2958753717b3eeeab28479f"
+    "mtime": 1794250271.8446417,
+    "hash": "6869cd3c95aeacb02d42f1d29fce8823"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/SKILL.md": {
-    "mtime": 1786666921.8222864,
-    "hash": "723bd8767754fad6a93a7877f051d554"
+    "mtime": 1794250253.0499852,
+    "hash": "105d5f4da7ed1d55a80f7674d17f4b32"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/tests/fixtures/lane-unescaped-pipe.md": {
-    "mtime": 1784660236.7826335,
+    "mtime": 1792078596.379712,
     "hash": "2323e319c4136161b1b4a06d70eb8e04"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/tests/fixtures/endpoint-escaped-pipe.md": {
-    "mtime": 1784660236.7779472,
+    "mtime": 1792078596.380287,
     "hash": "0d18f2833aae7f30d82c0e8e6c7b76a0"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/tests/fixtures/lane-short-row.md": {
-    "mtime": 1784660236.7818441,
+    "mtime": 1792078596.3806734,
     "hash": "2642e06fe5515c69f0e160bce0f9a7fd"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/tests/fixtures/fanout-no-execution-shape.md": {
-    "mtime": 1784660236.7808144,
+    "mtime": 1792078596.3812957,
     "hash": "5ac1781002df39d94abc3ffe311c56e8"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/tests/fixtures/lane-escaped-pipe.md": {
-    "mtime": 1784660236.781369,
+    "mtime": 1792078596.3816893,
     "hash": "8effa33f1a169c6345a8a3f5021faab7"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/tests/fixtures/draft-unbalanced-fences.md": {
-    "mtime": 1784660236.7764459,
+    "mtime": 1792078596.3820734,
     "hash": "94967b47673d811039e8d64bf31bcf5d"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/tests/fixtures/fanout-malformed-lane.md": {
-    "mtime": 1784660236.78032,
+    "mtime": 1792078596.38272,
     "hash": "02abcc2d0a974a6a4303fa87cba807e9"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/tests/fixtures/endpoint-unescaped-pipe.md": {
-    "mtime": 1784660236.7785056,
+    "mtime": 1792078596.383271,
     "hash": "a660b1cf68a5cc7ff596dd6b6afd55aa"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/tests/fixtures/valid-parallel-plan.md": {
-    "mtime": 1786108376.6358154,
+    "mtime": 1792078596.3837154,
     "hash": "7837a567866affd1654a8866bdc9cc23"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/tests/fixtures/execution-shape-absent.md": {
-    "mtime": 1784660236.7789314,
+    "mtime": 1792078596.3844242,
     "hash": "30c7ddb6f409d51493316342a395b8b4"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/tests/fixtures/execution-shape-typo-heading.md": {
-    "mtime": 1784660236.7797706,
+    "mtime": 1792078596.3847663,
     "hash": "7a7bb969c0f508e3715a817259f3d35a"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/tests/fixtures/draft-valid-minimal.md": {
-    "mtime": 1784660236.7770069,
+    "mtime": 1792078596.3852024,
     "hash": "3b7af5396cfd929318c5805d993a859a"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/tests/fixtures/execution-shape-fenced-example.md": {
-    "mtime": 1784660236.7793403,
+    "mtime": 1792078596.3854947,
     "hash": "7738e11c6fc75653a3a3d9d89dfe9a5d"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/personas/architect.md": {
-    "mtime": 1783969881.3231766,
+    "mtime": 1792078596.3681083,
     "hash": "71c10412aac6873471c186bea8db2bc0"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/personas/qa.md": {
-    "mtime": 1784904433.4234471,
-    "hash": "b77e945a102cfb610c502965ff3b409f"
+    "mtime": 1792792333.4497778,
+    "hash": "28b013d3af27d532cfdeea4f844c2bde"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/personas/planner-opus.md": {
-    "mtime": 1784904433.4218452,
+    "mtime": 1792078596.3692064,
     "hash": "c6c251bbbc3b6cf93f347ed3211e3abe"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/personas/project-developer.md": {
-    "mtime": 1783969881.3242714,
-    "hash": "765dd7bf54b1a2f0d83268a1f72a0b3d"
+    "mtime": 1792078596.3697045,
+    "hash": "1d4249620fb10f6487bcbe873e93b394"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/personas/ticket-matcher.md": {
-    "mtime": 1784904433.422875,
+    "mtime": 1792078596.370318,
     "hash": "a27e773b6d6a6dea7ff60108c57ea4a8"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/personas/flow-mapper.md": {
-    "mtime": 1784904433.4231942,
+    "mtime": 1792078596.3709896,
     "hash": "09ff7f669ecd563fda9148972c3a6387"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/personas/planner-codex.md": {
-    "mtime": 1784904433.4223177,
+    "mtime": 1792078596.3716366,
     "hash": "e71770f6f14e2548de5f3297a83fd19e"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/templates/pr-body.md": {
-    "mtime": 1784904513.3412726,
+    "mtime": 1792078596.372201,
     "hash": "9e2baafb2c8fd6decfb88fd46965ea56"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/templates/plan.md": {
-    "mtime": 1786668436.373054,
-    "hash": "d8fbe87ae3feff1c0f426d1bdce10331"
+    "mtime": 1794250265.6984618,
+    "hash": "adbd92c9e1894a741e4fac17590f57c6"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/templates/subplan.md": {
-    "mtime": 1784660236.774497,
-    "hash": "caca7ab6586ae6f6b46be3f7d5f3d075"
+    "mtime": 1792792375.1716547,
+    "hash": "caaf2984fe5bb07cc54b6b3c53fb1d96"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/pr-description/README.md": {
-    "mtime": 1785164210.4512901,
-    "hash": "3b0326ab8c1c993686823b2a0d1f4e56"
+    "mtime": 1792078596.364189,
+    "hash": "3e16d548bb437c20660cbbc4df4c17ce"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/pr-description/SKILL.md": {
-    "mtime": 1785951756.6653483,
-    "hash": "f39de8538ef52322a5ca42e1870cbc3e"
+    "mtime": 1794250344.9447672,
+    "hash": "5269de78b7920fa7f1c732c93238bb28"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/pr-description/personas/pr-writer.md": {
-    "mtime": 1785951756.6655679,
-    "hash": "da24635bd1cd8a87c27a49b21a84c510"
+    "mtime": 1793822107.2464538,
+    "hash": "b635756b38f186dd865372da1485c0ba"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/README.md": {
-    "mtime": 1786668995.0706184,
-    "hash": "ebeeac4878e369722f3738da69089328"
+    "mtime": 1794248828.5547178,
+    "hash": "39700e82d5bc26de75a22f68c6a40f41"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/SKILL.md": {
-    "mtime": 1786668995.0707288,
-    "hash": "111a01bbbf781e63c5a1dd0c12d660fb"
+    "mtime": 1794248828.5548894,
+    "hash": "1e6f1d4d2162e216555a8d5f357ddc45"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/variants/code-judo.yml": {
+    "mtime": 1793018296.717717,
+    "hash": "78afe1d20a873e3545a454120b37d497"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/variants/default.yml": {
-    "mtime": 1786641413.1023252,
-    "hash": "17ab80268f34fcfe2b1233d67afa872f"
+    "mtime": 1794248828.555325,
+    "hash": "1d4b8b5725a5e5bc451fdf2ff5b489a2"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/variants/stress-test.yml": {
-    "mtime": 1783969881.3372653,
-    "hash": "31d2369f98925e4f8550714a9faa7792"
+    "mtime": 1791397333.7428386,
+    "hash": "b3711520d2a85da148b22b9a663545f2"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/variants/adversarial-debate.yml": {
-    "mtime": 1783969881.336269,
-    "hash": "3d1937f9e928b412c397feee858ac5a8"
+    "mtime": 1791398295.0982473,
+    "hash": "3874e4be72d87520b59362aafcbb7c5a"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/variants/stage-light.yml": {
+    "mtime": 1793822106.823557,
+    "hash": "199a86c26e609d92494f92fc6880aec5"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/variants/security-focused.yml": {
-    "mtime": 1783969881.336963,
-    "hash": "e43e37a94b5f73e935d4932f9fdd6693"
+    "mtime": 1791397333.742115,
+    "hash": "36dd0bf60dd66b725920a29384e323f7"
   },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/concurrency-races.md": {
-    "mtime": 1783969881.331196,
-    "hash": "4ebc5daed4fcade86668587f65fa720c"
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/code-judo.md": {
+    "mtime": 1792078596.3741279,
+    "hash": "34131a291d90bdad7fe4860046415abe"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/senior-frontend.md": {
-    "mtime": 1783969881.333972,
-    "hash": "d1a486ef358cbd03139aedf23b02aa34"
+    "mtime": 1792078596.3747625,
+    "hash": "a527701e519bcd68c2e8e4543b608367"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/project-fit.md": {
+    "mtime": 1793822107.245968,
+    "hash": "3a2d8ac26d3d70bd59a77de0b8f71ad8"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/architecture.md": {
-    "mtime": 1786110684.0216265,
-    "hash": "611e297ccd71b7298e6f61a1b3b49fdc"
+    "mtime": 1794248827.4519753,
+    "hash": "8fae56001694a4d7449bf855ce631aab"
   },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/edge-cases.md": {
-    "mtime": 1783969881.3321314,
-    "hash": "5572e9ac4a21dd1243b24226b547aef3"
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/test-quality.md": {
+    "mtime": 1794247007.849011,
+    "hash": "e9155a4868866ed1a682d0d09ffb54df"
   },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/db-performance.md": {
-    "mtime": 1783969881.3314931,
-    "hash": "11796e26b2d23d71f99674f61b4c92cb"
-  },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/docs-consistency.md": {
-    "mtime": 1783969881.3318255,
-    "hash": "b80a6e4da43e25e39b547b752dc36df4"
-  },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/design-fidelity.md": {
-    "mtime": 1786641400.0543196,
-    "hash": "4a3db5d2685629f29588581973a95caa"
-  },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/type-precision.md": {
-    "mtime": 1785957731.789486,
-    "hash": "6b04c9f5f26a64643067d78a502b612b"
-  },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/scope-completeness.md": {
-    "mtime": 1783969881.3331003,
-    "hash": "5343b608fc859ab80311aa1cb794750a"
-  },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/test-coverage.md": {
-    "mtime": 1783969881.3345928,
-    "hash": "73bc43708150d682d4f741b759dd1c67"
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/shortcut-watchdog.md": {
+    "mtime": 1794248827.4522357,
+    "hash": "28ac76dcbbebb82994d70c874db2ec93"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/simplicity.md": {
-    "mtime": 1783969881.3343325,
-    "hash": "d05010bb7da3623c95ef752d5fe234a3"
+    "mtime": 1794248827.4523227,
+    "hash": "e186cc9943c0a76d641cc360a0a9a592"
   },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/project-patterns.md": {
-    "mtime": 1783969881.3328137,
-    "hash": "9a01260f5977f31b6e8dfa1012034494"
-  },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/error-handling-observability.md": {
-    "mtime": 1783969881.332491,
-    "hash": "24f9a47616477da4e8ec81ac124b561f"
-  },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/code-reuse.md": {
-    "mtime": 1785957710.8156116,
-    "hash": "57daa190e48fa3a2a1eaec11e08c3a96"
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/ui-ux.md": {
+    "mtime": 1792704186.6600323,
+    "hash": "bfc0861796c2bd8e8015ff5315a36b67"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/senior-backend.md": {
-    "mtime": 1783969881.3336394,
-    "hash": "96d1a9fea0ed93ff9b1f75c5828baedf"
+    "mtime": 1793969396.3131912,
+    "hash": "e152fccbcf856f215aef9bd10a5119ee"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/correctness.md": {
+    "mtime": 1794248828.5549564,
+    "hash": "c2bef5ded2b25f7d81320c6dcd6cd121"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-review/personas/security.md": {
-    "mtime": 1783969881.3333647,
+    "mtime": 1792078596.3788338,
     "hash": "bcd5ddc90a6c4c21e99b0539f935b0e1"
   },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/retro/SKILL.md": {
-    "mtime": 1785167081.6051688,
-    "hash": "d6440788712d1636bdc3df2a98e09e38"
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/implement/SKILL.md": {
+    "mtime": 1794250224.0713348,
+    "hash": "daceba8d861ec543c36d0ebc7e16019a"
   },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/log/SKILL.md": {
-    "mtime": 1785167081.604696,
-    "hash": "b2707f2da4212ed74f836015627ac4e7"
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/workflow-mode/SKILL.md": {
+    "mtime": 1794250303.3695505,
+    "hash": "579de431407d8e878b688ce996d6a750"
   },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/cmux-orchestrator/SKILL.md": {
-    "mtime": 1784660236.744398,
-    "hash": "609afa975d10c63b8a9cc53056cd469f"
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/shed-light/SKILL.md": {
+    "mtime": 1792505451.4929786,
+    "hash": "80665760943a880f420ce86dc1ca8513"
   },
-  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/cmux-orchestrator/templates/system-prompt.txt": {
-    "mtime": 1784660236.7471733,
-    "hash": "a26804b60736a669cfdd149e1e30e0ef"
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/workflow-post-plan/SKILL.md": {
+    "mtime": 1794248619.4419684,
+    "hash": "f871f66a0744f32b5f04171f93f4a197"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/_shared/stages.md": {
+    "mtime": 1792791599.4955378,
+    "hash": "4622874391d11c54f724aba02a4c728e"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/_shared/ticket-start.md": {
+    "mtime": 1794250191.174042,
+    "hash": "2d67697902d3b58fe8216165e05ea873"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/_shared/query-check.md": {
+    "mtime": 1793969435.0725343,
+    "hash": "cc3b055c688fd8cd9dbb91e375f4da20"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/_shared/plan-routing.md": {
+    "mtime": 1794250207.041176,
+    "hash": "242d7dc240ae8efbc564db67f636e47e"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/_shared/after-approval.md": {
+    "mtime": 1794250233.9047081,
+    "hash": "1c9c4515563a3fcac473884b127a1c9e"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/_shared/ui-quality.md": {
+    "mtime": 1792704186.65127,
+    "hash": "5b0de79cd4651bf4fb830b55df2270d0"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/_shared/workflow-artifacts.md": {
+    "mtime": 1794248658.910687,
+    "hash": "7141665758bd269c8c6d0d40af833765"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/_shared/spec-evidence.md": {
+    "mtime": 1793822107.2424903,
+    "hash": "4f4284f13b7a8cd845be08a26dcaa2c4"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/blindspot/SKILL.md": {
+    "mtime": 1792504677.0378194,
+    "hash": "eb4457b1b6d807e6f64d91a4a75bc812"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/simple-plan/SKILL.md": {
+    "mtime": 1794250297.0470185,
+    "hash": "ad9aa69677fd3a36f22c8f6015f95063"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/simple-plan/references/constraints.md": {
+    "mtime": 1793023055.2567725,
+    "hash": "6b0ac37ef2b82b54e33f31f8cec6749b"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/address-pr-comments/SKILL.md": {
+    "mtime": 1794246442.8041687,
+    "hash": "0e51382319ec0c6a70388542ef3a4a82"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/simplify/SKILL.md": {
+    "mtime": 1792078596.3547733,
+    "hash": "da569f88b2771c079e7b032768f744bd"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/jira-workflow/SKILL.md": {
-    "mtime": 1786667125.6324348,
-    "hash": "7103339d763391fcc1ad7cb5fba84db8"
+    "mtime": 1794250328.0268407,
+    "hash": "1848b5d3b6baa73eedfbd377d21c0614"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_config/yazi/flavors/catppuccin-macchiato.yazi/preview.png": {
     "mtime": 1785431941.9281232,
@@ -522,6 +1126,10 @@
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/qa-test-plan/tests/fixtures/evidence/checkout.png": {
     "mtime": 1784913928.4355268,
     "hash": "8129a5d6ccbfe71663b1251af0a53373"
+  },
+  "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/video-demo/assets/template/public/shots/example.svg": {
+    "mtime": 1792024649.217466,
+    "hash": "748df712f1866a8c65cb1213d7b5a6c3"
   },
   "/Users/barsotti/.local/share/chezmoi/dot_claude/skills/qa-test-plan/tests/fixtures/evidence/checkout.webm": {
     "mtime": 1784912669.4314854,
