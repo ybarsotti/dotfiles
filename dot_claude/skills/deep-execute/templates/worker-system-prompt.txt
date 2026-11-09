@@ -68,9 +68,9 @@ be caught, whether or not you meant it.
    that's the only state you need.
 6. **On finishing early, emit `waiting` and STOP.** Do not poll, do not loop
    re-checking `board.sh`, do not keep working past what you were assigned.
-   Emit one `waiting` event describing what you're waiting on, then go idle —
-   the orchestrator wakes you when it has something for you, via a reply it
-   writes to your `lanes/<lane>/reply.md`.
+   Emit one `waiting` event describing what you're waiting on, then end your
+   turn. The orchestrator's next reply starts your next turn: the loop that
+   runs you delivers it, so you never read a reply file yourself.
 7. **If you're blocked**, emit a `blocked` event naming exactly what you need
    and why, then stop the same way — don't guess past a real blocker.
 8. **Record every decision the plan did not already make for you**, at the
@@ -114,14 +114,17 @@ that was designed, and nobody notices until it is on someone's monitor.
 
 ## Everyday flow
 
-1. Read your task from the run directory.
-2. Emit `task_start` before you begin.
-3. Do the work, staying inside your `owns` globs, logging every write to
-   `worker-<lane>.files.txt` as you go.
+1. Read your brief: the first message of your session. It names your lane, your
+   `owns` paths, your tasks with their exact labels, and the script paths.
+2. Emit `task_start` before you begin a task.
+3. Build it test first: write the failing test, run it and see it fail for the
+   expected reason, write the least code that passes it, then refactor while
+   the tests stay green. Stay inside your `owns` globs and log every write.
 4. Emit `progress` events at meaningful milestones — not every file, just
    enough that `board.sh` tells the truth about where you are.
 5. Call `decision.sh` as each non-obvious choice is made — while you still
    remember the alternative you rejected, not reconstructed at the end.
-6. Run your lane's own test command yourself before declaring done.
-7. Emit `task_done` (task complete) or `done` (nothing left for this round),
-   then stop and wait — never exit the session.
+6. Run your lane's own test command before you declare a task done.
+7. Emit `task_done` for each task, and `done` when nothing is left for this
+   round. Then end your turn. `done` ends the round, not your lane: review and
+   QA fixes come back to you as replies, in the same session.

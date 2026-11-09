@@ -40,10 +40,21 @@ not ask the user again: the recommended option runs, unless the user named anoth
 
 | Option | Recommend it when | Executor |
 |---|---|---|
-| A | `Mode: parallel`, 2 or more non-orchestrator lanes with disjoint `owns`, and a materialized API contract | `/deep-execute "$PLAN"` |
-| B | every other plan: `Mode: serial`, one lane, no declared shape, or lanes too coupled to hold a contract | `Skill(skill="implement", args="$PLAN")` |
+| A | every rule of the option A test below holds | `/deep-execute "$PLAN"` |
+| B | every other plan, and the default | `Skill(skill="implement", args="$PLAN")` |
 | C | many uniform mechanical slices, such as a migration, a codemod or a sweep over N files | the Claude `Workflow` tool |
 | D | the user wants Codex to write one self-contained slice | `codex exec`, this session reviews |
 
-Option B is the default. `/deep-execute` refuses a plan that is not `Mode: parallel`, so never
-give it a serial plan.
+The option A test. Parallel lanes cost a contract, a round gate and a review per round, so
+they pay off only on large work that splits cleanly. Recommend option A only when all of
+these hold:
+
+1. The plan's `## Work size` says `Size: L`.
+2. `## Execution shape` says `Mode: parallel` and declares a materialized API contract.
+3. Two or more non-orchestrator lanes have no `depends_on` between them.
+4. Each of those lanes owns 3 or more tasks in `## Implementation tasks`.
+5. The `test_command` of each of those lanes passes on its own on the current commit. Run
+   each one before you recommend option A.
+
+When one rule fails, recommend option B, and name the failed rule in the reason.
+`/deep-execute` refuses a plan that is not `Mode: parallel`, so never give it a serial plan.

@@ -1,41 +1,77 @@
 #!/usr/bin/env bash
 # init-run.sh — scaffolds a deep-execute run directory from an approved
-# parallel plan: validates the plan, refuses to start on any uncommitted
-# contract/shared file, hands the launch scaffolder the confirmed agent mapping
-# worker prompts, then writes the run-state manifest.json that everything
-# else in this skill (event.sh, board.sh, validate-run-state.sh) reads.
+# parallel plan, once.
 #
 # Usage:
-#   init-run.sh PLAN RUN_DIR CWD ORCH_SURFACE
+#   init-run.sh PLAN RUN_DIR CWD ORCH_SURFACE [--max-rounds N]
+#               [--agent LANE=AGENT]... [--dry-run]
 #
-# PLAN describes the project rooted at CWD — every relative path in the plan
-# (Affected files, contract path, shared_read_only entries) is resolved
-# against CWD, so this script validates the plan FROM CWD, matching how a
-# human would run validate-plan.sh from the project root.
+#   --max-rounds N      the round cap recorded in manifest.json (default 3)
+#   --agent LANE=AGENT  replaces the plan's agent for LANE; AGENT is one line of
+#                       agents.allowlist, for example "codex gpt-6-sol medium"
+#   --dry-run           scaffolds into a temporary directory, prints the lanes,
+#                       agents, contract and expected review count, then deletes
+#                       it. RUN_DIR is not touched.
 #
-# Design note (not spelled out in the plan's interface list): the shared
-# prepare-run.sh writes ITS OWN manifest.json, shaped for the launch
-# bookkeeping (block_ref, prompt/result files, session_id) — a shape
-# that doesn't fit schemas/run-state.schema.json's `manifest` definition
-# (additionalProperties: false, and a different `workers[]` shape). Rather
-# than force those two shapes into one file, it is pointed at
-# `${RUN_DIR}/wave/` as its own run directory, and this script writes the
-# schema-conformant `${RUN_DIR}/manifest.json` separately. A later task that
-# needs a worker's block_ref reads `${RUN_DIR}/wave/manifest.json` (filled in
-# by wave-launch.sh); the prompt files live at predictable
-# `${RUN_DIR}/wave/worker-<lane>.prompt.md` paths.
-
+# It validates the plan from CWD (relative plan paths resolve against the
+# project root), refuses an uncommitted contract or shared file, and writes:
+#
+#   manifest.json               run state (schemas/run-state.schema.json)
+#   status.json                 phase and start time for run-status.sh
+#   events.jsonl                the empty event log
+#   worker-<lane>.files.txt     the attribution log of each lane
+#   lanes/<lane>/replies/       the numbered replies reply.sh publishes
+#   lanes/<lane>/decisions/     the records decision.sh writes
+#   launch/manifest.json        per lane: runner, model, effort, session id,
+#                               brief path, task label, terminal handle
+#   launch/system-prompt.txt    the shared worker rules
+#   launch/worker-<lane>.prompt.md  the rendered brief of each lane
+#
+# A second call into the same RUN_DIR fails: a run is resumed, never
+# re-initialized, because a new manifest would orphan the event history,
+# the session ids and the terminal handles of the first one.
 set -eufo pipefail
 
-if [ $# -lt 4 ]; then
-  echo "Usage: init-run.sh PLAN RUN_DIR CWD ORCH_SURFACE" >&2
+usage() {
+  echo "Usage: init-run.sh PLAN RUN_DIR CWD ORCH_SURFACE [--max-rounds N] [--agent LANE=AGENT]... [--dry-run]" >&2
   exit 2
-fi
+}
+[ $# -ge 4 ] || usage
 
 PLAN_ARG="$1"
 RUN_DIR="$2"
 CWD="$3"
 ORCH_SURFACE="$4"
+shift 4
+
+MAX_ROUNDS=3
+DRY_RUN=0
+OVERRIDES=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --max-rounds)
+      [ $# -ge 2 ] && [[ "$2" =~ ^[1-9][0-9]*$ ]] || {
+        echo "init-run.sh: --max-rounds needs a positive integer" >&2
+        exit 2
+      }
+      MAX_ROUNDS="$2"
+      shift 2
+      ;;
+    --agent)
+      [ $# -ge 2 ] && [ "${2#*=}" != "$2" ] || {
+        echo "init-run.sh: --agent needs LANE=AGENT" >&2
+        exit 2
+      }
+      OVERRIDES+=("$2")
+      shift 2
+      ;;
+    --dry-run)
+      DRY_RUN=1
+      shift
+      ;;
+    *) usage ;;
+  esac
+done
 
 [ -f "$PLAN_ARG" ] || {
   echo "init-run.sh: missing plan file: $PLAN_ARG" >&2
@@ -54,8 +90,15 @@ command -v jq >/dev/null 2>&1 || {
   exit 2
 }
 
-# Canonicalize PLAN to an absolute path up front — everything after this
-# point (including cd'ing into CWD to validate) must still be able to find it.
+if [ "$DRY_RUN" -eq 1 ]; then
+  DRY_TMP=$(mktemp -d)
+  trap 'rm -rf "$DRY_TMP"' EXIT
+  RUN_DIR="${DRY_TMP}/run"
+elif [ -f "${RUN_DIR}/manifest.json" ]; then
+  echo "init-run.sh: refusing to start — ${RUN_DIR} is already a run; resume it with /deep-execute --resume ${RUN_DIR}" >&2
+  exit 1
+fi
+
 PLAN_DIR_ABS="$(cd "$(dirname "$PLAN_ARG")" && pwd)"
 PLAN="${PLAN_DIR_ABS}/$(basename "$PLAN_ARG")"
 
@@ -63,21 +106,20 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 DEEP_PLAN_SCRIPTS="$(cd "${SCRIPT_DIR}/../../deep-plan/scripts" && pwd)"
 
-# Resolve BOTH the source-tree name (executable_*) and the deployed name for
-# every cross-skill script — chezmoi apply strips the `executable_` prefix
-# only in the deployed tree, and this skill is exercised from both.
-VALIDATE_PLAN="${DEEP_PLAN_SCRIPTS}/validate-plan.sh"
-[ -f "$VALIDATE_PLAN" ] || VALIDATE_PLAN="${DEEP_PLAN_SCRIPTS}/executable_validate-plan.sh"
-PARSER="${DEEP_PLAN_SCRIPTS}/plan-to-json.sh"
-[ -f "$PARSER" ] || PARSER="${DEEP_PLAN_SCRIPTS}/executable_plan-to-json.sh"
-PREPARE_RUN="${SCRIPT_DIR}/prepare-run.sh"
-[ -f "$PREPARE_RUN" ] || PREPARE_RUN="${SCRIPT_DIR}/executable_prepare-run.sh"
-
-WORKER_PROMPT="${SKILL_DIR}/templates/worker-system-prompt.txt"
-[ -f "$WORKER_PROMPT" ] || {
-  echo "init-run.sh: missing worker system prompt: $WORKER_PROMPT" >&2
-  exit 2
+# script DIR NAME — the deployed name, else the chezmoi source name (executable_*).
+script() {
+  local dir="$1" name="$2"
+  if [ -f "${dir}/${name}" ]; then printf '%s' "${dir}/${name}"; else printf '%s' "${dir}/executable_${name}"; fi
 }
+VALIDATE_PLAN=$(script "$DEEP_PLAN_SCRIPTS" validate-plan.sh)
+PARSER=$(script "$DEEP_PLAN_SCRIPTS" plan-to-json.sh)
+PLAN_STAMP=$(script "${SKILL_DIR}/../_shared" plan-stamp.sh)
+EVENT_SH=$(script "$SCRIPT_DIR" event.sh)
+BOARD_SH=$(script "$SCRIPT_DIR" board.sh)
+DECISION_SH=$(script "$SCRIPT_DIR" decision.sh)
+WORKER_PROMPT="${SKILL_DIR}/templates/worker-system-prompt.txt"
+BRIEF_TEMPLATE="${SKILL_DIR}/templates/worker-brief.md"
+ALLOWLIST="${SKILL_DIR}/agents.allowlist"
 
 # ─── Step 1: validate the plan, from the project root it describes ────────
 
@@ -89,8 +131,6 @@ VALIDATE_JSON=$(cd "$CWD" && "$VALIDATE_PLAN" "$PLAN" --root --json) || {
 
 # A stamped plan must still be the approved text (_shared/spec-evidence.md
 # section 2). An unstamped plan only warns: older plans and fixtures have none.
-PLAN_STAMP="${SKILL_DIR}/../_shared/plan-stamp.sh"
-[ -f "$PLAN_STAMP" ] || PLAN_STAMP="${SKILL_DIR}/../_shared/executable_plan-stamp.sh"
 if [ -f "${PLAN}.approved" ]; then
   bash "$PLAN_STAMP" check "$PLAN" >/dev/null || {
     echo "init-run.sh: refusing to start — the plan changed after its approval (plan-stamp.sh check)" >&2
@@ -100,46 +140,36 @@ else
   echo "init-run.sh: warning — $PLAN has no approval stamp" >&2
 fi
 
-# ─── Step 2: parse the plan (own source of truth, not re-derived by hand) ──
+# ─── Step 2: parse the plan ────────────────────────────────────────────────
 
 PLAN_JSON=$("$PARSER" "$PLAN") || {
   echo "init-run.sh: plan-to-json.sh could not parse $PLAN" >&2
   exit 1
 }
-
-MODE=$(jq -r '.mode // ""' <<<"$PLAN_JSON")
-[ "$MODE" = "parallel" ] || {
-  echo "init-run.sh: refusing to start — plan mode is '${MODE}', not 'parallel' (deep-execute only runs parallel plans)" >&2
+[ "$(jq -r '.mode // ""' <<<"$PLAN_JSON")" = "parallel" ] || {
+  echo "init-run.sh: refusing to start — plan mode is not 'parallel' (deep-execute only runs parallel plans)" >&2
   exit 1
 }
-CONTRACT_NULL=$(jq -r '.contract == null' <<<"$PLAN_JSON")
-[ "$CONTRACT_NULL" = "false" ] || {
+[ "$(jq -r '.contract == null' <<<"$PLAN_JSON")" = "false" ] || {
   echo "init-run.sh: refusing to start — plan declares no API contract (required for a parallel run)" >&2
   exit 1
 }
 
 ORCH_LANE=$(jq -r '.orchestrator_lane // ""' <<<"$PLAN_JSON")
-CONTRACT_VERSION=$(jq -r '.contract.version' <<<"$PLAN_JSON")
 CONTRACT_PATH=$(jq -r '.contract.path' <<<"$PLAN_JSON")
-CONTRACT_KIND=$(jq -r '.contract.kind' <<<"$PLAN_JSON")
-CONTRACT_VALIDATION=$(jq -r '.contract.validation_command' <<<"$PLAN_JSON")
 
 SHARED_ARR=()
 while IFS= read -r s; do
-  [ -z "$s" ] && continue
-  SHARED_ARR+=("$s")
+  [ -n "$s" ] && SHARED_ARR+=("$s")
 done < <(jq -r '.shared_read_only[]' <<<"$PLAN_JSON")
 
-# ─── Step 3: refuse to continue if the contract or any shared file is ─────
-# uncommitted — this run's baseline_commit is HEAD, and any lane worker's
-# view of "the contract" comes from that commit, not the working tree.
+# ─── Step 3: the contract and shared files must be committed ──────────────
 
 UNCOMMITTED=""
 MISSING=""
 for p in "$CONTRACT_PATH" "${SHARED_ARR[@]}"; do
   [ -f "${CWD}/${p}" ] || MISSING="${MISSING}${MISSING:+, }${p}"
-  DIRTY=$(git -C "$CWD" status --porcelain -- "$p" 2>/dev/null)
-  [ -z "$DIRTY" ] || UNCOMMITTED="${UNCOMMITTED}${UNCOMMITTED:+, }${p}"
+  [ -z "$(git -C "$CWD" status --porcelain -- "$p" 2>/dev/null)" ] || UNCOMMITTED="${UNCOMMITTED}${UNCOMMITTED:+, }${p}"
 done
 [ -z "$MISSING" ] || {
   echo "init-run.sh: refusing to start — missing on disk: $MISSING" >&2
@@ -150,137 +180,146 @@ done
   exit 1
 }
 
-# ─── Step 4: confirmed agent mapping -> launch worker specs ────────────────
-# agents.allowlist lines are "<model> <effort>" for claude (opus/sonnet) or
-# "codex <model> <effort>" for codex — the exact grammar validate-plan.sh's
-# lane-agent-in-allowlist already checked the plan's `agent` column against,
-# so no further validation is needed here, only re-shaping into
-# wave-launch.sh's `name:runner:model@effort` spec grammar.
-agent_to_spec() {
-  local lane="$1" agent="$2" a b c runner model effort
-  read -r a b c <<<"$agent"
-  if [ "$a" = "codex" ]; then
-    runner="codex"
-    model="$b"
-    effort="$c"
-  else
-    runner="claude"
-    model="$a"
-    effort="$b"
-  fi
-  printf '%s:%s:%s@%s' "$lane" "$runner" "$model" "$effort"
-}
+# ─── Step 4: the agent of each lane — the plan's, unless overridden ───────
+# Each allowlist line is "<model> <effort>" for claude or "codex <model>
+# <effort>". validate-plan.sh already checked the plan's own column.
 
-WORKER_SPECS=()
 WORKER_LANES=()
-while IFS=$'\t' read -r lname lagent; do
-  [ -z "$lname" ] && continue
-  WORKER_LANES+=("$lname")
-  WORKER_SPECS+=("$(agent_to_spec "$lname" "$lagent")")
-done < <(jq -r --arg orch "$ORCH_LANE" '.lanes[] | select(.name != $orch) | "\(.name)\t\(.agent)"' <<<"$PLAN_JSON")
-
-[ ${#WORKER_SPECS[@]} -ge 1 ] || {
+while IFS= read -r l; do
+  [ -n "$l" ] && WORKER_LANES+=("$l")
+done < <(jq -r --arg orch "$ORCH_LANE" '.lanes[] | select(.name != $orch) | .name' <<<"$PLAN_JSON")
+[ ${#WORKER_LANES[@]} -ge 1 ] || {
   echo "init-run.sh: refusing to start — no non-orchestrator lanes to launch" >&2
   exit 1
 }
 
-# ─── Step 5: launch scaffolding (its own manifest.json, kept out of ours) ──
-# prepare-run.sh writes the shared system prompt, one worker-<lane>.prompt.md per
-# lane, and a manifest with a null transport ref. It launches nothing and touches no
-# multiplexer, so it is transport-agnostic and reused as-is; wave-launch.sh fills the
-# `block_ref` and `session_id` fields in afterwards.
-
-mkdir -p "$RUN_DIR"
-WAVE_DIR="${RUN_DIR}/wave"
-mkdir -p "$WAVE_DIR"
-"$PREPARE_RUN" "$WAVE_DIR" "$CWD" "$ORCH_SURFACE" --system-prompt "$WORKER_PROMPT" "${WORKER_SPECS[@]}"
-
-# ─── Step 6: run-state scaffolding — events log, per-lane reply + files log ─
-# Never clobbers state a previous init-run.sh call already created, so a
-# second call (e.g. to add a lane) is safe.
-
-[ -f "${RUN_DIR}/events.jsonl" ] || : >"${RUN_DIR}/events.jsonl"
-for lane in "${WORKER_LANES[@]}"; do
-  mkdir -p "${RUN_DIR}/lanes/${lane}"
-  # decision.sh mkdir -p's this itself, but scaffolding it here means a lane
-  # that recorded nothing is visibly an empty directory rather than an absent
-  # one — build-run-report.sh reports "no records" either way, and a human
-  # poking at the run dir can tell the difference between "never wrote one"
-  # and "this run predates decision records".
-  mkdir -p "${RUN_DIR}/lanes/${lane}/decisions"
-  [ -f "${RUN_DIR}/lanes/${lane}/reply.md" ] || : >"${RUN_DIR}/lanes/${lane}/reply.md"
-  [ -f "${RUN_DIR}/worker-${lane}.files.txt" ] || : >"${RUN_DIR}/worker-${lane}.files.txt"
+AGENTS_JSON=$(jq -c --arg orch "$ORCH_LANE" '[.lanes[] | select(.name != $orch) | {key: .name, value: .agent}] | from_entries' <<<"$PLAN_JSON")
+for o in "${OVERRIDES[@]+"${OVERRIDES[@]}"}"; do
+  o_lane="${o%%=*}"
+  o_agent="${o#*=}"
+  jq -e --arg l "$o_lane" 'has($l)' <<<"$AGENTS_JSON" >/dev/null || {
+    echo "init-run.sh: --agent names '${o_lane}', which is not a worker lane of the plan" >&2
+    exit 1
+  }
+  grep -qxF -- "$o_agent" "$ALLOWLIST" || {
+    echo "init-run.sh: --agent '${o_agent}' is not a line of ${ALLOWLIST}" >&2
+    exit 1
+  }
+  AGENTS_JSON=$(jq -c --arg l "$o_lane" --arg a "$o_agent" '.[$l] = $a' <<<"$AGENTS_JSON")
 done
 
-# ─── Step 7: contract sha256 + baseline commit ─────────────────────────────
+new_uuid() {
+  if command -v uuidgen >/dev/null 2>&1; then
+    uuidgen | tr '[:upper:]' '[:lower:]'
+  else
+    cat /proc/sys/kernel/random/uuid
+  fi
+}
 
-if command -v sha256sum >/dev/null 2>&1; then
-  SHA_CMD=(sha256sum)
-else
-  SHA_CMD=(shasum -a 256)
-fi
+# ─── Step 5: run directory, briefs and launch manifest ─────────────────────
+
+LAUNCH_DIR="${RUN_DIR}/launch"
+mkdir -p "$LAUNCH_DIR"
+: >"${RUN_DIR}/events.jsonl"
+cp "$WORKER_PROMPT" "${LAUNCH_DIR}/system-prompt.txt"
+
+# md_list JSON_ARRAY — "`a`, `b`", or "none".
+md_list() { jq -r 'if length == 0 then "none" else map("`" + . + "`") | join(", ") end' <<<"$1"; }
+
+LAUNCH_WORKERS="[]"
+RUN_WORKERS="[]"
+for lane in "${WORKER_LANES[@]}"; do
+  mkdir -p "${RUN_DIR}/lanes/${lane}/decisions" "${RUN_DIR}/lanes/${lane}/replies"
+  : >"${RUN_DIR}/worker-${lane}.files.txt"
+
+  read -r a b c <<<"$(jq -r --arg l "$lane" '.[$l]' <<<"$AGENTS_JSON")"
+  if [ "$a" = "codex" ]; then runner=codex model="$b" effort="$c"; else runner=claude model="$a" effort="$b"; fi
+
+  LANE_JSON=$(jq -c --arg l "$lane" '.lanes[] | select(.name == $l)' <<<"$PLAN_JSON")
+  TASKS_JSON=$(jq -c --arg l "$lane" '[.tasks[] | select(.lane == $l)
+    | {label: ("\(.number) - \(.title)" | .[0:50]),
+       files: ([.files | objects | .[]?[]?] + [.files | arrays | .[]?] | unique)}]' <<<"$PLAN_JSON")
+  first_task=$(jq -r '.[0].label // empty' <<<"$TASKS_JSON")
+  [ -n "$first_task" ] || first_task="lane ${lane}"
+  subplan="${PLAN_DIR_ABS}/subplans/${lane}.md"
+  if [ -f "$subplan" ]; then subplan="\`${subplan}\`"; else subplan="none"; fi
+
+  VARS=$(jq -n \
+    --arg LANE "$lane" --arg RUN_DIR "$RUN_DIR" --arg CWD "$CWD" --arg PLAN "$PLAN" \
+    --arg SUBPLAN "$subplan" --arg EVENT_SH "$EVENT_SH" --arg BOARD_SH "$BOARD_SH" \
+    --arg DECISION_SH "$DECISION_SH" \
+    --arg SCOPE "$(jq -r '.scope // "No scope line in the plan."' <<<"$LANE_JSON")" \
+    --arg OWNS "$(md_list "$(jq -c '.owns' <<<"$LANE_JSON")")" \
+    --arg MUST_NOT_TOUCH "$(md_list "$(jq -c '.must_not_touch // []' <<<"$LANE_JSON")")" \
+    --arg DEPENDS_ON "$(md_list "$(jq -c '.depends_on // []' <<<"$LANE_JSON")")" \
+    --arg TEST_COMMAND "$(jq -r '.test_command // ""' <<<"$LANE_JSON")" \
+    --arg CONTRACT_PATH "$CONTRACT_PATH" \
+    --arg CONTRACT_VERSION "$(jq -r '.contract.version' <<<"$PLAN_JSON")" \
+    --arg CONTRACT_KIND "$(jq -r '.contract.kind' <<<"$PLAN_JSON")" \
+    --arg SHARED "$(md_list "$(jq -c '.shared_read_only' <<<"$PLAN_JSON")")" \
+    --arg TASKS "$(jq -r 'map("- `\(.label)`" + (if (.files | length) > 0 then " — files: " + (.files | map("`" + . + "`") | join(", ")) else "" end)) | join("\n")' <<<"$TASKS_JSON")" \
+    '$ARGS.named')
+  BRIEF="${LAUNCH_DIR}/worker-${lane}.prompt.md"
+  # split/join replaces literally: no regex, no `&` expansion, whatever the plan text holds.
+  jq -rn --rawfile tpl "$BRIEF_TEMPLATE" --argjson vars "$VARS" \
+    'reduce ($vars | to_entries[]) as $e ($tpl; split("{{" + $e.key + "}}") | join($e.value))' >"$BRIEF"
+  if grep -qE '\{\{[A-Z_]+\}\}' "$BRIEF"; then
+    echo "init-run.sh: the brief of lane ${lane} has an unresolved placeholder: ${BRIEF}" >&2
+    exit 1
+  fi
+
+  LAUNCH_WORKERS=$(jq -c --arg n "$lane" --arg r "$runner" --arg m "$model" --arg e "$effort" \
+    --arg s "$(new_uuid)" --arg p "$BRIEF" --arg t "$first_task" \
+    '. + [{name: $n, runner: $r, model: $m, effort: $e, session_id: $s, prompt_file: $p, task: $t, block_ref: null}]' \
+    <<<"$LAUNCH_WORKERS")
+  RUN_WORKERS=$(jq -c --arg l "$lane" --arg r "$runner" --arg e "$effort" \
+    --arg t "$(jq -r --arg l "$lane" '[.tasks[] | select(.lane == $l)][0].title // empty' <<<"$PLAN_JSON")" \
+    '. + [{id: $l, lane: $l, runner: $r, effort: $e, status: "pending"} + (if $t == "" then {} else {task: $t} end)]' \
+    <<<"$RUN_WORKERS")
+done
+jq -n --argjson w "$LAUNCH_WORKERS" '{workers: $w}' >"${LAUNCH_DIR}/manifest.json"
+
+# ─── Step 6: manifest.json and status.json ────────────────────────────────
+
+if command -v sha256sum >/dev/null 2>&1; then SHA_CMD=(sha256sum); else SHA_CMD=(shasum -a 256); fi
 CONTRACT_SHA=$("${SHA_CMD[@]}" "${CWD}/${CONTRACT_PATH}" | awk '{print $1}')
 BASELINE_COMMIT=$(git -C "$CWD" rev-parse HEAD)
 
-# ─── Step 8: assemble manifest.json (schemas/run-state.schema.json shape) ──
-
-WORKERS_JSON="[]"
-for i in "${!WORKER_LANES[@]}"; do
-  lane="${WORKER_LANES[$i]}"
-  spec="${WORKER_SPECS[$i]}"
-  runner="${spec#*:}"
-  runner="${runner%%:*}"
-  effort="${spec##*@}"
-  task=$(jq -r --arg l "$lane" '[.tasks[] | select(.lane == $l)][0].title // empty' <<<"$PLAN_JSON")
-
-  if [ -n "$task" ]; then
-    ENTRY=$(jq -n --arg id "$lane" --arg lane "$lane" --arg task "$task" \
-      --arg runner "$runner" --arg effort "$effort" \
-      '{id:$id, lane:$lane, task:$task, runner:$runner, effort:$effort, status:"pending"}')
-  else
-    ENTRY=$(jq -n --arg id "$lane" --arg lane "$lane" \
-      --arg runner "$runner" --arg effort "$effort" \
-      '{id:$id, lane:$lane, runner:$runner, effort:$effort, status:"pending"}')
-  fi
-  WORKERS_JSON=$(jq -c --argjson e "$ENTRY" '. + [$e]' <<<"$WORKERS_JSON")
-done
-
-SHARED_JSON=$(jq -n '$ARGS.positional' --args "${SHARED_ARR[@]}")
-
 jq -n \
-  --arg run_id "$(basename "$RUN_DIR")" \
-  --arg plan_path "$PLAN" \
-  --arg cwd "$CWD" \
-  --arg baseline_commit "$BASELINE_COMMIT" \
-  --argjson round 0 \
-  --argjson max_rounds 3 \
-  --arg orch_surface "$ORCH_SURFACE" \
-  --arg cv "$CONTRACT_VERSION" --arg cp "$CONTRACT_PATH" --arg ck "$CONTRACT_KIND" \
-  --arg cval "$CONTRACT_VALIDATION" --arg csha "$CONTRACT_SHA" \
-  --argjson shared "$SHARED_JSON" \
-  --argjson workers "$WORKERS_JSON" \
+  --arg run_id "$(basename "$RUN_DIR")" --arg plan_path "$PLAN" --arg cwd "$CWD" \
+  --arg baseline "$BASELINE_COMMIT" --argjson max_rounds "$MAX_ROUNDS" \
+  --arg orch_surface "$ORCH_SURFACE" --arg csha "$CONTRACT_SHA" \
+  --argjson plan "$PLAN_JSON" --argjson shared "$(jq -c '.shared_read_only' <<<"$PLAN_JSON")" \
+  --argjson workers "$RUN_WORKERS" \
   '{
     schema_version: "1.0.0",
     run_id: $run_id,
     plan_path: $plan_path,
     cwd: $cwd,
-    baseline_commit: $baseline_commit,
-    round: $round,
+    baseline_commit: $baseline,
+    checkpoint_commit: $baseline,
+    round: 1,
     max_rounds: $max_rounds,
     orchestrator_surface: $orch_surface,
-    contract: {version:$cv, path:$cp, kind:$ck, validation_command:$cval, sha256:$csha},
+    contract: ($plan.contract | {version, path, kind, validation_command} + {sha256: $csha}),
     shared_read_only: $shared,
     workers: $workers
   }' >"${RUN_DIR}/manifest.json"
 
-TASK_LABEL=$(git -C "$CWD" rev-parse --abbrev-ref HEAD 2>/dev/null || basename "$CWD")
 NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-jq -n \
-  --arg task_label "$TASK_LABEL" \
-  --arg started "$NOW" \
-  --arg orch "$ORCH_LANE" \
+jq -n --arg task_label "$(git -C "$CWD" rev-parse --abbrev-ref HEAD 2>/dev/null || basename "$CWD")" \
+  --arg started "$NOW" --arg orch "$ORCH_LANE" \
   '{schema_version:"1.0.0", task_label:$task_label, started_at:$started,
     phase:"execution", phase_started_at:$started, orchestrator_lane:$orch}' \
   >"${RUN_DIR}/status.json"
+
+if [ "$DRY_RUN" -eq 1 ]; then
+  echo "dry run: nothing was written outside a temporary directory"
+  echo "contract: ${CONTRACT_PATH} $(jq -r '.contract.version' <<<"$PLAN_JSON")"
+  jq -r '.workers[] | "lane \(.name): \(.runner) \(.model) \(.effort) — first task \(.task)"' "${LAUNCH_DIR}/manifest.json"
+  echo "rounds: up to ${MAX_ROUNDS}"
+  echo "reviews: up to $((MAX_ROUNDS + 1)) /deep-review runs (one per round, one over the whole run)"
+  exit 0
+fi
 
 echo "init-run.sh: wrote ${RUN_DIR}/manifest.json for $(basename "$RUN_DIR") (${#WORKER_LANES[@]} lane(s), baseline ${BASELINE_COMMIT})" >&2

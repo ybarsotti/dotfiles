@@ -11,8 +11,9 @@
 # never built once. A step with no enforcement at the end of a long unattended chain is the step
 # that gets dropped.
 #
-# It also delivers the page instead of printing a path. A path in terminal scrollback is easy to
-# miss; a Wave block is not. `--no-open` keeps it silent for a headless or cron run.
+# It also opens the page with `open` (macOS) instead of only printing a path, which is easy to
+# miss in terminal scrollback. Without `open`, or with `--no-open` for a headless or cron run,
+# it prints the path.
 #
 # The gate checks the report was really RENDERED, not merely created: an empty or truncated file
 # would otherwise pass a bare existence test and report success on a run with no report.
@@ -84,17 +85,10 @@ if [ -x "$SET_PHASE" ] && [ -f "${RUN_DIR}/status.json" ]; then
 	"$SET_PHASE" "$RUN_DIR" complete >/dev/null
 fi
 
-# Deliver it. A missing wsh means this run is not inside Wave, which is not a failure of the
-# run — the report exists either way, so say where and carry on.
-if [ "$OPEN" -eq 1 ]; then
-	if command -v wsh >/dev/null 2>&1; then
-		wsh web open "file://${REPORT}" >/dev/null 2>&1 ||
-			echo "finish-run.sh: could not open a Wave block; the report is still at ${REPORT}" >&2
-		if [ -n "$QA_REPORT" ]; then
-			wsh web open "file://${QA_REPORT}" >/dev/null 2>&1 || true
-		fi
-	else
-		echo "finish-run.sh: wsh not found, so nothing was opened (not inside Wave)" >&2
+if [ "$OPEN" -eq 1 ] && command -v open >/dev/null 2>&1; then
+	open "$REPORT" >/dev/null 2>&1 || echo "finish-run.sh: could not open the report; it is at ${REPORT}" >&2
+	if [ -n "$QA_REPORT" ]; then
+		open "$QA_REPORT" >/dev/null 2>&1 || true
 	fi
 fi
 

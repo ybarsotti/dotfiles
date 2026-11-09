@@ -1,102 +1,58 @@
 #!/usr/bin/env bash
-# monitor-events.sh — Blocks until exactly one of the following fires, then
-# prints ONE trigger JSON to stdout and exits: a `question`, `waiting`,
-# `blocked` or `done` event landing in RUN_DIR/events.jsonl, a line in that
-# file that fails the event schema (`invalid_event`), a worker pane that
-# vanishes (`vanished_pane`), a fatal signature appearing in a worker's pane
-# log (`fatal_signature`), the events log's own tail process dying
-# unexpectedly (`monitor_error`), or the bound below being exhausted
-# (`timeout`). Never returns silently and never guesses past what it
-# actually observed — see the header note in validate-run-state.sh for why
-# this skill treats "reported success by silence" as a bug class.
-#
-# WARNING: every trigger except `timeout` (and `monitor_error`) exits 0 —
-# detecting `blocked`, an invalid line, a vanished pane or a fatal signature
-# is this script doing its job, not failing at it. Callers MUST branch on the JSON
-# `.type` field, never on the exit code, to tell triggers apart.
+# monitor-events.sh — blocks until one trigger fires, prints ONE trigger JSON
+# line, and exits. It never reports success by silence.
 #
 # Usage:
-#   monitor-events.sh RUN_DIR
+#   monitor-events.sh RUN_DIR             wait for the next trigger
+#   monitor-events.sh RUN_DIR --ack SEQ   mark event line SEQ as handled
 #
-# Output shape: {"type":..., "lane":..., "task":..., "msg":..., "run_dir":...}
-# `lane`/`task` are null when the trigger isn't about one specific lane/task
-# (an invalid line whose JSON couldn't even be parsed for a lane, or the
-# bound-exhausted timeout).
+# Triggers:
+#   question | waiting | blocked | done   an event line of that type
+#   invalid_event                         a line that fails schemas/event.jq
+#   vanished_pane                         a lane's worker loop is not running
+#   fatal_signature                       a fatal pattern in a lane's worker.log
+#   monitor_error                         the tail on events.jsonl ended (exit 1)
+#   timeout                               MONITOR_MAX_WAIT passed (exit 1)
+# Every other trigger exits 0, so callers branch on `.type`, never on the exit code.
 #
-# Bounds (seconds, overridable via env for tests / tuning):
-#   MONITOR_LIVENESS_INTERVAL  how often, at most, a pane-health check
-#                               (vanished pane + fatal signature scan) runs
-#                               while waiting for the next event (default 30)
-#   MONITOR_MAX_WAIT           absolute bound on total wait before emitting
-#                               the timeout trigger (default 1800 = 30m)
-#   MONITOR_TEST_DELAY_BEFORE_TAIL  test-only, unset by default (no-op):
-#                               sleeps this many seconds immediately before
-#                               the tail attach below, so a test can append
-#                               an event squarely inside that window and
-#                               prove it is still caught — see this script's
-#                               startup-race test in
-#                               tests/executable_test-deep-execute.sh.
+# Output: {"type", "lane", "task", "msg", "seq", "run_dir"}. `seq` is the line
+# number of the event in events.jsonl, or null for a trigger that is not a line.
 #
-# ── How blocking works, and why `tail -n 0 -F` alone is not enough ────────
-# `events.jsonl` can already hold unprocessed lines the moment this script
-# starts (a worker emitted `waiting` a heartbeat before the orchestrator got
-# around to calling this script again for the next trigger) — a bare
-# `tail -n 0 -F`, which only shows content appended AFTER it attaches, would
-# silently skip that backlog and then sit blocked on lines that already
-# arrived. So every invocation resumes from the watermark it persisted last
-# time (under RUN_DIR/.monitor-events-state/, same technique as
-# monitor-workers.sh's per-worker liveness watermark, and for the same
-# reason: without it, a re-invoked script has no memory of what it already
-# reported) — but it does NOT do this by separately snapshotting "how many
-# lines exist right now" and only afterward attaching a live tail. An
-# earlier version of this script did exactly that: `wc -l` the file, spend
-# time computing LANES via a `jq` subprocess, THEN attach `tail -n 0 -F`. A
-# line appended in that window landed past the wc -l watermark (so the
-# backlog-drain loop never saw it) AND before the tail attach (so
-# `tail -n 0 -F`, which only shows content appended after it attaches, never
-# saw it either) — invisible to both. If that line was a lane's own last
-# event (`blocked`/`waiting` — lanes stop after emitting one), this
-# invocation would idle until MONITOR_MAX_WAIT and wrongly report `timeout`.
+# Read position and acknowledgement are separate. The watermark in
+# RUN_DIR/.monitor-events-state/events.watermark is the last HANDLED line. An
+# informational line (task_start, task_done, progress, decision) is handled
+# when it is read. A trigger line is handled only when the orchestrator calls
+# `--ack SEQ` after it acted on it. Until then every call reports the same
+# trigger again, so a crash between the trigger and the reply loses nothing:
+# resume replays every unacknowledged question, waiting and blocked event.
 #
-# Instead, backlog-drain and live-follow are the SAME stream: one
-# `tail -n "+${START_LINE}" -F events.jsonl` call, where START_LINE is the
-# watermark's next line. `tail -n +K -F` reads from line K to whatever is
-# currently in the file, then keeps following — there is no separate "count
-# what's there" step for a line to fall between, because counting and
-# following are the same read of the same file by the same process. A line
-# written a nanosecond before this script ran `tail`, or a nanosecond after,
-# is caught the same way: as part of that one stream.
+# Backlog and live events are ONE stream: `tail -n +K -F`, with K the line
+# after the watermark. There is no count-then-attach seam in which a line can
+# land unseen.
 #
-# Combining that blocking stream with a bounded, periodic pane-health check
-# (no model polling — this is a plain shell timer) is done with `read -t`
-# against the tail's output, not two independent loops: each iteration
-# either processes a line (backlog or genuinely new — the loop doesn't know
-# or care which) the instant it arrives, or times out after
-# MONITOR_LIVENESS_INTERVAL seconds of silence and runs exactly one
-# pane-health check before waiting again. Only time spent with NOTHING
-# happening (no event, no health-check trigger) counts against
-# MONITOR_MAX_WAIT; draining a backlog of ordinary progress events costs
-# nothing against that bound, because `read -t` returns immediately for
-# already-buffered lines instead of timing out.
+# Liveness runs on the wall clock: once at start (the resume probe) and then
+# every MONITOR_LIVENESS_INTERVAL seconds, also while events keep arriving.
+# For each lane with lanes/<lane>/loop.pid and no lanes/<lane>/stop file:
+#   - a pid that `kill -0` cannot reach is `vanished_pane` (once per pid);
+#   - a new line of lanes/<lane>/worker.log that matches FATAL_REGEX is
+#     `fatal_signature` (each line is scanned once).
 #
-# Fatal-signature scanning reuses monitor-workers.sh's own regex verbatim
-# (not re-derived) and the same incremental/per-lane-watermark technique —
-# see that script's header for why it is narrow (only genuine
-# dead-agent signatures) and incremental (a line already scanned, matching
-# or not, is never rescanned).
+# Bounds (seconds): MONITOR_LIVENESS_INTERVAL (default 30), MONITOR_MAX_WAIT
+# (default 1800, wall clock). MONITOR_TEST_DELAY_BEFORE_TAIL is test-only: it
+# sleeps right before the tail attaches, to prove that the seam is gone.
 set -eufo pipefail
 
 FATAL_REGEX='panic|fatal|segmentation fault|killed|traceback|unhandled'
 
 RUN_DIR="${1:-}"
 if [ -z "$RUN_DIR" ]; then
-  echo "Usage: monitor-events.sh RUN_DIR" >&2
+  echo "Usage: monitor-events.sh RUN_DIR [--ack SEQ]" >&2
   exit 2
 fi
 
 MANIFEST="${RUN_DIR}/manifest.json"
-WAVE_MANIFEST="${RUN_DIR}/wave/manifest.json"
 EVENTS="${RUN_DIR}/events.jsonl"
+EVENT_JQ="$(cd "$(dirname "${BASH_SOURCE[0]}")/../schemas" && pwd)/event.jq"
 
 [ -f "$MANIFEST" ] || {
   echo "monitor-events.sh: missing ${MANIFEST}" >&2
@@ -108,169 +64,117 @@ command -v jq >/dev/null 2>&1 || {
 }
 [ -f "$EVENTS" ] || : >"$EVENTS"
 
-LIVENESS_INTERVAL="${MONITOR_LIVENESS_INTERVAL:-30}"
-MAX_WAIT="${MONITOR_MAX_WAIT:-1800}"
-# A non-positive interval would make `read -t` either error or busy-poll
-# without ever advancing ELAPSED below — clamp so the bound can never be
-# turned into a lie by a caller passing 0.
-if [ "$LIVENESS_INTERVAL" -le 0 ] 2>/dev/null; then
-  LIVENESS_INTERVAL=1
-fi
-
 STATE_DIR="${RUN_DIR}/.monitor-events-state"
 mkdir -p "$STATE_DIR"
 WATERMARK_FILE="${STATE_DIR}/events.watermark"
+PREV_LINES=$(cat "$WATERMARK_FILE" 2>/dev/null || echo 0)
+case "$PREV_LINES" in '' | *[!0-9]*) PREV_LINES=0 ;; esac
 
-# emit TYPE LANE TASK MSG [EXIT_CODE] — prints the one trigger JSON and
-# exits. See the header WARNING: only the caller of this function for the
-# timeout/monitor_error paths passes a nonzero EXIT_CODE.
+if [ "${2:-}" = "--ack" ]; then
+  case "${3:-}" in
+    '' | *[!0-9]*)
+      echo "monitor-events.sh: --ack needs a line number" >&2
+      exit 2
+      ;;
+  esac
+  [ "$3" -le "$PREV_LINES" ] || printf '%s' "$3" >"$WATERMARK_FILE"
+  jq -cn --argjson seq "$3" '{acked: $seq}'
+  exit 0
+fi
+
+LIVENESS_INTERVAL="${MONITOR_LIVENESS_INTERVAL:-30}"
+MAX_WAIT="${MONITOR_MAX_WAIT:-1800}"
+[ "$LIVENESS_INTERVAL" -gt 0 ] 2>/dev/null || LIVENESS_INTERVAL=1
+
+# emit TYPE LANE TASK MSG [SEQ] [EXIT_CODE] — prints the one trigger and exits.
 emit() {
-  local type="$1" lane="$2" task="$3" msg="$4" code="${5:-0}"
-  jq -n \
-    --arg type "$type" \
-    --arg lane "$lane" \
-    --arg task "$task" \
-    --arg msg "$msg" \
+  jq -cn --arg type "$1" --arg lane "$2" --arg task "$3" --arg msg "$4" --arg seq "${5:-}" \
     --arg run_dir "$RUN_DIR" \
-    '{type: $type, lane: (if $lane == "" then null else $lane end), task: (if $task == "" then null else $task end), msg: $msg, run_dir: $run_dir}'
-  exit "$code"
+    '{type: $type, lane: (if $lane == "" then null else $lane end),
+      task: (if $task == "" then null else $task end), msg: $msg,
+      seq: (if $seq == "" then null else ($seq | tonumber) end), run_dir: $run_dir}'
+  exit "${6:-0}"
 }
 
-# event_line_valid LINE — same schema check validate-run-state.sh applies to
-# every line of events.jsonl (kept in sync by hand — both read the same
-# schemas/run-state.schema.json `event` definition).
-event_line_valid() {
-  jq -e '
-    (.ts | type == "string") and (.ts | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$")) and
-    (.lane | type == "string" and length > 0) and
-    (.task | type == "string" and length > 0) and
-    (.type == "task_start" or .type == "task_done" or .type == "progress" or .type == "question" or .type == "waiting" or .type == "blocked" or .type == "done" or .type == "decision") and
-    (.msg | type == "string") and (.msg | test("^[^\r\n]*$")) and (.msg | length <= 3000) and
-    ((keys_unsorted - ["ts","lane","task","type","msg"]) == [])
-  ' <<<"$1" >/dev/null 2>&1
-}
-
-# handle_line LINE — the one decision every event line goes through,
-# whether seen during backlog drain or the live follow loop: invalid line ->
-# invalid_event trigger; question/waiting/blocked/done -> that trigger;
-# task_start/task_done/progress/decision -> not a trigger, falls through so
-# the caller keeps going. `decision` is deliberately informational: a lane
-# recording why it chose something is for the run report to read afterwards,
-# not a reason to interrupt the orchestrator mid-round.
+# handle_line LINE SEQ — a trigger exits; an informational line returns 0.
 handle_line() {
-  local line="$1" lane_guess type l t m
+  local line="$1" seq="$2" type
   [ -z "$line" ] && return 0
-  if ! event_line_valid "$line"; then
-    lane_guess=$(jq -r '.lane // empty' <<<"$line" 2>/dev/null || true)
-    emit "invalid_event" "$lane_guess" "" "$line"
+  if ! jq -e -f "$EVENT_JQ" <<<"$line" >/dev/null 2>&1; then
+    emit "invalid_event" "$(jq -r '.lane // empty' <<<"$line" 2>/dev/null || true)" "" "$line" "$seq"
   fi
   type=$(jq -r '.type' <<<"$line")
   case "$type" in
     question | waiting | blocked | done)
-      l=$(jq -r '.lane' <<<"$line")
-      t=$(jq -r '.task' <<<"$line")
-      m=$(jq -r '.msg' <<<"$line")
-      emit "$type" "$l" "$t" "$m"
+      emit "$type" "$(jq -r '.lane' <<<"$line")" "$(jq -r '.task' <<<"$line")" "$(jq -r '.msg' <<<"$line")" "$seq"
       ;;
   esac
+  printf '%s' "$seq" >"$WATERMARK_FILE"
 }
 
-# ─── Resume point: the watermark's next line — see the header block for ───
-# why this is a starting line number for a single tail stream, not a
-# separate "count what's there" snapshot.
-PREV_LINES=$(cat "$WATERMARK_FILE" 2>/dev/null || echo 0)
-case "$PREV_LINES" in '' | *[!0-9]*) PREV_LINES=0 ;; esac
-START_LINE=$((PREV_LINES + 1))
-LINE_NO="$PREV_LINES"
-
-# ─── Lane / surface lookups for pane-health checks ─────────────────────────
 LANES=()
 while IFS= read -r l; do
   [ -n "$l" ] && LANES+=("$l")
 done < <(jq -r '.workers[]?.lane // empty' "$MANIFEST" 2>/dev/null)
 
-# do_liveness_check — one pass over every lane: a vanished block (its scrollback
-# can no longer be read) or a fatal signature in NEW block output since that lane's
-# own watermark. Silently skipped (not an error) when wsh is unavailable or the
-# launch manifest does not exist yet — this script's primary job is watching
-# events.jsonl; block health is a supplementary signal layered on top.
-#
-# `wsh termscrollback -b <block>` reads the block. The event name
-# stays `vanished_pane` because every caller's filter already branches on it, and
-# renaming a trigger silently is how a monitor goes deaf.
 do_liveness_check() {
-  command -v wsh >/dev/null 2>&1 || return 0
-  [ -f "$WAVE_MANIFEST" ] || return 0
-  local lane block pane_log state_file total prev new match
-  for lane in "${LANES[@]}"; do
-    block=$(jq -r --arg n "$lane" '.workers[]? | select(.name == $n) | .block_ref // empty' "$WAVE_MANIFEST" 2>/dev/null)
-    if [ -z "$block" ] || [ "$block" = "null" ]; then
+  local lane dir pid log state total prev match
+  for lane in "${LANES[@]+"${LANES[@]}"}"; do
+    dir="${RUN_DIR}/lanes/${lane}"
+    pid=$(cat "${dir}/loop.pid" 2>/dev/null || true)
+    [ -n "$pid" ] || continue
+    [ ! -f "${dir}/stop" ] || continue
+    if ! kill -0 "$pid" 2>/dev/null; then
+      state="${STATE_DIR}/vanished-${lane}"
+      if [ "$(cat "$state" 2>/dev/null || true)" != "$pid" ]; then
+        printf '%s' "$pid" >"$state"
+        emit "vanished_pane" "$lane" "" "worker loop ${pid} of lane ${lane} is not running"
+      fi
       continue
     fi
-
-    if ! pane_log=$(wsh termscrollback -b "$block" 2>&1); then
-      emit "vanished_pane" "$lane" "" "block vanished: termscrollback failed for ${block}"
-    fi
-
-    state_file="${STATE_DIR}/pane-${lane}.lines"
-    total=$(printf '%s\n' "$pane_log" | wc -l | tr -d ' ')
-    prev=$(cat "$state_file" 2>/dev/null || echo 0)
+    log="${dir}/worker.log"
+    [ -f "$log" ] || continue
+    state="${STATE_DIR}/log-${lane}.lines"
+    total=$(wc -l <"$log" | tr -d ' ')
+    prev=$(cat "$state" 2>/dev/null || echo 0)
     case "$prev" in '' | *[!0-9]*) prev=0 ;; esac
-    printf '%s' "$total" >"$state_file"
-
+    printf '%s' "$total" >"$state"
     if [ "$total" -gt "$prev" ]; then
-      new=$(printf '%s\n' "$pane_log" | tail -n +"$((prev + 1))")
-      if printf '%s\n' "$new" | grep -qEi "$FATAL_REGEX"; then
-        match=$(printf '%s\n' "$new" | grep -Ei "$FATAL_REGEX" | head -n1)
-        emit "fatal_signature" "$lane" "" "fatal signature: ${match}"
-      fi
+      match=$(tail -n +"$((prev + 1))" "$log" | head -n "$((total - prev))" | grep -Ei "$FATAL_REGEX" | head -n 1 || true)
+      [ -z "$match" ] || emit "fatal_signature" "$lane" "" "fatal signature: ${match}"
     fi
   done
 }
 
-# ─── Single stream: catches up on any backlog from START_LINE, then keeps ─
-# following — see the header block for why there is no seam between
-# "backlog" and "live" here, unlike the two-step drain-then-attach this
-# replaced.
+do_liveness_check
+
 if [ -n "${MONITOR_TEST_DELAY_BEFORE_TAIL:-}" ]; then
   sleep "$MONITOR_TEST_DELAY_BEFORE_TAIL"
 fi
-exec 3< <(tail -n "+${START_LINE}" -F "$EVENTS" 2>/dev/null)
+exec 3< <(tail -n "+$((PREV_LINES + 1))" -F "$EVENTS" 2>/dev/null)
 TAIL_PID=$!
 trap 'kill "$TAIL_PID" 2>/dev/null || true' EXIT
 
-ELAPSED=0
-while [ "$ELAPSED" -lt "$MAX_WAIT" ]; do
-  # NOTE: `rc=$?` MUST live inside the `else` — POSIX says an `if` with no
-  # `else` taken has ITS OWN exit status 0 regardless of the condition's
-  # real exit code, so capturing "$?" after a bare `fi` would always read 0
-  # and every timeout would be misread as EOF. The `else` is what makes
-  # `$?` here the read builtin's actual exit status.
-  if IFS= read -r -t "$LIVENESS_INTERVAL" -u 3 line; then
+LINE_NO="$PREV_LINES"
+DEADLINE=$((SECONDS + MAX_WAIT))
+NEXT_CHECK=$((SECONDS + LIVENESS_INTERVAL))
+while [ "$SECONDS" -lt "$DEADLINE" ]; do
+  WAIT=$((NEXT_CHECK - SECONDS))
+  [ "$WAIT" -ge 1 ] || WAIT=1
+  # `rc=$?` lives inside the else: after a bare `fi`, $? is the if's own status.
+  if IFS= read -r -t "$WAIT" -u 3 line; then
     LINE_NO=$((LINE_NO + 1))
-    printf '%s' "$LINE_NO" >"$WATERMARK_FILE"
-    handle_line "$line"
-    # An informational event (task_start/task_done/progress/decision) isn't a
-    # trigger — loop again immediately. Only silence counts against
-    # MAX_WAIT, so this costs nothing against the bound.
-    continue
+    handle_line "$line" "$LINE_NO"
   else
     rc=$?
+    # Below 128 is EOF: the tail process itself ended. That is a failure of the
+    # monitor, never "nothing happened".
+    [ "$rc" -ge 128 ] || emit "monitor_error" "" "" "tail -F on events.jsonl ended unexpectedly (fd closed)" "" 1
   fi
-  if [ "$rc" -ge 128 ]; then
-    # `read -t` timed out: MONITOR_LIVENESS_INTERVAL seconds passed with no
-    # new event line. Run one bounded pane-health check, then keep waiting.
+  if [ "$SECONDS" -ge "$NEXT_CHECK" ]; then
     do_liveness_check
-    ELAPSED=$((ELAPSED + LIVENESS_INTERVAL))
-    continue
+    NEXT_CHECK=$((SECONDS + LIVENESS_INTERVAL))
   fi
-  # EOF on the tail's fd, not a timeout: the backgrounded `tail -F` process
-  # itself ended (killed, or the file it's following was removed out from
-  # under it in a way tail couldn't recover from). This is a failure of the
-  # monitor's own blocking mechanism, not of anything it's watching — never
-  # mistake "nothing left to read" for "nothing happened".
-  emit "monitor_error" "" "" "tail -F on events.jsonl ended unexpectedly (fd closed)" 1
 done
 
-# Bound reached with no trigger — never report success by silence.
-emit "timeout" "" "" "timeout: no trigger fired within ${MAX_WAIT}s" 1
+emit "timeout" "" "" "timeout: no trigger fired within ${MAX_WAIT}s" "" 1

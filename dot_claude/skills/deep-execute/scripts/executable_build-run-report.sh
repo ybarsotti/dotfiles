@@ -156,15 +156,18 @@ pre_block() {
   } >>"$OUT"
 }
 
-# plan_section HEADING — the body of one `## HEADING` section of the plan.
-plan_section() {
-  [ -f "$PLAN_PATH" ] || return 0
-  awk -v want="## $1" '
+# section_of FILE HEADING — the body of one `## HEADING` section of any Markdown file.
+section_of() {
+  [ -f "$1" ] || return 0
+  awk -v want="## $2" '
     $0 == want { grabbing = 1; next }
     grabbing && /^## / { exit }
     grabbing { print }
-  ' "$PLAN_PATH"
+  ' "$1"
 }
+
+# plan_section HEADING — the body of one `## HEADING` section of the plan.
+plan_section() { section_of "$PLAN_PATH" "$1"; }
 
 # ─── Git: what was actually built between baseline and the frozen SHA ──────
 
@@ -423,6 +426,25 @@ if [ -n "$RATIONALE_SECTION" ] || [ -n "$ABSTRACTIONS_SECTION" ]; then
   fi
 fi
 
+# ─── Orchestrator decisions and plan deviations ────────────────────────────
+# decisions.md is the orchestrator's own log (_shared/after-approval.md section 0);
+# the D-NNN rows live under the plan's `## Deviations`.
+
+emit '<h2>Orchestrator decisions and deviations</h2>'
+if [ -s "${RUN_DIR}/decisions.md" ]; then
+  emit '<h3>decisions.md</h3>'
+  pre_block "$(cat "${RUN_DIR}/decisions.md")"
+else
+  emit '<p class="note">No decisions.md in the run directory: the orchestrator recorded no decision of its own.</p>'
+fi
+DEVIATIONS_SECTION=$(plan_section "Deviations")
+if [ -n "$DEVIATIONS_SECTION" ]; then
+  emit '<h3>Deviations (D-NNN)</h3>'
+  pre_block "$DEVIATIONS_SECTION"
+else
+  emit '<p class="note">The plan has no <span class="mono">## Deviations</span> rows.</p>'
+fi
+
 # ─── Drift from the approved plan ──────────────────────────────────────────
 
 emit '<h2>Drift from the approved plan</h2>'
@@ -508,6 +530,14 @@ if [ -n "$PR" ]; then
   emit "<p><a href=\"$(escs "$PR")\">$(escs "$PR")</a></p>"
 else
   emit '<p class="note">No pull request URL was passed to this report builder.</p>'
+fi
+
+OPEN_FINDINGS="$(section_of "$REVIEW" "Open findings")$(plan_section "Open findings")"
+emit '<h2>Open findings</h2>'
+if [ -n "$OPEN_FINDINGS" ]; then
+  pre_block "$OPEN_FINDINGS"
+else
+  emit '<p class="note">Neither the review report nor the plan lists an open finding.</p>'
 fi
 
 # ─── Footer ────────────────────────────────────────────────────────────────

@@ -54,6 +54,12 @@ printf -v BIG_MSG '%*s' 4090 ""
 BIG_MSG="${BIG_MSG// /x}"
 assert_exit 1 "$EVENT" "$E1" backend "Task 9" progress "$BIG_MSG"
 
+# 3001 characters fits under PIPE_BUF but breaks the 3000-character limit of the
+# event schema. The writer and every reader share one validator, so the writer
+# refuses it instead of writing a line the monitor would reject.
+printf -v LONG_MSG '%*s' 3001 ""
+assert_exit 1 "$EVENT" "$E1" backend "Task 9" progress "${LONG_MSG// /x}"
+
 BIG_STDERR=$("$EVENT" "$E1" backend "Task 9" progress "$BIG_MSG" 2>&1 >/dev/null || true)
 assert_contains "$BIG_STDERR" "bytes" "oversized event names the byte count"
 
@@ -215,9 +221,9 @@ assert_eq "$(jq -r '.baseline_commit' "${RUN_HAPPY}/manifest.json")" "$(git -C "
   "baseline_commit == git rev-parse HEAD at init time"
 assert_exit 0 test -f "${RUN_HAPPY}/events.jsonl"
 assert_exit 0 test -f "${RUN_HAPPY}/worker-backend.files.txt"
-assert_exit 0 test -f "${RUN_HAPPY}/lanes/backend/reply.md"
-assert_exit 0 test -f "${RUN_HAPPY}/wave/manifest.json"
-assert_exit 0 test -f "${RUN_HAPPY}/wave/worker-backend.prompt.md"
+assert_exit 0 test -d "${RUN_HAPPY}/lanes/backend/replies"
+assert_exit 0 test -f "${RUN_HAPPY}/launch/manifest.json"
+assert_exit 0 test -f "${RUN_HAPPY}/launch/worker-backend.prompt.md"
 assert_exit 0 test -f "${RUN_HAPPY}/status.json"
 assert_eq "$(jq -r '.phase' "${RUN_HAPPY}/status.json")" "execution" "new run starts in execution phase"
 
@@ -229,17 +235,10 @@ assert_contains "$STATUS_TEXT" "tasks 1/3 (33%)" "status derives task percentage
 assert_exit 0 "$SET_PHASE" "$RUN_HAPPY" review
 REVIEW_STATUS=$("$RUN_STATUS" "$RUN_HAPPY")
 assert_contains "$REVIEW_STATUS" "phase 2/4: review" "phase update advances the status surface"
-STATUS_BIN=$(mktemp -d)
-STATUS_WSH_LOG=$(mktemp)
-cat >"${STATUS_BIN}/wsh" <<'STUB'
-#!/usr/bin/env bash
-printf '%s\n' "$*" >>"$STATUS_WSH_LOG"
-STUB
-chmod +x "${STATUS_BIN}/wsh"
-STATUS_WSH_LOG="$STATUS_WSH_LOG" WAVETERM_TABID=test WAVETERM_BLOCKID=orchestrator PATH="${STATUS_BIN}:$PATH" \
-  "$RUN_STATUS" "$RUN_HAPPY" --update-tab >/dev/null
-assert_contains "$(cat "$STATUS_WSH_LOG")" "review 2/4 · tasks 33%" \
-  "review pane title keeps task percentage distinct from workflow phase"
+assert_contains "$REVIEW_STATUS" "lane backend: not launched" "status names the loop state of each lane"
+printf '%s\n' "$$" >"${RUN_HAPPY}/lanes/backend/loop.pid"
+assert_contains "$("$RUN_STATUS" "$RUN_HAPPY")" "lane backend: running" "status sees a live loop pid"
+rm -f "${RUN_HAPPY}/lanes/backend/loop.pid"
 
 HAPPY_JSON=$("$VALIDATE_STATE" "$RUN_HAPPY" --json)
 assert_exit 0 "$VALIDATE_STATE" "$RUN_HAPPY" --json
@@ -259,8 +258,8 @@ RUN1=$(new_run "$REPO1")
 printf 'outside/file.txt\n' >"${RUN1}/worker-backend.files.txt"
 printf 'backend/never-written.sh\n' >>"${RUN1}/worker-backend.files.txt"
 J1=$("$VALIDATE_STATE" "$RUN1" --json) || true
-assert_exit 1 "$VALIDATE_STATE" "$RUN1" --json
-assert_eq "$(status_of "$J1" worker-file-logs-valid)" fail "bogus log entries fail worker-file-logs-valid"
+assert_exit 0 "$VALIDATE_STATE" "$RUN1" --json
+assert_eq "$(status_of "$J1" worker-file-logs-valid)" warn "bogus log entries warn in worker-file-logs-valid (advisory, never blocking)"
 D1=$(detail_of "$J1" worker-file-logs-valid)
 assert_contains "$D1" "outside/file.txt(outside-own-ownership)" \
   "a path outside the lane's own ownership is named with that exact reason"
@@ -300,11 +299,11 @@ git -C "$REPO3" commit --quiet -m "worker commit"
 assert_eq "$(git -C "$REPO3" status --porcelain)" "" "worktree is clean after the worker's own commit"
 
 J3=$("$VALIDATE_STATE" "$RUN3" --json) || true
-assert_exit 1 "$VALIDATE_STATE" "$RUN3" --json
+assert_exit 0 "$VALIDATE_STATE" "$RUN3" --json
 assert_eq "$(status_of "$J3" changed-files-owned)" pass \
   "status-only check sees nothing — this is exactly the gap changed-files-within-union exists to close"
-assert_eq "$(status_of "$J3" changed-files-attributed-once)" fail \
-  "the baseline-diff union still shows the committed file; no lane logged it"
+assert_eq "$(status_of "$J3" changed-files-attributed-once)" warn \
+  "the baseline-diff union still shows the committed file; no lane logged it (a warning)"
 assert_contains "$(detail_of "$J3" changed-files-attributed-once)" "stolen.md" "diagnostic names the offending path"
 assert_contains "$(detail_of "$J3" changed-files-attributed-once)" "attributed=0" "diagnostic shows zero attributions"
 
@@ -341,8 +340,8 @@ printf 'x\n' >"${REPO6}/backend/shared-ish.txt"
 printf 'backend/shared-ish.txt\n' >"${RUN6}/worker-backend.files.txt"
 printf 'backend/shared-ish.txt\n' >"${RUN6}/worker-frontend.files.txt"
 J6=$("$VALIDATE_STATE" "$RUN6" --json) || true
-assert_exit 1 "$VALIDATE_STATE" "$RUN6" --json
-assert_eq "$(status_of "$J6" changed-files-attributed-once)" fail "a path logged by two lanes fails attribution"
+assert_exit 0 "$VALIDATE_STATE" "$RUN6" --json
+assert_eq "$(status_of "$J6" changed-files-attributed-once)" warn "a path logged by two lanes is an attribution warning"
 assert_contains "$(detail_of "$J6" changed-files-attributed-once)" "shared-ish.txt" "diagnostic names the ambiguous path"
 assert_contains "$(detail_of "$J6" changed-files-attributed-once)" "attributed=2" "diagnostic shows two attributions"
 
@@ -416,7 +415,7 @@ printf '../escape.txt\n' >>"${RUN10}/worker-backend.files.txt"
 printf 'backend/a/../../b\n' >>"${RUN10}/worker-backend.files.txt"
 
 J10=$("$VALIDATE_STATE" "$RUN10" --json) || true
-assert_exit 1 "$VALIDATE_STATE" "$RUN10" --json
+assert_exit 0 "$VALIDATE_STATE" "$RUN10" --json
 D10=$(detail_of "$J10" worker-file-logs-valid)
 assert_contains "$D10" "../escape.txt(path-traversal)" "a leading ../ segment is rejected as path-traversal"
 assert_contains "$D10" "backend/a/../../b(path-traversal)" "an embedded ../../ is rejected as path-traversal"
@@ -461,15 +460,14 @@ mon_run() {
   printf '%s' "$d"
 }
 
-# mon_run_with_surface — same, plus a wave/manifest.json giving lane
-# "backend" a real block_ref, for the block-health (vanished-pane /
-# fatal-signature) triggers.
-mon_run_with_surface() {
+# mon_run_with_loop PID — same, plus a loop.pid for lane "backend", for the
+# liveness triggers (vanished_pane, fatal_signature).
+mon_run_with_loop() {
   local d
   d=$(mktemp -d)
-  mkdir -p "${d}/wave"
+  mkdir -p "${d}/lanes/backend"
   printf '{"workers":[{"lane":"backend"}]}\n' >"${d}/manifest.json"
-  printf '{"workers":[{"name":"backend","block_ref":"block:1"}]}\n' >"${d}/wave/manifest.json"
+  printf '%s\n' "$1" >"${d}/lanes/backend/loop.pid"
   : >"${d}/events.jsonl"
   printf '%s' "$d"
 }
@@ -582,34 +580,28 @@ assert_eq "$(jq -r '.type' <<<"$TRIGGER_RACE")" blocked \
 assert_eq "$(jq -r '.msg' <<<"$TRIGGER_RACE")" "landed during the pre-tail delay" \
   "monitor-events.sh: the startup-race trigger carries the event's own message, proving it was genuinely read (not a stale/default value)"
 
-# ─── Vanished block: termscrollback fails for the lane's block_ref ─────────
+# ─── Vanished loop: the lane's pid is not running ──────────────────────────
 
-MON_VANISHED=$(mon_run_with_surface)
-STUB_BIN_CRASH=$(mktemp -d)
-cat >"${STUB_BIN_CRASH}/wsh" <<'STUB'
-#!/usr/bin/env bash
-exit 1
-STUB
-chmod +x "${STUB_BIN_CRASH}/wsh"
-TRIGGER_VANISHED=$(PATH="${STUB_BIN_CRASH}:${PATH}" MONITOR_LIVENESS_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "$MON_VANISHED")
-assert_eq "$(jq -r '.type' <<<"$TRIGGER_VANISHED")" vanished_pane "monitor-events.sh: termscrollback failing produces a vanished_pane trigger"
+sleep 0 &
+DEAD_PID=$!
+wait "$DEAD_PID"
+MON_VANISHED=$(mon_run_with_loop "$DEAD_PID")
+TRIGGER_VANISHED=$(MONITOR_LIVENESS_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "$MON_VANISHED") || true
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_VANISHED")" vanished_pane "monitor-events.sh: a dead loop pid produces a vanished_pane trigger"
 assert_eq "$(jq -r '.lane' <<<"$TRIGGER_VANISHED")" backend "monitor-events.sh: vanished_pane trigger names the lane"
-assert_contains "$(jq -r '.msg' <<<"$TRIGGER_VANISHED")" "block:1" "monitor-events.sh: vanished_pane trigger names the block that failed"
+assert_contains "$(jq -r '.msg' <<<"$TRIGGER_VANISHED")" "$DEAD_PID" "monitor-events.sh: vanished_pane trigger names the dead pid"
+: >"${MON_VANISHED}/lanes/backend/stop"
+STOPPED_RC=0
+TRIGGER_STOPPED=$(MONITOR_LIVENESS_INTERVAL=1 MONITOR_MAX_WAIT=2 "$MONITOR" "$MON_VANISHED") || STOPPED_RC=$?
+assert_eq "$STOPPED_RC" 1 "monitor-events.sh: the stopped lane leaves the monitor to time out"
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_STOPPED")" timeout "monitor-events.sh: a lane stopped on purpose is not a vanished loop"
 
-# ─── Fatal signature: termscrollback succeeds but the NEW block output ─────
-# contains a known-fatal signature.
+# ─── Fatal signature: the loop is alive but its worker.log shows a crash ───
 
-MON_FATAL=$(mon_run_with_surface)
-STUB_BIN_FATAL=$(mktemp -d)
-cat >"${STUB_BIN_FATAL}/wsh" <<'STUB'
-#!/usr/bin/env bash
-echo "some ordinary output"
-echo "panic: something exploded"
-exit 0
-STUB
-chmod +x "${STUB_BIN_FATAL}/wsh"
-TRIGGER_FATAL=$(PATH="${STUB_BIN_FATAL}:${PATH}" MONITOR_LIVENESS_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "$MON_FATAL")
-assert_eq "$(jq -r '.type' <<<"$TRIGGER_FATAL")" fatal_signature "monitor-events.sh: a fatal signature in fresh block output produces a fatal_signature trigger"
+MON_FATAL=$(mon_run_with_loop "$$")
+printf 'some ordinary output\npanic: something exploded\n' >"${MON_FATAL}/lanes/backend/worker.log"
+TRIGGER_FATAL=$(MONITOR_LIVENESS_INTERVAL=1 MONITOR_MAX_WAIT=5 "$MONITOR" "$MON_FATAL") || true
+assert_eq "$(jq -r '.type' <<<"$TRIGGER_FATAL")" fatal_signature "monitor-events.sh: a fatal signature in fresh worker.log output produces a fatal_signature trigger"
 assert_eq "$(jq -r '.lane' <<<"$TRIGGER_FATAL")" backend "monitor-events.sh: fatal_signature trigger names the lane"
 assert_contains "$(jq -r '.msg' <<<"$TRIGGER_FATAL")" "panic: something exploded" "monitor-events.sh: fatal_signature trigger quotes the matched line"
 
@@ -630,84 +622,51 @@ assert_eq "$TIMEOUT_RC" 1 "monitor-events.sh: the bound-exhausted timeout is the
 # reply.sh
 # ═══════════════════════════════════════════════════════════════════════════
 
-# reply_run — a 3-lane RUN_DIR (backend, frontend get a real block_ref;
-# review does not) wired entirely by hand — reply.sh only reads
-# manifest.json's .contract.version/.workers[].lane and wave/manifest.json's
-# .workers[].name/.block_ref, so it doesn't need a full init-run.sh run.
+# reply_run — a 3-lane RUN_DIR wired by hand: backend has a live loop (this
+# shell's pid), frontend a dead one, review none. reply.sh reads only
+# manifest.json and lanes/<lane>/loop.pid.
 reply_run() {
   local d
   d=$(mktemp -d)
-  mkdir -p "${d}/wave" "${d}/lanes/backend" "${d}/lanes/frontend" "${d}/lanes/review"
-  : >"${d}/lanes/backend/reply.md"
-  : >"${d}/lanes/frontend/reply.md"
-  : >"${d}/lanes/review/reply.md"
+  mkdir -p "${d}/lanes/backend" "${d}/lanes/frontend" "${d}/lanes/review"
   printf '{"contract":{"version":"1.0.1"},"workers":[{"lane":"backend"},{"lane":"frontend"},{"lane":"review"}]}\n' >"${d}/manifest.json"
-  printf '{"workers":[{"name":"backend","block_ref":"block:1"},{"name":"frontend","block_ref":"block:2"},{"name":"review","block_ref":null}]}\n' >"${d}/wave/manifest.json"
+  printf '%s\n' "$$" >"${d}/lanes/backend/loop.pid"
+  printf '%s\n' "$DEAD_PID" >"${d}/lanes/frontend/loop.pid"
   printf '%s' "$d"
 }
 
-# wsh stub for the "every lane is alive" side of the run — `wsh blocks list`
-# lists both launched blocks, so reply.sh finds a loop still watching each file.
-STUB_BIN_OK=$(mktemp -d)
-cat >"${STUB_BIN_OK}/wsh" <<'STUB'
-#!/usr/bin/env bash
-if [ "${1:-}" = "blocks" ]; then
-  echo "1"
-  echo "2"
-fi
-exit 0
-STUB
-chmod +x "${STUB_BIN_OK}/wsh"
-
-# ─── --all across 3 lanes: two wake, one has no block_ref (reported, ───────
-# not swallowed) — this is exactly the "waiting forever" failure mode the
-# team-lead flagged: a lane that emitted `waiting` and stopped by design
+# ─── --all across 3 lanes: one wakes, one loop is gone, one never started ─
+# — each reported, never swallowed: a lane that emitted `waiting` and stopped
 # must never be silently left unwoken.
 
 RUN_R=$(reply_run)
 REPLY_RC=0
-REPLY_OUT=$(PATH="${STUB_BIN_OK}:${PATH}" "$REPLY" "$RUN_R" --all "Contract 1.0.1 published" 2>/dev/null) || REPLY_RC=$?
+REPLY_OUT=$("$REPLY" "$RUN_R" --all "Contract 1.0.1 published" 2>/dev/null) || REPLY_RC=$?
 assert_eq "$REPLY_RC" 1 "reply.sh --all: exits 1 when at least one of 3 lanes fails to wake"
-
-assert_exit 0 grep -q 'Contract 1.0.1 published' "${RUN_R}/lanes/backend/reply.md"
-assert_exit 0 grep -q 'Contract 1.0.1 published' "${RUN_R}/lanes/frontend/reply.md"
-assert_exit 0 grep -q 'Contract 1.0.1 published' "${RUN_R}/lanes/review/reply.md"
-assert_contains "$(cat "${RUN_R}/lanes/backend/reply.md")" "- Contract version: 1.0.1" "reply.sh: reply.md's structured header names the contract version"
-assert_contains "$(cat "${RUN_R}/lanes/backend/reply.md")" "- Sent at:" "reply.sh: reply.md's structured header has a Sent-at timestamp"
+for L in backend frontend review; do
+  assert_exit 0 grep -q 'Contract 1.0.1 published' "${RUN_R}/lanes/${L}/replies/000001.md"
+done
+assert_contains "$(cat "${RUN_R}/lanes/backend/replies/000001.md")" "- Contract version: 1.0.1" "reply.sh: the reply header names the contract version"
+assert_contains "$(cat "${RUN_R}/lanes/backend/replies/000001.md")" "- Sent at:" "reply.sh: the reply header has a Sent-at timestamp"
 
 REPLY_BACKEND=$(printf '%s\n' "$REPLY_OUT" | jq -c 'select(.lane=="backend")')
 REPLY_FRONTEND=$(printf '%s\n' "$REPLY_OUT" | jq -c 'select(.lane=="frontend")')
 REPLY_REVIEW=$(printf '%s\n' "$REPLY_OUT" | jq -c 'select(.lane=="review")')
-assert_eq "$(jq -r '.woken' <<<"$REPLY_BACKEND")" true "reply.sh --all: backend (live block) is woken"
-assert_eq "$(jq -r '.woken' <<<"$REPLY_FRONTEND")" true "reply.sh --all: frontend (live block) is woken"
-assert_eq "$(jq -r '.woken' <<<"$REPLY_REVIEW")" false "reply.sh --all: review (no block_ref) fails to wake"
-assert_eq "$(jq -r '.reply_written' <<<"$REPLY_REVIEW")" true "reply.sh --all: reply.md is still written for review even though the wake itself failed"
-assert_contains "$(jq -r '.detail' <<<"$REPLY_REVIEW")" "no block_ref" "reply.sh --all: the wake failure names the exact reason, not a generic error"
-assert_contains "$(jq -r '.detail' <<<"$REPLY_REVIEW")" "review" "reply.sh --all: the wake-failure detail names the failing lane"
+assert_eq "$(jq -r '.woken' <<<"$REPLY_BACKEND")" true "reply.sh --all: backend (live loop) is woken"
+assert_eq "$(jq -r '.woken' <<<"$REPLY_FRONTEND")" false "reply.sh --all: frontend (dead loop) is not woken"
+assert_contains "$(jq -r '.detail' <<<"$REPLY_FRONTEND")" "is gone" "reply.sh: the detail distinguishes a dead loop"
+assert_eq "$(jq -r '.woken' <<<"$REPLY_REVIEW")" false "reply.sh --all: review (never launched) is not woken"
+assert_eq "$(jq -r '.reply_written' <<<"$REPLY_REVIEW")" true "reply.sh --all: the reply is still written for review"
+assert_contains "$(jq -r '.detail' <<<"$REPLY_REVIEW")" "no worker loop has started" "reply.sh --all: the detail names the exact reason"
 
-# ─── A block that is gone (block_ref present, but no loop is alive to read ─
-# the file) is a DIFFERENT failure mode than "no block_ref" and must be
-# reported with its own distinguishable detail. This is the stranded lane:
-# the reply is on disk and nobody will ever read it.
-
-STUB_BIN_FAIL=$(mktemp -d)
-cat >"${STUB_BIN_FAIL}/wsh" <<'STUB'
-#!/usr/bin/env bash
-exit 0
-STUB
-chmod +x "${STUB_BIN_FAIL}/wsh"
-
-RUN_R2=$(reply_run)
-REPLY_RC2=0
-REPLY_OUT2=$(PATH="${STUB_BIN_FAIL}:${PATH}" "$REPLY" "$RUN_R2" backend "urgent update" 2>/dev/null) || REPLY_RC2=$?
-assert_eq "$REPLY_RC2" 1 "reply.sh: a single-lane call whose block is gone exits 1"
-assert_eq "$(jq -r '.woken' <<<"$REPLY_OUT2")" false "reply.sh: a dead block is reported as woken:false"
-assert_contains "$(jq -r '.detail' <<<"$REPLY_OUT2")" "is gone" "reply.sh: the detail distinguishes a dead block from 'no block_ref'"
+# A second reply gets the next number; it never overwrites the first.
+"$REPLY" "$RUN_R" backend "second" >/dev/null 2>&1
+assert_exit 0 grep -q 'second' "${RUN_R}/lanes/backend/replies/000002.md"
+assert_exit 0 grep -q 'Contract 1.0.1 published' "${RUN_R}/lanes/backend/replies/000001.md"
 
 # ─── An unknown lane name is a usage error, not a silent no-op ────────────
 
-RUN_R3=$(reply_run)
-assert_exit 2 "$REPLY" "$RUN_R3" nonexistent-lane "hello"
+assert_exit 2 "$REPLY" "$RUN_R" nonexistent-lane "hello"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # validate-contract.sh
@@ -858,22 +817,13 @@ assert_contains "$(detail_of "$CT8_JSON" contract-lint)" "found on PATH but not 
 # round-gate.sh
 # ═══════════════════════════════════════════════════════════════════════════
 
-# claude_stub_bin VERDICT — a bin dir whose `claude` ignores its args,
-# reads (and discards) reviewer.sh's stdin, and emits a minimal review body
-# ending in the one line round-gate.sh's parser looks for. Always shadows
-# the real `claude` on PATH (prepended) so these tests never make a real
-# network call.
-claude_stub_bin() {
-  local verdict="$1" d
-  d=$(mktemp -d)
-  cat >"${d}/claude" <<STUB
-#!/usr/bin/env bash
-cat >/dev/null
-echo "Reviewed the diff against project conventions."
-echo "VERDICT: ${verdict}"
-STUB
-  chmod +x "${d}/claude"
-  printf '%s' "$d"
+# round_done RUN — every worker lane of the fixture plan emits `done` in
+# round 1, so the round-complete stage passes and the later stages run.
+round_done() {
+  local lane
+  for lane in backend frontend review; do
+    "$EVENT" "$1" "$lane" "round 1" "done" "round finished" >/dev/null
+  done
 }
 
 # new_run_with_plan PLAN REPO — same as the suite's own new_run helper,
@@ -886,23 +836,23 @@ new_run_with_plan() {
   printf '%s' "$run_dir"
 }
 
-RG_CLAUDE_APPROVE=$(claude_stub_bin APPROVE)
-RG_CLAUDE_REJECT=$(claude_stub_bin REQUEST_CHANGES)
-
 # ─── Happy path: every stage genuinely runs and passes, round 1 ───────────
 
 RG_REPO=$(new_repo)
 RG_RUN=$(new_run "$RG_REPO")
-RG_JSON=$(PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN" 1 --json)
-assert_exit 0 env PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN" 1 --json
+round_done "$RG_RUN"
+RG_JSON=$("$ROUND_GATE" "$RG_RUN" 1 --json)
+assert_exit 0 "$ROUND_GATE" "$RG_RUN" 1 --json
 assert_eq "$(status_of "$RG_JSON" round-within-max-rounds)" pass "round-gate.sh: round 1 is within max_rounds"
+assert_eq "$(status_of "$RG_JSON" round-complete)" pass "round-gate.sh: every lane emitted done in round 1"
 assert_eq "$(jq -r '[.[] | select(.stage=="lane-tests")] | length' <<<"$RG_JSON")" 3 \
   "round-gate.sh: lane-tests runs one item per non-orchestrator lane (backend, frontend, review)"
 assert_eq "$(jq -r '[.[] | select(.stage=="lane-tests" and .status=="pass")] | length' <<<"$RG_JSON")" 3 \
   "round-gate.sh: all 3 lane tests pass (fixture plan's test_command is \`true\`)"
 assert_eq "$(status_of "$RG_JSON" contract-exists)" pass "round-gate.sh: the contract stage's own sub-items are merged in verbatim"
 assert_eq "$(status_of "$RG_JSON" changed-files-within-union)" pass "round-gate.sh: the run-state stage's own sub-items are merged in verbatim"
-assert_eq "$(status_of "$RG_JSON" light-review-verdict)" pass "round-gate.sh: the reviewer approved, via the stubbed claude"
+assert_eq "$(jq -r '[.[] | select(.stage=="review")] | length' <<<"$RG_JSON")" 0 \
+  "round-gate.sh: no LLM review stage — the per-round /deep-review is the review"
 assert_eq "$(jq -r '[.[] | select(.status=="skipped")] | length' <<<"$RG_JSON")" 0 \
   "round-gate.sh: on a clean happy path, nothing is skipped — every stage genuinely ran"
 
@@ -916,16 +866,15 @@ sed "s/\`opus high\` | \`true\`/\`opus high\` | \`false\`/" "$FIXTURE_PLAN" >"${
 cp -r "$(dirname "$FIXTURE_PLAN")/subplans" "${RG_PLAN_DIR}/"
 cp "$(dirname "$FIXTURE_PLAN")/codeintel-status.json" "${RG_PLAN_DIR}/"
 RG_RUN_FAIL=$(new_run_with_plan "${RG_PLAN_DIR}/plan.md" "$RG_REPO_FAIL")
-RG_JSON_FAIL=$(PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN_FAIL" 1 --json) || true
-assert_exit 1 env PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN_FAIL" 1 --json
+round_done "$RG_RUN_FAIL"
+RG_JSON_FAIL=$("$ROUND_GATE" "$RG_RUN_FAIL" 1 --json) || true
+assert_exit 1 "$ROUND_GATE" "$RG_RUN_FAIL" 1 --json
 assert_eq "$(jq -r '.[] | select(.stage=="lane-tests" and .item=="lane-test:backend") | .status' <<<"$RG_JSON_FAIL")" fail \
   "round-gate.sh: the doctored backend test_command (\`false\`) fails lane-test:backend by name"
 assert_eq "$(jq -r '.[] | select(.stage=="contract") | .status' <<<"$RG_JSON_FAIL")" skipped \
   "round-gate.sh: contract never ran after the lane-test failure — status is skipped, not pass"
 assert_eq "$(jq -r '.[] | select(.stage=="run-state") | .status' <<<"$RG_JSON_FAIL")" skipped \
   "round-gate.sh: run-state never ran after the lane-test failure"
-assert_eq "$(jq -r '.[] | select(.stage=="review") | .status' <<<"$RG_JSON_FAIL")" skipped \
-  "round-gate.sh: review (the most expensive stage) never ran after the lane-test failure"
 assert_contains "$(jq -r '.[] | select(.stage=="contract") | .detail' <<<"$RG_JSON_FAIL")" "not run" \
   "round-gate.sh: the skipped stage's own detail says it was not run, not that it passed"
 
@@ -937,42 +886,28 @@ RG_RUN_BOUNDARY=$(new_run "$RG_REPO_BOUNDARY")
 mkdir -p "${RG_REPO_BOUNDARY}/rogue"
 printf 'x\n' >"${RG_REPO_BOUNDARY}/rogue/file.txt"
 printf 'rogue/file.txt\n' >>"${RG_RUN_BOUNDARY}/worker-backend.files.txt"
-RG_JSON_BOUNDARY=$(PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN_BOUNDARY" 1 --json) || true
-assert_exit 1 env PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN_BOUNDARY" 1 --json
+round_done "$RG_RUN_BOUNDARY"
+RG_JSON_BOUNDARY=$("$ROUND_GATE" "$RG_RUN_BOUNDARY" 1 --json) || true
+assert_exit 1 "$ROUND_GATE" "$RG_RUN_BOUNDARY" 1 --json
 assert_eq "$(jq -r '.[] | select(.stage=="run-state" and .item=="changed-files-within-union") | .status' <<<"$RG_JSON_BOUNDARY")" fail \
   "round-gate.sh: an unowned write outside every lane's union fails changed-files-within-union by name"
-assert_eq "$(jq -r '.[] | select(.stage=="review") | .status' <<<"$RG_JSON_BOUNDARY")" skipped \
-  "round-gate.sh: review is skipped after the boundary violation"
 
 # ─── A warn-only run-state (post-done-writes-absent) does NOT block — the ──
 # round proceeds to review and, with an approving reviewer, passes overall.
 
 RG_REPO_WARN=$(new_repo)
 RG_RUN_WARN=$(new_run "$RG_REPO_WARN")
-assert_exit 0 "$EVENT" "$RG_RUN_WARN" backend "Task 9" "done" "nothing left this round"
+round_done "$RG_RUN_WARN"
 printf 'more work after done\n' >>"${RG_REPO_WARN}/backend/service.sh"
 printf 'backend/service.sh\n' >>"${RG_RUN_WARN}/worker-backend.files.txt"
 RG_FUTURE_TS=$(date -v+1H +%Y%m%d%H%M.%S 2>/dev/null || date -d '+1 hour' +%Y%m%d%H%M.%S)
 touch -t "$RG_FUTURE_TS" "${RG_REPO_WARN}/backend/service.sh"
-RG_JSON_WARN=$(PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN_WARN" 1 --json)
-assert_exit 0 env PATH="${RG_CLAUDE_APPROVE}:${PATH}" "$ROUND_GATE" "$RG_RUN_WARN" 1 --json
+RG_JSON_WARN=$("$ROUND_GATE" "$RG_RUN_WARN" 1 --json)
+assert_exit 0 "$ROUND_GATE" "$RG_RUN_WARN" 1 --json
 assert_eq "$(jq -r '.[] | select(.item=="post-done-writes-absent") | .status' <<<"$RG_JSON_WARN")" warn \
   "round-gate.sh: post-done-writes-absent is merged in as warn, exactly as validate-run-state.sh reported it"
-assert_eq "$(status_of "$RG_JSON_WARN" light-review-verdict)" pass \
-  "round-gate.sh: a warn-only run-state did not short-circuit — review still ran and approved"
 assert_eq "$(jq -r '[.[] | select(.status=="fail")] | length' <<<"$RG_JSON_WARN")" 0 \
   "round-gate.sh: zero fail items — a warn never counts as a failure"
-
-# ─── Reviewer non-approval (REQUEST_CHANGES) fails the review stage ───────
-
-RG_REPO_REJECT=$(new_repo)
-RG_RUN_REJECT=$(new_run "$RG_REPO_REJECT")
-RG_JSON_REJECT=$(PATH="${RG_CLAUDE_REJECT}:${PATH}" "$ROUND_GATE" "$RG_RUN_REJECT" 1 --json) || true
-assert_exit 1 env PATH="${RG_CLAUDE_REJECT}:${PATH}" "$ROUND_GATE" "$RG_RUN_REJECT" 1 --json
-assert_eq "$(status_of "$RG_JSON_REJECT" light-review-verdict)" fail \
-  "round-gate.sh: a REQUEST_CHANGES verdict fails light-review-verdict"
-assert_contains "$(detail_of "$RG_JSON_REJECT" light-review-verdict)" "REQUEST_CHANGES" \
-  "round-gate.sh: the fail detail quotes the actual verdict, not a generic message"
 
 # ─── ROUND 4 is refused outright — an escalation record, every other ──────
 # stage skipped, nothing (not even the cheap lane-tests stage) runs.
@@ -987,7 +922,7 @@ assert_contains "$(detail_of "$RG_JSON_R4" round-within-max-rounds)" "escalate" 
 assert_eq "$(jq -r '.[] | select(.stage=="lane-tests") | .status' <<<"$RG_JSON_R4")" skipped \
   "round-gate.sh: round 4 refuses before even the cheap lane-tests stage runs"
 assert_eq "$(jq -r '[.[] | select(.status=="skipped")] | length' <<<"$RG_JSON_R4")" 5 \
-  "round-gate.sh: all 5 later stages (lane-tests, acceptance, contract, run-state, review) are skipped, none silently omitted"
+  "round-gate.sh: all 5 later stages (round-complete, lane-tests, acceptance, contract, run-state) are skipped, none silently omitted"
 assert_eq "$(jq -r '.[] | select(.stage=="acceptance") | .status' <<<"$RG_JSON_R4")" skipped \
   "round-gate.sh: acceptance is reported as skipped rather than omitted when the round short-circuits"
 
@@ -1147,6 +1082,22 @@ assert_contains "$BR_BARE_HTML" "no longer at /absent/plan.md" \
 BR_NOMANI=$(mktemp -d)
 assert_exit 1 "$BUILD_REPORT" "$BR_NOMANI"
 
+# ─── Orchestrator records: decisions.md, D-NNN deviations, open findings ──
+
+BR_REC=$(mktemp -d)
+cp -R "${BR_RUN}/." "$BR_REC/"
+rm -rf "${BR_REC}/report"
+printf '# Decisions\n\n- Kept the cents column; rejected numeric because it rounds.\n' >"${BR_REC}/decisions.md"
+printf '# Plan\n\n## Deviations\n\n| D-001 | totals moved to a view | read speed | none | executor |\n' >"${BR_REC}/plan.md"
+printf '# Review\n\n## Open findings\n\n- MEDIUM: rename totals_v, left for a follow-up\n' >"${BR_REC}/review.md"
+jq --arg p "${BR_REC}/plan.md" '.plan_path = $p' "${BR_RUN}/manifest.json" >"${BR_REC}/manifest.json"
+assert_exit 0 "$BUILD_REPORT" "$BR_REC" --review "${BR_REC}/review.md"
+BR_REC_HTML=$(cat "${BR_REC}/report/index.html")
+assert_contains "$BR_REC_HTML" "Kept the cents column" "build-run-report.sh: renders the orchestrator's decisions.md"
+assert_contains "$BR_REC_HTML" "D-001" "build-run-report.sh: renders the plan's D-NNN deviations"
+assert_contains "$BR_REC_HTML" "rename totals_v" "build-run-report.sh: renders the open findings"
+assert_contains "$BR_REC_HTML" "<h2>Open findings</h2>" "build-run-report.sh: the open findings have their own section"
+
 # ═══════════════════════════════════════════════════════════════════════════
 # Task 11: SKILL.md, README.md, /deep-execute command
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1182,7 +1133,7 @@ assert_contains "$SKILL_MD_TEXT" "report/index.html" "SKILL.md: names where the 
 
 assert_contains "$SKILL_MD_TEXT" "Monitor" "SKILL.md: mentions the Monitor tool"
 assert_contains "$SKILL_MD_TEXT" "events.jsonl" "SKILL.md: mentions events.jsonl"
-assert_contains "$SKILL_MD_TEXT" "reply.md" "SKILL.md: mentions reply.md"
+assert_contains "$SKILL_MD_TEXT" "lanes/<lane>/replies/" "SKILL.md: mentions the numbered replies"
 assert_contains "$SKILL_MD_TEXT" "agents.allowlist" "SKILL.md: mentions agents.allowlist"
 assert_contains "$SKILL_MD_TEXT" "max 3 rounds" "SKILL.md: states the default round cap as 'max 3 rounds'"
 
@@ -1200,12 +1151,16 @@ assert_contains "$SKILL_MD_TEXT" "A failing \`round-gate.sh\` JSON is a hard gat
   "SKILL.md: rule survives — a failing round-gate.sh JSON is a hard gate"
 assert_contains "$SKILL_MD_TEXT" "never advance" \
   "SKILL.md: rule survives — never advance on a failing gate"
-assert_contains "$SKILL_MD_TEXT" "\`AskUserQuestion\` confirms it against \`agents.allowlist\`" \
-  "SKILL.md: rule survives — the plan suggests an agent, AskUserQuestion confirms it"
+assert_contains "$SKILL_MD_TEXT" "The plan's validated agent runs; \`--agent\` overrides it" \
+  "SKILL.md: rule survives — the plan's agent runs without a second question"
 assert_contains "$SKILL_MD_TEXT" "Round 1 gets orchestrator review before anything reaches the human" \
   "SKILL.md: rule survives — round 1 gets orchestrator review before the human sees it"
-assert_contains "$SKILL_MD_TEXT" "After three rounds, stop and \`AskUserQuestion\`" \
-  "SKILL.md: rule survives — after three rounds, stop and AskUserQuestion"
+assert_contains "$SKILL_MD_TEXT" "After \`max_rounds\` rounds, stop and \`AskUserQuestion\`" \
+  "SKILL.md: rule survives — after max_rounds rounds, stop and AskUserQuestion"
+assert_contains "$SKILL_MD_TEXT" "--no-fix --no-simplify" "SKILL.md: per-round review is report-only"
+assert_contains "$SKILL_MD_TEXT" "steps 2 to 9 of \`~/.claude/skills/_shared/after-approval.md\`" \
+  "SKILL.md: delivery is the shared after-approval chain, not a second copy"
+assert_eq "$(printf '%s' "$SKILL_MD_TEXT" | grep -ci 'wave' || true)" 0 "SKILL.md: no Wave transport is left"
 
 # ─── Honest attribution framing (never claims proof/authentication) ───────
 
@@ -1262,23 +1217,24 @@ assert_contains "$README_MD_TEXT" "Artifacts produced" "README.md: documents the
 
 ORCA_LAUNCH="${ROOT}/dot_claude/skills/deep-execute/scripts/executable_orca-launch.sh"
 OL_TMP=$(mktemp -d)
-mkdir -p "${OL_TMP}/run/wave" "${OL_TMP}/bin" "${OL_TMP}/cwd"
-printf 'prompt' >"${OL_TMP}/run/wave/worker-api.prompt.md"
-jq -n --arg p "${OL_TMP}/run/wave/worker-api.prompt.md" '{workers: [{name: "api", prompt_file: $p}]}' \
-  >"${OL_TMP}/run/wave/manifest.json"
+mkdir -p "${OL_TMP}/bin"
+OL_RUN=$(new_run "$(new_repo)")
 cat >"${OL_TMP}/bin/orca" <<'STUB'
 #!/usr/bin/env bash
 printf '%s\n' "$*" >>"$(dirname "$0")/calls.log"
 printf '{"ok":true,"result":{"terminal":{"handle":"term_abc"}}}\n'
 STUB
 chmod +x "${OL_TMP}/bin/orca"
-OL_OUT=$(PATH="${OL_TMP}/bin:${PATH}" "$ORCA_LAUNCH" "${OL_TMP}/run/wave" "${OL_TMP}/cwd" api:claude:sonnet 2>&1)
+OL_OUT=$(PATH="${OL_TMP}/bin:${PATH}" "$ORCA_LAUNCH" "$OL_RUN" backend 2>&1)
 assert_eq "$?" "0" "orca-launch.sh: exits 0 when every lane launches"
 assert_contains "$OL_OUT" '"launched": true' "orca-launch.sh: reports the lane as launched"
-assert_eq "$(jq -r '.workers[0].block_ref' "${OL_TMP}/run/wave/manifest.json")" "term_abc" \
+assert_eq "$(jq -r '.workers[] | select(.name == "backend") | .block_ref' "${OL_RUN}/launch/manifest.json")" "term_abc" \
   "orca-launch.sh: records the Orca terminal handle as the lane's block_ref"
-assert_contains "$(cat "${OL_TMP}/bin/calls.log")" "--worktree path:${OL_TMP}/cwd" \
-  "orca-launch.sh: opens the terminal in the run's workspace"
+OL_CALLS=$(cat "${OL_TMP}/bin/calls.log")
+assert_contains "$OL_CALLS" "--worktree path:$(jq -r '.cwd' "${OL_RUN}/manifest.json")" \
+  "orca-launch.sh: opens the terminal in the run's worktree"
+assert_contains "$OL_CALLS" "worker-loop.sh" "orca-launch.sh: the terminal runs the worker loop"
+assert_eq "$(grep -c 'terminal create' "${OL_TMP}/bin/calls.log")" 1 "orca-launch.sh: a named lane relaunches only that lane"
 rm -rf "$OL_TMP"
 
 # ─── Command file delegates and does not restate the protocol ─────────────
@@ -1292,5 +1248,15 @@ assert_contains "$COMMAND_MD_TEXT" "--resume RUN_DIR" "deep-execute.md: argument
 assert_contains "$COMMAND_MD_TEXT" "--max-rounds N" "deep-execute.md: argument grammar documents --max-rounds"
 assert_eq "$(printf '%s' "$COMMAND_MD_TEXT" | grep -c 'round-gate.sh\|monitor-events.sh\|init-run.sh' || true)" "0" \
   "deep-execute.md: does not restate the skill's protocol by naming its internal scripts"
+
+assert_exit 0 grep -q -- '--dry-run' "$COMMAND_MD"
+assert_eq "$(grep -ci 'wave\|llmessage' "$COMMAND_MD" || true)" 0 "deep-execute.md: no Wave tab or chat layout is promised"
+
+# ─── Routing: option A only for large, cleanly split plans ────────────────
+
+ROUTING_TEXT=$(cat "${ROOT}/dot_claude/skills/_shared/plan-routing.md")
+for RULE in "Size: L" "no \`depends_on\` between them" "3 or more tasks" "passes on its own"; do
+  assert_contains "$ROUTING_TEXT" "$RULE" "plan-routing.md: option A requires '${RULE}'"
+done
 
 assert_summary

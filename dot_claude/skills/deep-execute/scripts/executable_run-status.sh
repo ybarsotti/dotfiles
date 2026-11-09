@@ -1,21 +1,20 @@
 #!/usr/bin/env bash
+# run-status.sh — one status line for a run, then one line per lane loop.
+#
+# Usage:
+#   run-status.sh RUN_DIR
+#
+# The first line gives the phase, the task completion and the elapsed time.
+# Each lane line says whether its worker loop runs: `running` (pid alive),
+# `stopped` (stop file), `dead` (pid file, no process — relaunch it with
+# orca-launch.sh RUN_DIR LANE) or `not launched`. Resume reads this first.
 set -eufo pipefail
 
 RUN_DIR="${1:-}"
-MODE="${2:-print}"
-
 if [ -z "$RUN_DIR" ] || [ ! -d "$RUN_DIR" ]; then
-  echo "run-status.sh: usage: run-status.sh RUN_DIR [--update-tab|--watch]" >&2
+  echo "run-status.sh: usage: run-status.sh RUN_DIR" >&2
   exit 2
 fi
-
-case "$MODE" in
-  print | --update-tab | --watch) ;;
-  *)
-    echo "run-status.sh: unknown mode '$MODE'" >&2
-    exit 2
-    ;;
-esac
 
 command -v jq >/dev/null 2>&1 || {
   echo "run-status.sh: jq required" >&2
@@ -97,53 +96,19 @@ snapshot() {
   printf '%s\n%s\n' "$title" "$line"
 }
 
-update_tab() {
-  local output title phase blocked
-  output=$(snapshot)
-  title=${output%%$'\n'*}
-  printf '%s\n' "${output#*$'\n'}"
-  command -v wsh >/dev/null 2>&1 || return 0
-  [ -n "${WAVETERM_TABID:-}" ] || return 0
-  [ -z "${WAVETERM_BLOCKID:-}" ] || \
-    wsh setmeta -b "${WAVETERM_BLOCKID}" "frame:title=${title}" >/dev/null 2>&1 || true
-  phase=$(jq -r '.phase' "$STATUS")
-  blocked=0
-  [ -s "${RUN_DIR}/events.jsonl" ] && blocked=$(jq -sr '
-    group_by([.lane, .task]) | map(sort_by(.ts) | last)
-    | [ .[] | select(.type == "blocked") ] | length
-  ' "${RUN_DIR}/events.jsonl")
-  if [ "$blocked" -gt 0 ]; then
-    wsh badge triangle-exclamation --color red -b tab >/dev/null 2>&1 || true
-  elif [ "$phase" = "complete" ]; then
-    wsh badge circle-check --color green -b tab >/dev/null 2>&1 || true
+snapshot | tail -1
+while IFS= read -r lane; do
+  [ -n "$lane" ] || continue
+  dir="${RUN_DIR}/lanes/${lane}"
+  pid=$(cat "${dir}/loop.pid" 2>/dev/null || true)
+  if [ -f "${dir}/stop" ]; then
+    state="stopped"
+  elif [ -z "$pid" ]; then
+    state="not launched"
+  elif kill -0 "$pid" 2>/dev/null; then
+    state="running (pid ${pid})"
   else
-    wsh badge spinner --color cyan -b tab >/dev/null 2>&1 || true
+    state="dead (pid ${pid}) — relaunch: orca-launch.sh ${RUN_DIR} ${lane}"
   fi
-}
-
-if [ "$MODE" = "print" ]; then
-  snapshot | tail -1
-  exit 0
-fi
-
-if [ "$MODE" = "--update-tab" ]; then
-  update_tab
-  exit 0
-fi
-
-PID_FILE="${RUN_DIR}/status-watcher.pid"
-if [ -s "$PID_FILE" ]; then
-  OLD_PID=$(cat "$PID_FILE")
-  case "$OLD_PID" in
-    *[!0-9]* | "") ;;
-    *) kill -0 "$OLD_PID" 2>/dev/null && exit 0 ;;
-  esac
-fi
-printf '%s\n' "$$" >"$PID_FILE"
-trap ': >"$PID_FILE"' EXIT
-
-while :; do
-  update_tab
-  [ "$(jq -r '.phase' "$STATUS")" != "complete" ] || exit 0
-  sleep 5
-done
+  printf 'lane %s: %s\n' "$lane" "$state"
+done < <(jq -r '.workers[]?.lane' "$MANIFEST")

@@ -10,9 +10,10 @@
 # events-schema-valid, events-line-size-valid, worker-file-logs-valid,
 # changed-files-owned, changed-files-attributed-once, contract-untouched,
 # shared-files-untouched, changed-files-within-union, post-done-writes-absent.
-# Exit 0 iff every "pass"/"fail" item passes ("warn" never blocks — see
-# below). NOTE: `baseline-diff-owned` was renamed to `changed-files-within-
-# union` — anything consuming these item names by string needs to follow.
+# Exit 0 iff no item is "fail". The two attribution checks and
+# post-done-writes-absent only ever "warn" — see below. NOTE:
+# `baseline-diff-owned` was renamed to `changed-files-within-union` — anything
+# consuming these item names by string needs to follow.
 #
 # ── The hard guarantee vs. advisory signals ────────────────────────────────
 # Lane attribution (`worker-<lane>.files.txt`, fed by event.sh's `--files`)
@@ -47,8 +48,9 @@
 # doesn't silently become a gap in both.
 #
 # `worker-file-logs-valid` and `changed-files-attributed-once` are DIAGNOSTIC
-# / advisory only. They catch self-inconsistency in the logs (a lane logging
-# a path outside its own ownership, a path logged by zero or by more than one
+# / advisory only, and record "warn", never "fail". A lane that logs one path
+# for each of several writes is counted once per (lane, path). They catch
+# self-inconsistency in the logs (a lane logging a path outside its own ownership, a path logged by zero or by more than one
 # lane) — genuinely useful signals when a worker misbehaves accidentally, or
 # when a hostile write forgets to log itself at all. What they cannot catch:
 # a single, internally-consistent forged log entry (a write that landed in
@@ -79,8 +81,23 @@
 # orchestrator write there would show up as "unowned" and fail. That
 # assumption is not enforced here (deep-plan's validate-plan.sh is the place
 # that would need to, and is out of this script's scope).
+#
+# Two orchestrator writes are expected and exempt:
+#   - the contract and the shared read-only files after contract-bump.sh: they
+#     are compared with manifest.json's `checkpoint_commit` (the last approved
+#     contract state), not with `baseline_commit` (the start of the run, kept
+#     for the report and for the ownership checks);
+#   - D-NNN rows under `## Deviations` of the plan, when the plan lives in the
+#     worktree: the plan is exempt while `plan-stamp.sh check` passes, which
+#     holds exactly when nothing but its `## Deviations` section changed.
 
 set -uo pipefail
+
+# `declare -A` below needs bash 4 or later; macOS /bin/bash is 3.2.
+if [ "${BASH_VERSINFO[0]:-0}" -lt 4 ]; then
+  echo "validate-run-state.sh: bash 4 or later required (this is bash ${BASH_VERSION}); install it with 'brew install bash'" >&2
+  exit 2
+fi
 
 RESULTS=()
 record() {
@@ -123,6 +140,9 @@ DEEP_PLAN_SCRIPTS="$(cd "${SCRIPT_DIR}/../../deep-plan/scripts" && pwd)"
 
 PARSER="${DEEP_PLAN_SCRIPTS}/plan-to-json.sh"
 [ -f "$PARSER" ] || PARSER="${DEEP_PLAN_SCRIPTS}/executable_plan-to-json.sh"
+PLAN_STAMP="${SCRIPT_DIR}/../../_shared/plan-stamp.sh"
+[ -f "$PLAN_STAMP" ] || PLAN_STAMP="${SCRIPT_DIR}/../../_shared/executable_plan-stamp.sh"
+EVENT_JQ="${SCRIPT_DIR}/../schemas/event.jq"
 
 MANIFEST="${RUN_DIR}/manifest.json"
 EVENTS="${RUN_DIR}/events.jsonl"
@@ -147,6 +167,7 @@ else
   manifest_check "plan_path" '(.plan_path | type == "string") and (.plan_path | length > 0)'
   manifest_check "cwd" '(.cwd | type == "string") and (.cwd | length > 0)'
   manifest_check "baseline_commit" '(.baseline_commit | type == "string") and (.baseline_commit | test("^[0-9a-f]{40}$"))'
+  manifest_check "checkpoint_commit" '(.checkpoint_commit | type == "string") and (.checkpoint_commit | test("^[0-9a-f]{40}$"))'
   manifest_check "round" '(.round | type == "number") and (.round == (.round | floor)) and (.round >= 0)'
   manifest_check "max_rounds" '(.max_rounds | type == "number") and (.max_rounds == (.max_rounds | floor)) and (.max_rounds >= 1)'
   manifest_check "orchestrator_surface" '(.orchestrator_surface | type == "string") and (.orchestrator_surface | length > 0)'
@@ -167,7 +188,7 @@ else
       (.status == "pending" or .status == "running" or .status == "waiting" or .status == "blocked" or .status == "done" or .status == "crashed") and
       ((keys_unsorted - ["id","lane","task","runner","effort","status"]) == [])
     ))'
-  manifest_check "no-extra-keys" '(keys_unsorted - ["schema_version","run_id","plan_path","cwd","baseline_commit","round","max_rounds","orchestrator_surface","contract","shared_read_only","workers"]) == []'
+  manifest_check "no-extra-keys" '(keys_unsorted - ["schema_version","run_id","plan_path","cwd","baseline_commit","checkpoint_commit","round","max_rounds","orchestrator_surface","contract","shared_read_only","workers"]) == []'
 
   if [ -z "$ISSUES" ]; then
     record "manifest-schema-valid" "pass" "all required fields present, well-typed, no extra keys"
@@ -194,14 +215,7 @@ if [ -f "$EVENTS" ]; then
     BYTES=$(printf '%s\n' "$line" | wc -c | tr -d ' ')
     [ "$BYTES" -lt 4096 ] || SIZE_ISSUES="${SIZE_ISSUES}${SIZE_ISSUES:+, }line ${LINE_NO} (${BYTES} bytes)"
 
-    jq -e '
-      (.ts | type == "string") and (.ts | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$")) and
-      (.lane | type == "string" and length > 0) and
-      (.task | type == "string" and length > 0) and
-      (.type == "task_start" or .type == "task_done" or .type == "progress" or .type == "question" or .type == "waiting" or .type == "blocked" or .type == "done" or .type == "decision") and
-      (.msg | type == "string") and (.msg | test("^[^\r\n]*$")) and (.msg | length <= 3000) and
-      ((keys_unsorted - ["ts","lane","task","type","msg"]) == [])
-    ' <<<"$line" >/dev/null 2>&1 || SCHEMA_ISSUES="${SCHEMA_ISSUES}${SCHEMA_ISSUES:+, }line ${LINE_NO}"
+    jq -e -f "$EVENT_JQ" <<<"$line" >/dev/null 2>&1 || SCHEMA_ISSUES="${SCHEMA_ISSUES}${SCHEMA_ISSUES:+, }line ${LINE_NO}"
   done <"$EVENTS"
 fi
 
@@ -223,6 +237,7 @@ PLAN_OK=0
 if [ "$MANIFEST_OK" -eq 1 ]; then
   CWD=$(jq -r '.cwd' "$MANIFEST")
   BASELINE=$(jq -r '.baseline_commit' "$MANIFEST")
+  CHECKPOINT=$(jq -r '.checkpoint_commit' "$MANIFEST")
   PLAN_PATH=$(jq -r '.plan_path' "$MANIFEST")
   CONTRACT_REL=$(jq -r '.contract.path' "$MANIFEST")
   CONTRACT_SHA=$(jq -r '.contract.sha256' "$MANIFEST")
@@ -272,9 +287,18 @@ if [ "$GIT_OK" -eq 1 ] && [ "$PLAN_OK" -eq 1 ]; then
   # validated by their own dedicated checks below, not by ownership matching
   # (they are explicitly nobody's writable territory during a round, even
   # when a lane legitimately authored them earlier in the plan).
+  # The plan, when it lives in the worktree and only its ## Deviations changed.
+  PLAN_REL=""
+  case "$PLAN_PATH" in
+    "$CWD"/*)
+      bash "$PLAN_STAMP" check "$PLAN_PATH" >/dev/null 2>&1 && PLAN_REL="${PLAN_PATH#"$CWD"/}"
+      ;;
+  esac
+
   is_excluded() {
     local path="$1" s
     [ "$path" = "$CONTRACT_REL" ] && return 0
+    [ -n "$PLAN_REL" ] && [ "$path" = "$PLAN_REL" ] && return 0
     for s in "${SHARED_ARR[@]}"; do
       [ "$path" = "$s" ] && return 0
     done
@@ -306,6 +330,16 @@ if [ "$GIT_OK" -eq 1 ] && [ "$PLAN_OK" -eq 1 ]; then
       [ -z "$path" ] && continue
       CHANGED_UNION["$path"]=1
     done < <(git -C "$CWD" diff --name-only --no-renames -z "${BASELINE}..HEAD" 2>/dev/null)
+  fi
+
+  # The changed set since the approved contract checkpoint — what the
+  # contract and shared-file checks compare against.
+  declare -A CHANGED_SINCE_CHECKPOINT=()
+  for k in "${!CHANGED_STATUS[@]}"; do CHANGED_SINCE_CHECKPOINT["$k"]=1; done
+  if git -C "$CWD" cat-file -e "${CHECKPOINT}^{commit}" 2>/dev/null; then
+    while IFS= read -r -d '' path; do
+      [ -n "$path" ] && CHANGED_SINCE_CHECKPOINT["$path"]=1
+    done < <(git -C "$CWD" diff --name-only --no-renames -z "${CHECKPOINT}..HEAD" 2>/dev/null)
   fi
 
   # ─── worker-file-logs-valid (advisory) ──────────────────────────────────
@@ -373,7 +407,7 @@ if [ "$GIT_OK" -eq 1 ] && [ "$PLAN_OK" -eq 1 ]; then
   if [ -z "$LOGS_BAD" ]; then
     record "worker-file-logs-valid" "pass" "advisory: every logged path is a real repo-relative path, inside its own lane's ownership, and reflects an actual change (self-declared log, internally consistent — not proof of who wrote it)"
   else
-    record "worker-file-logs-valid" "fail" "advisory: $LOGS_BAD"
+    record "worker-file-logs-valid" "warn" "advisory: $LOGS_BAD"
   fi
 
   # ─── changed-files-owned (status-only) / baseline-diff-owned (union) ────
@@ -428,11 +462,11 @@ if [ "$GIT_OK" -eq 1 ] && [ "$PLAN_OK" -eq 1 ]; then
     ACTUAL_SHA=$("${SHA_CMD[@]}" "$CONTRACT_ABS" | awk '{print $1}')
     [ "$ACTUAL_SHA" = "$CONTRACT_SHA" ] || CONTRACT_ISSUE="contract sha256 changed: manifest=${CONTRACT_SHA} actual=${ACTUAL_SHA}"
   fi
-  if [ -z "$CONTRACT_ISSUE" ] && [ -n "${CHANGED_UNION[$CONTRACT_REL]:-}" ]; then
-    CONTRACT_ISSUE="contract path present in the baseline-diff/status set even though its content hash is unchanged: $CONTRACT_REL"
+  if [ -z "$CONTRACT_ISSUE" ] && [ -n "${CHANGED_SINCE_CHECKPOINT[$CONTRACT_REL]:-}" ]; then
+    CONTRACT_ISSUE="contract path changed since the checkpoint commit even though its content hash matches: $CONTRACT_REL"
   fi
   if [ -z "$CONTRACT_ISSUE" ]; then
-    record "contract-untouched" "pass" "sha256 matches manifest (${CONTRACT_SHA}) and path absent from the changed-file set"
+    record "contract-untouched" "pass" "sha256 matches manifest (${CONTRACT_SHA}) and the path is unchanged since checkpoint ${CHECKPOINT:0:12}"
   else
     record "contract-untouched" "fail" "$CONTRACT_ISSUE"
   fi
@@ -440,10 +474,10 @@ if [ "$GIT_OK" -eq 1 ] && [ "$PLAN_OK" -eq 1 ]; then
   # ─── shared-files-untouched ───────────────────────────────────────────────
   SHARED_BAD=""
   for s in "${SHARED_ARR[@]}"; do
-    [ -n "${CHANGED_UNION[$s]:-}" ] && SHARED_BAD="${SHARED_BAD}${SHARED_BAD:+, }${s}"
+    [ -n "${CHANGED_SINCE_CHECKPOINT[$s]:-}" ] && SHARED_BAD="${SHARED_BAD}${SHARED_BAD:+, }${s}"
   done
   if [ -z "$SHARED_BAD" ]; then
-    record "shared-files-untouched" "pass" "no shared read-only file appears in the changed-file set"
+    record "shared-files-untouched" "pass" "no shared read-only file changed since checkpoint ${CHECKPOINT:0:12}"
   else
     record "shared-files-untouched" "fail" "modified: $SHARED_BAD"
   fi
@@ -458,6 +492,7 @@ if [ "$GIT_OK" -eq 1 ] && [ "$PLAN_OK" -eq 1 ]; then
   # true one from inside this check.
   declare -A LOG_COUNT=()
   declare -A LOG_LANES=()
+  declare -A LOG_SEEN=()
   for f in "${RUN_DIR}"/worker-*.files.txt; do
     [ -f "$f" ] || continue
     alog_base="$(basename "$f")"
@@ -465,6 +500,9 @@ if [ "$GIT_OK" -eq 1 ] && [ "$PLAN_OK" -eq 1 ]; then
     alog_lane="${alog_lane%.files.txt}"
     while IFS= read -r p || [ -n "$p" ]; do
       [ -z "$p" ] && continue
+      alog_key="${alog_lane}"$'\t'"${p}"
+      [ -z "${LOG_SEEN[$alog_key]:-}" ] || continue
+      LOG_SEEN["$alog_key"]=1
       LOG_COUNT["$p"]=$((${LOG_COUNT["$p"]:-0} + 1))
       LOG_LANES["$p"]="${LOG_LANES[$p]:-}${LOG_LANES[$p]:+,}${alog_lane}"
     done <"$f"
@@ -481,7 +519,7 @@ if [ "$GIT_OK" -eq 1 ] && [ "$PLAN_OK" -eq 1 ]; then
   if [ -z "$ATTR_BAD" ]; then
     record "changed-files-attributed-once" "pass" "advisory: every lane-owned changed path is logged by exactly one lane (self-declared logs, internally consistent — not proof of who actually wrote it)"
   else
-    record "changed-files-attributed-once" "fail" "advisory: $ATTR_BAD"
+    record "changed-files-attributed-once" "warn" "advisory: $ATTR_BAD"
   fi
 
   # ─── post-done-writes-absent (advisory, heuristic) ───────────────────────
@@ -539,11 +577,12 @@ if [ "$GIT_OK" -eq 1 ] && [ "$PLAN_OK" -eq 1 ]; then
   fi
 else
   DETAIL="prerequisite failed: manifest-ok=${MANIFEST_OK} git-ok=${GIT_OK} plan-ok=${PLAN_OK}"
-  for item in worker-file-logs-valid changed-files-owned changed-files-attributed-once \
-    contract-untouched shared-files-untouched changed-files-within-union; do
+  for item in changed-files-owned contract-untouched shared-files-untouched changed-files-within-union; do
     record "$item" "fail" "$DETAIL"
   done
-  record "post-done-writes-absent" "warn" "$DETAIL"
+  for item in worker-file-logs-valid changed-files-attributed-once post-done-writes-absent; do
+    record "$item" "warn" "$DETAIL"
+  done
 fi
 
 # ─── Output ─────────────────────────────────────────────────────────────

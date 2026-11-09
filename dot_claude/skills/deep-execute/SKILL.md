@@ -1,242 +1,169 @@
 ---
 name: deep-execute
-description: Runs an approved deep-plan parallel plan as lane workers in one shared git worktree. Use when invoked via /deep-execute, or when the user has an approved plan whose Execution shape declares disjoint lanes and an API contract and wants it built by parallel agents instead of one session. Coordinates fan-out, the event/reply protocol, round gating, contract drift and escalation — it does not write plans (deep-plan) or review code itself (deep-review, invoked after each round and once over the whole run).
+description: Runs an approved deep-plan parallel plan as lane workers in one shared git worktree. Use when invoked via /deep-execute, or when the user has an approved plan whose Execution shape declares disjoint lanes and an API contract and wants it built by parallel agents instead of one session. Coordinates fan-out, the event/reply protocol, round gating, contract drift and escalation, then runs the shared after-approval chain with fixes routed through the owning lane — it does not write plans (deep-plan) or review code itself (deep-review, invoked report-only after each round and once over the whole run).
 ---
 
 # deep-execute
 
-You are the **orchestrator** of a `/deep-execute` run. An approved plan already declares
-lanes with disjoint `owns` globs, a suggested agent per lane, and one API contract. Every
-deterministic check — plan validation, boundary enforcement, contract validation, round
-gating — is a script call. Your job is the judgement around those calls: which lane to wake,
-whether a `blocked` event is real contract drift or a question you can answer yourself,
-whether a round's failures are worth re-running or worth waking a human for.
+You are the **orchestrator** of a `/deep-execute` run. An approved plan declares lanes with
+disjoint `owns` globs, an agent per lane, and one API contract. Every deterministic check —
+plan validation, boundary enforcement, contract validation, round gating — is a script call.
+Your job is the judgement around those calls: which lane to wake, whether a `blocked` event
+is real contract drift or a question you can answer, whether a failing round is worth a retry
+or a human.
 
-**You never write lane code.** Lane workers do that, in parallel, in their own Wave blocks,
-inside the SAME shared worktree. You commit, you gate, you reply — you don't edit their files.
+**You never write lane code.** Lane workers do that, in parallel, each in its own Orca
+terminal, inside the SAME shared worktree. You commit, you gate, you reply.
+
+Scripts live in `~/.claude/skills/deep-execute/scripts/`. `RUN_DIR` defaults to
+`~/.claude/deep-execute-runs/run-YYYYmmdd-HHMMSS`.
 
 ## Phase 0 — Preflight
 
-0. **Wrap the run in `/goal`.** `/goal` is built into Claude Code and Codex; it keeps an agent
-   driving toward a stated objective instead of stopping at the first natural pause. Open it
-   before anything else, with the objective stated as the *finished* run — not the next step:
+1. Open `/goal` unless a goal is already active, with the finished run as the objective:
+   every lane done and gated, reviewed, QA green, PR open, report built. If `/goal` is
+   unavailable, say so in one line and continue under the *Continuous run* rule.
+2. Require a clean worktree (`git status --porcelain`). Uncommitted work at init time
+   predates `baseline_commit` and reads as an unowned write from no lane.
+3. Do not ask the user for agents. Each lane runs the agent of the plan, which
+   `validate-plan.sh` already checked against `agents.allowlist`. A user override arrives as
+   `--agent LANE=AGENT` and must be one line of that file.
+4. On `--dry-run`, run `init-run.sh ... --dry-run`, show its output, and stop.
 
-   ```text
-   /goal Build <plan title> to a merged-ready state: every lane done and gated, /deep-review
-   clean, QA green with evidence, PR open, run report built. Stop only on a blocker no agent
-   can decide alone.
-   ```
+## Phase 1 — Contract and shared files, then scaffold and launch
 
-   The Rules' *Continuous run* clause says what not to stop for; `/goal` is what makes that
-   hold when a round drags or a lane goes quiet. If `/goal` is unavailable in this harness, say
-   so in one line and carry on under the rule alone — never treat its absence as permission to
-   check in between phases.
-
-1. Confirm the target plan is approved and `Mode: parallel` with a declared API contract
-   (deep-plan's `validate-plan.sh --root` already enforced this at plan time; `init-run.sh`
-   re-checks it before scaffolding anything).
-2. Require a clean worktree (`git status --porcelain`). A dirty tree at fan-out time means
-   uncommitted work that predates `baseline_commit` — `validate-run-state.sh`'s boundary
-   checks diff against that baseline, so anything already dirty at init time gets misread as
-   an unowned write from no lane at all.
-3. For each non-orchestrator lane, the plan's `agent` column is a **suggestion**, not a
-   decision. Present it via `AskUserQuestion` — options are the exact lines in
-   `agents.allowlist` — and let the user confirm or swap each lane's agent before launch.
-
-## Phase 1 — Contract and shared files, then scaffold
-
-1. Materialize the plan's contract file and every `shared_read_only` path, commit them —
-   **before fanout, and read-only for every lane afterward**. `init-run.sh` refuses to start
-   if any of these is missing or uncommitted; this is why.
-2. Run `init-run.sh PLAN RUN_DIR CWD ORCH_SURFACE`. It re-validates the plan, records
-   `baseline_commit` as the current `HEAD`, writes the schema-conformant `RUN_DIR/manifest.json`
-   (contract, workers, `max 3 rounds` by default), and scaffolds `events.jsonl`,
-   `lanes/<lane>/reply.md`, `worker-<lane>.files.txt` and the launch manifest `RUN_DIR/wave/`.
-3. If the user passed `--max-rounds N` and `N` differs from the default, patch
-   `RUN_DIR/manifest.json`'s `max_rounds` field now — `round-gate.sh` reads that field, never a
-   hardcoded number, so this is the only place the override needs to land.
-4. Launch confirmed specs through `orca-launch.sh RUN_DIR/wave CWD SPEC...`. It opens one Orca
-   terminal per lane in the run's workspace, runs `worker-loop.sh` in it, and records the
-   terminal handle as the lane's `block_ref`. Run the build inside an Orca workspace
-   (`orca worktree current`). Outside Orca, `wave-launch.sh` takes the same arguments.
+1. Materialize the contract file and every `shared_read_only` path and commit them. They are
+   committed before fanout and are read-only afterwards; `init-run.sh` refuses to start
+   otherwise.
+2. `init-run.sh PLAN RUN_DIR CWD ORCH_SURFACE [--max-rounds N] [--agent LANE=AGENT]...`
+   validates the plan, records `baseline_commit`, and writes `manifest.json` (round 1,
+   max 3 rounds by default), `events.jsonl`, `lanes/<lane>/replies/` and the `launch/`
+   directory: one rendered brief per lane (tasks, owns, test command, contract, script
+   paths), the worker rules, and the agent and session id of each lane. It refuses a
+   `RUN_DIR` that already holds a run.
+3. `orca-launch.sh RUN_DIR` opens one Orca terminal per lane in the run's workspace
+   (`orca worktree current`) and runs `worker-loop.sh` in it. Outside Orca, start
+   `worker-loop.sh RUN_DIR LANE` in any terminal, or with `nohup` (README, *Without Orca*).
 
 ## Phase 2 — Monitor and react
 
-Hold a `Monitor` on `monitor-events.sh RUN_DIR`, in a loop, for the whole round. Every trigger
-except `timeout` exits 0 — branch on the JSON `.type` field, never the exit code. The filter
-must cover the happy path AND the failure path alike: `waiting`, `blocked`, `question`, `done`
-— and `invalid_event`, `vanished_pane`, `fatal_signature`, `monitor_error`, `timeout`. A filter
-that only recognizes the first four goes silent on a crash, and silence reads as "still
-working" — treat every failure-signature trigger as its own incident, not a warning to log
-past.
+Hold a `Monitor` on `monitor-events.sh RUN_DIR`, in a loop. Branch on the JSON `.type`, never
+the exit code: `timeout` and `monitor_error` exit 1, everything else exits 0. The filter covers
+the happy path and the failure path alike: `waiting`, `blocked`, `question`, `done` — and
+`invalid_event`, `vanished_pane`, `fatal_signature`, `monitor_error`, `timeout`. A filter that
+knows only the first four goes silent on a crash, and silence reads as "still working".
 
-- **`question`** — answer from the plan or the materialized contract when the answer is
-  already decided there; otherwise `AskUserQuestion` the human and `reply.sh LANE` with their
-  answer.
-- **`waiting`** — a lane that finished its assigned work emits `waiting` and stops; it does
-  not poll. Read `board.sh RUN_DIR` (or the manifest's `depends_on`) and do not wake a
-  `waiting` lane until every lane in its `depends_on` has emitted `done`. A reply that never
-  arrives strands that lane forever — an unsent wake is an incident, not a warning.
-- **`blocked` — contract drift.** A worker blocked on the contract itself means the contract
-  is wrong, not the worker. Edit the materialized contract directly, bump its semantic version,
-  commit the change (workers never commit — see Rules), recompute its sha256 and patch
-  `manifest.json`'s `contract.version`/`contract.sha256` so `validate-contract.sh` checks
-  against the new baseline, then run `reply.sh RUN_DIR --all "<new version + summary>"` —
-  every lane needs to learn the contract moved, not just the one that noticed.
-- **`done`** — record it; once every non-orchestrator lane has emitted `done`, the round is
-  ready to gate.
-- **`invalid_event` / `vanished_pane` / `fatal_signature` / `monitor_error`** — investigate the
-  named lane (`board.sh --lane LANE`, a manual pane capture) before deciding whether to
-  restart it or escalate; never assume it will recover on its own.
-- **`timeout`** — nothing fired within the bound; call `monitor-events.sh` again unless the
-  silence itself looks like a stall worth investigating.
+**Acknowledge each event trigger after you acted on it:** `monitor-events.sh RUN_DIR --ack
+<seq>`. Until then every call returns the same trigger, so nothing is lost when you crash
+between the trigger and the reply.
 
-`decision` events never interrupt a round; Phase 5's report reads them. They die with the worker
-session, so when a lane makes a real design choice or works around something the plan missed,
-tell it in `reply.sh` to record it through `decision.sh`, then add a `D-NNN` row to the plan's
-`## Deviations` yourself (`_shared/spec-evidence.md` §3). A deviation that changes a requirement,
-rule, edge-case decision or contract goes to `AskUserQuestion` before the lane builds it.
+- **`question`** — answer from the plan or the contract when they decide it; otherwise
+  `AskUserQuestion`. Then `reply.sh RUN_DIR LANE "<answer>"`.
+- **`waiting`** — read `board.sh RUN_DIR` and wake the lane only when every lane in its
+  `depends_on` has emitted `done`. An unsent wake strands the lane: it is an incident.
+- **`blocked` — contract drift.** A worker blocked on the contract means the contract is
+  wrong. A contract change goes to `AskUserQuestion` first (`_shared/after-approval.md`).
+  After approval: tell the affected lanes to pause, edit the contract,
+  bump its semantic version, commit it, run `contract-bump.sh RUN_DIR <version>`, then `reply.sh RUN_DIR --all
+  "<new version + summary>"`. The bump records the approved checkpoint that the gate compares
+  the contract against.
+- **`done`** — record it; once every lane emitted `done` in this round, gate the round.
+- **`invalid_event` / `fatal_signature` / `monitor_error`** — investigate the lane
+  (`board.sh --lane LANE`, `lanes/<lane>/worker.log`) before you restart or escalate.
+- **`vanished_pane`** — the worker loop died. Relaunch it with `orca-launch.sh RUN_DIR LANE`;
+  it resumes the same session and delivers the replies that waited on disk.
+- **`timeout`** — call `monitor-events.sh` again unless the silence looks like a stall.
 
-## Phase 3 — Round gate
+`decision` events never interrupt a round. When a lane makes a real design choice, tell it to
+record it with `decision.sh`, and add the `D-NNN` row to the plan's `## Deviations` yourself
+(`_shared/spec-evidence.md` §3) — the run-state check accepts deviation-only plan edits.
+Record your own decisions in `RUN_DIR/decisions.md`.
 
-Once every non-orchestrator lane has emitted `done` for the round, run
-`round-gate.sh RUN_DIR ROUND --json`. It short-circuits lane tests → contract
-(`validate-contract.sh`) → run-state (`validate-run-state.sh`) → one light reviewer pass, in
-that fixed cheapest-first order, and reports every stage — including the ones it skipped.
+## Phase 3 — Round gate and round review
 
-**A failing `round-gate.sh` JSON is a hard gate: read which item failed, fix the root cause
-(route the fix back through the owning lane via `reply.sh`), rerun `round-gate.sh` — never
-advance the round on a failing gate.** `warn`-only items (e.g. `post-done-writes-absent`)
-never block; only `fail` does.
+Once every lane emitted `done` for the round, run `round-gate.sh RUN_DIR ROUND --json`. It
+checks, cheapest first: round bound and retry budget → round complete → lane tests →
+acceptance commands → contract (`validate-contract.sh`) → run state (`validate-run-state.sh`).
 
-For round 1 specifically, let `round-gate.sh`'s own review stage run and settle before
-surfacing anything about that round to the human — round 1 gets orchestrator review before
-anything reaches the human. Only a genuine hard-gate failure that survives a fix attempt, or
-the max-rounds cap below, is worth `AskUserQuestion`.
+**A failing `round-gate.sh` JSON is a hard gate: read the failed item, route the fix to the
+owning lane with `reply.sh`, rerun the gate — never advance the round on a failing gate.**
+`warn` items never block, but read each attribution warning before you commit. After 3 failed
+gates of one round, the gate refuses the round: `AskUserQuestion`.
 
-Once a round passes, commit it (`git add -A && git commit`) — workers never run `git`; the
-orchestrator is the sole committer, between rounds.
+When the round passes, commit it (`git add -A && git commit`). Then review it report-only:
+`Skill(skill="deep-review", args="default --scope <previous round commit>..HEAD --no-fix
+--no-simplify")`. Route each CRITICAL and HIGH fix to the owning lane, gate, commit.
+Round 1 gets orchestrator review before anything reaches the human. Then bump
+`manifest.json`'s `round` and start the next round, or go to Phase 4.
 
-**Then review the part that round finished.** Every round closes with a `/deep-review` scoped
-to that round's commit: `Skill(skill="deep-review", args="default --scope <previous round
-commit>..HEAD")`. The light reviewer in `round-gate.sh` does not replace it. Route each
-CRITICAL and HIGH fix back through the owning lane with `reply.sh`, re-run `round-gate.sh`, and
-commit the fix. The next round starts on reviewed code, so the code stays organized as it grows. Then bump `manifest.json`'s `round` and
-either start the next round (more tasks remain) or move to Phase 4.
+**After `max_rounds` rounds, stop and `AskUserQuestion`.** `round-gate.sh` refuses a round above
+the cap on its own.
 
-**After three rounds, stop and `AskUserQuestion`.** `round-gate.sh RUN_DIR 4` (or whatever
-exceeds `max_rounds`) already refuses outright with its own escalation record instead of
-running anything — obey it rather than calling it a fourth time on your own judgement.
+## Phase 4 — The shared chain, through the lanes
 
-## Phase 4 — Review, QA, gap fixes, frozen SHA, PR
+Run steps 2 to 9 of `~/.claude/skills/_shared/after-approval.md` in order, unattended, with
+its `/deep-execute` routing: every `/deep-review` runs `--no-fix --no-simplify`, and every fix
+from review or QA goes to the owning lane with `reply.sh`, then `round-gate.sh`, then a
+commit. A file that no lane owns goes to a fresh implementer. Mark the phases with
+`set-phase.sh RUN_DIR review|qa|delivery` as you reach steps 2, 3 and 7. Record each landed and
+rejected finding with `decision.sh` while it is still true.
 
-Run `set-phase.sh RUN_DIR review`, then run these steps **back to back, unattended**. Run section
-11 of `_shared/ui-quality.md` first when the UI design pass applies; a `light` stage uses `stage-light`.
-1. **Full peer review.** `Skill(skill="deep-review", args="default --reviewers 6 --ratio 3:3")`
-   over the whole run's diff. Each round already had its own scoped `/deep-review`; this pass
-   checks how the parts fit together. Route each required fix back through the **owning lane**
-   (`reply.sh`), never your own editor; rerun the relevant verification, commit.
-2. **Record it while it is still true.** Through `decision.sh`, per lane and for the review
-   itself: what was built, which findings landed, which were rejected and why. A fix nobody
-   recorded is a fix the Phase 5 report cannot show.
-3. Run `set-phase.sh RUN_DIR qa`, then run steps 3 to 5 of
-   `~/.claude/skills/_shared/after-approval.md`: check that the app URL answers, then start the
-   `qa-ui` agent when the plan has a UI design pass and the `qa-business` agent, in parallel.
-   Give each the running URL and the current SHA. When the URL does not answer, the report
-   says QA was skipped and why.
-4. **Gap fixes by a different agent.** The agent that tested never fixes what it found — hand
-   each gap, with its evidence and reproduction, to the owning lane (or a fresh implementer
-   once the lanes are torn down), record the fix, then re-run the QA agent. A gap closes when
-   QA says so, not when the fixer does. Loop 3 → 4 until QA is clean, capped at 3 QA rounds;
-   at the cap, `AskUserQuestion` with the surviving findings.
-5. **Freeze.** Commit, record the full `git rev-parse HEAD`, run `plan-stamp.sh check PLAN`. QA
-   evidence binds the commit it ran against — a later change invalidates it. Never finish on a
-   changed plan, or on missing, blocked or stale evidence; surface the blocker instead.
-6. Run `set-phase.sh RUN_DIR delivery`, then **open the PR.**
-   `Skill(skill="pr-description", args="--plan <plan.md> --ticket <KEY-123> --evidence <qa-index.html>")`
-   — requirements reconciled against the finished diff, Mermaid, key decisions, and the
-   **evidence** from step 3: screenshots for a changed screen, a GIF or recording for a changed
-   flow. Keep the returned PR URL for Phase 5.
+Before step 7, freeze: commit, record the full `git rev-parse HEAD`, and run `plan-stamp.sh
+check PLAN`. Never finish on a changed plan or on stale QA evidence. Open the PR with
+`--no-watch`, so the report comes before the watch.
 
-## Phase 5 — Run report
-
-Everything the run knows about itself is scattered across `manifest.json`, `events.jsonl`, the
-per-lane decision records, the plan and git. Build the single readable artifact from it — last,
-after the SHA is frozen and QA has run, so it reports the finished run rather than a snapshot
-of one mid-flight:
+## Phase 5 — Run report (step 8 of the chain)
 
 ```bash
-build-run-report.sh RUN_DIR \
-  --final-sha <full-sha> \
-  --review ~/.claude/deep-review-runs/<RUN_ID>/report.md \
-  --qa <path-to-qa-index.html> \
-  --pr <pr-url>
+build-run-report.sh RUN_DIR --final-sha <full-sha> \
+  --review ~/.claude/deep-review-runs/<RUN_ID>/report.md --qa <qa-index.html> --pr <pr-url>
 ```
 
-It writes `RUN_DIR/report/index.html` — a self-contained page covering what was built
-(diffstat baseline→final), the lane table with `owns`/`depends_on`, every decision, trade-off
-and assumption the lanes recorded, the plan's own pre-implementation rationale, drift (contract
-version moved, extra rounds, blocked events), the final board plus full event timeline, the
-review and QA evidence (screenshots and recordings live in the linked QA report), and the PR.
-
-Omit `--review`/`--qa`/`--pr` only when that artifact genuinely does not exist — the report says
-so explicitly, which is the honest rendering. **Do not hand-write or supplement this page from
-memory.** Every claim on it must come from a file in the run directory; a decision that no lane
-recorded through `decision.sh` is one this report legitimately does not have.
-
-Close the run with `finish-run.sh RUN_DIR [--qa PATH]` — it refuses to call a run finished with
-the report missing or unrendered, and opens it in a Wave block instead of printing a path. Report
-the board, contract version, rounds, SHA, QA verdict and PR URL too, and leave the blocks alive.
+It writes `RUN_DIR/report/index.html` from the run directory alone: what was built, the
+lanes, every recorded decision, `decisions.md`, the `D-NNN` deviations, drift, the board and
+timeline, review, QA, open findings and the PR. Omit `--review`/`--qa`/`--pr` only when that
+artifact does not exist; the page says so. **Do not hand-write or supplement this page from
+memory.** A decision no one recorded is absent from it, and that absence is the truthful
+output. Close with `finish-run.sh RUN_DIR [--qa PATH]`, which refuses a missing or unrendered
+report. Then start the PR watch (step 9) and leave the lane loops alive; teardown
+(`lanes/<lane>/stop`) is a separate step the user confirms.
 
 ## Resume (`--resume RUN_DIR`)
 
-Reconstructible from disk: `manifest.json` (round, `max_rounds`, contract state, worker
-list), the full history in `events.jsonl` via `board.sh`, and every round already committed
-to git. **Not** reconstructible: whether a lane's pane is still alive and mid-edit — the last
-line in `events.jsonl` proves only what that lane last reported, not its current state.
-Before resuming the monitor loop, probe every lane (a fresh `monitor-events.sh` call surfaces
-`vanished_pane`/`fatal_signature` for real) rather than trusting the board on faith.
+Reconstructible from disk: `manifest.json` (round, `max_rounds`, contract, checkpoint), the
+launch manifest (agents, session ids), the event history via `board.sh`, every unacknowledged
+trigger, and every round committed to git. **Not** reconstructible: whether a lane's process
+is still alive and mid-edit — the last event proves only what the lane last reported.
+
+1. Never run `init-run.sh` again; it refuses an existing run.
+2. Run `run-status.sh RUN_DIR`. Relaunch each `dead` lane with `orca-launch.sh RUN_DIR LANE`.
+3. Restart the `Monitor`. Its first liveness probe runs at once, and it replays every
+   unacknowledged `question`, `waiting` and `blocked` event before anything new.
 
 ## Attribution is self-declared, not authenticated
 
-`worker-<lane>.files.txt` is a log a lane writes about itself — any process with access to
-`RUN_DIR` could log any path under any lane's name. Do not describe it, in anything you say to
-the user, as proving who wrote what. The one enforced boundary is `changed-files-within-union`
-inside `validate-run-state.sh`: computed from git only, independent of any worker's own
-claims. Everything else attribution-shaped (`changed-files-attributed-once`,
-`worker-file-logs-valid`, `post-done-writes-absent`) is advisory diagnostic, not proof.
-
-The same holds for decision records: `lanes/<lane>/decisions/*.json` is what a lane said about
-its own reasoning. It is the best account of that reasoning anyone will get, and it is still an
-account, not an audit trail.
+`worker-<lane>.files.txt` is a log a lane writes about itself; any process with access to
+`RUN_DIR` could log any path under any lane's name. Never describe it as proof of who wrote
+what. The one enforced boundary is `changed-files-within-union` in `validate-run-state.sh`:
+computed from git only, independent of any worker's claims. `changed-files-attributed-once`,
+`worker-file-logs-valid` and `post-done-writes-absent` are advisory `warn` signals. Decision
+records are the same: a lane's own account of its reasoning, not an audit trail.
 
 ## Rules
 
-- **You orchestrate; you never implement.** Directing lanes, answering their questions, gating
-  rounds, routing review and QA findings back to the owning agent, and committing — that is the
-  whole job. The only way this session writes feature code is if the user explicitly asked for
-  it (deep-plan's option B), and a plan that reached `/deep-execute` did not.
-- **Continuous run.** Phases 2 → 5 run end to end without a check-in. Stop only for a genuine
-  blocker no agent can decide alone — an ambiguous product decision, a missing credential, a
-  hard-gate failure that survived a fix attempt, the round or QA cap. "This is a good moment to
-  report progress" is not a blocker; neither is a failing test you can route back to its lane.
-  Phase 0 wraps the run in `/goal` (below) so this survives a stall, not just your intent.
-- **The tester never fixes; the fixer never signs off.** QA gaps go back to the owning lane or
-  a fresh implementer, and the QA agent re-verifies the fix.
-- **Documentation is part of done.** The plan's `## Documentation impact` lists what goes
-  stale — those edits belong to a lane like any other file, and a round is not done with them
-  outstanding. Same for a project `README`/`docs/` page the change contradicts.
-- **Use the code-intel tools, not `grep`.** Serena (`find_symbol`, `find_referencing_symbols`,
-  `replace_symbol_body`) for exact symbol work, GitNexus (`impact` before editing a symbol,
-  `detect_changes` before committing) for blast radius, Graphify (`query`/`path`/`explain`,
-  `GRAPH_REPORT.md`) for cross-module reasoning. Tell every lane the same in its brief, and
-  refresh the indexes after the run (`gitnexus analyze`, `graphify update .`).
-- Workers never run `git` — the orchestrator is the sole committer, between rounds.
-- The contract and shared files are committed before fanout and are read-only afterwards.
-- A failing `round-gate.sh` JSON is a hard gate — read it, fix, rerun, never advance.
-- The plan suggests a lane's agent; `AskUserQuestion` confirms it against `agents.allowlist`.
-- Round 1 gets orchestrator review before anything reaches the human.
-- After three rounds, stop and `AskUserQuestion`.
+- **You orchestrate; you never implement.** The only way this session writes feature code is
+  an explicit user request (deep-plan's option B), and a plan that reached `/deep-execute` did
+  not make one.
+- **Continuous run.** Phases 2 to 5 run end to end without a check-in. Stop only for a
+  blocker no agent can decide: an ambiguous product decision, a contract change, a missing
+  credential, a spent retry budget, the round or QA cap.
+- Workers never run `git` (claude lanes have it as a disallowed tool);
+  the orchestrator is the sole committer, between rounds.
+- The plan's validated agent runs; `--agent` overrides it with a line of `agents.allowlist`.
+- **Documentation is part of done.** The plan's `## Documentation impact` edits belong to a
+  lane like any other file.
+- **Use the code-intel tools, not `grep`.** Serena for symbols, GitNexus (`impact`,
+  `detect_changes`) for blast radius, Graphify for cross-module questions. Tell every lane the
+  same, and refresh the indexes after the run.
 - The run report is built from the run directory by `build-run-report.sh`, never written by
-  hand — an unrecorded decision is absent from it, and that absence is the truthful output.
-- The run ends with a PR open, evidence attached, and the report linking both.
+  hand.

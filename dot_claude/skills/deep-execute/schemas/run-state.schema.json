@@ -29,6 +29,11 @@
           "type": "string",
           "pattern": "^[0-9a-f]{40}$"
         },
+        "checkpoint_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$",
+          "description": "The last approved contract state: baseline_commit at init, then the commit contract-bump.sh records. The contract and shared-file checks compare against it."
+        },
         "round": {
           "type": "integer",
           "minimum": 0
@@ -95,6 +100,7 @@
         "plan_path",
         "cwd",
         "baseline_commit",
+        "checkpoint_commit",
         "round",
         "max_rounds",
         "orchestrator_surface",
@@ -106,7 +112,7 @@
     },
     "event": {
       "type": "object",
-      "description": "A single lifecycle event emitted by a worker or the orchestrator.",
+      "description": "A single lifecycle event emitted by a worker or the orchestrator. schemas/event.jq is the executable form of this definition.",
       "properties": {
         "ts": {
           "type": "string",
@@ -137,6 +143,11 @@
           "type": "string",
           "pattern": "^[^\r\n]*$",
           "maxLength": 3000
+        },
+        "round": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The manifest round when event.sh wrote the event."
         }
       },
       "required": ["ts", "lane", "task", "type", "msg"],

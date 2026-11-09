@@ -1,5 +1,5 @@
 ---
-description: Executes approved deep-plan lanes, runs /deep-review 3:3 plus fixes, QA-tests with the qa-ui and qa-business agents, fixes the gaps with a different agent, freezes SHA, opens the PR with evidence, then builds the run's HTML decision report
+description: Executes approved deep-plan lanes in parallel Orca terminals, gates and report-only reviews each round, then runs the shared after-approval chain (review, QA, PR, report, PR watch) with every fix routed through the owning lane
 ---
 
 # /deep-execute
@@ -14,41 +14,39 @@ orchestrator commits, gates rounds, and mediates contract drift; workers never t
 
 ```
 /deep-execute <absolute-plan-path> [flags]
+/deep-execute --resume RUN_DIR
 
 FLAGS
-  --resume RUN_DIR       resume an existing run instead of starting a new one
+  --resume RUN_DIR       resume an existing run; the plan path comes from its manifest.json
   --max-rounds N         override the round cap (default 3)
+  --agent LANE=AGENT     replace the plan's agent of one lane (a line of agents.allowlist)
+  --dry-run              print the lanes, agents, contract and review count, then stop
 ```
+
+A new run writes to `~/.claude/deep-execute-runs/run-YYYYmmdd-HHMMSS`.
 
 ## What you must do
 
 You are the **orchestrator**. Invoke the `deep-execute` skill — do NOT scaffold the run
 directory, launch workers, or parse events by hand. The skill lives at
 `~/.claude/skills/deep-execute/SKILL.md`. Follow its protocol exactly: preflight the plan and
-the worktree, confirm each lane's agent via `AskUserQuestion` against `agents.allowlist`,
-commit the contract and shared files before fanout, scaffold and launch the lanes, hold the
-`Monitor` on the run's event stream, and gate every round before advancing.
+the worktree, commit the contract and shared files before fanout, scaffold and launch the
+lanes in Orca terminals, hold the `Monitor` on the run's event stream, and gate every round
+before advancing.
 
-**You orchestrate; you never write lane code.** And the run does not pause to check in — Phase 0
-opens `/goal` on the finished state, so it goes end to end and stops only on a blocker no agent
-can settle alone.
+**You orchestrate; you never write lane code.** The run does not pause to check in: it goes
+end to end and stops only on a blocker no agent can settle alone.
 
-Every task uses one Wave tab. Lane blocks have names and form one vertical column. The task's llmessage chat opens
-beside them. The orchestrator header shows current
-phase, task completion, percentage, and elapsed time; tab badge shows running, blocked, or complete.
-
-Once the lanes are done, the skill's Phase 4 and Phase 5 run the tail back to back: the full
-`/deep-review`, then steps 3 to 8 of `~/.claude/skills/_shared/after-approval.md` (the `qa-ui`
-and `qa-business` agents, gap fixes by a different agent, frozen SHA, `/pr`), then the run
-report, which a script builds from the run directory.
-
-Documentation the change makes stale is part of done, and lanes use Serena / GitNexus / Graphify
-rather than raw `grep`.
+Once the lanes are done, the skill runs steps 2 to 9 of
+`~/.claude/skills/_shared/after-approval.md`: the full `/deep-review`, the `qa-ui` and
+`qa-business` agents, frozen SHA, the PR, the run report built from the run directory, and the
+PR watch. Every fix goes back to the lane that owns the code.
 
 ### Quick examples
 
 ```bash
-/deep-execute /Users/me/project/.deep-plan-runs/2026-07-18/plan.md
-/deep-execute /Users/me/project/plan.md --max-rounds 5
+/deep-execute /Users/me/project/docs/superpowers/plans/2026-07-18-totals/plan.md
+/deep-execute /Users/me/project/docs/superpowers/plans/2026-07-18-totals/plan.md --dry-run
+/deep-execute /Users/me/project/docs/superpowers/plans/2026-07-18-totals/plan.md --max-rounds 5
 /deep-execute --resume ~/.claude/deep-execute-runs/run-20260718-140000
 ```

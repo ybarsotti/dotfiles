@@ -60,17 +60,42 @@ command -v jq >/dev/null 2>&1 || {
   exit 2
 }
 
+# A run manifest names the worker lanes and the current round. Without one (a
+# bare test directory), the lane is not checked and the event carries no round.
+MANIFEST="${RUN_DIR}/manifest.json"
+ROUND=""
+if [ -f "$MANIFEST" ]; then
+  KNOWN=$(jq -r --arg l "$LANE" --slurpfile st <(cat "${RUN_DIR}/status.json" 2>/dev/null || echo '{}') \
+    '([.workers[]?.lane] + [$st[0].orchestrator_lane // empty]) as $lanes
+     | if ($lanes | length) == 0 or ($lanes | index($l)) then "yes" else "no" end' "$MANIFEST" 2>/dev/null || echo yes)
+  [ "$KNOWN" = "yes" ] || {
+    echo "event.sh: lane '${LANE}' is not a lane of this run (see ${MANIFEST})" >&2
+    exit 1
+  }
+  ROUND=$(jq -r '.round // empty | select(type == "number")' "$MANIFEST" 2>/dev/null || true)
+fi
+
 LINE=$(jq -cn \
   --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   --arg lane "$LANE" \
   --arg task "$TASK" \
   --arg type "$TYPE" \
   --arg msg "$MSG" \
-  '{ts:$ts, lane:$lane, task:$task, type:$type, msg:$msg}')
+  --arg round "$ROUND" \
+  '{ts:$ts, lane:$lane, task:$task, type:$type, msg:$msg}
+   + (if $round == "" then {} else {round: ($round | tonumber)} end)')
 
 BYTES=$(printf '%s\n' "$LINE" | wc -c | tr -d ' ')
 [ "$BYTES" -lt 4096 ] || {
   printf 'event.sh: event is %s bytes; limit is 4095 (PIPE_BUF safety margin for atomic concurrent appends)\n' "$BYTES" >&2
+  exit 1
+}
+
+# The same validator every reader applies (schemas/event.jq). A line this
+# script writes is a line the monitor and the run-state check accept.
+EVENT_JQ="$(cd "$(dirname "${BASH_SOURCE[0]}")/../schemas" && pwd)/event.jq"
+jq -e -f "$EVENT_JQ" <<<"$LINE" >/dev/null 2>&1 || {
+  echo "event.sh: the event fails schemas/event.jq (empty task, or msg over 3000 characters?)" >&2
   exit 1
 }
 

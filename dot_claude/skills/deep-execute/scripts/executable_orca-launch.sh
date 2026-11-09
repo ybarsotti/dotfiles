@@ -1,40 +1,40 @@
 #!/usr/bin/env bash
-# orca-launch.sh — launch every lane worker as an Orca terminal.
+# orca-launch.sh — starts the worker loop of each lane in its own Orca terminal.
 #
 # Usage:
-#   orca-launch.sh WAVE_DIR CWD SPEC...
+#   orca-launch.sh RUN_DIR [LANE...]
 #
-# The interface is the one wave-launch.sh has, so init-run.sh, prepare-run.sh and the
-# manifest stay as they are. WAVE_DIR is only the name of the launch directory that
-# prepare-run.sh scaffolds; nothing here needs Wave.
+# With no LANE, every lane of RUN_DIR/launch/manifest.json starts. Name lanes
+# to relaunch only those, for example after a crash: worker-loop.sh resumes the
+# lane's pinned session and delivers the replies that waited on disk.
 #
-# Each lane runs worker-loop.sh in its own Orca terminal in the run's workspace. The
-# wake is still the file `lanes/<lane>/reply.md`, which reply.sh writes. The terminal
-# handle (`term_...`) goes into the lane's `block_ref`, which reply.sh uses for its
-# liveness check.
+# The runner, model, effort and session id come from the launch manifest that
+# init-run.sh wrote, so a relaunch uses the same agent and the same session.
+# The terminal opens in the run's worktree (manifest.json's `cwd`), which must
+# be inside an Orca workspace (`orca worktree current`). The terminal handle
+# goes into the lane's `block_ref`, for a human who wants to watch the lane.
+# Liveness does not depend on it: the loop's own pid file is the signal.
 #
-# CWD must be inside an Orca workspace. `orca worktree current` says whether it is.
+# Without Orca, start each loop in any terminal, or headless:
+#   nohup worker-loop.sh RUN_DIR LANE >/dev/null 2>&1 &
 #
-# Every lane is attempted even after one fails, and the exit code is 1 if any lane
-# failed to launch.
+# Every lane is attempted even after one fails; the exit is 1 if any lane did
+# not launch.
 set -uo pipefail
 
-if [ $# -lt 3 ]; then
-	echo "orca-launch.sh: usage: orca-launch.sh WAVE_DIR CWD SPEC..." >&2
+if [ $# -lt 1 ]; then
+	echo "orca-launch.sh: usage: orca-launch.sh RUN_DIR [LANE...]" >&2
 	exit 2
 fi
-
-WAVE_DIR="$1"
-CWD="$2"
-shift 2
-
-MANIFEST="${WAVE_DIR}/manifest.json"
-[ -f "$MANIFEST" ] || {
-	echo "orca-launch.sh: missing ${MANIFEST} — run prepare-run.sh first" >&2
+RUN_DIR="$(cd "$1" 2>/dev/null && pwd)" || {
+	echo "orca-launch.sh: no such run directory: $1" >&2
 	exit 2
 }
-[ -d "$CWD" ] || {
-	echo "orca-launch.sh: CWD is not a directory: ${CWD}" >&2
+shift
+
+LAUNCH="${RUN_DIR}/launch/manifest.json"
+[ -f "$LAUNCH" ] || {
+	echo "orca-launch.sh: missing ${LAUNCH} — run init-run.sh first" >&2
 	exit 2
 }
 command -v jq >/dev/null 2>&1 || {
@@ -42,66 +42,41 @@ command -v jq >/dev/null 2>&1 || {
 	exit 2
 }
 command -v orca >/dev/null 2>&1 || {
-	echo "orca-launch.sh: orca not found — open Orca, or use wave-launch.sh inside Wave" >&2
+	echo "orca-launch.sh: orca not found — open Orca, or start worker-loop.sh by hand (see the header)" >&2
 	exit 2
 }
+CWD=$(jq -r '.cwd' "${RUN_DIR}/manifest.json")
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKER_LOOP="${SCRIPT_DIR}/worker-loop.sh"
 [ -f "$WORKER_LOOP" ] || WORKER_LOOP="${SCRIPT_DIR}/executable_worker-loop.sh"
-[ -f "$WORKER_LOOP" ] || {
-	echo "orca-launch.sh: cannot find worker-loop.sh next to this script" >&2
-	exit 2
-}
 
-new_uuid() {
-	if command -v uuidgen >/dev/null 2>&1; then
-		uuidgen | tr '[:upper:]' '[:lower:]'
-	else
-		cat /proc/sys/kernel/random/uuid
-	fi
-}
+LANES=("$@")
+if [ ${#LANES[@]} -eq 0 ]; then
+	while IFS= read -r l; do
+		[ -n "$l" ] && LANES+=("$l")
+	done < <(jq -r '.workers[]?.name' "$LAUNCH")
+fi
 
 FAILED=0
-for spec in "$@"; do
-	LANE="${spec%%:*}"
-	REST="${spec#*:}"
-	if [ "$REST" = "$spec" ]; then
-		RUNNER="claude"
-		MODEL="sonnet"
-	else
-		RUNNER="${REST%%:*}"
-		MODEL="${REST#*:}"
-		MODEL="${MODEL%%@*}"
-		[ -n "$RUNNER" ] || RUNNER="claude"
-		[ -n "$MODEL" ] || MODEL="sonnet"
-	fi
-
-	PROMPT_FILE=$(jq -r --arg n "$LANE" '.workers[]? | select(.name == $n) | .prompt_file // empty' "$MANIFEST")
-	if [ -z "$PROMPT_FILE" ] || [ ! -f "$PROMPT_FILE" ]; then
+for LANE in "${LANES[@]}"; do
+	if ! jq -e --arg n "$LANE" 'any(.workers[]?; .name == $n)' "$LAUNCH" >/dev/null; then
 		FAILED=1
-		jq -n --arg lane "$LANE" --arg detail "no prompt_file for lane in ${MANIFEST}" \
-			'{lane: $lane, launched: false, detail: $detail}'
+		jq -n --arg lane "$LANE" --arg detail "no record for lane in ${LAUNCH}" '{lane: $lane, launched: false, detail: $detail}'
 		continue
 	fi
-
-	SESSION_ID=$(new_uuid)
 	# Orca types --command into a login shell, so quote every argument for that shell.
-	COMMAND=$(printf '%q ' "$WORKER_LOOP" "$(dirname "$WAVE_DIR")" "$LANE" "$SESSION_ID" "$RUNNER" "$MODEL" "$PROMPT_FILE")
-
+	COMMAND=$(printf '%q ' bash "$WORKER_LOOP" "$RUN_DIR" "$LANE")
 	if OUT=$(orca terminal create --worktree "path:${CWD}" --title "Lane · ${LANE}" --command "$COMMAND" --json 2>&1) &&
 		HANDLE=$(printf '%s' "$OUT" | jq -r '[.. | .handle? // empty | strings] | first // empty') &&
 		[ -n "$HANDLE" ]; then
-		TMP=$(mktemp)
-		jq --arg n "$LANE" --arg b "$HANDLE" --arg s "$SESSION_ID" \
-			'.workers = [.workers[]? | if .name == $n then .block_ref = $b | .session_id = $s | .status = "running" else . end]' \
-			"$MANIFEST" >"$TMP" && mv "$TMP" "$MANIFEST"
-		jq -n --arg lane "$LANE" --arg block "$HANDLE" --arg session "$SESSION_ID" \
-			'{lane: $lane, launched: true, block_ref: $block, session_id: $session}'
+		TMP=$(mktemp "${RUN_DIR}/launch/.manifest.XXXXXX")
+		jq --arg n "$LANE" --arg b "$HANDLE" \
+			'.workers = [.workers[] | if .name == $n then .block_ref = $b else . end]' "$LAUNCH" >"$TMP" && mv "$TMP" "$LAUNCH"
+		jq -n --arg lane "$LANE" --arg block "$HANDLE" '{lane: $lane, launched: true, block_ref: $block}'
 	else
 		FAILED=1
-		jq -n --arg lane "$LANE" --arg detail "orca terminal create failed: ${OUT:-no output}" \
-			'{lane: $lane, launched: false, detail: $detail}'
+		jq -n --arg lane "$LANE" --arg detail "orca terminal create failed: ${OUT:-no output}" '{lane: $lane, launched: false, detail: $detail}'
 	fi
 done
 

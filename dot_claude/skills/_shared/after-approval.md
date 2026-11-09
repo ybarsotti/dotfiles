@@ -2,8 +2,8 @@
 
 The approval of the plan is the go signal. Do not stop at a handoff and do not wait for the
 user to type the next command. Run the steps below in order, unattended, until the PR is open
-and the report is delivered. `deep-plan`, `simple-plan`, `jira-workflow` and `implement` all
-use this chain. This file is the only full description of it; other files point here.
+and the report is delivered. `deep-plan`, `simple-plan`, `jira-workflow`, `implement` and
+`deep-execute` all use this chain. This file is the only full description of it; other files point here.
 
 Stop early only in these cases:
 
@@ -13,8 +13,8 @@ Stop early only in these cases:
 
 ## 0. Hold the chain open
 
-1. Open `/goal`. State the objective as the finished result: "built, reviewed, QA green,
-   PR open, report delivered". Name the plan path in it.
+1. Open `/goal` unless a goal is already active. State the objective as the finished result:
+   "built, reviewed, QA green, PR open, report delivered". Name the plan path in it.
 2. Record each decision you make on the way in `$RUN_DIR/decisions.md`: the decision, the
    rejected alternative, and the reason. The report reads this file.
 
@@ -53,14 +53,20 @@ stage, or a slice in options C and D. Before the next part starts, run
 finding through the agent that wrote the part, then commit. The next part builds on reviewed
 code.
 
-`/deep-execute` runs steps 2 to 6 itself. For options B, C and D, run them from this session.
+`/deep-execute` runs steps 2 to 9 itself. For options B, C and D, run them from this session.
+
+**Under `/deep-execute`, the lane that owns the code applies every fix.** Run each
+`/deep-review` with `--no-fix --no-simplify`, so the review only reports. Send each fix to
+the owning lane with `reply.sh RUN_DIR LANE "<finding, file, line, fix>"`, gate the fix with
+`round-gate.sh`, then commit. A file that no lane owns goes to a fresh implementer agent.
 
 ## 2. Review
 
 1. Run `/deep-review default` over the whole change. Each part had its own review; this pass
    checks how the parts fit together. Its Phase 4.5 fixes every CRITICAL and HIGH finding and
    re-runs the panel, for 2 fix rounds at most.
-2. A separate agent applies the fixes. The reviewer never fixes its own finding.
+2. A separate agent applies the fixes. The reviewer never fixes its own finding. Under
+   `/deep-execute`, that agent is the owning lane (section 1).
 3. Fix a MEDIUM finding when the fix is local and does not change behavior. Record every
    finding you do not fix, with the reason, under `## Open findings`.
 
@@ -108,8 +114,8 @@ When a fix changes code that the review saw, run `/deep-review` once more on the
 
 0. When `.workflow/config.json` exists, run `Skill(skill="workflow-post-implementation")` with the step 2 review and the QA results as evidence. It chains to `workflow-finish`.
 1. Freeze the commit SHA. Every result in the report names this SHA.
-2. Run `/pr`. It attaches the screenshots and the video with `gh --attach`, and it watches
-   the PR for review comments and CI until the PR merges or closes.
+2. Run `/pr --no-watch`. It attaches the screenshots and the video with `gh --attach`, opens
+   the PR and returns. The watch starts in step 9, after the report.
 3. When the change adds or alters a feature a person uses, record a narrated demo with the
    `video-demo` skill after the PR is open. Attach it with `gh pr edit <n> --attach` under a
    `## Demo` heading, and link it in the report. Skip it for a refactor, a lone migration or
@@ -132,3 +138,10 @@ and D do not write. For options B, C and D, write `$RUN_DIR/report/index.html` y
 
 Copy each image and video into `$RUN_DIR/report/media/` and link it by a relative path.
 Then run `open "$RUN_DIR/report/index.html"` and give the user the absolute path.
+
+## 9. Watch the PR
+
+Start the watch of Phase 5 of `~/.claude/skills/pr-description/SKILL.md` on the PR number:
+review comments go to `address-pr-comments`, failing checks to systematic debugging, until the
+PR merges or closes. Under `/deep-execute`, a fix still goes to the owning lane while its loop
+runs.

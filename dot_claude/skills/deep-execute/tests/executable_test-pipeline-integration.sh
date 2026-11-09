@@ -19,21 +19,16 @@ assert_exit 0 jq -e '
   .properties.decision.properties.kind.enum == ["decision", "assumption"]
 ' "$SCHEMA"
 
-# The event-type enum lives in FOUR places that are kept in sync by hand — this
-# schema, event.sh's `case`, monitor-events.sh's `event_line_valid`, and
-# validate-run-state.sh's `events-schema-valid` check. The pin above catches a
-# schema-side edit; these catch the three copies drifting away from it, which is
-# the failure that actually bites (an event type a worker can write but the
-# validator rejects, or vice versa).
-# Matched against each copy's own syntax, not a bare word — "decision" appears
-# in prose in all three files, so a loose grep would pass even with the enum
-# member missing.
+# The event rules live in the schema above and in ONE validator,
+# schemas/event.jq, which event.sh, monitor-events.sh and validate-run-state.sh
+# all run (run-viewer.py mirrors it; its test sends the boundary lines through).
+# These pins catch a consumer that drops the shared validator for a hand copy.
+EVENT_JQ="${ROOT}/dot_claude/skills/deep-execute/schemas/event.jq"
+assert_exit 0 grep -qF '"blocked", "done", "decision")' "$EVENT_JQ"
 assert_exit 0 grep -qF '| done | decision)' \
   "${ROOT}/dot_claude/skills/deep-execute/scripts/executable_event.sh"
-for JQ_COPY in \
-  "${ROOT}/dot_claude/skills/deep-execute/scripts/executable_monitor-events.sh" \
-  "${ROOT}/dot_claude/skills/deep-execute/scripts/executable_validate-run-state.sh"; do
-  assert_exit 0 grep -qF '.type == "decision"' "$JQ_COPY"
+for JQ_USER in event monitor-events validate-run-state; do
+  assert_exit 0 grep -qF 'event.jq' "${ROOT}/dot_claude/skills/deep-execute/scripts/executable_${JQ_USER}.sh"
 done
 
 ALLOW="${ROOT}/dot_claude/skills/deep-execute/agents.allowlist"
@@ -306,7 +301,7 @@ assert_eq "$(jq -r '.contract.path' "${RUN_DIR}/manifest.json")" "src/shared/con
   "manifest carries the fixture's contract path"
 assert_eq "$(jq -r '.baseline_commit' "${RUN_DIR}/manifest.json")" "$(git -C "$REPO" rev-parse HEAD)" \
   "manifest baseline_commit == the throwaway repo's HEAD at init time"
-assert_exit 0 test -f "${RUN_DIR}/wave/worker-planning.prompt.md"
+assert_exit 0 test -f "${RUN_DIR}/launch/worker-planning.prompt.md"
 
 # ─── Step 1d: the contract validates against what init-run.sh wrote ───────
 
@@ -327,6 +322,33 @@ assert_eq "$(jq -r '.[] | select(.item=="manifest-schema-valid") | .status' <<<"
   "the manifest init-run.sh wrote satisfies run-state.schema.json"
 assert_eq "$(jq -r '.[] | select(.item=="changed-files-within-union") | .status' <<<"$STATE_JSON")" pass \
   "a fresh run has no baseline-diff changes yet"
+
+# ─── Step 2: deep-plan publication, then the init-run.sh handoff ──────────
+# deep-plan publishes the approved plan into the project and hands the
+# published copy to /deep-execute. validate-plan.sh --root reads two files next
+# to the plan (codeintel-status.json and superpowers-receipts.log), so a copy of
+# plan.md and subplans/ alone fails the handoff. publish-plan.sh copies the
+# whole validation bundle, stamps the copy and validates it from the project root.
+
+PUBLISH="${ROOT}/dot_claude/skills/deep-plan/scripts/executable_publish-plan.sh"
+NAIVE="${REPO}/docs/naive"
+mkdir -p "$NAIVE"
+cp "$PLAN" "$NAIVE/"
+cp -R "${PLAN_SCRATCH}/subplans" "$NAIVE/"
+assert_exit 1 "$INIT_RUN" "${NAIVE}/plan.md" "$(mktemp -d)/run" "$REPO" "surface:test"
+rm -rf "$NAIVE"
+
+DEST="${REPO}/docs/superpowers/plans/2026-11-09-fixture"
+PUBLISH_RC=0
+PUBLISHED=$("$PUBLISH" "$PLAN_SCRATCH" "$DEST" 2>/dev/null) || PUBLISH_RC=$?
+assert_eq "$PUBLISH_RC" 0 "publish-plan.sh: publishes a plan that validates from the project root"
+assert_eq "$PUBLISHED" "${DEST}/plan.md" "publish-plan.sh: prints the published plan path"
+for f in plan.md plan.md.approved codeintel-status.json superpowers-receipts.log subplans/planning.md; do
+  assert_exit 0 test -f "${DEST}/${f}"
+done
+git -C "$REPO" add -A
+git -C "$REPO" commit --quiet -m "publish the approved plan"
+assert_exit 0 "$INIT_RUN" "${DEST}/plan.md" "$(mktemp -d)/run" "$REPO" "surface:test"
 
 # ─── Step 1f: no real agent binary was ever invoked ────────────────────────
 

@@ -1,63 +1,95 @@
 # deep-execute
 
-Runs an approved [deep-plan](../deep-plan/README.md) parallel plan as lane workers, in
-parallel Wave Terminal blocks, inside ONE shared git worktree. Every worker stays inside its lane's
-declared `owns` globs; the orchestrator is the sole committer, gates every round, and never
-lets a worker touch `git` itself.
+Runs an approved [deep-plan](../deep-plan/README.md) parallel plan as lane workers, one Orca
+terminal per lane, inside ONE shared git worktree. Each worker stays inside its lane's `owns`
+globs; the orchestrator is the sole committer, gates every round, and routes every fix back to
+the lane that owns the code. `SKILL.md` is the orchestrator's procedure; this file is the
+reference for the person who runs it.
 
 ## Quick start
 
+Prerequisites:
+
+- [ ] The plan is approved and published (`publish-plan.sh`), with `Mode: parallel`, disjoint
+      lanes and one API contract. `_shared/plan-routing.md` says when a plan qualifies.
+- [ ] The worktree is clean (`git status --porcelain` prints nothing).
+- [ ] The contract file and every `shared_read_only` file exist and are committed.
+- [ ] The session runs inside an Orca workspace (`orca worktree current` succeeds).
+- [ ] `jq`, `git`, `claude`, and `codex` when a lane uses it, are on `PATH`.
+- [ ] bash 4 or later is on `PATH` (`bash --version`; macOS needs `brew install bash`).
+
+Run it from Claude Code:
+
 ```bash
-# 1. Have an approved plan whose Execution shape declares Mode: parallel, disjoint lanes,
-#    and one API contract (deep-plan produces exactly this shape).
-
-# 2. Run the slash command from Claude Code
-/deep-execute /absolute/path/to/plan.md
-/deep-execute /absolute/path/to/plan.md --max-rounds 5
-/deep-execute /absolute/path/to/plan.md --resume ~/.claude/deep-execute-runs/<RUN_ID>
+/deep-execute /abs/path/docs/superpowers/plans/2026-11-09-totals/plan.md
 ```
 
-## Architecture
+- The run directory defaults to `~/.claude/deep-execute-runs/run-YYYYmmdd-HHMMSS`.
+- `--dry-run` scaffolds into a temporary directory, prints the lanes, agents, contract and
+  expected review count, and stops.
+- `--max-rounds N` changes the cap (default max 3 rounds).
+- `--agent LANE=AGENT` replaces the plan's agent of one lane; AGENT is a line of
+  `agents.allowlist`.
+- Resume an interrupted run: `/deep-execute --resume RUN_DIR`. It reads the plan from the
+  run's `manifest.json`.
+
+Known tradeoff: claude lanes run with `--dangerously-skip-permissions`, with no sandbox. They
+rely on the shared-worktree boundary checks and on `Bash(git:*)` as a disallowed tool. Codex
+lanes run in the `workspace-write` sandbox, with the run directory writable and network on.
+
+## Scripts
 
 ```
-slash command (~/.claude/commands/deep-execute.md)
-   │
-   ▼
-SKILL.md (this skill — orchestrates)
-   │
-   ▼
-scripts/init-run.sh        — validates the plan, scaffolds RUN_DIR + manifest.json
-scripts/event.sh           — atomic append to events.jsonl (workers call this, not the orchestrator)
-scripts/board.sh           — folds events.jsonl to a Markdown status table
-scripts/run-status.sh      — phase, task percentage, elapsed time, and Wave status
-scripts/set-phase.sh       — advances the human-facing phase without mutating the run manifest
-scripts/monitor-events.sh  — blocks, emits ONE trigger JSON, never guesses past what it observed
-scripts/reply.sh           — writes lanes/<lane>/reply.md and wakes the pane
-scripts/validate-contract.sh   — sha256 / version / lint check on the contract
-scripts/validate-run-state.sh  — schema + boundary checks (the union guarantee lives here)
-scripts/round-gate.sh      — lane-tests → contract → run-state → light review, in that order
-scripts/decision.sh        — records one lane decision/assumption, then announces it on the log
-scripts/build-run-report.sh — renders the run's HTML report from the run directory alone
+scripts/init-run.sh          validates the plan, scaffolds RUN_DIR once (refuses a second call)
+scripts/orca-launch.sh       one Orca terminal per lane running worker-loop.sh; relaunches a lane
+scripts/worker-loop.sh       runs one lane as agent turns: brief first, then each reply
+scripts/event.sh             atomic append to events.jsonl (workers call it)
+scripts/board.sh             folds events.jsonl to a Markdown status table
+scripts/monitor-events.sh    blocks, emits ONE trigger JSON; --ack SEQ marks it handled
+scripts/reply.sh             publishes a numbered reply for a lane; the publish is the wake
+scripts/contract-bump.sh     records an approved contract change and its checkpoint commit
+scripts/validate-contract.sh sha256 / version / lint check on the contract
+scripts/validate-run-state.sh schema + boundary checks (the union guarantee lives here)
+scripts/round-gate.sh        round bound → round complete → lane tests → acceptance → contract → run state
+scripts/decision.sh          records one lane decision or assumption
+scripts/build-run-report.sh  renders the run's HTML report from the run directory alone
+scripts/finish-run.sh        refuses to finish without a rendered report, then opens it
+scripts/run-status.sh        phase, task percentage, elapsed time, and the loop state of each lane
+scripts/set-phase.sh         advances the human-facing phase
+schemas/event.jq             the one event validator that every writer and reader applies
 ```
 
-`init-run.sh` scaffolds `RUN_DIR/wave/` as the launch transport's own run directory (a
-different manifest shape than this skill's own `RUN_DIR/manifest.json`) and `wave-launch.sh`
-launches each lane there as a Wave block running `worker-loop.sh`.
+## The lane loop
 
-**Why a loop instead of a REPL.** Wave has no way to type into a live block — `wsh run`
-launches one and `wsh termscrollback` reads one, but there is no `wsh send`. So the wake
-is a file:
-`worker-loop.sh` blocks on `lanes/<lane>/reply.md` and resumes the lane's session when it
-moves. Each lane is pinned to its own `--session-id` UUID, because every lane shares one
-worktree and resuming "the last session" would cross lanes. Codex lanes are stateless per
-turn — `codex exec resume` takes a session id but nothing pins one at creation — so a codex
-lane re-reads its prompt file and reply each turn instead.
+The orchestrator never types into a terminal. Each lane runs `worker-loop.sh RUN_DIR LANE`,
+which takes its runner, model, effort and session id from `launch/manifest.json`:
+
+- The first turn sends the rendered brief (`launch/worker-<lane>.prompt.md`), with the worker
+  rules (`launch/system-prompt.txt`) as a system prompt.
+- `reply.sh` publishes `lanes/<lane>/replies/<NNNNNN>.md` atomically. The loop delivers every
+  reply above `replies.consumed` on its next turn, also one that landed mid-turn.
+- A claude lane keeps one conversation: `--session-id` on the first turn, `--resume` after, also
+  after a relaunch. A codex lane is stateless, so each codex turn sends the rules and the brief
+  again.
+- `done` ends a round, not the lane: the loop waits for the next reply. It exits 0 only when
+  `lanes/<lane>/stop` exists.
+- The loop writes `lanes/<lane>/loop.pid` and tees the agent output to
+  `lanes/<lane>/worker.log`. A failing agent, a turn timeout and the turn cap emit `blocked`.
+
+### Without Orca
+
+Start each loop in any terminal, or headless:
+
+```bash
+nohup ~/.claude/skills/deep-execute/scripts/worker-loop.sh RUN_DIR LANE >/dev/null 2>&1 &
+```
+
+Liveness reads the pid file, so the monitor and `reply.sh` work the same way.
 
 ## The lane-agent allowlist
 
-The plan's `agent` column (e.g. `opus high`, `codex gpt-5.6-terra high`) is a **suggestion**.
-Before launch, the orchestrator confirms or swaps each lane's agent via `AskUserQuestion`,
-offering exactly the lines in `agents.allowlist`:
+The plan's `agent` column must be one of the lines in `agents.allowlist`, which
+`validate-plan.sh` checks. That agent runs without a second question; `--agent` overrides it.
 
 ```
 opus high
@@ -66,138 +98,62 @@ codex gpt-5.6-terra high
 codex gpt-6-sol medium
 ```
 
-`validate-plan.sh` already checked the plan's suggestion is one of these lines; the
-`AskUserQuestion` step is about the human's judgement, not a second validity check.
-
 ## Event / reply protocol
 
-Workers never talk to the orchestrator except through two scripts:
-
-- **`event.sh RUN_DIR LANE TASK TYPE MSG [--files PATH...]`** — the only way to write to
-  `events.jsonl`. `TYPE` is one of `task_start`, `task_done`, `progress`, `question`,
-  `waiting`, `blocked`, `done` (plus `decision`, which only `decision.sh` emits). `--files`
-  appends to that lane's `worker-<lane>.files.txt` attribution log in the same call.
-- **`board.sh RUN_DIR [--lane LANE]`** — the only way a worker reads run state; folds the
-  log to the latest event per (lane, task) as a Markdown table.
-- **`decision.sh RUN_DIR LANE TASK --title T --rationale R [--kind decision|assumption]
-  [--alternative A]... [--tradeoff T]...`** — records one non-obvious choice.
-
-A lane that finishes its assigned work emits `waiting` and **stops** — it does not poll. The
-orchestrator's `Monitor` sits on `monitor-events.sh RUN_DIR`, which blocks until exactly one
-trigger fires (draining any backlog first, so an event that landed before the monitor
-attached is never missed) and prints one JSON line:
-
-```json
-{"type": "waiting", "lane": "backend", "task": "Task 3", "msg": "...", "run_dir": "..."}
-```
-
-`type` is one of the happy-path triggers (`waiting`, `blocked`, `question`, `done`) or a
-failure signature (`invalid_event`, `vanished_pane`, `fatal_signature`, `monitor_error`,
-`timeout`) — every trigger except `timeout` exits 0, so the caller must branch on `.type`,
-never the exit code. Once the orchestrator has something for a lane, `reply.sh RUN_DIR
-LANE MESSAGE` (or `reply.sh RUN_DIR --all MESSAGE` for a contract-wide announcement) writes
-`lanes/<lane>/reply.md`, and that write IS the wake. `reply.sh` attempts
-every lane even when an earlier one fails to wake, and reports each lane's outcome as its own
-JSON line — a wake failure is surfaced, never swallowed, because a `waiting` lane that never
-gets its reply is stranded by design.
+- **`event.sh RUN_DIR LANE TASK TYPE MSG [--files PATH...]`** — the only way to write
+  `events.jsonl`. `TYPE` is `task_start`, `task_done`, `progress`, `question`, `waiting`,
+  `blocked` or `done` (`decision` comes from `decision.sh`). The lane must be a lane of the run;
+  the event carries the round from `manifest.json`. `--files` appends to that lane's
+  `worker-<lane>.files.txt`.
+- **`board.sh RUN_DIR [--lane LANE]`** — the latest event per (lane, task) as a table.
+- **`monitor-events.sh RUN_DIR`** prints one trigger: `question`, `waiting`, `blocked`,
+  `done`, `invalid_event`, `vanished_pane`, `fatal_signature`, `monitor_error` or `timeout`.
+  `timeout` and `monitor_error` exit 1; the others exit 0. An event trigger repeats until
+  `monitor-events.sh RUN_DIR --ack <seq>`, so a crash between trigger and reply loses nothing.
+- **`reply.sh RUN_DIR LANE|--all MESSAGE`** — one JSON line per lane; `woken:false` when the
+  lane's loop is not running. The reply waits on disk for the relaunch.
 
 ## Round policy
 
-`round-gate.sh RUN_DIR ROUND --json` runs, in this fixed cheapest-first order, short-
-circuiting on the first failure: lane tests (each lane's own `test_command`) → contract
-(`validate-contract.sh`) → run-state (`validate-run-state.sh`) → one light reviewer pass
-(deep-review's `project-fit` persona, must `APPROVE`). Every stage's records are
-returned even when skipped — nothing is silently omitted, nothing skipped is reported as
-having passed. A `fail` blocks the round; `warn` (e.g. `post-done-writes-absent`) never does.
-
-The default cap is **max 3 rounds**, read from `manifest.json`'s `max_rounds` (patched at
-init time if `--max-rounds N` was passed). Calling `round-gate.sh` for a round beyond the cap
-refuses outright — an escalation record, every other stage skipped — rather than running
-anything. The orchestrator commits each passing round (`git add -A && git commit`); workers
-never run `git` themselves. After three rounds without a clean pass, the orchestrator stops
-and calls `AskUserQuestion` rather than looping on its own judgement.
+`round-gate.sh RUN_DIR ROUND --json` short-circuits in a fixed order and reports every stage,
+the skipped ones too. A `fail` blocks the round; `warn` never does. A child validator that
+crashes is a `fail`. The default cap is max 3 rounds (`--max-rounds N`). After 3 failed gates of
+one round, the gate refuses the round until a human decides. After each passing round the
+orchestrator commits, then runs a report-only `/deep-review` and routes the fixes to the lanes.
 
 ## Contract drift
 
-A `blocked` event about the contract itself means the contract needs to change, not the
-worker. The orchestrator edits the materialized contract, bumps its semantic version,
-commits (workers never commit), recomputes the sha256 and patches `manifest.json`'s
-`contract.version`/`contract.sha256`, then runs `reply.sh RUN_DIR --all` with the new
-version — every lane learns the change, not just the one that hit it.
-
-## Resume
-
-`--resume RUN_DIR` reconstructs from disk what's genuinely on disk: `manifest.json` (round,
-`max_rounds`, contract state, worker list), the full event history via `board.sh`, and every
-round already committed to git. It does **not** reconstruct whether a given lane's pane is
-still alive and mid-edit — the last event in `events.jsonl` proves only what that lane last
-reported. Resume re-probes every lane through `monitor-events.sh` (which surfaces
-`vanished_pane`/`fatal_signature` for real) before trusting the board and resuming the wait
-loop.
+A `blocked` event about the contract means the contract must change. After the user approves,
+the orchestrator edits the contract, bumps its semantic version, commits it, runs
+`contract-bump.sh RUN_DIR VERSION`, and announces it with `reply.sh RUN_DIR --all`. The bump
+stores the new hash and `checkpoint_commit`; the contract checks compare against that
+checkpoint, and `baseline_commit` stays the start of the run.
 
 ## Attribution: what is and isn't enforced
 
-`worker-<lane>.files.txt` is a log a lane writes about itself — it is **self-declared and
-unauthenticated**. Any process with access to `RUN_DIR` can log any path under any lane's
-name; nothing here proves who actually wrote a given file. The one boundary that is actually
-enforced is `changed-files-within-union` inside `validate-run-state.sh`: computed from git
-only (the union of every lane's `owns`, diffed against the round's baseline commit),
-independent of anything a worker claims about itself. Everything else attribution-shaped —
-`changed-files-attributed-once`, `worker-file-logs-valid`, `post-done-writes-absent` — is an
-advisory diagnostic that a forged or missing log entry can defeat; treat its `warn`/`fail` as
-a signal worth investigating, never as proof.
-
-## Decision records and the run report
-
-An approved plan carries the reasoning behind the decisions taken *before* any code was
-written. Everything decided *during* the run — which of two viable implementations a lane
-picked, what it assumed about a lane it doesn't own, where it worked around something the plan
-didn't anticipate — lives only in that worker's session, and dies with it. `decision.sh` is the
-one channel that outlives the pane:
-
-```bash
-decision.sh RUN_DIR LANE TASK --title "Materialized view for the totals" \
-  --rationale "The plan left the aggregation strategy open; a view keeps reads to one query." \
-  --alternative "Compute in the API layer — N+1 across three tables" \
-  --tradeoff "Up to 60s of refresh lag on the totals"
-```
-
-It writes `lanes/<lane>/decisions/<NNN>.json` and emits a `decision` event carrying only the
-headline. The split is not cosmetic: an `events.jsonl` line has to stay single-line and under
-`PIPE_BUF` for concurrent appends to be atomic, and rationale is prose. `decision` events are
-deliberately **not** monitor triggers — they are for the report to read, not a reason to
-interrupt a round.
-
-`build-run-report.sh RUN_DIR [--final-sha SHA] [--review report.md] [--qa index.html]` then
-renders `RUN_DIR/report/index.html`: what was built (git diffstat, baseline → frozen SHA), the
-lane table with `owns`/`depends_on`, every recorded decision with its alternatives and
-tradeoffs, the plan's own pre-implementation rationale, drift (contract version moved, extra
-rounds, blocked lanes), the final board plus the full event timeline, and the review and QA
-evidence. Self-contained HTML, light and dark, no external assets.
-
-Every claim on that page comes from a file in the run directory — it is never written or
-padded from a model's memory of the run. The honest consequence: a decision no lane recorded
-is absent from it, and the page says that rather than implying no decisions were made. The
-same caveat as attribution applies — a decision record is the lane's own account of its
-reasoning, which is the best account anyone will get and still not an audit trail.
+`worker-<lane>.files.txt` is a log a lane writes about itself: it is **self-declared and
+unauthenticated**. The one enforced boundary is `changed-files-within-union` in
+`validate-run-state.sh`, computed from git only (the union of every lane's `owns`, diffed
+against `baseline_commit`). `worker-file-logs-valid`, `changed-files-attributed-once` and
+`post-done-writes-absent` only `warn`: they are diagnostics that a forged or missing log entry
+can defeat.
 
 ## Artifacts produced
 
 ```
 RUN_DIR/
-├── manifest.json                  # schema-conformant run state (schemas/run-state.schema.json)
-├── status.json                    # current phase and elapsed-time origin for Wave status
-├── events.jsonl                   # append-only event log
-├── worker-<lane>.files.txt        # per-lane attribution log (self-declared, see above)
-├── lanes/<lane>/reply.md          # the orchestrator's current instruction for that lane
-├── lanes/<lane>/decisions/NNN.json # decisions/assumptions that lane recorded mid-run
-├── light-review/round-<N>/        # round-gate.sh's own reviewer transcript per round
-├── report/index.html              # the run report (build-run-report.sh)
-└── wave/
-    ├── manifest.json              # launch bookkeeping (block_ref, session_id)
-    └── worker-<lane>.prompt.md    # the prompt each lane block was launched with
+├── manifest.json                 run state (schemas/run-state.schema.json)
+├── status.json                   phase and start time
+├── events.jsonl                  append-only event log
+├── decisions.md                  the orchestrator's own decisions
+├── worker-<lane>.files.txt       per-lane attribution log (self-declared)
+├── gate/round-<N>.fails          failed gates of a round (the retry budget)
+├── lanes/<lane>/replies/         numbered replies; replies.consumed is the delivered mark
+├── lanes/<lane>/decisions/       decision records of the lane
+├── lanes/<lane>/loop.pid         pid of the lane loop; stop ends it
+├── lanes/<lane>/worker.log       agent output of the lane
+├── launch/manifest.json          per lane: runner, model, effort, session_id, brief, block_ref
+├── launch/system-prompt.txt      the worker rules
+├── launch/worker-<lane>.prompt.md the rendered brief
+└── report/index.html             the run report (build-run-report.sh)
 ```
-
-At the end of a successful run, one full `/deep-review` pass runs over the whole diff, the run
-report is built, and the Wave blocks are left alive — teardown is a separate, human-confirmed
-step.

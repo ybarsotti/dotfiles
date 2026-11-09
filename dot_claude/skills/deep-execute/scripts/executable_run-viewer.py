@@ -24,11 +24,14 @@ import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-# The five keys event.sh writes, and the eight types it accepts. Kept in sync
-# with schemas/run-state.schema.json by hand; a line failing this becomes an
-# invalid_event rather than taking the endpoint down, which is the stance
-# monitor-events.sh already takes.
+# The rules of schemas/event.jq, the one event validator that event.sh,
+# monitor-events.sh and validate-run-state.sh run. Change both together; the
+# viewer test sends the same boundary lines through here. A line failing them
+# becomes an invalid_event rather than taking the endpoint down.
 EVENT_KEYS = ("ts", "lane", "task", "type", "msg")
+OPTIONAL_KEYS = ("round",)
+TS_RE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z")
+MAX_MSG = 3000
 EVENT_TYPES = frozenset(
     (
         "task_start",
@@ -74,11 +77,8 @@ def resolve_run_dir(runs_dir, run_id):
 def parse_event(raw):
     """Turn one events.jsonl line into an event dict.
 
-    Anything that is not a well-formed event of a known type becomes an
-    `invalid_event` carrying the offending text, rather than being dropped or
-    raising. Unknown EXTRA keys are deliberately preserved: the schema forbids
-    them today, but when --mode and --topic land the API already carries them
-    and only the rendering changes.
+    Anything that schemas/event.jq rejects becomes an `invalid_event`
+    carrying the offending text, rather than being dropped or raising.
     """
     text = raw.decode("utf-8", "replace").strip()
     if not text:
@@ -92,7 +92,17 @@ def parse_event(raw):
     for key in EVENT_KEYS:
         if key not in obj or not isinstance(obj[key], str):
             return _invalid(text)
-    if obj["type"] not in EVENT_TYPES:
+    if set(obj) - set(EVENT_KEYS) - set(OPTIONAL_KEYS):
+        return _invalid(text)
+    if obj["type"] not in EVENT_TYPES or not TS_RE.fullmatch(obj["ts"]):
+        return _invalid(text)
+    if not obj["lane"] or not obj["task"]:
+        return _invalid(text)
+    msg = obj["msg"]
+    if "\n" in msg or "\r" in msg or len(msg) > MAX_MSG:
+        return _invalid(text)
+    rnd = obj.get("round", 0)
+    if isinstance(rnd, bool) or not isinstance(rnd, (int, float)) or rnd < 0 or rnd != int(rnd):
         return _invalid(text)
     return obj
 

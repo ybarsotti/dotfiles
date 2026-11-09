@@ -26,7 +26,7 @@ Read `$ARGUMENTS` and extract:
 - **--task id** (default: auto-detect)
 - **--timeout secs** (default `600`)
 - **--sarif** (default off): also write `findings.sarif` for GitHub code scanning
-- **--no-simplify** (default off): skip the `/simplify` pass that otherwise runs after the report
+- **--no-simplify** / **--no-fix** (default off): skip the Phase 5 `/simplify` pass / the Phase 4.5 fixer (report only)
 - **--keep-artifacts** / **--dry-run** (default off)
 - **--lens PATH** (repeatable): a review skill the repository owns. Run `--dry-run` first; it
   lists them. Pass at most 2 read-only lenses that fit the diff's stack. Skip plan reviewers,
@@ -58,8 +58,8 @@ Call the dispatcher with the parsed args:
   [--dry-run]
 ```
 
-`--no-simplify` is yours, not the dispatcher's. Strip it from the args before you call
-`dispatch.sh`, which rejects flags it does not know, and act on it in Phase 5.
+`--no-simplify` and `--no-fix` are yours, not the dispatcher's. Strip them before you call
+`dispatch.sh`, which rejects flags it does not know, and act on them in Phases 4.5 and 5.
 
 `dispatch.sh` handles everything end-to-end: context, persona assignment, prompts, reviewers
 in the background, and the `report.md`. Run it in the **foreground** to see progress. Don't background it.
@@ -112,7 +112,7 @@ than a question. Do not stop at the report and wait to be asked.
    reason, and you say plainly which findings remain.
 4. **MEDIUM, LOW and QUESTION are the user's call.** List them and ask; do not fix them silently.
 
-Skip it after `--dry-run` or an empty diff. The fixer is a separate `Agent`, never the reviewer.
+Skip it after `--dry-run`, `--no-fix` or an empty diff. The fixer is a separate `Agent`, never the reviewer.
 
 ## Phase 4.6 — Turn a recurring finding into a rule
 
