@@ -1,0 +1,34 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# run_onchange_09_install_plannotator.sh.tmpl
+#
+# Installs the pinned Plannotator standalone binary with the official install script.
+# chezmoi runs this script again when PLANNOTATOR_VERSION changes, so a version bump here
+# upgrades the binary. A run_once script never upgraded it, which left an old binary on PATH.
+# The Claude Code plugin is installed and updated separately.
+
+set -eufo pipefail
+
+PLANNOTATOR_VERSION="v0.28.51"
+
+export PATH="$HOME/.local/bin:$PATH"
+
+current="$(plannotator --version 2>/dev/null | awk '{print $2}' || true)"
+if [ "v${current}" = "$PLANNOTATOR_VERSION" ]; then
+    echo "✅ Plannotator ${PLANNOTATOR_VERSION} already installed"
+    exit 0
+fi
+
+echo "📥 Installing Plannotator ${PLANNOTATOR_VERSION} (found: ${current:-none})..."
+curl -fsSL https://plannotator.ai/install.sh | bash -s -- --version "$PLANNOTATOR_VERSION"
+
+installed="$(plannotator --version 2>/dev/null | awk '{print $2}' || true)"
+if [ "v${installed}" = "$PLANNOTATOR_VERSION" ]; then
+    echo "✅ Plannotator ${PLANNOTATOR_VERSION} installed: $(command -v plannotator)"
+else
+    echo "⚠️  Expected Plannotator ${PLANNOTATOR_VERSION}, found: ${installed:-none}"
+    exit 1
+fi
+
+{{ end -}}
