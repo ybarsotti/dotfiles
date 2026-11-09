@@ -9,7 +9,8 @@
     "defaultMode": "bypassPermissions"
   },
   "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"{{ if env "CLAUDE_CODE_OAUTH_TOKEN" }},
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CODE_MODERNIZATION_TELEMETRY": "0"{{ if env "CLAUDE_CODE_OAUTH_TOKEN" }},
     "CLAUDE_CODE_OAUTH_TOKEN": "{{ env "CLAUDE_CODE_OAUTH_TOKEN" }}"{{ end }}
   },
   "teammateMode": "auto",
