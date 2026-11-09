@@ -60,6 +60,11 @@ Ask once for all the queries of a run. Name each query, the table, and the SQL t
 The user chooses how to connect: a read replica, a read-only DSN in an environment variable, or
 a command the project already has. The user can also decline. Then mark the rows `static`.
 
+Production sizing. Read the database instance size, the connection pool size and the pool
+timeout from the project's `CLAUDE.md`, `ARCHITECTURE.md` or `docs/`. When they are unknown,
+add them to the same question. A query that reads many pages from disk holds a pool connection
+and starves every other request. Judge its cost against the pool, not the query time alone.
+
 ## 3. Safety rules — read before you connect
 
 - Get the approval of the user for each run. An approval in an earlier run does not carry over.
@@ -125,6 +130,9 @@ For each query, give:
 - the index that the query uses, or the sequential scan;
 - the estimated rows and the actual rows, and the skew between them;
 - the time before and after the optimization, and where it was measured;
+- the `shared hit + read` buffers before and after. A warm cache hides cost. For example, and
+  only as an illustration, not as sizing data: 800k buffers can run in 1 s on an idle replica
+  and in 80 s on the primary under load;
 - the queries per request, before and after;
 - the verdict: the optimization holds, the optimization changes, or the query is safe as it is.
 

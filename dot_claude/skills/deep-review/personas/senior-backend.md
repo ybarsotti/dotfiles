@@ -21,15 +21,43 @@ handler → service → repo → response. Flag:
 
 ## 2. Database and queries
 
-Static pass, for every changed query, ORM call, or repository method:
+Static pass, for every query the diff adds or changes. Report only queries whose cost or
+correctness changes with this diff, never style. Give file:line and the generated SQL shape.
 
 - **N+1**: a query inside a loop, or a serializer/resolver that lazily loads a relation per
-  row. Name the eager-load, join, or dataloader fix.
+  row. Name the eager-load, join, or dataloader fix. Django: `select_related`/`prefetch_related`.
+  SQLAlchemy: `selectinload`/`joinedload`; suggest `lazy="raise"` on the relation. Prisma/Drizzle:
+  `include`/`with`. Go `database/sql` or sqlc: a query in a `for` loop; batch with `= ANY($1)`.
 - **Missing index**: a `WHERE`, `JOIN`, or `ORDER BY` on a column with no supporting index.
-  Check the migrations and the model for existing indexes. Name the exact index to add.
-- **Heavy query**: `SELECT *` on wide tables, unbounded result sets with no `LIMIT`,
-  cartesian joins, `OFFSET` pagination on large tables, aggregates with no covering index,
-  and functions wrapped around indexed columns, which kill index use.
+  A compound filter such as `(account_id, owner_id, thread_id)` needs a compound index in that
+  order. Check the migrations and the model. Name the exact index to add.
+- **Heavy query**: `SELECT *` on wide tables, unbounded result sets with no `LIMIT`
+  (`findMany` with no `take`), cartesian joins, `OFFSET` pagination on large tables, aggregates
+  with no covering index, functions around indexed columns, and a full scan of a table over
+  50k rows on a request path.
+- **Work per row**: a correlated subquery (`Subquery(... OuterRef(...))`, `Exists`, a `Count`
+  through `Subquery`) over a large outer set. Estimate the outer row count, because each outer
+  row runs the subquery once. An annotation also used in `.filter()`, `.order_by()` or `HAVING`
+  is not reused by PostgreSQL. A subquery in SELECT, WHERE and ORDER BY runs three times per row.
+  `.count()` on the same expensive queryset that the code also lists runs it twice. Propose the
+  set-based form: one grouped join (`FilteredRelation` + `Count(..., distinct=True)`), or one
+  `values().annotate()` per child table.
+- **Rows read, not rows returned**: a sort or filter on a computed value followed by `LIMIT`
+  computes every row before it returns the first page.
+- **Where it runs**: find the callers. A query on a page-load path (dashboard, home,
+  notification summary, sidebar counts) runs for every user on every visit. It is hot even when
+  it is "only a report". Flag an expensive read that can be cached, precomputed in a background
+  job, or loaded on demand.
+
+Join and rewrite pass, for every changed query that joins a reverse relation, joins two child
+tables, or replaces an existing query:
+
+- A join on a reverse relation skips the default manager. The join must restate soft-delete
+  (`deleted_at IS NULL`) and every manager filter.
+- Two LEFT JOINs to child tables multiply rows. Counts need `distinct=True`.
+- A negated reverse-relation condition in `.filter()`/`.exclude()` becomes `NOT EXISTS`. Inside
+  a `FilteredRelation` condition, it stays in the JOIN. Confirm which one the code needs.
+- Permission and scoping filters still apply after the rewrite, including the empty-access case.
 
 ORM pass, for every changed query. The project chose an ORM, so a query that leaves it needs a
 reason:
@@ -126,12 +154,15 @@ When no database is reachable, say so and fall back to static findings. Include 
 `EXPLAIN` command a human should run. Never mutate real or production data.
 
 Production check request. A dev database does not show how a query runs on production volume.
-Follow `~/.claude/skills/_shared/query-check.md`, section 2. For each N+1, missing index or
-heavy query whose cost depends on that volume:
+Follow `~/.claude/skills/_shared/query-check.md`, section 2. For each N+1, missing index, heavy
+query, work-per-row or rows-read finding whose cost depends on that volume:
 
 1. Record the finding with the optimization in `--suggestion`. Do not wait for production data.
 2. Record one `QUESTION` finding titled `prod-check: <query>`, with the read-only SQL of
-   section 4 of that file in `--description`. The orchestrator asks the user and runs it.
+   section 4 of that file in `--description`. Ask for `EXPLAIN (ANALYZE, BUFFERS)` before and
+   after the change. The orchestrator asks the user and runs it.
+3. In the step 1 finding's `--suggestion`, ask for a test that pins the endpoint's query count:
+   Django `assertNumQueries` or `django_assert_num_queries`, or the ORM's query counter.
 
 Never connect to a production database yourself.
 

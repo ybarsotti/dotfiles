@@ -208,6 +208,32 @@ assert_eq "$(grep -c "$MOCK_HEADING" "${PERSONAS_DIR}/correctness.md" || true)" 
 assert_contains "$(cat "${PERSONAS_DIR}/test-quality.md" 2>/dev/null)" "$MOCK_HEADING" \
   "test-quality.md: owns the mock-boundary block"
 
+# ─── senior-backend: query-cost checklist and backend path regex ───────────
+SB_MD=$(cat "${PERSONAS_DIR}/senior-backend.md")
+for needle in "**Work per row**" "**Rows read, not rows returned**" "**Where it runs**" \
+  "Join and rewrite pass" "deleted_at IS NULL" "distinct=True" "EXPLAIN (ANALYZE, BUFFERS)" \
+  "assertNumQueries" "selectinload" "lazy=\"raise\"" "findMany" "generated SQL shape"; do
+  assert_contains "$SB_MD" "$needle" "senior-backend.md: names ${needle}"
+done
+assert_eq "$(grep -c '^- \*\*N+1\*\*' "${PERSONAS_DIR}/senior-backend.md")" 1 \
+  "senior-backend.md: one N+1 rule, not a second copy"
+QC_MD=$(cat "${ROOT}/dot_claude/skills/_shared/query-check.md")
+assert_contains "$QC_MD" "Production sizing" "query-check.md: sizing comes from project docs"
+assert_contains "$QC_MD" "shared hit + read" "query-check.md: report compares buffers"
+SB_RE=$(yq -r '.personas[] | select(.id == "senior-backend") | .only_when_changed' "$DEFAULT_YML")
+for p in apps/api/src/orders.service.ts prisma/schema.prisma src/db/schema.ts drizzle.config.ts \
+  packages/core/src/database/client.ts src/repositories/order-repository.ts \
+  src/repository/user.repo.js src/models/invoice.ts drizzle/0003_add_orders_index.sql \
+  internal/store/queries/orders.sql app/billing/models.py src/users/users.repository.ts \
+  src/orders/order.entity.ts src/migration/1700-add.ts; do
+  assert_eq "$(grep -cE -- "$SB_RE" <<<"$p" || true)" 1 "senior-backend regex: matches ${p}"
+done
+for p in src/components/OrderTable.tsx src/features/orders/OrderList.tsx 'app/routes/orders.$id.tsx' \
+  src/features/orders/queries/useOrders.ts src/features/checkout/schema.ts \
+  src/hooks/useDatabaseStatus.ts; do
+  assert_eq "$(grep -cE -- "$SB_RE" <<<"$p" || true)" 0 "senior-backend regex: skips ${p}"
+done
+
 # ─── test-signals.sh: silent without recipes, headed output with them ──────
 SIG_REPO=$(mktemp -d)
 assert_eq "$("$TEST_SIGNALS" "$SIG_REPO" 2>&1; echo "exit=$?")" "exit=0" \

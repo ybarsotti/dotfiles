@@ -46,7 +46,9 @@ personas:
       or wrongly ordered indexes, more than one migration file where one would do, and
       migrations that lock a large table or cannot be reversed, and migrations that the
       previous release cannot survive while it still runs during the deploy. Query performance: N+1, missing indexes, unbounded results, OFFSET
-      pagination, non-sargable predicates, verified with live EXPLAIN (ANALYZE) when a dev
+      pagination, non-sargable predicates, correlated subqueries and annotations recomputed
+      per row, LIMIT after a computed sort, hot page-load callers, rewrites that drop
+      soft-delete or permission filters, verified with EXPLAIN (ANALYZE, BUFFERS) when a dev
       database is reachable. ORM use: raw SQL where the ORM expresses the same query, rows
       filtered or aggregated in application code, a relation loaded per row, a write loop
       where a bulk call exists. Django traps: related.id over related_id, only() dropping a
@@ -54,7 +56,8 @@ personas:
       null=True on text, external calls inside atomic. Reads the framework's own query documentation with context7
       before recording an ORM finding. Observability: error context, structured logs with correlation
       ids, metrics and spans on new paths.
-    only_when_changed: '\.(py|go|rb|java|kt|rs|php|cs|ex|exs|sql)$|(^|/)(migrations|server|backend|api)/'
+    # Accepted over-match: a frontend models/ or db/ folder adds one reviewer; grep -E has no lookahead to exclude it.
+    only_when_changed: '\.(py|go|rb|java|kt|rs|php|cs|ex|exs|sql|prisma)$|\.(repository|repo|entity|dao)\.[cm]?[jt]s$|(^|/)(migrations?|server|backend|api|db|database|repositories|repository|models|drizzle)/|(^|/)drizzle\.config\.[cm]?[jt]s$'
     runner: codex
 
   - id: senior-frontend
