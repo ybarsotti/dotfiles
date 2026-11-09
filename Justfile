@@ -151,9 +151,8 @@ test-all: test-fresh test-idempotency
 #
 # The template step calls CI's own script rather than repeating it. The copy that used
 # to live here dropped every line starting with `{{`, which cut the closing line out of
-# a multi-line assignment such as JOURNAL_ALIASES and left shellcheck an unterminated
-# string (SC1073). The script strips each `{{ ... }}` in place instead, so the quotes
-# still balance.
+# a multi-line assignment and left shellcheck an unterminated string (SC1073). The
+# script strips each `{{ ... }}` in place instead, so the quotes still balance.
 lint:
     @echo "Running shellcheck on .sh files..."
     @find . -name "*.sh" -type f -not -path "*/.git/*" -print0 | xargs -0 -r shellcheck
