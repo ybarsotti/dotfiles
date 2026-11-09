@@ -1,5 +1,5 @@
 ---
-description: Deep planning with Opus+Codex, requirement/journey/data/UI-design traceability, 5-persona review, Plannotator, then /deep-execute
+description: Deep planning with Opus+Codex, requirement/journey/data/UI-design traceability, 5-persona review, Plannotator, then build to PR through the after-approval chain
 ---
 
 # /deep-plan
@@ -25,8 +25,9 @@ plan" to stop at the approved plan.
 6. **Present** — `finalize-plan.sh` validate/repair/tick gate, then **Plannotator**:
    `plannotator annotate <plan> --gate` for the full plan, then `ExitPlanMode` (its hook
    re-opens the UI for final approval).
-7. **Execution recommendation** — pick one of four ways to build it from the plan (see below).
-8. **Build to PR** — run the after-approval chain end to end.
+7. **Execution recommendation** — pick the executor from the plan's `## Execution shape`
+   (`~/.claude/skills/_shared/plan-routing.md`).
+8. **Build to PR** — run `~/.claude/skills/_shared/after-approval.md` end to end.
 
 **Arguments:** `$ARGUMENTS`
 
@@ -46,8 +47,8 @@ FLAGS
 ## What you must do
 
 You are the **orchestrator**. Invoke the `deep-plan` skill — do NOT plan or implement inline.
-The skill lives at `~/.claude/skills/deep-plan/SKILL.md`. Follow its phases exactly. deep-plan
-**stops at the approved plan**; the build/review/PR happen in the execution phase it hands off to.
+The skill lives at `~/.claude/skills/deep-plan/SKILL.md`. Follow its phases exactly. After
+approval it builds through to the PR, unless the user said to stop at the plan.
 
 ### Evidence discipline
 
@@ -57,34 +58,12 @@ its evidence (for example, `path/to/file:line`, command output, test result, tra
 field). If evidence is missing, label the claim **unknown** and add an investigation step; never
 present an assumption as fact or approve a plan that depends on an unverified claim.
 
-## Execution recommendation (Phase 7)
+## After the plan is approved
 
-deep-plan reads the approved plan's `## Execution shape`, picks **one** of these, and starts:
-
-| | Option | Fits when |
-|---|---|---|
-| **A** | `/deep-execute "$RUN_DIR/plan.md"` — parallel lane workers, one shared worktree | `Mode: parallel`, ≥ 2 disjoint lanes, a real contract |
-| **B** | Serial, one implementer agent per task (`superpowers:subagent-driven-development`) | serial plan, one lane, or lanes too coupled for a contract |
-| **C** | Claude `Workflow` — deterministic script fan-out | many uniform mechanical slices (migration, codemod, sweep) |
-| **D** | Codex-only implementer, this session orchestrates and reviews | one coherent slice you want a second model to write |
-
-**The planning session orchestrates; it does not implement.** It directs workers, answers
-their questions, gates rounds, routes review findings back to the owning agent, and commits.
-It writes feature code only when you ask for that in so many words.
-
-## What runs after the plan is approved
-
-`~/.claude/skills/_shared/after-approval.md` is the chain. It runs end to end under `/goal` and
-stops only on a decision that changes a requirement, a rule, a contract or the scope:
-
-1. Build with strict TDD through the chosen option.
-2. `/deep-review default`, with the CRITICAL and HIGH findings fixed and re-reviewed.
-3. When the app URL answers: the `qa-ui` agent compares each new element with the plan and
-   the Design canvas at desktop width and at 390 px, and the `qa-business` agent runs the
-   requirements and edge cases end to end with video.
-4. A separate agent fixes what QA found. QA re-runs, for 3 rounds at most.
-5. `/pr` with the evidence attached, then the PR watch.
-6. An HTML report with the decisions, the tests, the screenshots and the videos.
+The planning session orchestrates; it does not implement. It writes feature code only when you
+ask for that in so many words. The executor choice is in
+`~/.claude/skills/_shared/plan-routing.md`, and the chain is in
+`~/.claude/skills/_shared/after-approval.md`.
 
 ### Quick examples
 

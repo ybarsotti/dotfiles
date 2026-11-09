@@ -1,8 +1,8 @@
 # deep-plan
 
 A global Claude Code skill + slash command that runs a hardened **deep-planning** pipeline
-for any non-trivial task, then hands off to `/deep-execute`. deep-plan
-**stops at the approved plan** — it does not build, review the code, or open the PR.
+for any non-trivial task. After approval it builds, reviews, runs QA and opens the PR
+through the shared after-approval chain, unless the user said to stop at the plan.
 
 ## What it does
 
@@ -16,7 +16,7 @@ for any non-trivial task, then hands off to `/deep-execute`. deep-plan
                   │ Phase 2:   Review loop (5 personas, ≤ 3 iter)│
                   │ Phase 2.5: Subplan fan-out                   │
                   │ Phase 3:   finalize-plan.sh + Plannotator    │
-                  │ Phase 4:   Handoff → /deep-execute           │
+                  │ Phase 4:   after-approval chain → PR         │
                   └─────────────────────────────────────────────┘
 ```
 
@@ -57,14 +57,11 @@ Codex-side agents (planner-codex, flow-mapper, qa) are pinned to **`gpt-6-sol` @
 default. Override with `DEEP_PLAN_CODEX_MODEL` / `DEEP_PLAN_CODEX_EFFORT`
 (`none|minimal|low|medium|high|xhigh|max`).
 
-## Handoff (execution phase — `/deep-execute` runs this after approval)
+## After approval
 
-deep-plan prints `/deep-execute "$RUN_DIR/plan.md"` and stops. `/deep-execute` drives:
-`superpowers:using-git-worktrees` → `subagent-driven-development` (TDD, mock only outer
-boundaries) → `/simplify` ×2 → `/qa-test-plan` (if flows/screens change) → `/deep-review` →
-`verification-before-completion` → `/pr` (title + ticket/Slack + reconciled
-requirements + Mermaid + decisions, no file list, assigned to you) → CI/Copilot watch →
-`finishing-a-development-branch`. For a Jira ticket, `jira-workflow` drives all of this.
+deep-plan builds the approved plan unless the user said to stop at the plan. The chain
+(build, review, QA, PR, report) is in `~/.claude/skills/_shared/after-approval.md`. The
+executor choice is in `~/.claude/skills/_shared/plan-routing.md`.
 
 ## Plan format
 

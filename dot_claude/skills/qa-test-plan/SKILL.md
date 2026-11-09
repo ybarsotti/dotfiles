@@ -1,6 +1,6 @@
 ---
 name: qa-test-plan
-description: Plan and execute evidence-backed manual QA for user-facing changes. Use via /qa-plan before implementation, /qa-execute after review on a frozen commit, or /qa-test-plan for both phases. Produces a validated qa-plan.yaml, human Markdown, browser-recorded scenario evidence, annotated screenshots, WebVTT-captioned videos, structured results.json, and an HTML report tied to the tested commit.
+description: Plan and execute evidence-backed manual QA for user-facing changes. Use via /qa-plan before implementation ("what should QA check", "write the test plan", "QA plan for this feature"), /qa-execute after review on a frozen commit ("run the QA plan", "test this against staging", "produce QA evidence for the PR"), or /qa-test-plan for both phases. Produces a validated qa-plan.yaml, human Markdown, browser-recorded scenario evidence, annotated screenshots, WebVTT-captioned videos, structured results.json, and an HTML report tied to the tested commit.
 ---
 
 # QA test plan
@@ -28,8 +28,9 @@ WebVTT, and HTML through bundled scripts. Never parse generated Markdown back in
 --dry-run                 print phases, paths, and worker count without spawning
 ```
 
-`/qa-plan` supplies `--phase plan`. `/qa-execute` supplies `--phase execute`.
-`/qa-test-plan` defaults to `--phase all`.
+`/qa-plan` supplies `--phase plan`; it needs `--plan PATH`, because without the plan there are
+no requirements to map. `/qa-execute` supplies `--phase execute`. `/qa-test-plan` defaults to
+`--phase all`.
 
 ## Contract files
 

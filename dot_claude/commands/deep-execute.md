@@ -1,5 +1,5 @@
 ---
-description: Executes approved deep-plan lanes, runs /deep-review 3:3 plus fixes, QA-tests with a browser agent, fixes the gaps with a different agent, freezes SHA, opens the PR with evidence, then builds the run's HTML decision report
+description: Executes approved deep-plan lanes, runs /deep-review 3:3 plus fixes, QA-tests with the qa-ui and qa-business agents, fixes the gaps with a different agent, freezes SHA, opens the PR with evidence, then builds the run's HTML decision report
 ---
 
 # /deep-execute
@@ -37,20 +37,10 @@ Every task uses one Wave tab. Lane blocks have names and form one vertical colum
 beside them. The orchestrator header shows current
 phase, task completion, percentage, and elapsed time; tab badge shows running, blocked, or complete.
 
-Once the lanes are done, the tail runs back to back:
-
-1. `/deep-review default --reviewers 6 --ratio 3:3`, fixes routed back to the owning lane.
-2. Record what was built and what the review changed, through `decision.sh`.
-3. A **QA agent** drives `agent-browser` against the live env, capturing screenshots and
-   recordings — `/qa-testing` (EXECUTE) when that skill is on the machine, `/qa-execute` when
-   the plan carries a `qa-plan.yaml`, a plain browser agent otherwise.
-4. A **different** agent fixes every gap QA found; QA re-verifies. The tester never fixes.
-5. Freeze the commit SHA.
-6. `/pr` opens the PR with the evidence attached.
-7. Build the run report — a self-contained HTML page covering what was built, every decision and
-   assumption the lanes recorded (alternatives rejected, tradeoffs accepted), drift from the
-   approved plan, tests, the review and QA evidence, and the PR. Assembled from the run directory
-   by script; never written or extended from your own memory of the run.
+Once the lanes are done, the skill's Phase 4 and Phase 5 run the tail back to back: the full
+`/deep-review`, then steps 3 to 8 of `~/.claude/skills/_shared/after-approval.md` (the `qa-ui`
+and `qa-business` agents, gap fixes by a different agent, frozen SHA, `/pr`), then the run
+report, which a script builds from the run directory.
 
 Documentation the change makes stale is part of done, and lanes use Serena / GitNexus / Graphify
 rather than raw `grep`.

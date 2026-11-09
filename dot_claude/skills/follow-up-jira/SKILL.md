@@ -178,8 +178,9 @@ Write the smallest runnable check when none exists. Never report a fix on
 reasoning alone.
 
 **5. Update the pull request.** Commit and push to the existing branch when that
-pull request is still open. Open a fresh branch and pull request off the default
-branch when the original already merged, and link it to the ticket.
+pull request is still open. When the original already merged, create a fresh
+branch off the default branch, push it, and open the pull request with
+`Skill(skill="pr-description", args="--ticket <KEY>")`.
 
 ## Step 5 — Report, then hand back
 

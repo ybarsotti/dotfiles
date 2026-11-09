@@ -60,39 +60,18 @@ Gather evidence before you draft. Write the result to `$RUN_DIR/context.md`.
    the Context7 MCP server when it is available. Record the idiom the library expects.
 7. Use Serena and GitNexus for symbol lookup and blast radius when the project is indexed.
 8. When the task names a ticket, or the branch name holds a ticket key, read the ticket. Copy
-   each acceptance criterion and each stated requirement into the brief, word for word.
+   each acceptance criterion and each stated requirement into the brief, word for word. For a
+   Jira key, run `~/.claude/skills/_shared/ticket-start.md` once.
 
 Every line of the brief carries a path, such as `src/api/orders.py:42`. A line without a
 path is an assumption, and you must mark it **unknown**.
 
 ## Phase 0.5 — Recommend the pipeline, and wait for the answer
 
-The brief now says how large the change really is. `simple-plan` is the lean pipeline, and
-`/deep-plan` is the thorough one. Which of the two fits is a decision for the user, made once,
-with the evidence in front of them.
-
-Recommend `simple-plan` when the change is narrow and the behaviour is understood: one module,
-a pattern the repo already has, no new contract.
-
-Recommend `/deep-plan` when the brief shows any of these:
-
-- business behaviour: pricing, billing, an order or an approval path;
-- who may do what: a role, a permission, a policy, a guard;
-- a migration, or any change to a table or a column;
-- a third-party integration, or a new contract with another service;
-- scope the brief could not pin down, with more than one reasonable reading.
-
-Say which you recommend and give the reason in one sentence, with the path from the brief that
-drove it. Then **stop and wait**. Silence is not an answer, and neither is the absence of an
-objection. The user accepts or overrides, and the override is theirs to make without a reason.
-
-Record the exchange in the plan's front matter: what you recommended, the reason, the user's
-words, and the pipeline selected. When the user picks `/deep-plan`, stop this run and say so;
-do not plan the task twice.
-
-**When the scope grows during the run**, recommend again before the work that depends on it.
-Append a second decision. Never rewrite the first one — the record of what was known when the
-choice was made is the point of keeping it.
+The brief now says how large the change really is. Recommend `simple-plan` or `/deep-plan`
+with the criteria of `~/.claude/skills/_shared/plan-routing.md`, and follow the question rules
+there. Record the exchange in the plan's front matter. When the user picks `/deep-plan`, stop
+this run and say so; do not plan the task twice.
 
 ## Phase 1 — Brainstorm, only when the task is unclear
 
@@ -450,11 +429,8 @@ stop to recommend commands. Stop at the plan only when the user said so, such as
    the implementation. It maps the plan's requirements into a reviewed `qa-plan.yaml`, and the
    Validation section of `$PLAN_PATH` references it. When the change touches no flow and no
    screen, say why you skip it.
-2. **Then the chain in `~/.claude/skills/_shared/after-approval.md`.** Take option B
-   (`superpowers:subagent-driven-development`), or `/deep-execute` when the plan declares
-   parallel lanes. The chain builds with TDD, runs `/deep-review` with fixes, runs the `qa-ui`
-   and `qa-business` agents when the app URL answers, fixes and re-tests, opens `/pr`, and
-   delivers the HTML report.
+2. **Then the chain in `~/.claude/skills/_shared/after-approval.md`.** Its executor comes from
+   `~/.claude/skills/_shared/plan-routing.md`: usually the `implement` skill.
 
 Rules for this pipeline inside that chain:
 
@@ -463,10 +439,6 @@ Rules for this pipeline inside that chain:
   evidence-map row at the shipped SHA.
 - For stages, run the build, review and QA once per stage with the gate of its class, commit
   the stage, and open the PR with the stage table (`_shared/stages.md`).
-- When the change adds or alters a feature a person uses, record a narrated demo with the
-  `video-demo` skill after the PR is open. Attach it with `gh pr edit <n> --attach` under a
-  `## Demo` heading, and link it in the report. Skip it for a refactor, a lone migration or
-  an internal API, and say why.
 - When Phase 1.5 produced `$RUN_DIR/breakdown.md`, end by naming the next task in it.
 
 ## Failure handling

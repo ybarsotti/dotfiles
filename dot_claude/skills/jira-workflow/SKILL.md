@@ -11,15 +11,14 @@ description: |
   jira", "start on this", "let's pick up", "work on the ticket", or any mention of a
   ticket the user wants to work on. The workflow covers: reading + clarifying the
   ticket, naming the Orca terminal tab, creating a branch (main repo or new worktree),
-  transitioning the Jira status to "Under investigation", then delegating the deep
+  assigning the ticket to the user and moving it to in progress, then delegating the deep
   planning to /deep-plan (grilling + domain-modeling → brainstorming → writing-plans → 5-persona
-  review incl. ticket-matcher → plannotator → approved plan), then executing it — via
-  /deep-execute for an approved `Mode: parallel` plan with 2+ lanes (lane fanout, round
-  tests, run-state validation, orchestrator commits, one final /deep-review), or the
-  superpowers execution workflow under strict TDD otherwise — running /qa-test-plan when
-  flows or screens change, opening the PR via /pr (conventional title,
-  Mermaid, no file list, assigned to the user), and watching the PR for review feedback
-  and CI until it merges or closes.
+  review incl. ticket-matcher → plannotator → approved plan), which then builds it through the
+  shared after-approval chain — /deep-execute for an approved `Mode: parallel` plan with 2+
+  lanes, the implement skill under strict TDD otherwise, /deep-review, the qa-ui and
+  qa-business agents when flows or screens change, the PR via /pr (conventional title,
+  Mermaid, no file list, assigned to the user), and the PR watch for review feedback and CI
+  until it merges or closes — plus the Jira steps: ticket comment and notifications.
 ---
 
 # Jira Ticket Workflow
@@ -54,7 +53,7 @@ items.
 - [ ] **Location decision**: main repo or new git worktree?
 - [ ] **Worktree (if chosen)**: create from `origin/main` at `.claude/worktrees/<slug>`
 - [ ] **Branch**: `<type>/<CODE>-<kebab-description>` (see `.claude/rules/branching.md`)
-- [ ] **Jira transition**: move ticket to the "Under investigation" transition
+- [ ] **Ticket start**: assign the ticket to you and move it to in progress (§1.6)
 - [ ] **Continuity ledger** (multi-day ticket): bind/create via `continuity-ledger`
       (`new <CODE>`), then **save** at each progress boundary below — it auto-loads on resume
       after `/clear`. Skip for a quick single-session fix.
@@ -62,18 +61,10 @@ items.
       brainstorming → writing-plans → 5-persona review (incl. **ticket-matcher**, which bats
       requirements matrix point-by-point against ticket, preserving linked Slack threads) →
       plannotator → approved plan
-- [ ] **Execute approved plan** — the plan's `## Execution shape` decides the path:
-      `Mode: parallel` + 2+ lanes → `/deep-execute ~/.claude/deep-plan-runs/<RUN_ID>/plan.md`
-      (lane fanout, round tests, run-state validation, orchestrator commits, one final
-      `/deep-review`). Anything else → superpowers execution (`subagent-driven-development` /
-      `executing-plans`) under strict TDD, then `/simplify` ×2 and `/deep-review`.
-- [ ] **`/qa-test-plan`** (if the plan's QA flag is "yes" — flow change or new screens):
-      manual test doc + codex review + agent-browser execution with video
-- [ ] **Re-run tests**: every test (new + existing) must be green
-- [ ] **`/pr`**: title + ticket/Slack + reconciled requirements + Mermaid +
-      decisions, **no file list**, assigned to me
-- [ ] **PR watch** — `/pr` Phase 5 watches CI and every review comment, human or bot,
-      until the PR merges or closes (see §7)
+- [ ] **Build to PR** — deep-plan runs `~/.claude/skills/_shared/after-approval.md` once;
+      add the Jira steps of §3
+- [ ] **Jira comment + notifications** (§3)
+- [ ] **PR watch** — `/pr` Phase 5 owns it; add the Jira steps of §4
 
 ---
 
@@ -163,24 +154,10 @@ Branch-type prefix follows `.claude/rules/branching.md` (`feat/`, `fix/`, `refac
 `docs/`, `chore/`). Derive it from the ticket's issuetype + description — Bug →
 `fix/`, Story → `feat/`, etc.
 
-### 1.6 Transition Jira to "Under investigation"
+### 1.6 Ticket start
 
-Jira transition names vary per project. Don't guess — enumerate first:
-
-```
-mcp__atlassian__getTransitionsForJiraIssue(cloudId, issueIdOrKey=<CODE>)
-```
-
-Find the transition whose `name` matches "Under investigation" (case-insensitive,
-trimmed). If there's no exact match, fall back to the closest of:
-`In Progress`, `In Review`, `Investigating`, or — if truly nothing fits — ask the user
-which transition to apply.
-
-```
-mcp__atlassian__transitionJiraIssue(cloudId, issueIdOrKey=<CODE>, transition={id: <id>})
-```
-
-Confirm in a single short line: `"TICKET-1234 → Under investigation"`.
+Run `~/.claude/skills/_shared/ticket-start.md`: assign the ticket to the user, move it to
+in progress, and report the transition name chosen. `/deep-plan` then finds it done.
 
 ---
 
@@ -197,139 +174,35 @@ deep-planning pipeline. Once the ticket is understood and the branch/worktree ex
 drafts → a 5-persona review loop (architect, project-developer, **ticket-matcher**,
 flow-mapper, qa) that hardens the plan and bats it **point-by-point** against the ticket's
 acceptance criteria → plannotator → an approved plan at
-`~/.claude/deep-plan-runs/<RUN_ID>/plan.md`. It **stops at the approved plan**.
+`~/.claude/deep-plan-runs/<RUN_ID>/plan.md`. After approval it builds through to the PR (§3).
 
 Do NOT hand-trace, hand-write tests, or plan inline here — that duplicates deep-plan. If the
 ticket-matcher flags the plan as vague or missing an acceptance criterion, resolve it inside
 the deep-plan loop before continuing.
 
-## 3. Execute approved plan
+## 3. Build to PR — the Jira steps
 
-After approval, deep-plan picks the execution mode and runs
-`~/.claude/skills/_shared/after-approval.md` itself: build, `/deep-review`, the `qa-ui` and
-`qa-business` agents, fixes, `/pr`, and the HTML report. Run that chain once. The steps below
-add the Jira parts to it; they do not start a second build. The chosen mode is in
-`~/.claude/deep-plan-runs/<RUN_ID>/execution-recommendation.md` under `## Chosen`. Every option
-keeps you in the orchestrator seat; write feature code only when the user asks for it.
+After approval, deep-plan picks the executor (`~/.claude/skills/_shared/plan-routing.md`) and
+runs `~/.claude/skills/_shared/after-approval.md` itself: build, review, QA, `/pr` and the
+report. Run that chain once. Do not start a second build, review or QA. Add only these steps:
 
-If that file is missing (an older run), fall back to the plan's `## Execution shape` — its
-`Mode:` line plus lane count decides. `/deep-execute` itself refuses to start on anything but
-`Mode: parallel`, so don't hand it a serial plan.
+- **Bug or regression ticket:** the executor drives the fix through
+  `superpowers:systematic-debugging` before it writes the fix.
+- **Before `/pr`:** run `Skill(skill="superpowers:verification-before-completion")`. Every
+  test, new and existing, is green. Do not open the PR on red.
+- **Commit message:** a Conventional Commit with `Implements <CODE>.` in the body. Do not skip
+  the hooks.
+- **`/pr` arguments:** `--ticket <CODE> --plan <plan.md> --evidence <qa-report-index.html>`.
+- **After the PR opens:** send a `PushNotification` with `<CODE> PR opened` and the PR URL.
+  Add the PR URL to the ticket:
 
-**`Mode: parallel` with 2+ lanes → delegate to `/deep-execute`:**
-
-```
-/deep-execute ~/.claude/deep-plan-runs/<RUN_ID>/plan.md
-```
-
-`/deep-execute` owns lane fanout, round tests, run-state validation, orchestrator commits,
-and one final `/deep-review` — do NOT hand-run the superpowers execution workflow, `/simplify`,
-or `/deep-review` separately here; that duplicates what `/deep-execute` already does at the
-end of its last round. See `dot_claude/skills/deep-execute/SKILL.md` (and
-`ARCHITECTURE.md` §9) for the fan-out, round-gate, and contract-drift protocol.
-
-**`Mode: serial`, or no declared shape → build it yourself:**
-
-- `Skill(skill="superpowers:using-git-worktrees")` if not already isolated (you usually made
-  a worktree in §1.5 — reuse it).
-- `Skill(skill="superpowers:subagent-driven-development")` (or `executing-plans` when
-  subagents are unavailable) against `~/.claude/deep-plan-runs/<RUN_ID>/plan.md`.
-- Strict red-green-refactor per `superpowers:test-driven-development`. **Mock only the
-  outermost boundaries** (network, 3rd-party APIs, clock/random) — inner services,
-  repositories, and domain logic run REAL code in tests.
-- **Bug/regression ticket?** Drive the fix through `superpowers:systematic-debugging`
-  (reproduce → minimise → hypothesise → instrument → fix → regression-test) before writing
-  the fix.
-- Then `/simplify` ×2 (re-run tests after each pass) and
-  `/deep-review default --reviewers 6 --ratio 3:3`;
-  `Skill(skill="superpowers:receiving-code-review")` before applying its findings, then address
-  every actionable one with a small TDD cycle.
-- Record what was built and what the review changed — that account is what the PR and the final
-  report are written from.
-- Dispatch a **QA agent** over every flow and screen the plan touched, driving `agent-browser`
-  against the running app and capturing screenshots and recordings —
-  `Skill(skill="qa-testing")` in EXECUTE mode when `~/.claude/skills/qa-testing/SKILL.md`
-  exists on this machine, a plain browser agent when it doesn't. Then hand its gaps to a
-  **different** agent to fix, and let the QA agent re-verify. The tester never fixes its own
-  findings.
-
-**Either path:** `Skill(skill="superpowers:verification-before-completion")` once execution
-reports complete, before any PR work.
-
-**Don't stop between these steps.** Build → review → record → QA → gap fixes → PR runs
-straight through; pause only for a blocker no agent can settle alone (an ambiguous product
-decision, a missing credential, a gate that survived a fix attempt). Open `/goal` (built into
-Claude Code and Codex) before the build starts, with the objective stated as the finished
-state — reviewed, QA-green, PR open — so the run keeps driving there. `/deep-execute` opens
-its own; on the serial path you open it here.
-
-## 4. QA test plan (only if flows/screens changed)
-
-If the deep-plan `plan.md` `## QA / test-execution` flag is **yes** (a user-facing flow
-changed or a screen was added), run:
-
-```
-/qa-test-plan --ticket <CODE>
-```
-
-It writes a manual test plan to the project's `./tmp/`, has a codex agent review it, then
-drives `agent-browser` (a codex worker in an Orca terminal) to execute the steps and record a video,
-returning a pass/fail report. Reference the report + video path on the PR/ticket.
-
-## 5. Verification
-
-Confirm every test (new + existing) is green and `verification-before-completion` passed.
-Do not open the PR on red.
-
-## 6. PR creation
-
-### 6.1 Commit
-
-Conventional commit message. Mention the ticket in the body:
-
-```
-<type>(<scope>): <short summary>
-
-Implements <CODE>.
-
-<optional longer description>
-```
-
-Don't skip hooks. Don't `--no-verify`.
-
-### 6.2 Push + open PR — `/pr`
-
-Push the branch, then let `/pr` build the title + body and open the PR — do NOT
-hand-write the PR body here:
-
-```bash
-git push -u origin HEAD
-```
-```
-/pr --ticket <CODE> --plan ~/.claude/deep-plan-runs/<RUN_ID>/plan.md \
-  --evidence <qa-report-index.html>
-```
-
-`/pr` produces a Conventional-Commit title `<type>(<scope>): <summary> (<CODE>)`
-and an **objective** body — what it solves + ticket/Slack links + reconciled requirements
-matrix + Mermaid + rationale/key decisions + **evidence** (a GIF or recording of the flow and
-before/after screenshots when the UI changed). It contains **no file list and no counts**.
-A codex agent reviews the draft,
-the PR is opened **assigned to you** (`--assignee @me`), and CODEOWNERS reviewers are added.
-
-Send a `PushNotification`: `<CODE> PR opened` and the PR URL.
-
-### 6.3 Jira comment (optional but nice)
-
-Add the PR URL to the ticket:
-
-```
-mcp__atlassian__addCommentToJiraIssue(cloudId, issueIdOrKey=<CODE>, commentBody="PR: <url>")
-```
+  ```
+  mcp__atlassian__addCommentToJiraIssue(cloudId, issueIdOrKey=<CODE>, commentBody="PR: <url>")
+  ```
 
 ---
 
-## 7. Watch the PR
+## 4. Watch the PR
 
 `/pr` Phase 5 owns the watch: CI, every review comment from a human or a bot, the review
 state, and merge conflicts, until the PR merges or closes. Do not run a second loop here.

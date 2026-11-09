@@ -28,14 +28,14 @@ execution half. Invoke each planning-phase skill via the Skill tool at its mappe
 | 3 | `humanizing-plans` | Phase 3 (present) | deep-plan |
 | 4 | `plannotator-annotate` | Phase 3 (annotate) | deep-plan |
 | ✳ | `continuity-ledger` | any long session (save/resume) | deep-plan |
-| — | — | **handoff** ↓ | **`/deep-execute`** |
-| 4 | `using-git-worktrees` | execution | deep-execute |
-| 5 | `subagent-driven-development` / `executing-plans` | execution | deep-execute |
-| 6 | `test-driven-development` | execution (per task) | deep-execute |
-| 6b| `systematic-debugging` | execution (bug/regression tasks) | deep-execute |
-| 6c| `dispatching-parallel-agents` | execution (fallback for parallel slices) | deep-execute |
-| 7 | `/deep-review` + `receiving-code-review` + `/qa-execute` | execution | deep-execute |
-| 8 | `/pr` + `finishing-a-development-branch` | execution | deep-execute |
+| — | — | **handoff** ↓ | **`/deep-execute` or `implement`** |
+| 4 | `using-git-worktrees` | execution | executor |
+| 5 | `subagent-driven-development` / `executing-plans` | execution | executor |
+| 6 | `test-driven-development` | execution (per task) | executor |
+| 6b| `systematic-debugging` | execution (bug/regression tasks) | executor |
+| 6c| `dispatching-parallel-agents` | execution (fallback for parallel slices) | executor |
+| 7 | `/deep-review` + `receiving-code-review` + `qa-ui`/`qa-business` agents | execution | after-approval |
+| 8 | `/pr` + `finishing-a-development-branch` | execution | after-approval |
 
 Plus deep-plan adds: multi-model planner/reviewer fan-out, the `ticket-matcher` reviewer,
 code-intel bootstrap, and the machine-validated checklist gate.
@@ -103,18 +103,14 @@ The persona prompts (planner-opus, planner-codex, architect, project-developer, 
 Create `$RUN_DIR/related-context.md` before drafting. Record `Ticket:` and `Slack threads:`.
 Use connected ticket/Slack tools when available; inspect ticket description/comments and linked
 threads. Preserve URLs plus one-line relevance. If none exist or access is unavailable, record
-where you checked; never fabricate context. `dispatch-planners.sh` and
+where you checked; never fabricate context. With a Jira key, run `_shared/ticket-start.md` first. `dispatch-planners.sh` and
 `dispatch-reviewers.sh` include this artifact when present.
 
 ## Phase 0.4 — Is this the right pipeline?
 
-The code intelligence from Phase 0.2 says how large the change really is. When it turns out
-narrow — one module, a pattern the repo already has, no migration, no permission change, no
-new contract — say so and recommend `/simple-plan` instead, with the path that shows it.
-
-Then stop and wait. The user accepts or overrides, and an override needs no reason. Silence is
-not an answer. Record what you recommended, the reason, the user's words, and the pipeline
-they chose, then continue or stop on their answer.
+The code intelligence from Phase 0.2 says how large the change really is. When it meets the
+lean criteria of `~/.claude/skills/_shared/plan-routing.md`, recommend `/simple-plan` instead
+and follow the question rules there. Continue or stop on the user's answer.
 
 When it is large but splits into working slices that ship in one PR, recommend stages
 (`_shared/stages.md`) in the same question. Say nothing here when the change is genuinely large
@@ -362,34 +358,22 @@ Copy `plan.md` and `subplans/` to `$PROJECT_ROOT/docs/superpowers/plans/YYYY-MM-
 handoff below names it, and execution appends to its `## Deviations`.
 
 Write `$RUN_DIR/execution-recommendation.md` — recommendation first, then the four options
-with the trade-off that decides between them. Do not ask the user: the recommended option runs.
-
-Read the plan's `## Execution shape` and pick the recommendation from what is actually there:
-
-| Signal in the approved plan | Recommend |
-|---|---|
-| `Mode: parallel`, ≥ 2 non-orchestrator lanes with disjoint `owns`, materialized contract | **A — `/deep-execute`** |
-| `Mode: serial`, or one lane, or lanes too coupled to hold a contract still | **B — sequential in this session** |
-| Many mechanical, uniform slices (a migration, a codemod, a sweep over N files) | **C — Claude `Workflow`** |
-| A single self-contained slice the user wants built by Codex, Claude reviewing | **D — Codex-only implementer** |
+with the trade-off that decides between them. Pick the recommendation with the executor
+section of `~/.claude/skills/_shared/plan-routing.md`. Do not ask the user: it runs.
 
 The four options, each stated to the user with what it costs:
 
 - **A — `/deep-execute "$RUN_DIR/plan.md"`.** Parallel lane workers in Orca terminals, one shared
   worktree, round gating, contract drift handling, one full `/deep-review`, QA, run report,
   PR. Most machinery, most parallelism; needs disjoint lanes and a real contract.
-- **B — serial** via `superpowers:subagent-driven-development`: one implementer agent per
-  task, in order, in one worktree, strict TDD per task. This session reviews each task.
+- **B — serial** via the `implement` skill (`superpowers:subagent-driven-development`): one
+  implementer agent per task, in order, strict TDD per task. This session reviews each task.
 - **C — Claude `Workflow`.** Deterministic script-driven fan-out (`pipeline()`/`parallel()`)
   over a known work-list, with an adversarial verify stage. Best when the slices are uniform
   and the orchestration shape is known up front; no lane terminals, no per-round human gate.
 - **D — Codex-only implementer.** `codex exec` writes the code; this session orchestrates,
   gates, reviews and commits. Use when the change is one coherent slice and you want a
   second model's hands on the implementation.
-
-Then run `~/.claude/skills/_shared/after-approval.md` end to end, without waiting for the user:
-build, `/deep-review` with fixes, the `qa-ui` and `qa-business` agents when the environment
-answers, fix and re-test, `/pr`, and the HTML report. It opens `/goal` first.
 
 Record the chosen option in `$RUN_DIR/execution-recommendation.md` under `## Chosen`.
 

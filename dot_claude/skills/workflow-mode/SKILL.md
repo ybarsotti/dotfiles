@@ -22,16 +22,13 @@ The verifier reads the last one. Do not delete the earlier decision.
 
 ## 2. Recommend a mode
 
-Read `.workflow/modes.md`. It is the rule of this repository. When it differs from the summary
-below, follow `modes.md`.
-
-- **Standard**: the task touches business behavior, permissions, migrations, an integration
-  with an external system, or its scope is unclear.
-- **Fast**: any other narrow change.
+Read `.workflow/modes.md`. It is the rule of this repository. Otherwise use the criteria of
+`~/.claude/skills/_shared/plan-routing.md`: its thorough path is **standard**, and its lean
+path is **fast**.
 
 Find the files that the task will touch: the ticket, the plan, or the user's request. Read the
 active rules in the folders that `.workflow/config.json` names. Note each active rule whose
-`paths` match those files. A match with a `kind: business` rule is a reason for standard.
+`paths` match those files.
 
 ## 3. Ask the user
 

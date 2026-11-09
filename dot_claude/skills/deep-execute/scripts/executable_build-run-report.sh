@@ -13,7 +13,7 @@
 #   --final-sha SHA   the frozen SHA the run ended on (default: HEAD of the
 #                     manifest's cwd, if it still resolves)
 #   --review PATH     a /deep-review report.md to embed
-#   --qa PATH         the /qa-execute index.html to link as evidence
+#   --qa PATH         the QA report index.html to link as evidence
 #   --pr URL          the pull request this run opened
 #   --title TEXT      report heading (default: the run id)
 #

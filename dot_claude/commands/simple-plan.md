@@ -23,10 +23,9 @@ hand the problem to another command.
 0. **Context brief** — read the affected `CLAUDE.md` files, `.claude/rules/`, neighbor files
    of the same kind, the dependency manifest, and the docs of the libraries the change uses.
    Every claim cites a path.
-0.5 **Recommend the pipeline** — with the brief in hand, recommend `simple-plan` or
-   `/deep-plan`, give the reason and the path behind it, then wait. Business behaviour,
-   permissions, a migration, an integration or unpinned scope point at `/deep-plan`. Silence
-   is not an answer. The decision and the user's words go in the plan's front matter.
+0.5 **Recommend the pipeline** — recommend `simple-plan` or `/deep-plan` with the criteria
+   of `~/.claude/skills/_shared/plan-routing.md`, then wait. The decision and the user's words
+   go in the plan's front matter.
 1. **Brainstorm** — `superpowers:brainstorming`, only when the task is unclear, and with at
    most 3 questions.
 1.5 **Split** — when the work holds more than one shippable outcome, an agent turns it into
@@ -48,17 +47,9 @@ hand the problem to another command.
 4. **Present** — when the plan adds machinery, `shed-light` first, so the approval covers
    the upkeep and not only the design. Then `plannotator annotate --gate`, then
    `ExitPlanMode`.
-5. **Build to PR** — `/qa-plan` first when a flow or screen changes, then the
-   after-approval chain end to end, then the next task from the breakdown.
-
-## The chain after implementation
-
-`~/.claude/skills/_shared/after-approval.md` runs by default, and each step **fixes what it
-finds**: build with TDD → `/deep-review` with fixes → when the app URL answers, the `qa-ui`
-agent (visual parity with the plan and the Design canvas, desktop and 390 px) and the
-`qa-business` agent (requirements and edge cases end to end, with video) → a separate agent
-fixes, QA re-runs → `/pr` → the `video-demo` skill for a user-facing feature → the HTML report
-with decisions, tests, screenshots and videos.
+5. **Build to PR** — `/qa-plan` first when a flow or screen changes, then
+   `~/.claude/skills/_shared/after-approval.md` end to end, then the next task from the
+   breakdown.
 
 ## What you must do
 

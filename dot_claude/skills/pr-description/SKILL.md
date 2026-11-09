@@ -171,8 +171,8 @@ If it does, the section carries, in this order:
    SHA it was captured against.
 
 Source them, in order of preference: the `--evidence` artifacts; the QA run this PR follows
-(`/qa-testing` and `/qa-execute` already capture annotated screenshots and WebVTT-captioned
-videos); a fresh `agent-browser` pass over the changed flow if neither exists and the app runs
+(the `qa-business` agent and `/qa-execute` already capture annotated screenshots and
+WebVTT-captioned videos); a fresh `agent-browser` pass over the changed flow if neither exists and the app runs
 locally.
 
 **Embedding.** Never commit media to the repository, on any branch. Upload it with the
@@ -316,16 +316,13 @@ An open PR is not done. Watch it until it merges or closes. Skip this phase for
    Keep the ids you already handled in `$RUN_DIR/handled-comments.txt`.
 2. **A `CHANGES_REQUESTED` review or a new actionable comment** from a human or a bot: run
    `Skill(skill="address-pr-comments")`. It verifies each claim, fixes only the valid ones in
-   scope, replies in each thread and reruns the tests.
-3. **Reply in the thread** to every comment: the fix commit SHA, or the reason you did not
-   change the code. Use `gh api repos/<owner>/<repo>/pulls/<n>/comments/<id>/replies -F body=...`.
-4. **A failing check** goes through `superpowers:systematic-debugging`. Do not patch blindly.
-5. **Ask the user first** when a comment changes scope, a requirement or a contract, or when
+   scope, reruns the tests, then replies in and resolves each thread. Do not reply here.
+3. **A failing check** goes through `superpowers:systematic-debugging`. Do not patch blindly.
+4. **Ask the user first** when a comment changes scope, a requirement or a contract, or when
    two reviewers disagree.
-6. After each push, rerun Phase 0.5 proofs and update `## Evidence by requirement` if a
+5. After each push, rerun Phase 0.5 proofs and update `## Evidence by requirement` if a
    result changed.
-
-7. **A merge conflict** (`mergeable: CONFLICTING`): rebase on the base branch, rerun the
+6. **A merge conflict** (`mergeable: CONFLICTING`): rebase on the base branch, rerun the
    tests, and push. Ask the user first when the conflict touches logic that another PR changed.
 
 **Two stages.** Human reviewers answer hours later, so a quiet CI does not end the watch.
@@ -335,7 +332,7 @@ An open PR is not done. Watch it until it merges or closes. Skip this phase for
   why, and what waits on the user.
 - *Long*: then run `Skill(skill="loop", args="<the watch prompt>")` with no interval, so the
   loop paces itself with `ScheduleWakeup` at 1200 to 1800 seconds. The watch prompt names the
-  PR URL, `handled-comments.txt`, and steps 1 to 7. A new comment, a `CHANGES_REQUESTED`
+  PR URL, `handled-comments.txt`, and steps 1 to 6. A new comment, a `CHANGES_REQUESTED`
   review, a red check or a conflict starts the active stage again.
 
 Send a `PushNotification` when the PR is approved and green, and when a review needs the user.

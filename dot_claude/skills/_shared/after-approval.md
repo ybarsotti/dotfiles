@@ -2,7 +2,8 @@
 
 The approval of the plan is the go signal. Do not stop at a handoff and do not wait for the
 user to type the next command. Run the steps below in order, unattended, until the PR is open
-and the report is delivered. `deep-plan`, `simple-plan` and `jira-workflow` all use this chain.
+and the report is delivered. `deep-plan`, `simple-plan`, `jira-workflow` and `implement` all
+use this chain. This file is the only full description of it; other files point here.
 
 Stop early only in these cases:
 
@@ -39,14 +40,9 @@ orca orchestration worker-start --worktree current --agent claude --json \
 
 ## 1. Build
 
-Take the recommended execution option of the plan. Do not ask for it again.
-
-| Option | Who writes the code |
-|---|---|
-| A — `/deep-execute "$PLAN"` | lane workers |
-| B — serial | `superpowers:subagent-driven-development`: one implementer agent per task, this session reviews |
-| C — `Workflow` | the workflow agents |
-| D — Codex | `codex exec`, this session reviews |
+Pick the executor with the last section of `~/.claude/skills/_shared/plan-routing.md`:
+A is `/deep-execute`, B is the `implement` skill, C is `Workflow`, D is Codex. Do not ask for
+it again.
 
 The session that planned orchestrates. It does not write feature code. Build with strict
 TDD. Record each departure from the plan as a `D-NNN` row under the plan's `## Deviations`.
@@ -114,11 +110,16 @@ When a fix changes code that the review saw, run `/deep-review` once more on the
 1. Freeze the commit SHA. Every result in the report names this SHA.
 2. Run `/pr`. It attaches the screenshots and the video with `gh --attach`, and it watches
    the PR for review comments and CI until the PR merges or closes.
+3. When the change adds or alters a feature a person uses, record a narrated demo with the
+   `video-demo` skill after the PR is open. Attach it with `gh pr edit <n> --attach` under a
+   `## Demo` heading, and link it in the report. Skip it for a refactor, a lone migration or
+   an internal API, and say why.
 
 ## 8. Deliver the report
 
-`/deep-execute` builds its report with `build-run-report.sh`. For options B, C and D, write
-`$RUN_DIR/report/index.html` yourself. It is one self-contained page with these sections:
+`/deep-execute` builds its report with `build-run-report.sh`. That script reads the lane
+records of a run (`manifest.json`, `events.jsonl`, `decision.sh` output), which options B, C
+and D do not write. For options B, C and D, write `$RUN_DIR/report/index.html` yourself. It is one self-contained page with these sections:
 
 1. **Summary** — what was built, the ticket, the PR link, the frozen SHA.
 2. **Requirements** — the ticket coverage table, each row with its proof.

@@ -693,40 +693,34 @@ Three slash commands chain together for planning and parallel execution of non-t
 ##### Execution recommendation (how the plan gets built)
 
 The approved plan says *what* to build; how it gets built is a separate call, and it is yours.
-deep-plan's last phase reads the plan's `## Execution shape`, recommends one of four modes and
-asks you to confirm via `AskUserQuestion`, writing the choice to
-`$RUN_DIR/execution-recommendation.md`.
+deep-plan's last phase reads the plan's `## Execution shape`, picks one of four modes with the
+criteria in `dot_claude/skills/_shared/plan-routing.md`, and writes the choice to
+`$RUN_DIR/execution-recommendation.md`. The recommended mode runs unless you named another.
 
 Before it offers those options it **re-runs `validate-plan.sh --root` from the project root** —
 the exact check `/deep-execute`'s `init-run.sh` will run. Phase 3 already validated before
 presenting the plan, but Plannotator's second pass can edit it afterwards, so a shape failure
 would otherwise surface only once you asked to build. It now fails at the recommendation instead.
 
-The four modes:
-
-| | Option | Fits when |
-|---|---|---|
-| **A** | `/deep-execute` — parallel lane workers, one shared worktree | `Mode: parallel`, ≥ 2 disjoint lanes, a real contract |
-| **B** | Sequential in the planning session (`superpowers:executing-plans`) | serial plan, one lane, or lanes too coupled for a contract |
-| **C** | Claude `Workflow` — deterministic script fan-out | many uniform mechanical slices (migration, codemod, sweep) |
-| **D** | Codex-only implementer, Claude orchestrates and reviews | one coherent slice for a second model to write |
+The four modes are A `/deep-execute` (parallel lanes), B the `implement` skill (serial, the
+default), C Claude `Workflow` and D a Codex implementer. `plan-routing.md` holds the criteria.
 
 **The planning session orchestrates; it does not implement.** It directs workers, answers their
 questions, gates rounds, routes review and QA findings back to the owning agent, and commits.
-**Option B is the only opt-out**, and only when *you* pick it — never because the session judged
-the change small enough to just do itself.
+The session writes feature code only when *you* ask for that — never because it judged the
+change small enough to just do itself.
 
 Whichever mode runs, the tail is the same and runs **end to end without checking in** — it
 halts only on a blocker no agent can settle alone. The run is wrapped in **`/goal`** (built
 into Claude Code and Codex) with the objective stated as the finished state — reviewed,
 QA-green, PR open — which is what keeps it driving there instead of stopping at the first
 natural pause; `/deep-execute` opens its own in Phase 0, and under B, C and D the planning
-session opens it. The self-contained HTML run report is a `/deep-execute` artifact — under
-B, C and D you get the QA evidence report and the PR body instead.
+session opens it. The tail is `dot_claude/skills/_shared/after-approval.md`. Under A the
+script `build-run-report.sh` builds the HTML run report; under B, C and D the session writes it.
 
-QA adapts to the machine: `qa-testing` in EXECUTE mode when that skill is installed, the plan's
-`qa-plan.yaml` through `/qa-test-plan` when it names one, and a plain `agent-browser` agent
-otherwise. A missing skill downgrades the evidence; it never cancels the QA step.
+QA has one route: the chain starts the `qa-ui` and `qa-business` agents. `qa-business` runs the
+plan's `qa-plan.yaml` through `/qa-test-plan` when it names one, and drives `agent-browser`
+itself otherwise.
 
 ##### The Stop hook that refuses to lose the run report
 

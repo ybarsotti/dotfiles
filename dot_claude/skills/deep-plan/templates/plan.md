@@ -387,7 +387,7 @@ stateDiagram-v2
 ## QA / test-execution
 <!-- Does this change user-facing flows or add/alter screens? Answer yes/no.
      If yes, deep-plan MUST create a reviewed structured plan via `/qa-plan`.
-     deep-execute later consumes it via `/qa-execute` after deep-review. -->
+     The qa-business agent later runs it after deep-review. -->
 - Changes flows or adds screens? **<yes/no>**
 - If yes, QA focus: <which screens/flows a manual tester must exercise>
 - QA plan: <`$RUN_DIR/qa/qa-plan.yaml`, or `not applicable — reason`>
