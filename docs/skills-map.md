@@ -12,7 +12,7 @@ The generator reads `dot_claude/skills/**/*.md`, `dot_claude/commands/*.md`, `do
 It writes `docs/skills-map.md` and `docs/skills-map.html`. A second run gives no diff.
 Run `node --test docs/skills-map.test.mjs` to test the edge extraction.
 
-Counts: 22 skills, 12 commands, 3 agents, 10 shared docs, 16 external references. 153 edges: 70 invokes skill, 6 spawns agent, 33 runs command, 44 reads shared doc.
+Counts: 24 skills, 14 commands, 3 agents, 10 shared docs, 16 external references. 157 edges: 73 invokes skill, 6 spawns agent, 33 runs command, 45 reads shared doc.
 
 ## Diagram 1: the main chains
 
@@ -452,10 +452,14 @@ flowchart LR
   subgraph cl_pr_ticket["pr-ticket"]
     direction TB
     c_pr(["/pr"]):::command
+    c_release(["/release"]):::command
+    c_release_notes(["/release-notes"]):::command
     s_address_pr_comments("address-pr-comments"):::skill
     s_follow_up_jira("follow-up-jira"):::skill
     s_jira_workflow("jira-workflow"):::skill
     s_pr_description("pr-description"):::skill
+    s_release("release"):::skill
+    s_release_notes("release-notes"):::skill
   end
   subgraph cl_qa["qa"]
     direction TB
@@ -476,6 +480,8 @@ flowchart LR
     d_ticket_start[("_shared/ticket-start.md")]:::shared
   end
   c_pr --> s_pr_description
+  c_release --> s_release
+  c_release_notes --> s_release_notes
   s_follow_up_jira --> s_pr_description
   s_jira_workflow -.-> c_deep_execute
   s_jira_workflow -.-> c_deep_plan
@@ -494,25 +500,31 @@ flowchart LR
   s_pr_description --> s_blindspot
   s_pr_description --> x_loop
   s_pr_description --> x_superpowers_systematic_debugging
+  s_release --> s_release_notes
+  s_release_notes --o d_inbox
   linkStyle 0 stroke:#2563eb
   linkStyle 1 stroke:#2563eb
-  linkStyle 2 stroke:#16a34a
-  linkStyle 3 stroke:#16a34a
+  linkStyle 2 stroke:#2563eb
+  linkStyle 3 stroke:#2563eb
   linkStyle 4 stroke:#16a34a
   linkStyle 5 stroke:#16a34a
-  linkStyle 6 stroke:#9ca3af
-  linkStyle 7 stroke:#9ca3af
+  linkStyle 6 stroke:#16a34a
+  linkStyle 7 stroke:#16a34a
   linkStyle 8 stroke:#9ca3af
-  linkStyle 9 stroke:#2563eb
-  linkStyle 10 stroke:#2563eb
-  linkStyle 11 stroke:#db2777
-  linkStyle 12 stroke:#16a34a
-  linkStyle 13 stroke:#9ca3af
-  linkStyle 14 stroke:#9ca3af
-  linkStyle 15 stroke:#2563eb
-  linkStyle 16 stroke:#2563eb
+  linkStyle 9 stroke:#9ca3af
+  linkStyle 10 stroke:#9ca3af
+  linkStyle 11 stroke:#2563eb
+  linkStyle 12 stroke:#2563eb
+  linkStyle 13 stroke:#db2777
+  linkStyle 14 stroke:#16a34a
+  linkStyle 15 stroke:#9ca3af
+  linkStyle 16 stroke:#9ca3af
   linkStyle 17 stroke:#2563eb
   linkStyle 18 stroke:#2563eb
+  linkStyle 19 stroke:#2563eb
+  linkStyle 20 stroke:#2563eb
+  linkStyle 21 stroke:#2563eb
+  linkStyle 22 stroke:#9ca3af
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
@@ -897,6 +909,8 @@ References to skills, agents or shared docs that this repository does not define
 | /qa-execute | invokes skill | qa-test-plan | `dot_claude/commands/qa-execute.md:16` |
 | /qa-plan | invokes skill | qa-test-plan | `dot_claude/commands/qa-plan.md:16` |
 | /qa-test-plan | invokes skill | qa-test-plan | `dot_claude/commands/qa-test-plan.md:18` |
+| /release | invokes skill | release | `dot_claude/commands/release.md:21` |
+| /release-notes | invokes skill | release-notes | `dot_claude/commands/release-notes.md:21` |
 | /shed-light | invokes skill | shed-light | `dot_claude/commands/shed-light.md:20` |
 | /simple-plan | runs command | /deep-plan | `dot_claude/commands/simple-plan.md:26` |
 | /simple-plan | runs command | /qa-plan | `dot_claude/commands/simple-plan.md:50` |
@@ -988,6 +1002,8 @@ References to skills, agents or shared docs that this repository does not define
 | pr-description | invokes skill | blindspot | `dot_claude/skills/pr-description/SKILL.md:244` |
 | pr-description | invokes skill | loop | `dot_claude/skills/pr-description/SKILL.md:333` |
 | pr-description | invokes skill | superpowers:systematic-debugging | `dot_claude/skills/pr-description/SKILL.md:320` |
+| release | invokes skill | release-notes | `dot_claude/skills/release/SKILL.md:168` |
+| release-notes | reads shared doc | inbox.md | `dot_claude/skills/release-notes/SKILL.md:122` |
 | simple-plan | spawns agent | ui-designer | `dot_claude/skills/simple-plan/SKILL.md:173` |
 | simple-plan | runs command | /deep-plan | `dot_claude/skills/simple-plan/SKILL.md:71` |
 | simple-plan | runs command | /pr | `dot_claude/skills/simple-plan/SKILL.md:440` |

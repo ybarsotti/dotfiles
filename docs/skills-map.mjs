@@ -42,6 +42,8 @@ const CLUSTERS = {
     "address-pr-comments",
     "jira-workflow",
     "follow-up-jira",
+    "release",
+    "release-notes",
   ],
   workflow: [
     "workflow-mode",
