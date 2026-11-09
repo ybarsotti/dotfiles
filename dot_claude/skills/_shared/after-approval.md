@@ -110,6 +110,7 @@ When a fix changes code that the review saw, run `/deep-review` once more on the
 
 ## 7. Open the PR
 
+0. When `.workflow/config.json` exists, run `Skill(skill="workflow-post-implementation")` with the step 2 review and the QA results as evidence. It chains to `workflow-finish`.
 1. Freeze the commit SHA. Every result in the report names this SHA.
 2. Run `/pr`. It attaches the screenshots and the video with `gh --attach`, and it watches
    the PR for review comments and CI until the PR merges or closes.

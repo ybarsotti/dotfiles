@@ -439,6 +439,7 @@ into a line of evidence, so a row with no runnable proof says why.
 3. `ExitPlanMode` for the final approval.
 4. Stamp the approved plan: `~/.claude/skills/_shared/plan-stamp.sh approve "$PLAN_PATH"`.
    Commit the plan and its `.approved` stamp together.
+5. When `.workflow/config.json` exists, run `Skill(skill="workflow-post-plan")` with the Phase 3 reviewer results as evidence.
 
 ## Phase 5 — Build to PR, without waiting
 

@@ -409,6 +409,7 @@ The session writes feature code only when the user asks for that in so many word
 
 Follow `~/.claude/skills/_shared/after-approval.md`. Option A runs `/deep-execute "$PLAN"`, which
 runs the chain itself. Stop at the plan only when the user said so.
+When `.workflow/config.json` exists, first run `Skill(skill="workflow-post-plan")` with the last Phase 2 verdicts as evidence.
 
 ## Reuse
 
