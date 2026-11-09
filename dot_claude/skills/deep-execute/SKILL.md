@@ -57,8 +57,10 @@ knows only the first four goes silent on a crash, and silence reads as "still wo
 <seq>`. Until then every call returns the same trigger, so nothing is lost when you crash
 between the trigger and the reply.
 
-- **`question`** — answer from the plan or the contract when they decide it; otherwise
-  `AskUserQuestion`. Then `reply.sh RUN_DIR LANE "<answer>"`.
+- **`question`** — answer from the plan or the contract when they decide it. Otherwise post it
+  to the run's Inbox thread with `Holds up: lane <LANE>`, ack it, and keep the other lanes
+  running (`~/.claude/skills/_shared/inbox.md`). Use `AskUserQuestion` only when every lane is
+  blocked or the Inbox is absent. Send the answer with `reply.sh RUN_DIR LANE "<answer>"`.
 - **`waiting`** — read `board.sh RUN_DIR` and wake the lane only when every lane in its
   `depends_on` has emitted `done`. An unsent wake strands the lane: it is an incident.
 - **`blocked` — contract drift.** A worker blocked on the contract means the contract is
@@ -125,8 +127,9 @@ timeline, review, QA, open findings and the PR. Omit `--review`/`--qa`/`--pr` on
 artifact does not exist; the page says so. **Do not hand-write or supplement this page from
 memory.** A decision no one recorded is absent from it, and that absence is the truthful
 output. Close with `finish-run.sh RUN_DIR [--qa PATH]`, which refuses a missing or unrendered
-report. Then start the PR watch (step 9) and leave the lane loops alive; teardown
-(`lanes/<lane>/stop`) is a separate step the user confirms.
+report. Send the report summary to the run's Inbox thread with `report/index.html` in
+`attachments` (`_shared/inbox.md`). Then start the PR watch (step 9) and leave the lane loops
+alive; teardown (`lanes/<lane>/stop`) is a separate step the user confirms.
 
 ## Resume (`--resume RUN_DIR`)
 

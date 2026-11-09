@@ -106,7 +106,9 @@ Run steps 4 and 5 in parallel. They touch different things.
 1. A separate fixer agent fixes every difference from step 4 and every failure from step 5.
    The QA agents never fix code.
 2. Re-run only the QA agent that found the problem, on the fixed commit.
-3. Stop after 3 rounds. Report what is still open and ask the user.
+3. Stop after 3 rounds. Report what is still open and ask the user. The chain runs unattended,
+   so ask each decision as an Inbox question when the Inbox exists, else `AskUserQuestion`
+   (`~/.claude/skills/_shared/inbox.md`).
 
 When a fix changes code that the review saw, run `/deep-review` once more on the fix.
 
@@ -138,6 +140,9 @@ and D do not write. For options B, C and D, write `$RUN_DIR/report/index.html` y
 
 Copy each image and video into `$RUN_DIR/report/media/` and link it by a relative path.
 Then run `open "$RUN_DIR/report/index.html"` and give the user the absolute path.
+
+Send the finished-work summary to the Inbox thread of the ticket or branch: the PR in `pulls`,
+the QA screenshots in the body, and the report and videos in `attachments` (`_shared/inbox.md`).
 
 ## 9. Watch the PR
 

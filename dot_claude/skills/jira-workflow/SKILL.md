@@ -190,8 +190,9 @@ report. Run that chain once. Do not start a second build, review or QA. Add only
 - **Commit message:** a Conventional Commit with `Implements <CODE>.` in the body. Do not skip
   the hooks.
 - **`/pr` arguments:** `--ticket <CODE> --plan <plan.md> --evidence <qa-report-index.html>`.
-- **After the PR opens:** send a `PushNotification` with `<CODE> PR opened` and the PR URL.
-  Add the PR URL to the ticket:
+- **After the PR opens:** send `<CODE> PR opened` and the PR URL as the `/pr` Phase 5 rule
+  sends its notices: the Inbox thread `<CODE>`, else a `PushNotification`. Add the PR URL to
+  the ticket:
 
   ```
   mcp__atlassian__addCommentToJiraIssue(cloudId, issueIdOrKey=<CODE>, commentBody="PR: <url>")
@@ -205,7 +206,7 @@ report. Run that chain once. Do not start a second build, review or QA. Add only
 state, and merge conflicts, until the PR merges or closes. Do not run a second loop here.
 The jira-workflow parts are these:
 
-- When the PR is ready to merge, send a `PushNotification`: `<CODE> ready to merge`.
+- When the PR is ready to merge, send `<CODE> ready to merge` the same way.
 - When the PR merges, offer to move the ticket to its next Jira status.
 
 The merge is the user's call.

@@ -335,7 +335,10 @@ An open PR is not done. Watch it until it merges or closes. Skip this phase for
   PR URL, `handled-comments.txt`, and steps 1 to 6. A new comment, a `CHANGES_REQUESTED`
   review, a red check or a conflict starts the active stage again.
 
-Send a `PushNotification` when the PR is approved and green, and when a review needs the user.
+When the PR is approved and green, and when a review needs the user, send it to the Inbox
+thread of the ticket or branch, with the PR in `pulls` (`~/.claude/skills/_shared/inbox.md`).
+Without the Inbox, send a `PushNotification`. A `CHANGES_REQUESTED` that `address-pr-comments`
+cannot resolve alone becomes an Inbox question.
 Stop the loop when the PR merges or closes. The loop lives in this session: when the session
 ends, the watch ends. Say so in the final report.
 
