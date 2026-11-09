@@ -340,7 +340,8 @@ appends to its `## Deviations`.
 
 Write `$RUN_DIR/execution-recommendation.md` — recommendation first, then the four options
 with the trade-off that decides between them. Pick the recommendation with the executor
-section of `~/.claude/skills/_shared/plan-routing.md`. Do not ask the user: it runs.
+section of `~/.claude/skills/_shared/plan-routing.md`. Do not ask the user: it runs. Option C
+is the exception: ask its ultracode question here, before Phase 4, as `plan-routing.md` says.
 
 The four options, each stated to the user with what it costs:
 
@@ -349,9 +350,8 @@ The four options, each stated to the user with what it costs:
   PR. Most machinery, most parallelism; needs disjoint lanes and a real contract.
 - **B — serial** via the `implement` skill (`superpowers:subagent-driven-development`): one
   implementer agent per task, in order, strict TDD per task. This session reviews each task.
-- **C — Claude `Workflow`.** Deterministic script-driven fan-out (`pipeline()`/`parallel()`)
-  over a known work-list, with an adversarial verify stage. Best when the slices are uniform
-  and the orchestration shape is known up front; no lane terminals, no per-round human gate.
+- **C — Claude `Workflow` (ultracode).** Parallel worktrees with adversarial review and no
+  lane terminals, but no human input during a run. Needs the user's opt-in; test in `plan-routing.md`.
 - **D — Codex-only implementer.** `codex exec` writes the code; this session orchestrates,
   gates, reviews and commits. Use when the change is one coherent slice and you want a
   second model's hands on the implementation.

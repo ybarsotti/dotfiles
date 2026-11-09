@@ -11,6 +11,9 @@ Stop early only in these cases:
 - A decision changes a requirement, a business rule, a contract or the scope. Ask the user.
 - A loop below reaches its round limit with failures left. Report them and ask.
 
+The ultracode question of option C is not a stop case. The planning skill asks it once, at
+plan approval, before this chain starts (`plan-routing.md`). This chain never asks it.
+
 ## 0. Hold the chain open
 
 1. Open `/goal` unless a goal is already active. State the objective as the finished result:
@@ -40,15 +43,18 @@ orca orchestration worker-start --worktree current --agent claude --json \
 
 ## 1. Build
 
-Pick the executor with the last section of `~/.claude/skills/_shared/plan-routing.md`:
-A is `/deep-execute`, B is the `implement` skill, C is `Workflow`, D is Codex. Do not ask for
-it again.
+The executor comes from the last section of `~/.claude/skills/_shared/plan-routing.md`:
+A is `/deep-execute`, B is the `implement` skill, C is `Workflow`, D is Codex. The planning
+skill picks it before this chain starts. Run option C only when `$RUN_DIR/decisions.md`
+records the user's ultracode opt-in, or the session runs at ultracode effort. Without either,
+run option B.
 
 The session that planned orchestrates. It does not write feature code. Build with strict
 TDD. Record each departure from the plan as a `D-NNN` row under the plan's `## Deviations`.
 
 **Review each part when it is done.** A part is a task in option B, a round in option A, a
-stage, or a slice in options C and D. Before the next part starts, run
+stage, or a slice in option D. In option C, the workflow's adversarial reviewer replaces this
+per-part review (`plan-routing.md`, "How option C runs"). Before the next part starts, run
 `/deep-review default --scope <commit before the part>..HEAD`. Fix every CRITICAL and HIGH
 finding through the agent that wrote the part, then commit. The next part builds on reviewed
 code.

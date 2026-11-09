@@ -432,6 +432,8 @@ stop to recommend commands. Stop at the plan only when the user said so, such as
    screen, say why you skip it.
 2. **Then the chain in `~/.claude/skills/_shared/after-approval.md`.** Its executor comes from
    `~/.claude/skills/_shared/plan-routing.md`: usually the `implement` skill.
+   A simple-plan plan holds one task, so it fails the option C test and never asks the
+   ultracode question.
 
 Rules for this pipeline inside that chain:
 
