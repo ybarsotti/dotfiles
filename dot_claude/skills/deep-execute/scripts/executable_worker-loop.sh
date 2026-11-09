@@ -105,6 +105,15 @@ fi
 
 mkdir -p "$REPLIES"
 rm -f "${LANE_DIR}/stop"
+
+# A `git` shim first on PATH blocks `env git`, `command git` and the other
+# forms that the `Bash(git:*)` deny misses, for both runners. An absolute path
+# such as /usr/bin/git still bypasses it: the boundary checks of the round
+# gate remain the real control.
+mkdir -p "${LANE_DIR}/bin"
+printf '#!/bin/sh\necho "workers never run git; the orchestrator commits" >&2\nexit 1\n' >"${LANE_DIR}/bin/git"
+chmod +x "${LANE_DIR}/bin/git"
+export PATH="${LANE_DIR}/bin:${PATH}"
 printf '%s\n' "$$" >"${LANE_DIR}/loop.pid"
 
 # macOS ships no `timeout`: gtimeout, then timeout, then perl's alarm.

@@ -11,7 +11,9 @@
 # that checkpoint from now on; `baseline_commit` stays the start of the run.
 #
 # It refuses an uncommitted contract: the checkpoint must hold the bytes the
-# hash describes.
+# hash describes. It also refuses a bump that would absorb other changes into
+# the checkpoint: a shared_read_only file that changed since the old
+# checkpoint, or a commit that changes the contract together with any other file.
 set -eufo pipefail
 
 [ $# -eq 2 ] || {
@@ -36,6 +38,27 @@ CONTRACT=$(jq -r '.contract.path' "$MANIFEST")
   echo "contract-bump.sh: commit ${CONTRACT} first — the checkpoint must hold the new contract" >&2
   exit 1
 }
+
+OLD=$(jq -r '.checkpoint_commit' "$MANIFEST")
+SHARED=()
+while IFS= read -r s; do [ -n "$s" ] && SHARED+=("$s"); done < <(jq -r '.shared_read_only[]?' "$MANIFEST")
+if [ "${#SHARED[@]}" -gt 0 ]; then
+  CHANGED=$(git -C "$CWD" diff --name-only "${OLD}..HEAD" -- "${SHARED[@]}")
+  [ -z "$CHANGED" ] || {
+    echo "contract-bump.sh: shared_read_only files changed since checkpoint ${OLD:0:12}; the bump would absorb them:" >&2
+    echo "  ${CHANGED//$'\n'/$'\n'  }" >&2
+    exit 1
+  }
+fi
+# The contract change must be its own commit, so the checkpoint absorbs nothing else.
+for c in $(git -C "$CWD" rev-list "${OLD}..HEAD" -- "$CONTRACT"); do
+  OTHER=$(git -C "$CWD" diff-tree --root --no-commit-id --name-only -r "$c" | grep -vxF "$CONTRACT" || true)
+  [ -z "$OTHER" ] || {
+    echo "contract-bump.sh: commit ${c:0:12} changes ${CONTRACT} together with other files; commit the contract alone:" >&2
+    echo "  ${OTHER//$'\n'/$'\n'  }" >&2
+    exit 1
+  }
+done
 
 if command -v sha256sum >/dev/null 2>&1; then SHA_CMD=(sha256sum); else SHA_CMD=(shasum -a 256); fi
 SHA=$("${SHA_CMD[@]}" "${CWD}/${CONTRACT}" | awk '{print $1}')

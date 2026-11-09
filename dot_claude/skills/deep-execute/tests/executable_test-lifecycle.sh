@@ -89,6 +89,7 @@ case "$mode" in
   slow) sleep "${STUB_SLOW:-2}" ;;
   done) "$STUB_EVENT" "$STUB_RUN" "$STUB_LANE" "$STUB_TASK" done "round finished" ;;
   slow-done) sleep "${STUB_SLOW:-2}"; "$STUB_EVENT" "$STUB_RUN" "$STUB_LANE" "$STUB_TASK" done "round finished" ;;
+  git) git status >/dev/null 2>"${dir}/call.${n}.git.err"; printf '%s' "$?" >"${dir}/call.${n}.git.rc" ;;
 esac
 exit 0
 STUB
@@ -421,5 +422,61 @@ assert_contains "$PROMPT_N2" "Never run \`git\`" "codex: every stateless turn ca
 assert_contains "$PROMPT_N2" "2 - Implement the backend service" "codex: every stateless turn carries the brief"
 assert_contains "$PROMPT_N2" "codex follow-up" "codex: the follow-up turn carries the reply"
 stop_loop "$RUN_M" backend "$LOOP_N"
+
+# ─── 13. A lane that runs git hits the PATH shim, for both runners ─────────
+
+for RUNNER_O in claude codex; do
+  REPO_O=$(new_repo)
+  if [ "$RUNNER_O" = codex ]; then
+    RUN_O=$(new_run "$REPO_O" "$FIXTURE_PLAN" --agent "backend=codex gpt-6-sol medium")
+  else
+    RUN_O=$(new_run "$REPO_O")
+  fi
+  STUB_O=$(new_stub "git")
+  start_loop "$RUN_O" backend "$STUB_O"
+  LOOP_O=$LOOP_PID
+  wait_until 10 test -f "${STUB_O}/call.1.git.rc"
+  assert_eq "$(cat "${STUB_O}/call.1.git.rc" 2>/dev/null)" 1 "git shim (${RUNNER_O}): git status exits 1 inside a lane"
+  assert_contains "$(cat "${STUB_O}/call.1.git.err" 2>/dev/null)" "workers never run git; the orchestrator commits" \
+    "git shim (${RUNNER_O}): the shim names the rule"
+  stop_loop "$RUN_O" backend "$LOOP_O"
+done
+
+# ─── 14. contract-bump.sh refuses to absorb other changes into the checkpoint ─
+
+REPO_P=$(new_repo)
+RUN_P=$(new_run "$REPO_P")
+P_MANIFEST=$(shasum "${RUN_P}/manifest.json")
+printf '# readme v2\n' >"${REPO_P}/README.md"
+git -C "$REPO_P" commit --quiet -am "edit a shared file"
+printf '{"type":"object","title":"v2"}\n' >"${REPO_P}/contract.schema.json"
+git -C "$REPO_P" commit --quiet -am "contract 1.1.0"
+P_RC=0
+P_ERR=$("$CONTRACT_BUMP" "$RUN_P" 1.1.0 2>&1 >/dev/null) || P_RC=$?
+assert_eq "$P_RC" 1 "bump: a changed shared_read_only file refuses the bump"
+assert_contains "$P_ERR" "README.md" "bump: the refusal names the shared file"
+assert_eq "$(shasum "${RUN_P}/manifest.json")" "$P_MANIFEST" "bump: a refused bump leaves the manifest untouched"
+
+REPO_Q=$(new_repo)
+RUN_Q=$(new_run "$REPO_Q")
+Q_MANIFEST=$(shasum "${RUN_Q}/manifest.json")
+printf '{"type":"object","title":"v2"}\n' >"${REPO_Q}/contract.schema.json"
+printf 'echo smuggled\n' >>"${REPO_Q}/backend/service.sh"
+git -C "$REPO_Q" commit --quiet -am "contract 1.1.0 and a lane file"
+Q_RC=0
+Q_ERR=$("$CONTRACT_BUMP" "$RUN_Q" 1.1.0 2>&1 >/dev/null) || Q_RC=$?
+assert_eq "$Q_RC" 1 "bump: a contract commit that also touches another file refuses the bump"
+assert_contains "$Q_ERR" "backend/service.sh" "bump: the refusal names the extra file"
+assert_eq "$(shasum "${RUN_Q}/manifest.json")" "$Q_MANIFEST" "bump: a mixed-commit refusal leaves the manifest untouched"
+
+REPO_R=$(new_repo)
+RUN_R=$(new_run "$REPO_R")
+printf 'echo lane work\n' >>"${REPO_R}/backend/service.sh"
+git -C "$REPO_R" commit --quiet -am "round 1 lane work"
+printf '{"type":"object","title":"v2"}\n' >"${REPO_R}/contract.schema.json"
+git -C "$REPO_R" commit --quiet -am "contract 1.1.0"
+assert_exit 0 "$CONTRACT_BUMP" "$RUN_R" 1.1.0
+assert_eq "$(jq -r '.checkpoint_commit' "${RUN_R}/manifest.json")" "$(git -C "$REPO_R" rev-parse HEAD)" \
+  "bump: lane commits and a contract-only commit pass"
 
 assert_summary

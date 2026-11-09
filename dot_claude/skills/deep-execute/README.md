@@ -34,8 +34,12 @@ Run it from Claude Code:
   run's `manifest.json`.
 
 Known tradeoff: claude lanes run with `--dangerously-skip-permissions`, with no sandbox. They
-rely on the shared-worktree boundary checks and on `Bash(git:*)` as a disallowed tool. Codex
+rely on the shared-worktree boundary checks, on `Bash(git:*)` as a disallowed tool, and on a
+`git` shim first on `PATH` for every lane (an absolute path such as `/usr/bin/git` bypasses it). Codex
 lanes run in the `workspace-write` sandbox, with the run directory writable and network on.
+Codex lanes need write access to the run directory for `event.sh`, so a misbehaving lane
+could edit `manifest.json`. The round gate validates the manifest schema again, and the
+orchestrator is the only committer.
 
 ## Scripts
 
