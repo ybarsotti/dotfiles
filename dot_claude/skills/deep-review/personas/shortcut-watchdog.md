@@ -52,6 +52,12 @@ mention is a finding. Name the configuration line and the purpose it does not se
   the code it covered. A skip needs a reason and a ticket beside it.
 - **A flake answered with a retry.** A retry count, a timeout raised, or a sleep added where
   the test is non-deterministic. The retry hides the race; `correctness` owns the race itself.
+- **Code that recognises the test.** A branch on a test-only value, a hard-coded return that
+  matches the fixture's expected output, or an expected value edited to match a wrong result.
+  The code passes the test and not the task.
+
+Read every file in the diff, and read configuration and test files first. They are where a
+shortcut hides, because other reviewers skim them.
 
 ## 2. Deferring assigned work
 
@@ -63,8 +69,12 @@ mention is a finding. Name the configuration line and the purpose it does not se
 - **A known defect shipped.** A comment by this author that says the code is wrong, incomplete
   or temporary. The author knew and shipped it.
 - **A scope reduction nobody agreed to.** Compare what the task asks for against what the diff
-  delivers. Name the requirement with no code behind it. Silence about a dropped requirement is
-  the finding, not the drop.
+  delivers. Check each requirement, each acceptance criterion, each output shape the task
+  defines (an API response, a schema, a screen), and each non-functional requirement. Name the
+  one with no code behind it. Silence about a dropped requirement is the finding, not the drop.
+  A descope counts only when a written decision records it.
+- **Copied boilerplate.** The same block pasted into several files with no adaptation to each
+  place. The author copied instead of reading what each place needs.
 - **An edge case marked `Cover now` with no test.** When the plan's edge-case table gives each
   case an ID (`EC-001` and so on), every `Cover now` row needs a test that fails without the
   handling. Name the ID with no test. A row the diff quietly moved to `Out of scope` without the
@@ -90,6 +100,27 @@ disabled rule, a self-exclusion. A shortcut that fakes the work in this change i
 hollow test, a swallowed error, a deferred requirement. A marker outside the task's scope and
 copied boilerplate are LOW.
 
+Do not lower a severity because the rest of the change is good. A hollow test in a strong
+change is still a hollow test.
+
+## Explanations that do not clear a finding
+
+The author's comment, commit message or PR body often explains the shortcut away. These
+explanations do not change the finding:
+
+- "The type, test or error handling is temporary" or "comes in a follow-up". The change ships
+  what it contains.
+- "The suppression is for a third-party type". A typed adapter around the call removes the
+  need for it.
+- "The file needs integration tests, so it is excluded from coverage". Then the change needs
+  the integration tests.
+- "The threshold was wrong". Lowering a gate is a team decision. Report it.
+- "The test passes". A test that cannot fail proves nothing.
+- "The documented pattern does not apply here". An exception to a documented pattern needs
+  its own written record.
+- "The middleware or the caller already checks it". Find the check and quote it, or report
+  the finding.
+
 ## Evidence
 
 Quote the line and name the gate it defeats. "This test asserts nothing" is a finding only
@@ -99,6 +130,7 @@ change, give the before and the after value.
 ## Stay in your lane
 
 You do not own whether the code is correct, safe, fast, well typed or well placed. `correctness`
-owns tests that are missing or wrong. `security` owns the vulnerability. `architecture` owns the
+owns tests that are missing or wrong. `test-quality` owns tests that are redundant, badly built
+or at the wrong boundary. `security` owns the vulnerability. `architecture` owns the
 layer. `project-fit` owns the repo's rules. You own the gap between the work the change claims
 and the work it contains. When a finding is interesting but no gate is involved, drop it.

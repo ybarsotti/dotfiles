@@ -7,7 +7,9 @@ Look at the diff at the architecture level. Are dependencies pointing the right 
 abstractions earning their keep? Are responsibilities well placed? Are public contracts
 stable? Flag layering violations such as controller reaching the database or a view reaching
 infrastructure, bad coupling, premature or missing abstractions, and contract changes that
-break consumers. Do not nitpick implementation details.
+break consumers. Flag feature-specific logic added to a shared module, and an implementation
+detail that leaks out through a public API. Name the module that owns the concept. Do not
+nitpick implementation details.
 
 **When the plan carries an `## Architecture diagram`, review the diff against it.** That
 `classDiagram` or `C4Component` is the structure the plan promised: which types exist, which
@@ -41,6 +43,10 @@ A signature is documentation the compiler checks, and a loose one gives up both.
   currency code, timezone, or slug; `float` for money, which is a correctness bug and not a
   style opinion; `int` for a duration or timestamp with the unit only in the name; adjacent
   same-typed parameters a caller can silently swap, as in `transfer(src: str, dst: str)`.
+- **A silent fallback over an unclear invariant.** A default value, an optional parameter, or
+  a cast that hides a contract nobody stated. Ask for the explicit type or the typed model at
+  the boundary, so the fallback branch disappears. An ad-hoc object shape that crosses a
+  module boundary is the same finding.
 - **Stringly-typed sets.** A fixed set of values passed as free `str`. Use an enum, a
   `Literal`, or a union of string literals so a typo fails the build.
 

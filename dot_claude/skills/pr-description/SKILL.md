@@ -314,9 +314,9 @@ An open PR is not done. Watch it until it merges or closes. Skip this phase for
    gh api repos/<owner>/<repo>/pulls/<n>/comments   # inline review comments
    ```
    Keep the ids you already handled in `$RUN_DIR/handled-comments.txt`.
-2. **Address each new review comment** from a human or a bot with
-   `Skill(skill="superpowers:receiving-code-review")`. Verify the claim against the code
-   before you change anything. Fix what is right, and push back on what is wrong with evidence.
+2. **A `CHANGES_REQUESTED` review or a new actionable comment** from a human or a bot: run
+   `Skill(skill="address-pr-comments")`. It verifies each claim, fixes only the valid ones in
+   scope, replies in each thread and reruns the tests.
 3. **Reply in the thread** to every comment: the fix commit SHA, or the reason you did not
    change the code. Use `gh api repos/<owner>/<repo>/pulls/<n>/comments/<id>/replies -F body=...`.
 4. **A failing check** goes through `superpowers:systematic-debugging`. Do not patch blindly.

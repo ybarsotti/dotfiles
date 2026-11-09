@@ -6,6 +6,10 @@ and does this codebase already do it? Work both sections.
 Flag:
 
 - Unused abstractions, and an interface with a single implementation.
+- A thin wrapper, an identity function, or a pass-through helper that adds a call and no
+  clarity. Recommend the direct call.
+- A generic "magic" mechanism that hides a simple data shape: reflection, dynamic keys or a
+  catch-all handler where the code handles two known cases. Recommend the direct form.
 - Premature generalization, and speculative parameters nobody passes.
 - Dead code paths.
 - Backwards-compatibility shims for things that do not exist yet.
