@@ -25,9 +25,8 @@ execution half. Invoke each planning-phase skill via the Skill tool at its mappe
 | 1 | `brainstorming` | Phase 1 | deep-plan |
 | 2 | `writing-plans` | Phase 1.5 | deep-plan |
 | 2b| `/qa-plan` | Phase 2.4 when user flows/screens change | deep-plan |
-| 3 | `humanizing-plans` | Phase 3 (present) | deep-plan |
-| 4 | `plannotator-annotate` | Phase 3 (annotate) | deep-plan |
-| ✳ | `continuity-ledger` | any long session (save/resume) | deep-plan |
+| 3 | `_shared/plan-page.md` (plan page) | Phase 3 (present) | deep-plan |
+| 4 | `plannotator annotate --gate` | Phase 3 (annotate) | deep-plan |
 | — | — | **handoff** ↓ | **`/deep-execute` or `implement`** |
 | 4 | `using-git-worktrees` | execution | executor |
 | 5 | `subagent-driven-development` / `executing-plans` | execution | executor |
@@ -298,35 +297,16 @@ Confirm the plan includes, at minimum:
 
 If any are missing, loop back once into Phase 2 with a synthetic CHANGES_REQUESTED verdict naming the missing artifact.
 
-**Humanize for the reader (superpowers-adjacent: `humanizing-plans`):**
-```
-Skill(skill="humanizing-plans")
-```
-The raw `plan.md` is written for a worker (file paths, task steps, TDD list). Before asking
-the human to approve it, run `humanizing-plans` on `$RUN_DIR/plan.md` to distill it to human
-altitude (goal, approach, key decisions + why, risks, sequence) and render the best-fit format
-(text / diagram / HTML). This is the artifact the user actually reads to approve. Record:
-```
-~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR" humanizing-plans
-```
-If `humanizing-plans` is unavailable, print a short human-altitude distillation inline instead.
+**Plan page:** render the humanized `$RUN_DIR/plan.html`, gate it and decide where it lives per `~/.claude/skills/_shared/plan-page.md`.
 
 **Present the plan through Plannotator (mandatory — never a terminal wall of text):**
 
 The plan is always reviewed in the Plannotator UI, in two passes:
 
-1. **Annotate the full worker plan.** Invoke the skill (it runs the command itself):
-   ```
-   Skill(skill="plannotator-annotate")
-   ```
-   Target `$RUN_DIR/plan.md` and gate on the result:
-   ```
-   plannotator annotate "$RUN_DIR/plan.md" --gate
-   ```
-   `--gate` blocks until the user approves or returns annotations. Address **every**
-   annotation: edit `plan.md`, re-run `finalize-plan.sh` (validate + tick together), then
-   re-open Plannotator on the updated file. Loop until the user approves with no annotations.
-   Record it:
+1. **Gate the plan page.** `plannotator annotate "$RUN_DIR/plan.html" --gate` blocks until the
+   user approves or returns annotations. Address **every** annotation in `plan.md`, re-run
+   `finalize-plan.sh` (validate + tick together), re-render the page, then re-open it. Loop
+   until the user approves with no annotations. Record it:
    ```
    ~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR" plannotator-annotate
    ```
@@ -352,10 +332,11 @@ root — so run it there, now: `(cd "$PROJECT_ROOT" && validate-plan.sh "$RUN_DI
 --json)`. Any `fail` goes back to `finalize-plan.sh`. Never offer option A on a plan that
 `init-run.sh` will reject; that failure belongs here, not after the user asks to build.
 
-**Publish and stamp the approved plan** (`~/.claude/skills/_shared/spec-evidence.md` sections 1–2).
-Copy `plan.md` and `subplans/` to `$PROJECT_ROOT/docs/superpowers/plans/YYYY-MM-DD-<slug>/`, run
-`plan-stamp.sh approve` on the copy, and commit both. That copy is `$PLAN` from here on: every
-handoff below names it, and execution appends to its `## Deviations`.
+**Publish and stamp the approved plan** (`~/.claude/skills/_shared/spec-evidence.md` sections 1–2):
+`PLAN=$(publish-plan.sh "$RUN_DIR" "$PROJECT_ROOT/docs/superpowers/plans/YYYY-MM-DD-<slug>")`. It
+copies the plan with the files `validate-plan.sh --root` reads, stamps and re-validates the copy;
+commit the folder. `$PLAN` is the plan from here on: every handoff names it, and execution
+appends to its `## Deviations`.
 
 Write `$RUN_DIR/execution-recommendation.md` — recommendation first, then the four options
 with the trade-off that decides between them. Pick the recommendation with the executor
@@ -363,7 +344,7 @@ section of `~/.claude/skills/_shared/plan-routing.md`. Do not ask the user: it r
 
 The four options, each stated to the user with what it costs:
 
-- **A — `/deep-execute "$RUN_DIR/plan.md"`.** Parallel lane workers in Orca terminals, one shared
+- **A — `/deep-execute "$PLAN"`.** Parallel lane workers in Orca terminals, one shared
   worktree, round gating, contract drift handling, one full `/deep-review`, QA, run report,
   PR. Most machinery, most parallelism; needs disjoint lanes and a real contract.
 - **B — serial** via the `implement` skill (`superpowers:subagent-driven-development`): one
@@ -409,20 +390,7 @@ When `.workflow/config.json` exists, first run `Skill(skill="workflow-post-plan"
 - `plannotator annotate --gate` exits without feedback → treat as approved, note it, continue.
 - Not in plan mode at Phase 3 (session started outside it) → still run the `annotate --gate` pass; skip `ExitPlanMode`.
 
-## Continuity ledger (long / multi-day planning)
+## Long or multi-day planning
 
-Deep planning can span a long session or several days. Use the **`continuity-ledger`** skill so
-the work survives `/clear` and compaction:
-
-- **Start / bind** — for a multi-day task or ticket, at Phase 0 create or bind a ledger:
-  `Skill(skill="continuity-ledger")` with `new deep-plan-<slug>` (or `save` to bind an existing
-  one). It writes `thoughts/ledgers/CONTINUITY_CLAUDE-<name>.md` and binds this pane/window.
-- **Save at boundaries** — after the Phase 2 review loop converges, and again right before the
-  Phase 4 handoff, run `continuity-ledger` **save**. Capture Goal, Constraints, Key Decisions,
-  State (Done/Now/Next), Open Questions, and the `$RUN_DIR` path in the ledger.
-- **Resume** — the ledger's `SessionStart` hook auto-loads it after `/clear`, so a fresh session
-  picks up the plan, the run dir, and the decisions without re-deriving them. No manual load
-  needed when the hooks are installed.
-
-Only for genuinely long work — skip the ledger for a quick, single-session plan. If
-`continuity-ledger` is not installed, this degrades to a no-op; do not fabricate a ledger file.
+`$RUN_DIR` holds every draft, verdict and the plan, so a fresh session resumes from it. Before
+`/clear` on multi-day work, offer the user `/mattpocock-skills:handoff` and name `$RUN_DIR` in it.

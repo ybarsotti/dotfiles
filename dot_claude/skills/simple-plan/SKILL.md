@@ -179,7 +179,7 @@ intentions. A screen whose plan is silent about them gets built without them.
 Fold the answer into the plan's `UI design pass` section, and into `Project fit`, `Affected
 files` and `Edge cases`. The plan names the existing component it reuses instead of leaving
 the implementer to invent one.
-`Skill(skill="frontend-design")` applies when the change needs visual direction rather than
+`Skill(skill="frontend-design:frontend-design")` applies when the change needs visual direction rather than
 pattern-matching.
 
 Skip this when the change touches no interface, and record that you skipped it.
@@ -413,8 +413,9 @@ into a line of evidence, so a row with no runnable proof says why.
    step or a monitor. The report says what the team will own, the upkeep each piece carries,
    and the work that leaves the team. Put it beside the plan, so the approval covers the cost
    and not only the design. Skip it when the plan only changes code the team already owns.
-1. `Skill(skill="plannotator-annotate")`, then `plannotator annotate "$PLAN_PATH" --gate`.
-2. Apply the annotations that come back.
+1. Render the plan page and decide where it lives per `~/.claude/skills/_shared/plan-page.md`.
+   Then gate it: `plannotator annotate "${PLAN_PATH%.md}.html" --gate`.
+2. Apply the annotations that come back to `$PLAN_PATH`, then render the page again.
 3. `ExitPlanMode` for the final approval.
 4. Stamp the approved plan: `~/.claude/skills/_shared/plan-stamp.sh approve "$PLAN_PATH"`.
    Commit the plan and its `.approved` stamp together.

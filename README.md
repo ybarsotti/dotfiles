@@ -594,7 +594,7 @@ Config lives in `~/.config/waveterm/` (flat JSON, `:` as level separator). Docs:
 [llmessage](https://github.com/ybarsotti/llmessage) is a per-project chat that agents and you
 share. It lives in its own repo at `~/Developer/llmessage`; this repo carries only the widget.
 
-A `/deep-execute` run already writes `events.jsonl` and `lanes/<lane>/reply.md`, but that
+A `/deep-execute` run already writes `events.jsonl` and `lanes/<lane>/replies/`, but that
 conversation is one-way, machine-shaped, and dies with the run — `RUN_DIR` ends when the PR
 opens, so CI failures and review rounds land nowhere. llmessage reads those files **from the
 outside** and projects them into a session that lives until the PR closes. **No line of
@@ -610,8 +610,8 @@ llmessage sessions            # every session, newest first
 
 - The **`chat` widget** runs one `--once` sync and then the TUI, so it is useful even when no
   daemon is running.
-- The chat sits **beside** the run, never on its critical path. `reply.md` stays the wake
-  channel `worker-loop.sh` blocks on, so a broken chat cannot strand a lane.
+- The chat sits **beside** the run, never on its critical path. The numbered replies stay the
+  wake channel `worker-loop.sh` waits on, so a broken chat cannot strand a lane.
 - A human message reaches a lane through the **orchestrator**, which reads the chat and routes
   it via `reply.sh` — the same single door that already owns commits and replies.
 - Install today is `cargo install --path ~/Developer/llmessage`. There is no pinned
@@ -667,20 +667,19 @@ Three slash commands chain together for planning and parallel execution of non-t
   handoff. Stops at an **approved plan** — it never builds or reviews code itself. Its last
   phase is an **execution recommendation** (below).
 - **`/deep-execute <plan.md>`** - Runs an approved parallel plan as lane workers sharing ONE
-  git worktree, in parallel **Orca terminals** (`orca-launch.sh`; Wave blocks through
-  `wave-launch.sh` outside Orca). The orchestrator never types into a live terminal, so each lane runs
-  `worker-loop.sh`: it takes its first prompt as an argument and every later one from
-  `lanes/<lane>/reply.md`, and the write of that file is the wake. Each lane is pinned to its
-  own `claude --session-id` UUID, because all lanes share one worktree and resuming "the last
-  session" would cross them. Coordinates fan-out, an
-  event/reply protocol (`event.sh` / `board.sh` / `monitor-events.sh` / `reply.sh`),
-  contract-drift handling, per-round gating (`round-gate.sh`: lane tests → contract →
-  run-state → one light review, in that order), a 3-round cap with escalation, then the
-  unattended tail: `/deep-review default --reviewers 6 --ratio 3:3` + fixes → record what was
-  built and what review changed → a **QA agent** running `/qa-testing` through `agent-browser`
-  → a **different** agent fixing the gaps it found → frozen SHA → `/pr-description` with
-  evidence → the **run report** (below). The orchestrator is the sole `git` committer between
-  rounds; lane workers never run `git` themselves.
+  git worktree, one **Orca terminal** per lane (`orca-launch.sh`; any terminal or `nohup`
+  outside Orca). Each lane runs `worker-loop.sh`: the first turn sends the lane's rendered
+  brief, and each later turn delivers the numbered replies that `reply.sh` published. `done`
+  ends a round, not the lane, so review and QA fixes go back to the lane that owns the code.
+  Each claude lane is pinned to its own `--session-id`, also across a relaunch, because all
+  lanes share one worktree. Coordinates fan-out, an event/reply protocol (`event.sh` /
+  `board.sh` / `monitor-events.sh` with `--ack` / `reply.sh`), contract drift
+  (`contract-bump.sh`), per-round gating (`round-gate.sh`: round complete → lane tests →
+  acceptance → contract → run state), a report-only `/deep-review` per round, a round cap with
+  escalation, then steps 2 to 9 of `_shared/after-approval.md`: review, QA, frozen SHA, PR,
+  the **run report** (below), PR watch. The orchestrator is the sole `git` committer between
+  rounds; lane workers never run `git` themselves. `_shared/plan-routing.md` says when a plan
+  qualifies.
 - **`/deep-review`** - Multi-persona peer review of a diff (Claude + Codex headless
   reviewers), invoked once per `/deep-execute` run and usable standalone. The `default`
   roster runs 16 lenses; two of them guard against the failure modes an agent writing code

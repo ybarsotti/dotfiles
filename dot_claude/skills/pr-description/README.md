@@ -34,7 +34,7 @@ it. Used standalone via `/pr`, and as a runtime dependency of `deep-plan`
 ## Layout
 
 ```
-~/.claude/skills/pr/
+~/.claude/skills/pr-description/
 ├── README.md                # this file
 ├── SKILL.md                 # protocol the orchestrator follows when /pr runs
 └── personas/

@@ -23,7 +23,7 @@
         {
           "step_id": "QA-CHECKOUT-001-01",
           "status": "pass",
-          "observed": "Confirmation screen showed order B2B-1001.",
+          "observed": "Confirmation screen showed order ORD-1001.",
           "started_at": "2026-07-24T12:00:03Z",
           "finished_at": "2026-07-24T12:00:12Z",
           "video_start_seconds": 3.0,

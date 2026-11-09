@@ -67,7 +67,8 @@ Return:
 - every assumption you made, as a list.
 
 Then stay open. The user may comment on the canvas or write to you here. Read new comments
-with `ArtifactComments`, revise the artboards, and say what changed. When the user approves
+with `ArtifactComments`, revise the artboards, and say what changed. When you receive the plan
+page URL (`_shared/plan-page.md`), add a `Plan: <url>` link to the canvas. When the user approves
 the canvas, it is the design that the `qa-ui` agent holds the build to.
 
 ## Rules

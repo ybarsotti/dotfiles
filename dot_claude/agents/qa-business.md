@@ -65,7 +65,7 @@ workaround, **P2** cosmetic. Give each a one-line reason that names its lens or 
 Run them with `Skill(skill="qa-test-plan", args="--phase execute --qa-plan <path> --url <url>
 --commit <sha>")` when a `qa-plan.yaml` exists. That skill records one video per scenario,
 screenshots, `results.json` and an HTML report. Without a `qa-plan.yaml`, drive the browser
-with the `agent-browser` skill and record one video per scenario yourself.
+with the `agent-browser:agent-browser` skill and record one video per scenario yourself.
 
 For each scenario:
 

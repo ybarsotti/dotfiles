@@ -77,9 +77,9 @@ clarifying Qs, Mermaid, rationale, QA flag, machine-validated checklist).
 
 ## Plan presentation
 
-Always through **Plannotator**, never a terminal dump: `plannotator annotate <plan> --gate`
-for the full worker plan (loop until no annotations), then `ExitPlanMode` with the humanized
-summary — the plannotator plugin's `PermissionRequest` hook re-opens the UI for final
+Always through **Plannotator**, never a terminal dump: render the humanized `plan.html` per
+`~/.claude/skills/_shared/plan-page.md`, gate it with `plannotator annotate plan.html --gate`
+(loop until no annotations), then `ExitPlanMode` with the humanized summary — the plannotator plugin's `PermissionRequest` hook re-opens the UI for final
 approve / request-changes with a plan diff between submissions.
 
 ## Requirements
@@ -87,8 +87,9 @@ approve / request-changes with a plan diff between submissions.
 - `claude` CLI, `codex` CLI (unless `--no-codex`), `jq`, `git`
 - `plannotator` CLI (`curl -fsSL https://plannotator.ai/install.sh | bash`) + the
   `plannotator@plannotator` plugin enabled (for the ExitPlanMode hook)
-- Runtime deps for the pipeline: `grill-with-docs`, `superpowers:*`, `plannotator-annotate`
-  (installed skills/plugins, not vendored here)
+- Runtime deps for the pipeline: `mattpocock-skills:grilling`, `mattpocock-skills:domain-modeling`,
+  `superpowers:*`, and the Plannotator visual explainer that `_shared/plan-page.md` reads
+  (installed plugins, not vendored here)
 
 ## Invocation
 

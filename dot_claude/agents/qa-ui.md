@@ -30,11 +30,13 @@ agent fixes what you report.
    1. Read `project/canvas.json` with the `Artifact` tool (`action: "read"`, `path`).
    2. Read each artboard file `project/<name>.dc.html`. Take the copy, colors, sizes,
       spacing, fonts and icons from its source.
-   3. Screenshot each artboard. Open the canvas URL with the `agent-browser` skill and the
-      user's logged-in profile, in the focused view of that artboard. If the page needs a login
-      you do not have, compare against the source only, and say so in the report.
-3. Screenshot the implementation with the `agent-browser` skill. Take each state at 1440 px
-   and at 390 px. Drive the app into each state through the UI or through fixture data.
+   3. Screenshot each artboard. Open the canvas URL with the `agent-browser:agent-browser`
+      skill and the user's logged-in profile, in the focused view of that artboard. If the
+      page needs a login you do not have, compare against the source only, and say so in the
+      report.
+3. Screenshot the implementation with the `agent-browser:agent-browser` skill. Take each state
+   at 1440 px and at 390 px. Drive the app into each state through the UI or through fixture
+   data.
 4. Compare element by element. Check layout, alignment, spacing, size, copy, color, type,
    radius, icon, focus ring, hover, and each state. Check that the 390 px layout stacks and
    does not scroll sideways.

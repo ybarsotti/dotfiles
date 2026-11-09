@@ -54,9 +54,6 @@ items.
 - [ ] **Worktree (if chosen)**: create from `origin/main` at `.claude/worktrees/<slug>`
 - [ ] **Branch**: `<type>/<CODE>-<kebab-description>` (see `.claude/rules/branching.md`)
 - [ ] **Ticket start**: assign the ticket to you and move it to in progress (§1.6)
-- [ ] **Continuity ledger** (multi-day ticket): bind/create via `continuity-ledger`
-      (`new <CODE>`), then **save** at each progress boundary below — it auto-loads on resume
-      after `/clear`. Skip for a quick single-session fix.
 - [ ] **Deep planning** — run `/deep-plan "<CODE>" --ticket <CODE>`: grilling + domain-modeling →
       brainstorming → writing-plans → 5-persona review (incl. **ticket-matcher**, which bats
       requirements matrix point-by-point against ticket, preserving linked Slack threads) →
@@ -217,9 +214,8 @@ The merge is the user's call.
 
 ## Tips
 
-- **Continuity ledger**: on a multi-day ticket, `save the continuity ledger` before each
-  `/clear` (after plan approval, after build, before PR). It auto-loads next session so you
-  resume with the plan, decisions, and run dir intact — no re-derivation.
+- **Multi-day ticket**: before each `/clear`, offer `/mattpocock-skills:handoff`. The approved
+  plan and its run dir carry the decisions, so the next session resumes from them.
 - **Docs, not just code**: Acme repos keep real logic in `docs/`. Confirm the change
   updates the affected docs (the `/deep-plan` plan lists them; `/deep-review` flags stale ones).
 - **Worktree cleanup**: after merge, offer to run `git worktree remove .claude/worktrees/<slug>`.

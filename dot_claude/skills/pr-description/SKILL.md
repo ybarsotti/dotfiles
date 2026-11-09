@@ -78,7 +78,7 @@ Follow sections 2, 4 and 5 of `~/.claude/skills/_shared/spec-evidence.md`.
 ## Phase 1 — WRITE (claude Sonnet)
 
 Assemble the writer input into `$RUN_DIR/writer-input.md`:
-1. The persona prompt: `~/.claude/skills/pr/personas/pr-writer.md`
+1. The persona prompt: `~/.claude/skills/pr-description/personas/pr-writer.md`
 2. `---`
 3. Context: detected ticket, `git diff --stat main...HEAD` **for the writer's private
    understanding only** (remind it: never echo file names/counts into the body), the
@@ -91,7 +91,7 @@ Assemble the writer input into `$RUN_DIR/writer-input.md`:
    every requirement against finished diff/tests: `✅ Implemented`, `⚠️ Partial`, or
    `❌ Missing`; never carry `✅ Planned` forward blindly.
 
-Dispatch the writer headless (mirror `deep-review/scripts/executable_reviewer.sh` flags):
+Dispatch the writer headless (mirror `~/.claude/skills/deep-review/scripts/reviewer.sh` flags):
 
 ```bash
 claude -p \
@@ -120,7 +120,7 @@ Unless `--no-codex`, dispatch a codex reviewer to validate the draft. Assemble
 - The detected ticket (or "none")
 - The explicit checklist below
 
-Dispatch (mirror the codex side of `executable_reviewer.sh`):
+Dispatch (mirror the codex side of `reviewer.sh`):
 
 ```bash
 codex exec \
@@ -255,7 +255,7 @@ If `--dry-run`: print the final title + body and **stop here**. Do not open/upda
 ## Phase 3 — OPEN / UPDATE PR
 
 Mirror the opener logic in
-`/Users/barsotti/.local/share/chezmoi/dot_claude/skills/deep-plan/scripts/executable_pr-open.sh`
+`~/.claude/skills/deep-plan/scripts/pr-open.sh`
 (read it): conventional-type inference from recent commits + changed paths, ticket
 auto-detect, and CODEOWNERS reviewer detection. Reuse those, but the **title + body come
 from Phases 1-2** — do not regenerate them from a template.
@@ -365,8 +365,8 @@ the relevant phase before declaring done.
 
 ## Reuse
 
-- Headless `claude -p` / `codex exec` flag patterns: `~/.claude/skills/deep-review/scripts/executable_reviewer.sh`.
-- Conventional-type inference, ticket auto-detect, CODEOWNERS reviewers: `~/.claude/skills/deep-plan/scripts/executable_pr-open.sh`.
+- Headless `claude -p` / `codex exec` flag patterns: `~/.claude/skills/deep-review/scripts/reviewer.sh`.
+- Conventional-type inference, ticket auto-detect, CODEOWNERS reviewers: `~/.claude/skills/deep-plan/scripts/pr-open.sh`.
 - This skill is a runtime dependency of `deep-plan` (Phase 6 handoff) and `jira-workflow` (PR step).
 
 ## Failure modes

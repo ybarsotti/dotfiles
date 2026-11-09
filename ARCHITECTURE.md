@@ -207,7 +207,7 @@ graph TD
         LAUNCH["orca-launch.sh<br/>one Orca terminal per non-orchestrator lane"]
         LANES["Lane workers (parallel, ONE shared worktree)<br/>each owns disjoint path globs"]
         MON["monitor-events.sh<br/>event.sh / board.sh / reply.sh"]
-        GATE["round-gate.sh<br/>lane tests → contract → run-state → light review"]
+        GATE["round-gate.sh<br/>round complete → lane tests → acceptance → contract → run-state"]
         COMMIT["orchestrator commits<br/>(workers never run git)"]
 
         INIT --> LAUNCH --> LANES
@@ -216,10 +216,10 @@ graph TD
         MON -->|"all lanes done"| GATE
         GATE -->|"pass"| COMMIT
         GATE -->|"fail: fix + rerun"| LANES
-        COMMIT -->|"round < max_rounds (default 3)"| LAUNCH
+        COMMIT -->|"report-only /deep-review, fixes to the owning lane"| LANES
     end
 
-    COMMIT -->|"final round"| REVIEW["/deep-review<br/>full-diff, multi-persona"]
+    COMMIT -->|"final round"| REVIEW["after-approval.md steps 2-9<br/>/deep-review, QA, PR, report, watch"]
 ```
 
 - **Boundary guarantee (git-only, unforgeable):** `changed-files-within-union` inside
@@ -228,12 +228,13 @@ graph TD
 - **Advisory only (self-declared, not authenticated):** `worker-<lane>.files.txt` (per-lane
   attribution), `changed-files-attributed-once`, `worker-file-logs-valid`, and
   `post-done-writes-absent` are diagnostics a worker could forge from inside the shared
-  worktree — status `warn` never blocks a round, and `fail` on these items is a signal to
-  investigate, not proof of authorship.
+  worktree — they only record `warn`, which never blocks a round: a signal to investigate,
+  not proof of authorship.
 - **Contract drift:** a lane `blocked` on the materialized API contract means the contract
-  is wrong, not the worker — the orchestrator edits it, bumps its semantic version, commits,
-  and broadcasts via `reply.sh RUN_DIR --all`.
-- **Round cap:** `max_rounds` (default 3, patchable via `--max-rounds`) lives in
+  is wrong, not the worker — after the user approves, the orchestrator edits it, bumps its
+  semantic version, commits, records the checkpoint with `contract-bump.sh`, and broadcasts
+  via `reply.sh RUN_DIR --all`.
+- **Round cap:** `max_rounds` (default 3, set with `init-run.sh --max-rounds`) lives in
   `manifest.json`; a round beyond the cap is refused outright with an escalation record.
 - **Tests:** `just test-deep-pipeline` runs six shell suites (700+ assertions) covering plan
   validation, lane/ownership boundaries, the event/reply protocol, round gating, and an

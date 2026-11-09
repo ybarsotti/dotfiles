@@ -122,7 +122,7 @@ The plan lists every state of the screen. The implementation builds each one.
 
 Do this after the UI builds and before review. A screen nobody looked at is not done.
 
-1. Run the app. Use the `agent-browser` skill, or `obscura` for a local URL.
+1. Run the app. Use the `agent-browser:agent-browser` skill, or `obscura` for a local URL.
 2. Take a screenshot of each state from the plan, at desktop width and at 390 px.
 3. Critique each screenshot as a designer, against sections 3 to 10 of this file. Write each
    weak point down.
