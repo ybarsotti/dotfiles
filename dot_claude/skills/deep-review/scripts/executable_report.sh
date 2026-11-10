@@ -43,6 +43,11 @@ else
   VERDICT="APPROVE"
 fi
 
+# A failed reviewer checked nothing, so an empty report does not clear the change.
+BAD=0
+[ -f "$STATUS" ] && BAD=$(awk -F'\t' '$3!="ok"{n++} END{print n+0}' "$STATUS")
+[ "$VERDICT" = "APPROVE" ] && [ "$BAD" -gt 0 ] && VERDICT="INCOMPLETE"
+
 printf '# Review Panel Report\n\n'
 printf '**Verdict: %s**\n\n' "$VERDICT"
 printf '## Summary\n\n'
@@ -55,10 +60,15 @@ fi
 
 if [ -f "$STATUS" ]; then
   OK=$(awk -F'\t' '$3=="ok"{n++} END{print n+0}' "$STATUS")
-  BAD=$(awk -F'\t' '$3!="ok"{n++} END{print n+0}' "$STATUS")
   printf -- '- Reviewers: %s (%s ok, %s not ok)\n' "$((OK + BAD))" "$OK" "$BAD"
 fi
 printf '\n'
+
+print_not_ok() {
+  [ "$BAD" -gt 0 ] || return 0
+  printf '\n## Reviewers that did not report\n\n'
+  awk -F'\t' '$3!="ok" {printf "- %s (%s): %s\n", $1, $2, $3}' "$STATUS"
+}
 
 print_clean() {
   [ -s "$CLEAN" ] || return 0
@@ -69,6 +79,7 @@ print_clean() {
 if [ "$TOTAL" -eq 0 ]; then
   printf 'No reviewer recorded a finding.\n'
   print_clean
+  print_not_ok
   exit 0
 fi
 
@@ -133,11 +144,4 @@ if jq -e 'any(.[]; (.remark // "") != "")' <<< "$MERGED" >/dev/null; then
 fi
 
 print_clean
-
-if [ -f "$STATUS" ]; then
-  NOT_OK=$(awk -F'\t' '$3!="ok"' "$STATUS")
-  if [ -n "$NOT_OK" ]; then
-    printf '\n## Reviewers that did not report\n\n'
-    awk -F'\t' '$3!="ok" {printf "- %s (%s): %s\n", $1, $2, $3}' "$STATUS"
-  fi
-fi
+print_not_ok

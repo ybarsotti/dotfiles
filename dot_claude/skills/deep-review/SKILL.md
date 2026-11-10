@@ -73,7 +73,7 @@ exit) is flagged in the report and does not stop the run.
 
 When the dispatcher finishes, the report is already on stdout. Just summarize the verdict in 1-2 sentences and offer next steps:
 
-- If `APPROVE` → "All N reviewers cleared the changes. Ready to ship."
+- If `APPROVE` → "All N reviewers cleared the changes. Ready to ship." If `INCOMPLETE` (no findings, but a reviewer failed) → name the failed reviewers and rerun them; never call it ready.
 - If `REQUEST_CHANGES` → "N findings (X CRITICAL, Y HIGH). Top issue: <title>. Fixing now."
 - If `REJECT` → "Critical blockers found. Top issue: <title>. Fixing the blockers before anything else."
 
@@ -154,7 +154,7 @@ Three things follow from that:
    ungrounded opinion never reaches the report.
 2. **`--category` is a closed set**, so the report groups and SARIF gets a stable `ruleId`.
 3. **There is no per-reviewer verdict.** Severity decides it: any CRITICAL is `REJECT`, any
-   HIGH is `REQUEST_CHANGES`, no findings is `APPROVE`; a `QUESTION` never blocks. A reviewer
+   HIGH is `REQUEST_CHANGES`, no findings is `APPROVE` (`INCOMPLETE` when a reviewer failed); a `QUESTION` never blocks. A reviewer
    cannot report a CRITICAL and vote APPROVE.
 
 `scripts/report.sh` then builds `report.md` as a pure `jq` transform — no aggregator model

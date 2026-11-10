@@ -80,7 +80,7 @@ closed set: `security`, `correctness`, `concurrency`, `db-performance`, `typing`
 `frontend`, `observability`.
 
 There is no per-reviewer verdict. Severity decides it: any CRITICAL is `REJECT`, any HIGH is
-`REQUEST_CHANGES`, nothing recorded is `APPROVE`.
+`REQUEST_CHANGES`, nothing recorded is `APPROVE`, or `INCOMPLETE` when a reviewer failed.
 
 ### Quick examples
 

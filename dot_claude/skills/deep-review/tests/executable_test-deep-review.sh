@@ -313,4 +313,16 @@ assert_contains "$(cat "$DISPATCH")" "**Verify claims about another system.**" \
 assert_contains "$(cat "$DISPATCH")" '--findings ${FINDINGS_FILE}' \
   "brief: the record command names the findings file"
 
+# ─── report.sh: a failed reviewer blocks APPROVE and is listed ─────────────
+RP_DIR=$(mktemp -d); : > "${RP_DIR}/findings.jsonl"
+printf 'security\tcodex\tfailed after 40s (reported 2 finding(s), recorded 0)\nsimplicity\tclaude\tok\n' \
+  > "${RP_DIR}/status.tsv"
+RP_OUT=$("$REPORT" "$RP_DIR")
+assert_contains "$RP_OUT" "**Verdict: INCOMPLETE**" "report: no findings with a failed reviewer is INCOMPLETE"
+assert_contains "$RP_OUT" "- security (codex): failed after 40s (reported 2 finding(s), recorded 0)" \
+  "report: an empty report still lists the failed reviewer"
+printf 'security\tcodex\tok\n' > "${RP_DIR}/status.tsv"
+assert_contains "$("$REPORT" "$RP_DIR")" "**Verdict: APPROVE**" "report: no findings with every reviewer ok is APPROVE"
+rm -rf "$RP_DIR"
+
 assert_summary
