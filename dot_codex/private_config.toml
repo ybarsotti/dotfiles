@@ -295,3 +295,9 @@ config_file = "./agents/momus.toml"
 
 [agents.plan]
 config_file = "./agents/plan.toml"
+
+[otel]
+environment = "dev"
+exporter = { otlp-http = { endpoint = "http://127.0.0.1:4318/v1/logs", protocol = "binary" } }
+trace_exporter = { otlp-http = { endpoint = "http://127.0.0.1:4318/v1/traces", protocol = "binary" } }
+metrics_exporter = { otlp-http = { endpoint = "http://127.0.0.1:4318/v1/metrics", protocol = "binary" } }

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# claude-otel — start Claude Code with its own telemetry sent to the local OpenTelemetry
+# dashboard (the Aspire `otel` service of a project made from the AI monorepo template).
+#
+# Usage: claude-otel [claude arguments...]
+#
+# The settings stay in this one session. They are not in ~/.claude/settings.json, because the
+# `env` there also reaches every command that Claude Code runs, including other projects' apps.
+# Claude Code ignores these keys in a project's .claude/settings.json.
+# Exported: token usage, cost, tool decisions. Prompt text and tool details stay redacted.
+set -euo pipefail
+
+root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+
+export CLAUDE_CODE_ENABLE_TELEMETRY=1
+export OTEL_METRICS_EXPORTER=otlp
+export OTEL_LOGS_EXPORTER=otlp
+export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+export OTEL_EXPORTER_OTLP_ENDPOINT="${CLAUDE_OTEL_ENDPOINT:-http://127.0.0.1:${OTEL_GRPC_PORT:-4317}}"
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative
+export OTEL_RESOURCE_ATTRIBUTES="service.namespace=${root##*/}"
+
+exec claude "$@"

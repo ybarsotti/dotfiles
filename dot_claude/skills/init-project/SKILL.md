@@ -83,8 +83,8 @@ function, because zsh does not split a variable into words.
 Derived values:
 
 - Language of a kind: `react-tanstack` and `hono-trpc` are node, `django-ninja` and `fastapi`
-  are python, `go` is go. `has_node`, `has_python` and `has_go` are `true` when an app of that
-  language exists.
+  are python, `go` is go. The core needs no language answer: `sync-apps` derives the language
+  lists from each `app.json`.
 - A `react-tanstack` app talks to one backend. With a `hono-trpc` app, pass `api=trpc` and
   `api_app=<that app>`. Else, with a `fastapi`, `django-ninja` or `go` app, pass `api=openapi`
   and `api_app=<the first one>`. Else pass `api=none`.
@@ -101,8 +101,7 @@ Derived values:
 
 1. `git init -b main` when the folder is not a repository.
 2. Render the core:
-   `COPIER --data kind=core --data project_name=<name> --data 'services=[...]'
-   --data has_node=<b> --data has_python=<b> --data has_go=<b> <SRC> .`
+   `COPIER --data kind=core --data project_name=<name> --data 'services=[...]' <SRC> .`
 3. Render each app with a pack. Render the backends first, because a frontend reads its
    backend's `openapi.json`:
    `mkdir -p apps/<app>`, then
@@ -123,8 +122,8 @@ Derived values:
    `ls apps/`. Refuse a name that already exists under `apps/`. When Serena rewrote
    `.serena/project.yml` and dropped the sync-apps markers (a core older than the full Serena
    file), restore the file with `git restore .serena/project.yml` and report it.
-2. Render each new app as in section 4, step 3. When a node app arrives and the root has no
-   `.npmrc`, copy `core/{% if has_node %}.npmrc{% endif %}` of the template to `.npmrc`.
+2. Render each new app as in section 4, step 3. When the root has no `.npmrc` (a core older
+   than v0.3.0), copy `core/.npmrc` of the template to `.npmrc`.
 3. Build each app without a pack (section 6).
 4. `just sync-apps`, the green loop, releases and observability, as in new mode.
 5. When the tree was clean at step 1, commit `feat(<app>): add the <app> app` through the
