@@ -74,7 +74,7 @@ exit) is flagged in the report and does not stop the run.
 When the dispatcher finishes, the report is already on stdout. Just summarize the verdict in 1-2 sentences and offer next steps:
 
 - If `APPROVE` → "All N reviewers cleared the changes. Ready to ship." If `INCOMPLETE` (no findings, but a reviewer failed) → name the failed reviewers and rerun them; never call it ready.
-- If `REQUEST_CHANGES` → "N findings (X CRITICAL, Y HIGH). Top issue: <title>. Fixing now."
+- If `REQUEST_CHANGES` → "N findings (X CRITICAL, Y HIGH, Z MEDIUM). Top issue: <title>. Fixing now."
 - If `REJECT` → "Critical blockers found. Top issue: <title>. Fixing the blockers before anything else."
 
 Name the report path (`~/.claude/deep-review-runs/<RUN_ID>/report.md`); `findings.jsonl` and,
@@ -104,13 +104,13 @@ Skip it for the run you just finished in this session, where nothing has changed
 A finding reported and not fixed is not a reviewed change, so this phase is the default rather
 than a question. Do not stop at the report and wait to be asked.
 
-1. **Fix every CRITICAL and HIGH**, from each finding's file, line and suggestion. First run
+1. **Fix every CRITICAL, HIGH and MEDIUM**, from each finding's file, line and suggestion. First run
    each `prod-check:` QUESTION by `~/.claude/skills/_shared/query-check.md` §2; it can move a severity.
 2. **Re-run the panel on the fix**, scoped to the changed files. A fix that introduces its own
    finding is common, and the second pass is what catches it.
 3. **Stop after two fix rounds.** What survives goes in a `## Open findings` section with the
    reason, and you say plainly which findings remain.
-4. **MEDIUM, LOW and QUESTION are the user's call.** List them and ask; do not fix them silently.
+4. **LOW and QUESTION are the user's call.** List them and ask; do not fix them silently.
 
 Skip it after `--dry-run`, `--no-fix` or an empty diff. The fixer is a separate `Agent`, never the reviewer.
 

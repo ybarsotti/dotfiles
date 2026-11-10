@@ -94,7 +94,7 @@ gates of one round, the gate refuses the round: `AskUserQuestion`.
 
 When the round passes, commit it (`git add -A && git commit`). Then review it report-only:
 `Skill(skill="deep-review", args="default --scope <previous round commit>..HEAD --no-fix
---no-simplify")`. Route each CRITICAL and HIGH fix to the owning lane, gate, commit.
+--no-simplify")`. Route each CRITICAL, HIGH and MEDIUM fix to the owning lane, gate, commit.
 Round 1 gets orchestrator review before anything reaches the human. Then bump
 `manifest.json`'s `round` and start the next round, or go to Phase 4.
 

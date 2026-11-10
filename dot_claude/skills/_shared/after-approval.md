@@ -55,8 +55,8 @@ TDD. Record each departure from the plan as a `D-NNN` row under the plan's `## D
 **Review each part when it is done.** A part is a task in option B, a round in option A, a
 stage, or a slice in option D. In option C, the workflow's adversarial reviewer replaces this
 per-part review (`plan-routing.md`, "How option C runs"). Before the next part starts, run
-`/deep-review default --scope <commit before the part>..HEAD`. Fix every CRITICAL and HIGH
-finding through the agent that wrote the part, then commit. The next part builds on reviewed
+`/deep-review default --scope <commit before the part>..HEAD`. Fix every CRITICAL, HIGH and
+MEDIUM finding through the agent that wrote the part, then commit. The next part builds on reviewed
 code.
 
 `/deep-execute` runs steps 2 to 9 itself. For options B, C and D, run them from this session.
@@ -69,7 +69,7 @@ the owning lane with `reply.sh RUN_DIR LANE "<finding, file, line, fix>"`, gate 
 ## 2. Review
 
 1. Run `/deep-review default` over the whole change. Each part had its own review; this pass
-   checks how the parts fit together. Its Phase 4.5 fixes every CRITICAL and HIGH finding and
+   checks how the parts fit together. Its Phase 4.5 fixes every CRITICAL, HIGH and MEDIUM finding and
    re-runs the panel, for 2 fix rounds at most.
 2. A separate agent applies the fixes. The reviewer never fixes its own finding. Under
    `/deep-execute`, that agent is the owning lane (section 1).
