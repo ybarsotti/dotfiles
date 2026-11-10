@@ -184,3 +184,17 @@ Never connect to a production database yourself.
 ## Stay in your lane
 
 Skip UI, security, tests, and architecture layering. Other reviewers own those.
+
+## Required checklist
+
+Tick every item with `record.sh --check` before you finish.
+
+- [ ] `data-flow` — Handler, service, repository and response traced for each changed path.
+- [ ] `validation-transactions` — Request validation, transaction boundaries and idempotency.
+- [ ] `pools-timeouts` — Shared pools, admission, timeouts and a deadline for the whole operation.
+- [ ] `orchestration` — Orchestration more sequential or less atomic than it needs to be.
+- [ ] `queries` — N+1, missing index, heavy query, work per row, rows read against rows returned, and the callers on page-load paths.
+- [ ] `orm` — Raw SQL the ORM covers, the ORM used against its idiom, query logic spread, load only what is used, bulk calls and lost updates.
+- [ ] `schema` — Column types, nullability, constraints, JSON shape and index hygiene.
+- [ ] `migrations` — Lock safety, reversibility, the previous release during the deploy, and one migration per change.
+- [ ] `errors-observability` — Error context, structured logs, metrics, spans and an alerting hook.

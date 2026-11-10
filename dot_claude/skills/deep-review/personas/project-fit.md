@@ -86,12 +86,17 @@ These are the ones a diff slips past review most often.
 - **File granularity.** A small, single-purpose thing buried in a large unrelated file, and
   its mirror — a file created for three lines that belong beside their only caller. Say which
   way the diff errs and where the code should live.
-- **A file crossing 1000 lines because of this diff.** Check the before and after line count
-  of every changed file. A file the diff pushes from under 1000 lines to over it is a finding
-  by default: ask whether the new code should be extracted first, and name what to split out.
-  Waive it only when the file is still clearly organised and the author gave a structural
-  reason. A file already over 1000 lines before the diff is not this finding — say so and
-  move on, rather than reopening history.
+- **A large file.** Count the lines of every changed file, before and after the diff.
+  - A file over about 500 lines that holds more than one unrelated concept, when the diff
+    grows it, is a MEDIUM finding. Name the concepts, and propose a split by concept, not by
+    layer: a package with one module per concept, not `models`, `services` and `utils` files
+    that each hold a piece of every concept.
+  - A file the diff pushes from under 1000 lines to over it is a finding by default, even
+    with one concept. Ask whether the new code should be extracted first, and name what to
+    split out. Waive it only when the file is still clearly organised and the author gave a
+    structural reason.
+  - A file that was already large before the diff, and that the diff does not grow, gets at
+    most one LOW finding with the proposed split. Do not reopen its history beyond that.
 - **A function outside its class.** A module-level function whose every parameter comes from
   one object, or that only ever runs on one class's state, is a method in the wrong place.
   So is a private module-level helper (`_foo`) that only one class calls, even when it is
@@ -115,8 +120,8 @@ at the specific rule or doc line that governs it. This persona is the one most l
 a convention that does not exist, so when you cannot quote the source, do not record the
 finding.
 
-Sections 4 and 5 need no quoted source. The code is the evidence. A silenced linter, a file the
-diff pushes over 1000 lines, a module-level function that is really a method, and an unimported
+Sections 4 and 5 need no quoted source. The code is the evidence. A silenced linter, a large file
+by the rules above, a module-level function that is really a method, and an unimported
 package are findings on their own. Give the `file:line` and the destination or the neighbour you
 compare it to. Do not drop one of these findings because no written rule covers it.
 
@@ -132,3 +137,17 @@ Judge a `.tsx`, `.vue`, `.go` or `.sql` change by the same standard as a `.py` o
 Skip security and performance. Leave dependency direction and abstraction boundaries to
 `architecture`; you own where a file, a name or a function sits, not which layer may call
 which.
+
+## Required checklist
+
+Tick every item with `record.sh --check` before you finish.
+
+- [ ] `agent-docs` — The nearest CLAUDE.md and AGENTS.md of each changed file.
+- [ ] `rules` — The rules that point at the changed files, and the plan's Rules section.
+- [ ] `docs` — Docs the diff made stale or wrong, and new behavior with no doc.
+- [ ] `task-scope` — Acceptance criteria, scope creep, silent deviation and unproved claims.
+- [ ] `artifacts` — The per-branch and per-task artifacts the repository requires.
+- [ ] `lint-escapes` — Every silenced linter the diff adds.
+- [ ] `layout-naming` — Prefix doing a directory's job, naming, file granularity, and a function outside its class.
+- [ ] `file-size` — The line count of every changed file, against the large-file rules.
+- [ ] `dependencies` — A dependency nobody imports, and one added for a single call.

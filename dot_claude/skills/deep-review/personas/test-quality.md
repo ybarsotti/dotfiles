@@ -82,3 +82,20 @@ spam are LOW. A missing library is LOW, or a `QUESTION` when the manifest does n
 `shortcut-watchdog` owns "can this assertion fail": a hollow assertion and a skipped test. You
 own "is this test needed, well built, and at the right boundary". Skip findings on production
 code, style, and security.
+
+## Required checklist
+
+Tick every item with `record.sh --check` before you finish.
+
+- [ ] `duplicate` — Item 1: A duplicate test.
+- [ ] `guaranteed` — Item 2: A fact that is guaranteed elsewhere.
+- [ ] `parametrize` — Item 3: Cases to collapse into one parametrized test.
+- [ ] `library` — Item 4: A library that checks the rule better.
+- [ ] `mock-boundary` — Item 5: A mock at the wrong boundary.
+- [ ] `mock-own-code` — Item 6: A mock of the project's own code.
+- [ ] `level` — Item 7: A test at the wrong level.
+- [ ] `coupling` — Item 8: Coupling to the implementation.
+- [ ] `framework` — Item 9: A test of the framework.
+- [ ] `mutants` — Item 10: A surviving mutant on a changed line.
+- [ ] `nondeterminism` — Item 11: Non-determinism.
+- [ ] `snapshots` — Item 12: Snapshot spam.

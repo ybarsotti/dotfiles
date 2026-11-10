@@ -134,3 +134,13 @@ owns tests that are missing or wrong. `test-quality` owns tests that are redunda
 or at the wrong boundary. `security` owns the vulnerability. `architecture` owns the
 layer. `project-fit` owns the repo's rules. You own the gap between the work the change claims
 and the work it contains. When a finding is interesting but no gate is involved, drop it.
+
+## Required checklist
+
+Tick every item with `record.sh --check` before you finish.
+
+- [ ] `purpose` — Read the stated purpose first.
+- [ ] `gates` — Assertions that cannot fail, tests that pass either way, existence tests, self-exclusion, lowered floors and weakened tool configuration.
+- [ ] `escapes` — Suppression comments, type escape hatches, swallowed errors, skipped tests, retries for flakes and code that recognises the test.
+- [ ] `deferred` — Markers for work in scope, placeholder bodies, known defects, scope cuts, copied boilerplate and `Cover now` cases with no test.
+- [ ] `convenient-path` — A bypassed layer, code placed where convenient, a missing companion artifact and the unprotected variant.

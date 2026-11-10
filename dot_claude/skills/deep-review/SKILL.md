@@ -147,15 +147,15 @@ A variant with `record_findings: true` — the `default` variant does — change
 report. Instead of printing YAML for an aggregator to parse, each reviewer appends findings
 by running `scripts/record.sh`, one call per finding, to a shared `findings.jsonl`.
 
-Three things follow from that:
+Four things follow from that:
 
 1. **Every finding must cite evidence.** `record.sh` rejects a finding with no `--evidence`:
-   a `path:line` of the precedent in this repo, or the exact rule the diff breaks. An
-   ungrounded opinion never reaches the report.
+   a `path:line` of the precedent in this repo, or the exact rule the diff breaks.
 2. **`--category` is a closed set**, so the report groups and SARIF gets a stable `ruleId`.
-3. **There is no per-reviewer verdict.** Severity decides it: any CRITICAL is `REJECT`, any
-   HIGH is `REQUEST_CHANGES`, no findings is `APPROVE` (`INCOMPLETE` when a reviewer failed); a `QUESTION` never blocks. A reviewer
-   cannot report a CRITICAL and vote APPROVE.
+3. **Each persona ticks its `## Required checklist`** with `record.sh --check` (`ok`,
+   `finding` or `na` with a note). An open item fails the reviewer; the report lists each `na`.
+4. **There is no per-reviewer verdict.** Severity decides it: any CRITICAL is `REJECT`, any
+   HIGH is `REQUEST_CHANGES`, no findings is `APPROVE` (`INCOMPLETE` when a reviewer failed); a `QUESTION` never blocks.
 
 `scripts/report.sh` then builds `report.md` as a pure `jq` transform — no aggregator model
 call, so nothing can invent a finding. `scripts/merge.jq` defines what counts as one finding:

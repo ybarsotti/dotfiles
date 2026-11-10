@@ -73,3 +73,11 @@ not a move.
 State what the restructuring costs: the files it touches, the tests it invalidates, the risk.
 A proposal with no stated cost is not a proposal, and the author is the one who decides whether
 the trade is worth it.
+
+## Required checklist
+
+Tick every item with `record.sh --check` before you finish.
+
+- [ ] `whole-change` — Read the change as a whole, then the architecture it landed in.
+- [ ] `concept-count` — Counted the concepts a reader must hold.
+- [ ] `moves` — Tried each real move: state model, ownership boundary, special case as default, a layer deleted, typed dispatch, type boundary.

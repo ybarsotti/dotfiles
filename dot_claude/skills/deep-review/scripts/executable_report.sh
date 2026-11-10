@@ -6,7 +6,7 @@
 # Reads:
 #   <run-dir>/findings.jsonl   one JSON finding per line (written by record.sh)
 #   <run-dir>/status.tsv       persona<TAB>runner<TAB>status  (optional)
-#   <run-dir>/clean.jsonl      {persona, clean} per checklist section with no finding (optional)
+#   <run-dir>/checklist.jsonl  {persona, id, status, note} per ticked checklist item (optional)
 # Writes the report to stdout.
 
 set -euo pipefail
@@ -15,7 +15,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RUN_DIR="$1"
 FINDINGS="${RUN_DIR}/findings.jsonl"
 STATUS="${RUN_DIR}/status.tsv"
-CLEAN="${RUN_DIR}/clean.jsonl"
+CHECKLIST="${RUN_DIR}/checklist.jsonl"
 
 [ -f "$FINDINGS" ] || { printf 'report: ERROR: missing %s\n' "$FINDINGS" >&2; exit 1; }
 
@@ -70,15 +70,20 @@ print_not_ok() {
   awk -F'\t' '$3!="ok" {printf "- %s (%s): %s\n", $1, $2, $3}' "$STATUS"
 }
 
-print_clean() {
-  [ -s "$CLEAN" ] || return 0
-  printf '\n## Clean\n\n'
-  jq -rs 'group_by(.persona)[] | "- \(.[0].persona): \(map(.clean) | unique | join(", "))"' "$CLEAN"
+# One line per persona with its tick counts, then every `na` with its reason, so a skipped
+# item is visible to the person who reads the report.
+print_checklist() {
+  [ -s "$CHECKLIST" ] || return 0
+  printf '\n## Checklist\n\n'
+  jq -rs 'group_by(.persona)[] | (reverse | unique_by(.id)) as $c
+    | def n(s): [$c[] | select(.status == s)] | length;
+    "- \($c[0].persona): \($c | length) items, \(n("ok")) ok, \(n("finding")) finding, \(n("na")) n/a",
+    ($c[] | select(.status == "na") | "  - n/a `\(.id)`: \(.note)")' "$CHECKLIST"
 }
 
 if [ "$TOTAL" -eq 0 ]; then
   printf 'No reviewer recorded a finding.\n'
-  print_clean
+  print_checklist
   print_not_ok
   exit 0
 fi
@@ -143,5 +148,5 @@ if jq -e 'any(.[]; (.remark // "") != "")' <<< "$MERGED" >/dev/null; then
     | "- `\(.file)\(if .line > 0 then ":\(.line)" else "" end)` \(.remark)"' <<< "$MERGED"
 fi
 
-print_clean
+print_checklist
 print_not_ok

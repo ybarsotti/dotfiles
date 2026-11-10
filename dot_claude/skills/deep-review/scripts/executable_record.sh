@@ -5,12 +5,17 @@
 #   record.sh --persona ID --category CAT --severity SEV --title T --evidence E
 #             [--file PATH] [--line N] [--description D] [--suggestion S]
 #             [--remark R] [--findings PATH]
-#   record.sh --persona ID --clean SECTION [--findings PATH]
+#   record.sh --persona ID --check ITEM STATUS NOTE [--check ...] [--findings PATH]
 #
 # --remark is the finding as one short comment a person can paste on the PR: a question
-# with the fix inside, at most REMARK_LIMIT characters. --clean records that a section of
-# the persona's checklist ran and found nothing; it goes to clean.jsonl beside the
-# findings file, so the report can show what was checked, not only what failed.
+# with the fix inside, at most REMARK_LIMIT characters.
+#
+# --check ticks one item of the persona's required checklist. STATUS is `ok` (checked, no
+# finding), `finding` (a finding was recorded for it) or `na` (nothing in this diff to
+# check). NOTE is required: what was read or searched, or why the item does not apply.
+# Ticks go to checklist.jsonl beside the findings file. When the run lists the persona's
+# items in reviewers/<persona>.checklist, an unknown item is rejected, and the command
+# prints the items still open. reviewer.sh fails a reviewer that leaves an item open.
 #
 # Appends one compact JSON line to the findings file. Every reviewer appends to the
 # same file concurrently. One printf of a single line under APPEND_LIMIT bytes is an
@@ -34,7 +39,7 @@ simplicity code-reuse tests docs project-fit scope frontend observability
 ui-ux accessibility responsiveness shortcut"
 
 PERSONA=""; CATEGORY=""; SEVERITY=""; TITLE=""; EVIDENCE=""
-FILE="-"; LINE="0"; DESCRIPTION=""; SUGGESTION=""; REMARK=""; CLEAN=""
+FILE="-"; LINE="0"; DESCRIPTION=""; SUGGESTION=""; REMARK=""; CHECKS=()
 FINDINGS="${DEEP_REVIEW_FINDINGS:-}"
 
 err() { printf 'record: ERROR: %s\n' "$*" >&2; exit 1; }
@@ -51,7 +56,8 @@ while [ $# -gt 0 ]; do
     --description)  DESCRIPTION="$2"; shift 2 ;;
     --suggestion)   SUGGESTION="$2"; shift 2 ;;
     --remark)       REMARK="$2"; shift 2 ;;
-    --clean)        CLEAN="$2"; shift 2 ;;
+    --check)        [ $# -ge 4 ] || err "--check takes three values: ITEM STATUS NOTE"
+                    CHECKS+=("$2" "$3" "$4"); shift 4 ;;
     --findings)     FINDINGS="$2"; shift 2 ;;
     *)              err "unknown flag: $1" ;;
   esac
@@ -62,10 +68,29 @@ command -v jq >/dev/null 2>&1 || err "jq not installed (brew install jq)"
 [ -n "$FINDINGS" ] || err "no findings file (pass --findings or set DEEP_REVIEW_FINDINGS)"
 [ -n "$PERSONA" ]  || err "--persona is required"
 
-if [ -n "$CLEAN" ]; then
-  jq -cn --arg persona "$PERSONA" --arg clean "$CLEAN" '{persona:$persona,clean:$clean}' \
-    >> "$(dirname "$FINDINGS")/clean.jsonl"
-  printf 'record: %s clean: %s\n' "$PERSONA" "$CLEAN" >&2
+if [ "${#CHECKS[@]}" -gt 0 ]; then
+  RUN_DIR=$(dirname "$FINDINGS")
+  TICKS="${RUN_DIR}/checklist.jsonl"
+  ITEMS="${RUN_DIR}/reviewers/${PERSONA}.checklist"
+  # Validate every tick before the first append, so one bad tick records nothing.
+  for ((i = 0; i < ${#CHECKS[@]}; i += 3)); do
+    item="${CHECKS[i]}"; status="${CHECKS[i+1]}"; note="${CHECKS[i+2]}"
+    case "$status" in ok|finding|na) ;; *) err "--check ${item}: status must be ok, finding or na (got: '${status}')" ;; esac
+    [ -n "$note" ] || err "--check ${item}: the note is required: what you checked, or why the item does not apply"
+    if [ -s "$ITEMS" ] && ! grep -qxF -- "$item" "$ITEMS"; then
+      err "--check: '${item}' is not on the ${PERSONA} checklist: $(paste -sd' ' "$ITEMS")"
+    fi
+  done
+  for ((i = 0; i < ${#CHECKS[@]}; i += 3)); do
+    jq -cn --arg persona "$PERSONA" --arg id "${CHECKS[i]}" --arg status "${CHECKS[i+1]}" \
+      --arg note "${CHECKS[i+2]}" '{persona:$persona,id:$id,status:$status,note:$note}' >> "$TICKS"
+  done
+  printf 'record: %s ticked %d item(s)\n' "$PERSONA" "$(( ${#CHECKS[@]} / 3 ))" >&2
+  if [ -s "$ITEMS" ]; then
+    open=$(comm -23 <(sort -u "$ITEMS") \
+      <(jq -r --arg p "$PERSONA" 'select(.persona == $p) | .id' "$TICKS" | sort -u) | paste -sd' ' -)
+    [ -z "$open" ] || printf 'record: %s items still open: %s\n' "$PERSONA" "$open" >&2
+  fi
   exit 0
 fi
 

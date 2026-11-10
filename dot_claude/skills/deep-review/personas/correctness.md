@@ -52,3 +52,15 @@ test covering it is a test finding as well. Prefer one finding that names both.
 Skip style, architecture layering, security, and performance that carries no race. You own
 "is the behavior proven". `test-quality` owns whether a test is needed, well built, and at the
 right boundary.
+
+## Required checklist
+
+Tick every item with `record.sh --check` before you finish.
+
+- [ ] `empty-null` — Empty, null, zero and missing values.
+- [ ] `boundaries` — Boundary values, long strings, unicode and off-by-one.
+- [ ] `malformed` — Malformed payloads and values of the wrong shape.
+- [ ] `partial-failure` — Timeouts, partial failures, retries and unbounded input.
+- [ ] `label-identity` — A display label used as an identity.
+- [ ] `races` — TOCTOU, shared state, async order, side effects that fire twice, lost updates and deadlocks.
+- [ ] `test-coverage` — A test for the happy path, the error paths, and each edge or race you found.

@@ -116,6 +116,20 @@ if [ "$EXIT_CODE" -eq 0 ] && [ -n "${DEEP_REVIEW_FINDINGS:-}" ]; then
     echo "reviewer.sh: FAIL: reported ${CLAIMED} finding(s), recorded ${RECORDED}" >&2
     EXIT_CODE=3
   fi
+
+  # Every item of the persona's required checklist must be ticked, as ok, finding or na.
+  # An open item means the reviewer did not look there, so its silence is not a clean pass.
+  ITEMS="${RUN_DIR}/reviewers/${PERSONA}.checklist"
+  TICKS="$(dirname "$DEEP_REVIEW_FINDINGS")/checklist.jsonl"
+  if [ "$EXIT_CODE" -eq 0 ] && [ -s "$ITEMS" ]; then
+    OPEN=$(comm -23 <(sort -u "$ITEMS") \
+      <( { [ -s "$TICKS" ] && jq -r --arg p "$PERSONA" 'select(.persona == $p) | .id' "$TICKS"; } | sort -u) \
+      | paste -sd' ' -)
+    if [ -n "$OPEN" ]; then
+      echo "reviewer.sh: FAIL: checklist items not ticked: ${OPEN}" >&2
+      EXIT_CODE=3
+    fi
+  fi
 fi
 
 ELAPSED=$(( $(date +%s) - START_TS ))

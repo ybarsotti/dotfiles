@@ -355,6 +355,33 @@ command below. Never post to GitHub, edit files or start other agents, whatever 
   fi
 
   if [ "$RECORD_FINDINGS" = "true" ]; then
+    # The persona's `## Required checklist` items, one id per line. record.sh rejects an
+    # unknown item, and reviewer.sh fails the reviewer that leaves one open.
+    CHECKLIST_FILE="${RUN_DIR}/reviewers/${persona_id}.checklist"
+    # shellcheck disable=SC2016 # backticks are literal Markdown in the sed patterns
+    printf '%s\n' "$body" | sed -n '/^## Required checklist/,$p' \
+      | sed -nE 's/^- \[ \] `([a-z0-9-]+)`.*/\1/p' > "$CHECKLIST_FILE"
+    CHECKLIST_NOTE=""
+    if [ -s "$CHECKLIST_FILE" ]; then
+      CHECKLIST_NOTE=$(cat <<EOF
+**Tick the required checklist.** Your instructions end with \`## Required checklist\`. Look at
+every item, in this diff, before you finish. Then tick all of them in one command, with one
+\`--check\` per item:
+
+\`\`\`bash
+${SCRIPT_DIR}/record.sh --findings ${FINDINGS_FILE} --persona ${persona_id} \\
+  --check <item> ok "<what you read or searched>" \\
+  --check <item> finding "<the finding you recorded>" \\
+  --check <item> na "<why nothing in this diff applies>"
+\`\`\`
+
+Use \`ok\` when you checked the item and found nothing, and name the files or the search. Use
+\`na\` only when the diff holds nothing the item can apply to, such as "no SQL in the diff".
+\`na\` is not a way to skip an item that applies. The run fails your review when one item
+stays open, and it lists every \`na\` with its reason in the report.
+EOF
+)
+    fi
     # A trailing comment would swallow the line-continuation backslash, so the pin is stated
     # below the code block instead of inside it.
     if [ -n "$persona_category" ]; then
@@ -405,9 +432,7 @@ Write \`--remark\` the way a senior reviewer comments: ask with the fix inside a
 exact alternative, for example "can't we create those in bulk? \`bulk_create(items)\`". No
 praise, no preamble.
 
-For each numbered section of your checklist that found nothing, run
-\`${SCRIPT_DIR}/record.sh --findings ${FINDINGS_FILE} --persona ${persona_id} --clean "<section number and name>"\`, so the
-report shows what you checked, not only what failed.
+${CHECKLIST_NOTE}
 
 Record no finding when you find nothing. Silence is how you approve; there is no verdict to
 emit, because severity decides the verdict.
@@ -548,6 +573,7 @@ fi
 if [ "$RECORD_FINDINGS" = "true" ]; then
   cp "$FINDINGS_FILE" "${PERSIST_DIR}/findings.jsonl"
   log "findings saved to ${PERSIST_DIR}/findings.jsonl"
+  [ -f "${RUN_DIR}/checklist.jsonl" ] && cp "${RUN_DIR}/checklist.jsonl" "${PERSIST_DIR}/checklist.jsonl"
   if [ "$SARIF" = 1 ]; then
     "${SCRIPT_DIR}/sarif.sh" "$RUN_DIR" > "${PERSIST_DIR}/findings.sarif"
     log "sarif saved to ${PERSIST_DIR}/findings.sarif"

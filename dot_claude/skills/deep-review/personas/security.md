@@ -17,3 +17,16 @@ path, the key it drops, and the collision that leaks data.
 
 When the diff or a comment claims that an ID is globally unique, or owned by one account, verify
 the claim in the model that defines the ID. A claim nobody verified is not a scope.
+
+## Required checklist
+
+Tick every item with `record.sh --check` before you finish.
+
+- [ ] `authz` — Every new route, handler, job or action checks authentication and the caller's permission (BOLA/IDOR included).
+- [ ] `tenant-scope` — Every query and external lookup keeps its tenant and account keys on every path, the fallback included.
+- [ ] `input` — Untrusted input is validated at the boundary, with no injection into SQL, a shell, HTML or a path.
+- [ ] `secrets` — No secret, token or credential in code, configuration, logs or error messages.
+- [ ] `web` — CSRF, cookie flags, JWT handling, CORS and TLS validation on the changed endpoints.
+- [ ] `abuse` — A rate limit or a cost bound on a public, unauthenticated or costly endpoint.
+- [ ] `dependencies` — Known CVEs in a new or changed dependency.
+- [ ] `leaks` — Error responses and logs reveal no internals and no personal data.

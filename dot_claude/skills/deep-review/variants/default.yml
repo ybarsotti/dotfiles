@@ -130,10 +130,11 @@ personas:
     focus: |
       Premature abstraction, speculative generality, dead code, redundant layers,
       over-configurable systems, comments explaining WHAT instead of WHY. Code that does not
-      read top down: helpers above the API, mixed abstraction levels, nesting past 2 levels.
+      read top down: helpers above the API, mixed abstraction levels, nesting past 2 levels,
+      nested ternaries (forbidden), logic packed into JSX props or call arguments.
       Guards (getattr, hasattr, is None, try/except) on values the schema already guarantees. Then whether
       the codebase already does it: an existing helper reimplemented, a standard-library
-      function hand-rolled, a near-copy of a sibling, a new dependency for what an
+      function hand-rolled, the same pattern repeated across siblings, a new dependency for what an
       installed one covers. Searches with Serena, gitnexus and graphify, never raw grep.
       Declines to force reuse across a real boundary.
     runner: claude
@@ -180,7 +181,8 @@ personas:
       # noqa or # type: ignore, a shared filename prefix that should be a directory, naming
       that fights the neighbours, a small thing buried in a large file or a file created for
       three lines, a module-level function that is really a method of one class, and a private
-      module-level helper that only one class calls. Finally
+      module-level helper that only one class calls, and a file over about 500 lines that
+      mixes unrelated concepts, split by concept. Finally
       dependencies the diff left behind — an installed package nobody imports — and the
       linked task: missing acceptance criteria, scope creep, requirements left unaddressed.
       Quotes the rule or doc line for every rule and doc finding. Layout findings stand on

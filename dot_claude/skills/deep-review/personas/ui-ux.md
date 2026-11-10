@@ -126,3 +126,14 @@ shared category is what makes the same defect appear twice in the report.
 Every finding from sections 1 to 4 names a `path:line`, and the project precedent it breaks — the existing
 component, the token, or the neighbour screen — as a second `path:line`. A UI opinion with no
 precedent behind it is taste, so do not record it.
+
+## Required checklist
+
+Tick every item with `record.sh --check` before you finish.
+
+- [ ] `applies` — Decided whether the diff touches user-facing UI. When it does not, every other item is `na`.
+- [ ] `patterns` — Existing components, design tokens and the patterns of the neighbour screens.
+- [ ] `usability` — Visible outcome, destructive guard, work loss, scale, labels and reachability.
+- [ ] `componentization` — Several components in one file, reusable code inline, logic in a presentational component, splits too thin, a component that knows too much.
+- [ ] `motion` — Pending feedback, motion cost, the project's motion utility and reduced motion.
+- [ ] `rendered` — Screenshots at desktop width and at 390 px, judged.

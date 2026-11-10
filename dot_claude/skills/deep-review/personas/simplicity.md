@@ -45,6 +45,14 @@ but it runs one query per row unless the query loads that relation.
   detail of one of them. Name the step to extract, and the name it takes.
 - Nesting deeper than 2 levels where a guard clause or an early return removes it. Show the
   flattened shape.
+- **A nested ternary. It is forbidden.** A conditional expression inside another one, in any
+  language: `a ? b : c ? d : e`, `x if p else y if q else z`. A chain of `&&` and `||` used as
+  a fallback, such as `a && b || c && d || e`, counts too. Record it as HIGH, and show the
+  replacement: early returns, a small named helper, a `switch` or `match`, or a lookup table.
+  One `cond && <Item />` in JSX is not this finding.
+- **Logic packed into one expression.** A JSX prop, a call argument or a return value that
+  holds a condition, a `map`, a format or a calculation inline, so the line does not read at a
+  glance. Name the variable or the helper to extract, and the name it takes.
 - A name that says how the function works instead of what it does in the domain.
 
 The project's own file organization wins. When the neighbour files follow another order, the
@@ -70,8 +78,12 @@ Flag, in rough order of how often it happens:
   sibling service, differing only by a parameter name or an inlined default.
 - **A reimplemented standard library or framework function**: hand-rolled grouping, chunking,
   deep-merge, date math, debounce, retry, path joining, deep-equal, UUID.
-- **A near-copy of a sibling** two or three files over with one branch changed. Say whether a
-  parameter, a strategy argument, or a shared base resolves it.
+- **Repetition across siblings.** The same pattern repeated in sibling files or blocks with one
+  value changed: producers, readers, tabs, records, handlers, tests and fixtures. Record it as
+  MEDIUM. Propose the shared helper, a parameter, or a base class that takes the changing
+  values. When the copies must stay separate, say why. When the copies differ in behavior and
+  not only in values, record the repetition and name the pattern; `architecture` owns the
+  pattern itself.
 - **A new dependency for what an installed one already does.** Check the manifest first.
 - **A second module for a concern that already has an owner**: two date utils, two HTTP
   clients, two config loaders, two error taxonomies.
@@ -100,3 +112,16 @@ Judge a `.tsx`, `.vue`, `.go` or `.sql` change by the same standard as a `.py` o
 ## Stay in your lane
 
 Skip security, performance, tests, and architecture layering.
+
+## Required checklist
+
+Tick every item with `record.sh --check` before you finish.
+
+- [ ] `over-engineering` — Unused abstraction, thin wrapper, speculative generality, dead code, shims, configuration nobody tunes, comments that say WHAT.
+- [ ] `spaghetti` — Conditionals, flags and special cases the diff added to code it did not own.
+- [ ] `schema-guards` — Guards on values the schema already guarantees.
+- [ ] `top-down` — Reading order, mixed abstraction levels and nesting past 2 levels.
+- [ ] `nested-ternary` — No nested ternary, and no `&&` or `||` fallback chain.
+- [ ] `packed-expressions` — Inline logic in JSX props, call arguments and return values.
+- [ ] `repetition` — The same pattern repeated across siblings.
+- [ ] `reinvention` — An existing helper, a standard-library function, an installed dependency, a second module or a redefined constant, searched with the semantic tools.

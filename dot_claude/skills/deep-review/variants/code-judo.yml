@@ -11,8 +11,8 @@ record_findings: true
 # itself disable-model-invocation: true for the same reason this is a variant rather than a
 # ninth default persona: the lens is valuable on demand and wasteful on every PR.
 #
-# The measurable rules from that skill live in the default panel instead — the 1000-line file
-# threshold in project-fit, spaghetti grown in existing code in simplicity, and sequential or
+# The measurable rules from that skill live in the default panel instead — the 500- and 1000-line file
+# thresholds in project-fit, spaghetti grown in existing code in simplicity, and sequential or
 # non-atomic orchestration in senior-backend.
 personas:
   - id: code-judo

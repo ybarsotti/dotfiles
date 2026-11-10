@@ -88,3 +88,16 @@ conventions, usability, component boundaries and motion — when a finding is re
 those, leave it to them, and cover its ground yourself when `ui-ux` is not on this run's
 panel. You keep accessibility, responsiveness and the loading/error/empty/success states. For stack-specific component and styling guidance, consult
 `Skill(skill="ui-ux-pro-max:ui-ux-pro-max")`.
+
+## Required checklist
+
+Tick every item with `record.sh --check` before you finish.
+
+- [ ] `components` — Component design, state location, re-renders, list keys, i18n keys and types.
+- [ ] `states` — Loading, error and empty states.
+- [ ] `rbac` — The UI permission agrees with the backend.
+- [ ] `unsafe-html` — No unsafe HTML injection.
+- [ ] `keyboard-focus` — Keyboard operation, tab order and focus handling.
+- [ ] `names-contrast` — Accessible names and roles, live regions, colour alone, contrast and alt text.
+- [ ] `responsive` — Overflow, reflow, touch targets and images at the project's breakpoints.
+- [ ] `design-fidelity` — The changed screen against its design, or the missing design.

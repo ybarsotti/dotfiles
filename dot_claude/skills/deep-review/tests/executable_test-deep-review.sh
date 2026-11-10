@@ -117,20 +117,29 @@ for script in "$DISPATCH" "$COLLECT_CONTEXT" "$REVIEWER" "$AGGREGATE" "$RECORD" 
 done
 
 
-# ─── record.sh + report.sh: QUESTION, --remark and --clean ─────────────────
+# ─── record.sh + report.sh: QUESTION, --remark and --check ─────────────────
 # A QUESTION reaches the report but never blocks the verdict; a remark is capped so it stays
-# pasteable; a clean section is listed so the report shows what ran.
+# pasteable; checklist ticks are counted per persona, and every n/a shows its reason.
 RR_DIR=$(mktemp -d)
 export DEEP_REVIEW_FINDINGS="${RR_DIR}/findings.jsonl"
 "$RECORD" --persona simplicity --category simplicity --severity QUESTION --file app/m.py --line 3 \
   --title "guard on a non-null field?" --evidence "app/models.py:10" \
   --remark "isn't this enforced at DB level? read obj.x directly" 2>/dev/null
-"$RECORD" --persona senior-backend --clean "2. Database and queries" 2>/dev/null
+mkdir -p "${RR_DIR}/reviewers"; printf 'queries\nmigrations\n' > "${RR_DIR}/reviewers/senior-backend.checklist"
+assert_exit 1 "$RECORD" --persona senior-backend --check typo ok "x"
+assert_exit 1 "$RECORD" --persona senior-backend --check queries skip "x"
+assert_exit 1 "$RECORD" --persona senior-backend --check queries ok ""
+assert_eq "$([ -f "${RR_DIR}/checklist.jsonl" ] && echo yes || echo no)" "no" "record.sh: a rejected tick records nothing"
+RR_OPEN=$("$RECORD" --persona senior-backend --check queries ok "read app/repo.py" 2>&1)
+assert_contains "$RR_OPEN" "items still open: migrations" "record.sh: a tick prints the items still open"
+"$RECORD" --persona senior-backend --check migrations na "no migration in the diff" 2>/dev/null
 RR_REPORT=$("$REPORT" "$RR_DIR")
 assert_contains "$RR_REPORT" "**Verdict: APPROVE**" "report: a QUESTION alone does not block the verdict"
 # shellcheck disable=SC2016 # literal backticks in the expected markdown, not a command substitution
 assert_contains "$RR_REPORT" '- `app/m.py:3` isn'"'"'t this enforced at DB level?' "report: remarks to post list the file, line and remark"
-assert_contains "$RR_REPORT" "- senior-backend: 2. Database and queries" "report: clean sections are listed per persona"
+assert_contains "$RR_REPORT" "- senior-backend: 2 items, 1 ok, 0 finding, 1 n/a" "report: checklist ticks are counted per persona"
+# shellcheck disable=SC2016 # literal backticks in the expected markdown
+assert_contains "$RR_REPORT" '  - n/a `migrations`: no migration in the diff' "report: every n/a item shows its reason"
 "$RECORD" --persona correctness --category correctness --severity LOW --file app/m.py --line 9 \
   --title "low" --evidence "app/m.py:1" 2>/dev/null
 assert_contains "$("$REPORT" "$RR_DIR")" "**Verdict: REQUEST_CHANGES**" "report: a LOW beside a QUESTION still requests changes"
@@ -296,6 +305,12 @@ assert_eq "$(rv 0 'done: 2 finding(s)')" 3 "reviewer.sh: findings lost on the wa
 assert_contains "$(cat "${RV_RUN}/err")" "FAIL: reported 2 finding(s), recorded 0" "reviewer.sh: the failure names both counts"
 assert_eq "$(rv 0 '')" 3 "reviewer.sh: an empty final message fails the reviewer"
 assert_eq "$(rv 0 'done: 0 finding(s)')" 0 "reviewer.sh: a clean review with zero findings passes"
+printf 'empty-null\nraces\n' > "${RV_RUN}/reviewers/correctness.checklist"
+echo '{"persona":"correctness","id":"races","status":"ok","note":"n"}' > "${RV_RUN}/checklist.jsonl"
+assert_eq "$(rv 0 'done: 0 finding(s)')" 3 "reviewer.sh: an open checklist item fails the reviewer"
+assert_contains "$(cat "${RV_RUN}/err")" "FAIL: checklist items not ticked: empty-null" "reviewer.sh: the failure names the open items"
+echo '{"persona":"correctness","id":"empty-null","status":"na","note":"n"}' >> "${RV_RUN}/checklist.jsonl"
+assert_eq "$(rv 0 'done: 0 finding(s)')" 0 "reviewer.sh: a fully ticked checklist passes"
 rm -rf "$RV_RUN" "$RV_BIN"
 
 # ─── Personas and brief: the coverage a missed external review exposed ─────
@@ -307,6 +322,20 @@ assert_contains "$(cat "${ROOT}/dot_claude/skills/deep-review/personas/correctne
   "correctness: checks labels used as keys"
 assert_contains "$(cat "${ROOT}/dot_claude/skills/deep-review/personas/project-fit.md")" "per-branch or per-task artifact" \
   "project-fit: checks required artifacts the diff cannot show"
+while IFS= read -r pf; do
+  # shellcheck disable=SC2016 # backticks are literal Markdown in the sed patterns
+  PF_IDS=$(sed -n '/^## Required checklist/,$p' "$pf" | sed -nE 's/^- \[ \] `([a-z0-9-]+)`.*/\1/p')
+  assert_eq "$([ "$(echo "$PF_IDS" | grep -c .)" -ge 3 ] && echo yes || echo no)" "yes" "$(basename "$pf"): has a required checklist"
+  assert_eq "$(echo "$PF_IDS" | sort | uniq -d)" "" "$(basename "$pf"): checklist ids are unique"
+done < <(find "${ROOT}/dot_claude/skills/deep-review/personas" -name '*.md' | sort)
+SIMPLICITY_MD=$(cat "${ROOT}/dot_claude/skills/deep-review/personas/simplicity.md")
+assert_contains "$SIMPLICITY_MD" "**A nested ternary. It is forbidden.**" "simplicity: forbids nested ternaries"
+assert_contains "$SIMPLICITY_MD" "**Repetition across siblings.**" "simplicity: flags repetition across siblings"
+assert_contains "$(cat "${ROOT}/dot_claude/skills/deep-review/personas/architecture.md")" "## 5. Concept placement and design patterns" \
+  "architecture: proposes a pattern for variants that share a lifecycle"
+assert_contains "$(cat "${ROOT}/dot_claude/skills/deep-review/personas/project-fit.md")" "A file over about 500 lines that holds more than one unrelated concept" \
+  "project-fit: proposes a split by concept for a large file"
+assert_contains "$(cat "$DISPATCH")" "**Tick the required checklist.**" "brief: reviewers tick every checklist item"
 assert_contains "$(cat "$DISPATCH")" "**Verify claims about another system.**" \
   "brief: reviewers verify claims about another system at its source"
 # shellcheck disable=SC2016 # the literal variable name is what the brief must contain
