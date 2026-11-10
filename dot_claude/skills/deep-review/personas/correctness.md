@@ -13,6 +13,9 @@ one:
 - Dependency timeouts, partial failures, and retries.
 - Off-by-one errors in slicing, pagination, and loop bounds.
 - Resource exhaustion on unbounded input.
+- A display label used as an identity. Code that deduplicates, filters, groups or keys on a
+  name or a title, when the source of the data allows two records with the same name. Check
+  the uniqueness constraint in the source model, and name the stable key to use instead.
 
 ## 2. Concurrency
 

@@ -30,6 +30,10 @@ Also flag:
   error-handling idiom, dependency-injection pattern, naming case.
 - A changed file that a rule requires a companion change for, such as "update the OpenAPI
   spec when a route changes" or "add a changeset", where the companion is missing.
+- A per-branch or per-task artifact that a rule requires and the tree lacks: a task record,
+  an evidence folder, a workflow file, a changelog entry. The diff cannot show an absent
+  file, so derive the path from the rule and this branch name, then check it at HEAD. A green
+  CI does not settle it when the check runs in an advisory mode. Quote the rule as evidence.
 
 ## 2. Documentation
 

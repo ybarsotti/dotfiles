@@ -250,4 +250,67 @@ assert_contains "$SIG_OUT" "overlap-found" "test-signals: a failing recipe still
 assert_contains "$SIG_OUT" "exit=0" "test-signals: a failing recipe does not fail the script"
 rm -rf "$SIG_REPO"
 
+# ─── collect-context.sh: server code inside a web app is Backend ───────────
+CC_REPO=$(mktemp -d); CC_RUN=$(mktemp -d)
+(
+  cd "$CC_REPO" && git init -q -b main && git -c user.name=t -c user.email=t@t commit -q --allow-empty -m base
+  mkdir -p apps/web/src/server/services apps/web/src/components/api app/billing src/lib
+  touch apps/web/src/server/services/invoice.service.ts apps/web/src/components/api/Table.tsx \
+    app/billing/models.py src/lib/format.ts
+  git add -A && git -c user.name=t -c user.email=t@t commit -q -m change
+  "$COLLECT_CONTEXT" "$CC_RUN" "HEAD~1...HEAD" >/dev/null 2>&1
+)
+CC_OUT=$(awk '/^### Backend/{s="B"} /^### Frontend/{s="F"} /^### Proto/{s=""} s && /^  - /{print s $0}' "${CC_RUN}/context.md")
+assert_contains "$CC_OUT" "B  - apps/web/src/server/services/invoice.service.ts" "collect-context: a server service in a web app is Backend"
+assert_contains "$CC_OUT" "B  - app/billing/models.py" "collect-context: a Python file is Backend"
+assert_contains "$CC_OUT" "F  - apps/web/src/components/api/Table.tsx" "collect-context: a component under api/ stays Frontend"
+assert_contains "$CC_OUT" "F  - src/lib/format.ts" "collect-context: other TypeScript stays Frontend"
+rm -rf "$CC_REPO" "$CC_RUN"
+
+# ─── reviewer.sh: findings that never reach the run's file fail the reviewer ─
+RV_RUN=$(mktemp -d); RV_BIN=$(mktemp -d)
+mkdir -p "${RV_RUN}/reviewers"
+echo "persona prompt" > "${RV_RUN}/reviewers/correctness.prompt.md"
+echo "context" > "${RV_RUN}/context.md"
+# A fake codex: it records $FAKE_RECORDED findings through the environment it received,
+# writes $FAKE_MSG as its final message, and logs its arguments.
+cat > "${RV_BIN}/codex" <<FAKE
+#!/usr/bin/env bash
+printf '%s\n' "\$@" > "${RV_RUN}/codex.args"
+out=""; prev=""
+for a in "\$@"; do [ "\$prev" = "--output-last-message" ] && out="\$a"; prev="\$a"; done
+n=\${FAKE_RECORDED:-0}
+while [ "\$n" -gt 0 ]; do
+  echo '{"persona":"correctness","title":"t"}' >> "\$DEEP_REVIEW_FINDINGS"; n=\$((n - 1))
+done
+printf '%s\n' "\$FAKE_MSG" > "\$out"
+FAKE
+chmod +x "${RV_BIN}/codex"
+rv() { : > "${RV_RUN}/findings.jsonl"
+  PATH="${RV_BIN}:$PATH" DEEP_REVIEW_FINDINGS="${RV_RUN}/findings.jsonl" FAKE_RECORDED="$1" FAKE_MSG="$2" \
+    "$REVIEWER" codex correctness "$RV_RUN" 30 >/dev/null 2>"${RV_RUN}/err"; echo $?; }
+assert_eq "$(rv 2 'done: 2 finding(s)')" 0 "reviewer.sh: claimed and recorded counts match, so it passes"
+assert_contains "$(cat "${RV_RUN}/codex.args")" "shell_environment_policy.set.DEEP_REVIEW_FINDINGS=\"${RV_RUN}/findings.jsonl\"" \
+  "reviewer.sh: codex gets DEEP_REVIEW_FINDINGS again through its shell policy"
+assert_eq "$(rv 0 'done: 2 finding(s)')" 3 "reviewer.sh: findings lost on the way fail the reviewer"
+assert_contains "$(cat "${RV_RUN}/err")" "FAIL: reported 2 finding(s), recorded 0" "reviewer.sh: the failure names both counts"
+assert_eq "$(rv 0 '')" 3 "reviewer.sh: an empty final message fails the reviewer"
+assert_eq "$(rv 0 'done: 0 finding(s)')" 0 "reviewer.sh: a clean review with zero findings passes"
+rm -rf "$RV_RUN" "$RV_BIN"
+
+# ─── Personas and brief: the coverage a missed external review exposed ─────
+assert_contains "$(cat "${ROOT}/dot_claude/skills/deep-review/personas/security.md")" "## Tenant and account isolation" \
+  "security: checks the scope keys on every query path"
+assert_contains "$(cat "${ROOT}/dot_claude/skills/deep-review/personas/senior-backend.md")" "**Shared pools and admission.**" \
+  "senior-backend: checks pool admission and a whole-operation deadline"
+assert_contains "$(cat "${ROOT}/dot_claude/skills/deep-review/personas/correctness.md")" "A display label used as an identity" \
+  "correctness: checks labels used as keys"
+assert_contains "$(cat "${ROOT}/dot_claude/skills/deep-review/personas/project-fit.md")" "per-branch or per-task artifact" \
+  "project-fit: checks required artifacts the diff cannot show"
+assert_contains "$(cat "$DISPATCH")" "**Verify claims about another system.**" \
+  "brief: reviewers verify claims about another system at its source"
+# shellcheck disable=SC2016 # the literal variable name is what the brief must contain
+assert_contains "$(cat "$DISPATCH")" '--findings ${FINDINGS_FILE}' \
+  "brief: the record command names the findings file"
+
 assert_summary

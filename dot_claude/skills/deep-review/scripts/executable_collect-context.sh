@@ -82,7 +82,8 @@ esac
 
 # --- Categorize files (lightweight stack detection) ---
 # Order matters: more specific patterns must precede generic ones (e.g. *.proto
-# before *.ts so that proto-generated *_pb.ts is caught as PROTO not FRONTEND).
+# before *.ts so that proto-generated *_pb.ts is caught as PROTO not FRONTEND, and UI files
+# before server paths so that a component under api/ stays FRONTEND).
 declare -a BACKEND FRONTEND PROTO MIGRATION INFRA DOCS CONFIG OTHER
 while IFS= read -r f; do
   [ -z "$f" ] && continue
@@ -91,8 +92,11 @@ while IFS= read -r f; do
     *.sql|*/migrations/*|*/seeds/*)                       MIGRATION+=("$f") ;;
     Dockerfile*|docker-compose*|.github/*|*/k8s/*|Justfile|justfile) INFRA+=("$f") ;;
     *.md|docs/*)                                          DOCS+=("$f") ;;
-    *.go|*/internal/*|*/cmd/*|*-backend/*)                BACKEND+=("$f") ;;
-    *.tsx|*.ts|*.jsx|*.js|*-client/*|*/components/*|*.css|*.scss) FRONTEND+=("$f") ;;
+    *.tsx|*.jsx|*-client/*|*/components/*|*.css|*.scss)   FRONTEND+=("$f") ;;
+    # Server code inside a web app (apps/web/src/server/...) is backend, whatever its language.
+    *.go|*.py|*.rb|*.java|*.kt|*.rs|*.php|*.cs|*.ex|*.exs|*/internal/*|*/cmd/*|*-backend/*|\
+    */server/*|*/api/*|*/services/*|*/routers/*|*/repositories/*|*/models/*|*/db/*) BACKEND+=("$f") ;;
+    *.ts|*.js)                                            FRONTEND+=("$f") ;;
     .env*|*.toml|*.yaml|*.yml|*.json)                     CONFIG+=("$f") ;;
     *)                                                    OTHER+=("$f") ;;
   esac

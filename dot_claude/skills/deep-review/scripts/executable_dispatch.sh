@@ -373,6 +373,7 @@ as text — text is discarded, only recorded findings reach the report.
 
 \`\`\`bash
 ${SCRIPT_DIR}/record.sh \\
+  --findings ${FINDINGS_FILE} \\
   --persona ${persona_id} \\
   --category ${CATEGORY_ARG} \\
   --severity <CRITICAL|HIGH|MEDIUM|LOW|QUESTION> \\
@@ -393,12 +394,19 @@ breaks a written rule, quote the rule instead. A finding you cannot ground this 
 a defect. Record it as \`QUESTION\` only when its answer would change the code, with the line
 that raised it as evidence; drop it otherwise. \`QUESTION\` never blocks the verdict.
 
+**Verify claims about another system.** The diff, a code comment or the plan can state a fact
+about another repository or service: that an ID is unique, which account owns a record, which
+fields a payload carries. Do not take it on trust. Open the source: a local clone when one
+exists, else \`gh api repos/<owner>/<repo>/contents/<path>\` or \`gh search code\`. Cite the
+source as a GitHub permalink URL in \`--evidence\`. When the source contradicts a claim that
+the code depends on, that is a finding.
+
 Write \`--remark\` the way a senior reviewer comments: ask with the fix inside and name the
 exact alternative, for example "can't we create those in bulk? \`bulk_create(items)\`". No
 praise, no preamble.
 
 For each numbered section of your checklist that found nothing, run
-\`${SCRIPT_DIR}/record.sh --persona ${persona_id} --clean "<section number and name>"\`, so the
+\`${SCRIPT_DIR}/record.sh --findings ${FINDINGS_FILE} --persona ${persona_id} --clean "<section number and name>"\`, so the
 report shows what you checked, not only what failed.
 
 Record no finding when you find nothing. Silence is how you approve; there is no verdict to
@@ -497,7 +505,9 @@ for ((i=0; i<${#PIDS[@]}; i++)); do
     elapsed=$(( $(date +%s) - START_TS[i] ))
     log "  [${PERSONAS[$i]}] FAILED (${elapsed}s) — see ${RUN_DIR}/logs/${PERSONAS[$i]}.log"
     if [ "$RECORD_FINDINGS" = "true" ]; then
-      printf '%s\t%s\tfailed after %ss\n' "${PERSONAS[$i]}" "${RUNNERS[$i]}" "$elapsed" >> "$STATUS_FILE"
+      why=$(sed -n 's/^reviewer\.sh: FAIL: //p' "${RUN_DIR}/logs/${PERSONAS[$i]}.log" | tail -1)
+      printf '%s\t%s\tfailed after %ss%s\n' "${PERSONAS[$i]}" "${RUNNERS[$i]}" "$elapsed" \
+        "${why:+ (${why})}" >> "$STATUS_FILE"
     else
       # Drop empty result so aggregator doesn't trip
       : > "${RUN_DIR}/results/${PERSONAS[$i]}.md"
@@ -524,6 +534,16 @@ cp "${RUN_DIR}/context.md" "${PERSIST_DIR}/context.md"
 cp "${RUN_DIR}/diff.sha256" "${PERSIST_DIR}/diff.sha256" 2>/dev/null || true
 cp "${RUN_DIR}/scope" "${PERSIST_DIR}/scope" 2>/dev/null || true
 log "report saved to ${PERSIST_DIR}/report.md"
+
+# Keep the end of each failed reviewer's log, so a failure can be diagnosed after the run.
+if [ -f "$STATUS_FILE" ]; then
+  cp "$STATUS_FILE" "${PERSIST_DIR}/status.tsv"
+  while IFS=$'\t' read -r persona _ state; do
+    [ "$state" = "ok" ] && continue
+    mkdir -p "${PERSIST_DIR}/logs"
+    tail -n 200 "${RUN_DIR}/logs/${persona}.log" > "${PERSIST_DIR}/logs/${persona}.log" 2>/dev/null || true
+  done < "$STATUS_FILE"
+fi
 
 if [ "$RECORD_FINDINGS" = "true" ]; then
   cp "$FINDINGS_FILE" "${PERSIST_DIR}/findings.jsonl"

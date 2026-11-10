@@ -11,6 +11,11 @@ handler → service → repo → response. Flag:
 - Missing transaction boundaries, and transactions that are not actually atomic.
 - Swallowed errors, and errors returned without the context that names the operation.
 - Unbounded operations, missing timeouts, missing context/timeout propagation.
+- **Shared pools and admission.** A new caller of a shared connection pool, client or worker
+  queue. A statement timeout does not bound the wait for a free connection. When the caller is
+  public, unauthenticated or rate-limited only per link, ask for a bound on admission and one
+  deadline for the whole operation that cancels queued work. A latency that the plan, the PR
+  or a benchmark reports is evidence; read it.
 - Responses that leak internals: stack traces, driver errors, internal ids.
 - Idempotency gaps on state writes, especially on retried or queued work.
 - **Orchestration more sequential or less atomic than it needs to be**, judged as a design
