@@ -41,5 +41,5 @@ skip the hooks.
 
 ## Next
 
-Continue with sections 2 to 8 of `~/.claude/skills/_shared/after-approval.md`. Do not run a
+Continue with sections 2 to 9 of `~/.claude/skills/_shared/after-approval.md`. Do not run a
 review, QA or PR flow of your own.
