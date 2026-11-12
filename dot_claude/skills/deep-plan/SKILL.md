@@ -176,7 +176,8 @@ Skill(skill="superpowers:writing-plans")
 
 **Step 3 — start the designer, when the change touches an interface.** Start the
 `ui-designer` agent as an Orca worker with `--keep-open` (`_shared/after-approval.md`, "Parallel
-agents run in Orca"). Give it the ticket, the task and `$RUN_DIR/design/`. It draws while the
+agents run in Orca"). Give it the ticket, the task, the app URL or run command, and
+`$RUN_DIR/design/`. It reads and screenshots the screens it changes before it draws, while the
 planners draft. Put its `Canvas:` and `Design system:` URLs in the UI design pass before Phase 3.
 
 **Step 4 — dispatch:**
