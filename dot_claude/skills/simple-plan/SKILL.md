@@ -58,7 +58,13 @@ Gather evidence before you draft. Write the result to `$RUN_DIR/context.md`.
 5. Read the dependency manifest. List the libraries that the change will use.
 6. Read the documentation of each of those libraries for the parts the change touches. Use
    the Context7 MCP server when it is available. Record the idiom the library expects.
-7. Use Serena and GitNexus for symbol lookup and blast radius when the project is indexed.
+7. Find the code with the code-intelligence tools first, and use grep only where they have
+   no answer. Run `~/.claude/skills/deep-plan/scripts/bootstrap-codeintel.sh "$RUN_DIR"` to
+   refresh the indexes, and activate the project in Serena.
+   - Serena: `find_symbol`, `find_referencing_symbols` and `get_symbols_overview` for the
+     symbols the change touches.
+   - GitNexus: `query` and `context` for the flows, and `impact` for the blast radius.
+   - Graphify: read `graphify-out/GRAPH_REPORT.md` when it exists.
 8. When the task names a ticket, or the branch name holds a ticket key, read the ticket. Copy
    each acceptance criterion and each stated requirement into the brief, word for word. For a
    Jira key, run `~/.claude/skills/_shared/ticket-start.md` once.
@@ -431,7 +437,8 @@ stop to recommend commands. Stop at the plan only when the user said so, such as
    Validation section of `$PLAN_PATH` references it. When the change touches no flow and no
    screen, say why you skip it.
 2. **Then the chain in `~/.claude/skills/_shared/after-approval.md`.** Its executor comes from
-   `~/.claude/skills/_shared/plan-routing.md`: usually the `implement` skill.
+   `~/.claude/skills/_shared/plan-routing.md`: usually the `implement` skill. Show the
+   recommendation as that section says, with the options this harness offers, then run it.
    A simple-plan plan holds one task, so it fails the option C test and never asks the
    ultracode question.
 

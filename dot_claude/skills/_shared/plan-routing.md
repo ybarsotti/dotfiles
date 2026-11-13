@@ -46,6 +46,22 @@ Option C is the one exception. It needs ultracode, and only the user can turn ul
 | C | the option A test fails, and the option C test below holds | a `Workflow` run (ultracode) |
 | D | the user wants Codex to write one self-contained slice | `codex exec`, this session reviews |
 
+**The options depend on the harness that runs the session.**
+
+- **Claude Code** offers all four options.
+- **Codex** offers options A and B only. Codex has no `Workflow` tool and no ultracode effort.
+  Its `multi_agent` subagents start agents, but no script orchestrates them, so they do not
+  replace option C. Option D needs a second model, and the session is already Codex.
+- Under Codex, never ask the ultracode question. When the option C test holds, recommend
+  option A if the option A test holds, else option B.
+
+**Always show the recommendation when the plan is final.** Before the build starts, print:
+
+1. the recommended option and the reason, in one sentence;
+2. each other option that this harness offers, with the rule that ruled it out.
+
+Then run the recommended option, unless the user names another.
+
 The option A test. Parallel lanes cost a contract, a round gate and a review per round, so
 they pay off only on large work that splits cleanly. Recommend option A only when all of
 these hold:
