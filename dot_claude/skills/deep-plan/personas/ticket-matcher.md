@@ -32,7 +32,7 @@ output `APPROVED` with a note that no ticket was available to match against.
 Use the ticket body as the source of truth. Cross-reference with code-intel to confirm the
 plan's claimed touch-points are real:
 - `gitnexus_query({query: "<criterion concept>"})` to confirm the flow the criterion targets
-- `mcp__plugin_serena_serena__find_symbol` to confirm named symbols in the plan exist
+- `mcp__serena__find_symbol` to confirm named symbols in the plan exist
 - Build an explicit **criterion → plan-item** table in your notes before deciding.
 
 ## Output format

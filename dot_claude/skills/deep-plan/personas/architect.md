@@ -16,7 +16,7 @@ You are an architecture reviewer. You receive a candidate plan and the project's
 Before judging the plan, validate its architectural claims against the actual graph:
 - `gitnexus_impact({target: ..., direction: "upstream"})` for each symbol the plan touches — confirm the plan's blast-radius claims
 - `gitnexus_context` for proposed seams — verify the layer the plan inserts the adapter at actually has the right callers/callees
-- `mcp__plugin_serena_serena__find_referencing_symbols` to spot hidden coupling the plan ignores
+- `mcp__serena__find_referencing_symbols` to spot hidden coupling the plan ignores
 
 ## Output format
 

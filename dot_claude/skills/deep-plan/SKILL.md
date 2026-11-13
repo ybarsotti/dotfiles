@@ -83,17 +83,15 @@ Refresh local code-intel indexes so planners + reviewers use semantic tools inst
    ```
    This re-runs `gitnexus analyze` if `.gitnexus/` exists, `graphify update .` if `graphify-out/graph.json` exists, and writes `$RUN_DIR/codeintel-status.json`.
 
-2. Activate Serena for the current project via the MCP tool (the script can't issue MCP calls):
-   ```
-   mcp__plugin_serena_serena__activate_project(path=<repo root>)
-   ```
+2. Serena needs no activation call. Its MCP server starts with `--project-from-cwd`, so it
+   serves the repository at the session's working directory. Start the session at the repo root.
 
 3. If `graphify-out/GRAPH_REPORT.md` exists, read it for the "god nodes" + community summary before drafting — saves a planner pass.
 
 4. Surface index status to the user in one line, e.g. `code-intel: gitnexus=fresh graphify=fresh serena=activated`.
 
 The persona prompts (planner-opus, planner-codex, architect, project-developer, qa, ticket-matcher) all prefer these tools over raw `grep`/`find`:
-- `mcp__plugin_serena_serena__find_symbol`, `find_referencing_symbols`, `replace_symbol_body`
+- `mcp__serena__find_symbol`, `find_referencing_symbols`, `replace_symbol_body`
 - `gitnexus_query`, `gitnexus_context`, `gitnexus_impact`, `gitnexus_rename`, `gitnexus_detect_changes`
 - `graphify path/explain` for cross-symbol reasoning
 

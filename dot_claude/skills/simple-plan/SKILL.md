@@ -60,7 +60,7 @@ Gather evidence before you draft. Write the result to `$RUN_DIR/context.md`.
    the Context7 MCP server when it is available. Record the idiom the library expects.
 7. Find the code with the code-intelligence tools first, and use grep only where they have
    no answer. Run `~/.claude/skills/deep-plan/scripts/bootstrap-codeintel.sh "$RUN_DIR"` to
-   refresh the indexes, and activate the project in Serena.
+   refresh the indexes. Serena serves the working directory and needs no activation.
    - Serena: `find_symbol`, `find_referencing_symbols` and `get_symbols_overview` for the
      symbols the change touches.
    - GitNexus: `query` and `context` for the flows, and `impact` for the blast radius.

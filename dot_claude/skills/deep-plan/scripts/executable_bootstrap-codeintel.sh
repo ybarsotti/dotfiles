@@ -8,9 +8,8 @@
 # Side effects:
 #   - gitnexus analyze  (if .gitnexus/ already initialized for this repo)
 #   - graphify update . (if graphify-out/graph.json already exists)
-#   - serena activation is NOT done here — the orchestrator MUST call
-#     mcp__plugin_serena_serena__activate_project itself (script can't issue
-#     MCP tool calls). The skill prompt instructs the orchestrator to do so.
+#   - none for Serena: its MCP server starts with --project-from-cwd and
+#     serves the repository at the session's working directory.
 #
 # Writes a status marker file: <run-dir>/codeintel-status.json
 # Exit always 0 (failures degrade gracefully).
@@ -23,7 +22,7 @@ MARKER="${RUN_DIR}/codeintel-status.json"
 
 GITNEXUS_STATUS="absent"
 GRAPHIFY_STATUS="absent"
-SERENA_HINT="orchestrator: call mcp__plugin_serena_serena__activate_project with the current repo path"
+SERENA_HINT="serena: served from the session working directory (--project-from-cwd)"
 
 # ─── GitNexus ──────────────────────────────────────────────────────────────
 

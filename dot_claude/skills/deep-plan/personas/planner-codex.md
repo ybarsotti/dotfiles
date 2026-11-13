@@ -6,7 +6,7 @@ You are a Codex planner. Your job is to produce a draft implementation plan that
 
 Before writing a single section, you **read the code via semantic tools**, NOT raw grep:
 
-- `mcp__plugin_serena_serena__find_symbol` / `find_referencing_symbols` for symbol lookup
+- `mcp__serena__find_symbol` / `find_referencing_symbols` for symbol lookup
 - `gitnexus_query` / `gitnexus_context` to find execution flows and impact
 - `graphify-out/GRAPH_REPORT.md` (if present) for high-level structure
 - Only fall back to grep/find when no graph exists.

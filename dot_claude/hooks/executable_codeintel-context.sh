@@ -28,7 +28,7 @@ fi
 parts=()
 
 if [ -f "$cwd/.serena/project.yml" ]; then
-  parts+=("serena: .serena/project.yml detected. Activate this project with the Serena MCP activate_project tool before symbol-level exploration or edits.")
+  parts+=("serena: .serena/project.yml detected. Serena serves this working directory; use it for symbol-level exploration and edits.")
 fi
 
 if [ -d "$cwd/.gitnexus" ]; then
