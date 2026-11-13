@@ -8,6 +8,7 @@ description: |
   Use after the build of a plan that has a UI design pass, or when the user asks to check that
   an implementation matches its design, mockup or artboard.
 tools: Bash, Read, Write, Glob, Grep, Skill, Artifact
+model: sonnet
 ---
 
 # qa-ui

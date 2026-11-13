@@ -19,7 +19,8 @@
 #
 # Behaviour:
 #   Opens one Orca terminal in <cwd> that runs
-#     codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check - < <task-file>
+#     codex exec --model <QA_CODEX_MODEL, default gpt-6.1-terra> --dangerously-bypass-approvals-and-sandbox \
+#       --skip-git-repo-check - < <task-file>
 #   Outside an Orca workspace, falls back to a plain background codex exec
 #   (no terminal, no visibility) and says so on stderr.
 
@@ -47,15 +48,18 @@ fi
 
 mkdir -p "$RUN_DIR"
 
+# QA runs on a mid-tier model, not the top one. Override with QA_CODEX_MODEL.
+MODEL="${QA_CODEX_MODEL:-gpt-6.1-terra}"
+
 # The command the worker runs inside the terminal. Reads the task from the file on stdin.
-CODEX_CMD="cd $(printf %q "$CWD") && codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check - < $(printf %q "$TASK_FILE")"
+CODEX_CMD="cd $(printf %q "$CWD") && codex exec --model $(printf %q "$MODEL") --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check - < $(printf %q "$TASK_FILE")"
 
 # --- Headless fallback: no Orca workspace here ----------------------------------------
 fallback_headless() {
   local reason="$1"
   echo "Warning: ${reason} — falling back to headless codex exec (no terminal, no visibility)." >&2
   local log="${RUN_DIR}/${WORKER}.log"
-  ( cd "${CWD}" && codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check - < "${TASK_FILE}" ) \
+  ( cd "${CWD}" && codex exec --model "${MODEL}" --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check - < "${TASK_FILE}" ) \
     >"${log}" 2>&1 &
   local pid=$!
   echo "Headless codex worker pid=${pid}, log=${log}" >&2

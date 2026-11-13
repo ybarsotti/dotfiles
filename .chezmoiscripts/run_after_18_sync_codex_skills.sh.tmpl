@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Mirror the Claude skills that this repo manages into ~/.agents/skills, where Codex reads them.
+#
+# Codex does not read ~/.claude/skills. Without this script, ~/.agents/skills keeps old copies
+# that were made by hand, and Codex runs outdated skills. The script copies real files: Codex
+# skips symlinked prompts (see run_after_14), so the copies resolve every symlink.
+#
+# Only the skills in this repo's dot_claude/skills are synced. Every other skill in
+# ~/.agents/skills, such as one that another installer added, stays untouched.
+
+set -eufo pipefail
+
+CLAUDE_SKILLS="${HOME}/.claude/skills"
+AGENTS_SKILLS="${HOME}/.agents/skills"
+SOURCE_SKILLS={{ joinPath .chezmoi.sourceDir "dot_claude/skills" | quote }}
+MANIFEST="${AGENTS_SKILLS}/.synced-from-claude"
+
+# Only sync when Codex is set up on this machine.
+[ -d "${HOME}/.codex" ] || exit 0
+[ -d "$CLAUDE_SKILLS" ] && [ -d "$SOURCE_SKILLS" ] || exit 0
+command -v rsync >/dev/null 2>&1 || exit 0
+
+mkdir -p "$AGENTS_SKILLS"
+
+NEW_MANIFEST=$(mktemp)
+trap 'rm -f "$NEW_MANIFEST"' EXIT
+
+# find, not a glob: the repo's `set -eufo pipefail` includes -f, which disables globbing.
+while IFS= read -r dir; do
+  # Strip the chezmoi attribute prefixes to get the target name.
+  name=$(basename "$dir" | sed -E 's/^((private|readonly|exact|empty|executable)_)*//; s/^dot_/./')
+  src="${CLAUDE_SKILLS}/${name}"
+  # A skill that .chezmoiignore skips on this machine has no target. Skip it too.
+  [ -d "$src" ] || continue
+  # rsync only writes what changed, so the run stays idempotent.
+  rsync -a --delete --copy-links --exclude '.DS_Store' "${src}/" "${AGENTS_SKILLS}/${name}/"
+  printf '%s\n' "$name" >> "$NEW_MANIFEST"
+done < <(find "$SOURCE_SKILLS" -mindepth 1 -maxdepth 1 -type d)
+
+sort -o "$NEW_MANIFEST" "$NEW_MANIFEST"
+
+# Remove the copies of skills that this script synced before and that the repo dropped since.
+if [ -f "$MANIFEST" ]; then
+  comm -23 "$MANIFEST" "$NEW_MANIFEST" | while IFS= read -r name; do
+    if [ -n "$name" ]; then rm -rf "${AGENTS_SKILLS:?}/${name}"; fi
+  done
+fi
+
+if [ ! -f "$MANIFEST" ] || ! cmp -s "$NEW_MANIFEST" "$MANIFEST"; then
+  cp "$NEW_MANIFEST" "$MANIFEST"
+fi

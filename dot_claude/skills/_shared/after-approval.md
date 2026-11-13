@@ -29,9 +29,13 @@ Start each agent that runs beside this session as an Orca worker: the QA agents,
 orchestration`, then start the worker:
 
 ```bash
-orca orchestration worker-start --worktree current --agent claude --json \
+orca orchestration worker-start --worktree current --agent claude --model sonnet --json \
   --spec "Read ~/.claude/agents/qa-ui.md and follow it. <the inputs it lists>"
 ```
+
+QA and UI analysis run on a mid-tier model, never on the top tier. Start the `qa-ui` and
+`qa-business` workers with `--model sonnet`. A Codex QA worker uses `gpt-6.1-terra`, never
+Opus, Sol or Astra. The build and the plan keep their own models.
 
 - Start every independent worker, then end your turn. Orca wakes you with each `worker_done`.
 - Add `--keep-open` when the user will talk to the worker, as with the `ui-designer`.

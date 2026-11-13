@@ -8,6 +8,7 @@ description: |
   Use after the build and review of a plan, when the environment answers, or when the user asks
   to test the business rules or the flows of a change end to end.
 tools: Bash, Read, Write, Glob, Grep, Skill
+model: sonnet
 ---
 
 # qa-business

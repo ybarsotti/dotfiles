@@ -116,7 +116,7 @@ Validate:
 uv run ~/.claude/skills/qa-test-plan/scripts/qa_artifacts.py validate-plan "$QA_PLAN"
 ```
 
-Spawn one Codex document reviewer. Ask it to inspect implementation plan and validated YAML
+Spawn one Codex document reviewer on `gpt-6.1-terra` (`codex exec --model gpt-6.1-terra`). Ask it to inspect implementation plan and validated YAML
 for missing requirements, personas, branches, preconditions, data isolation, actionable steps,
 objective expectations, and evidence coverage. Apply concrete fixes to YAML, then validate again.
 
