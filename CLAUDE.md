@@ -160,28 +160,34 @@ MCP servers are split by account type in `.chezmoidata/mcp-server.yml`:
 
 The template `dot_claude/mcp_servers.json.tmpl` merges `shared` + the typed section automatically.
 
-### Commands Also Reach Codex
+### Commands and Skills Also Reach Codex
 
 `~/.claude/commands` is the single source of truth for slash commands. Add a command there
 and `.chezmoiscripts/run_after_14_sync_codex_prompts.sh.tmpl` copies it to
 `~/.codex/prompts` on the next `chezmoi apply`, so it appears in Codex too. Do not add a
 second copy by hand.
 
-**Never link the two directories.** Codex skips symlinked prompts without an error
-(openai/codex#3637, #4383, #5040), so a symlink looks correct and shows nothing. The sync
-script copies real files for that reason.
+`dot_claude/skills` is the single source of truth for skills. Codex reads skills from
+`~/.agents/skills`, and `.chezmoiscripts/run_after_18_sync_codex_skills.sh.tmpl` copies each
+skill of this repo there on every `chezmoi apply`. Edit the skill in `dot_claude/skills`,
+never the copy in `~/.agents/skills`: the next apply overwrites the copy. The script leaves
+the skills of other installers in `~/.agents/skills` untouched, and removes only the copies
+it synced before (`~/.agents/skills/.synced-from-claude`).
+
+**Never link the directories.** Codex skips symlinked prompts without an error
+(openai/codex#3637, #4383, #5040), so a symlink looks correct and shows nothing. Both sync
+scripts copy real files for that reason.
 
 **A plugin's skills do not travel this way.** Codex runs its own plugin system and does not
-read Claude's plugins, so a plugin that ships skills instead of commands — superpowers, for
-one — surfaces nothing in Codex no matter what the prompts directory holds. Install it on
-the Codex side as well, through
+read Claude's plugins, so a plugin that ships skills — superpowers, for one — surfaces
+nothing in Codex unless it is installed there too. Install it on the Codex side through
 `.chezmoiscripts/run_onchange_after_15_install_codex_plugins.sh.tmpl`. Find the plugin with
 `codex plugin list` and add its `name@marketplace` line to that script.
 
-A command that invokes `Skill(skill="...")` — `deep-plan`, `deep-review`, `simple-plan` —
-appears in Codex but stops when it reaches the skill, because skills are a Claude Code
-feature. When you need one of those to run under Codex, write a Codex-native prompt that
-reads the `SKILL.md` by path and calls the skill's scripts through the shell.
+**A skill names Claude Code tools, and Codex lacks some of them.** Codex has no `Workflow`
+tool and no ultracode effort, so `_shared/plan-routing.md` offers only executors A and B
+under Codex. When a skill step needs a tool that Codex lacks, the skill must state the Codex
+path next to the Claude Code one.
 
 ### Asking About Account Type
 **IMPORTANT**: When the user asks to install, configure, or add anything related to Claude Code
