@@ -19,7 +19,8 @@ builds. Review, QA, the PR and the report belong to `~/.claude/skills/_shared/af
    small tasks first, ordered from the foundation up.
 2. Dispatch one implementer agent per task with `superpowers:subagent-driven-development`.
    This session reviews each task. It writes feature code only when the user asks for that.
-   Without subagents, use `superpowers:executing-plans`.
+   Without subagents, use `superpowers:executing-plans`. While subagents run, watch them on
+   the schedule of `~/.claude/skills/_shared/agent-watch.md`.
 3. Build each task with strict TDD: `superpowers:test-driven-development`, or the `tdd`
    skill when it is installed. Write the tests at the seams that the plan agreed. Mock only
    the outermost boundaries: the network, a third-party API, the clock.
