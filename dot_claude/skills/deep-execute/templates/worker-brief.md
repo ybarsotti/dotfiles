@@ -39,6 +39,9 @@ Use each label below, exactly as written, as `<task>` in every event about that 
 2. Write the failing test first. Run it and see it fail for the expected reason.
 3. Write the least code that makes the test pass.
 4. Run the lane test command. Refactor while it stays green.
+   Follow section 2 of `~/.claude/skills/_shared/engineering-principles.md`. When two fixes
+   that share one premise fail the same check, stop, test the premise, and emit `question`
+   if it is false.
 5. Log every path you wrote with `--files`, then emit `task_done`.
 
 When every task is done and the lane test command passes, emit `done` and stop. The loop keeps

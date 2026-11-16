@@ -99,3 +99,4 @@ Tick every item with `record.sh --check` before you finish.
 - [ ] `mutants` — Item 10: A surviving mutant on a changed line.
 - [ ] `nondeterminism` — Item 11: Non-determinism.
 - [ ] `snapshots` — Item 12: Snapshot spam.
+- [ ] `vacuous` — A test that still passes when the code under test returns nothing.

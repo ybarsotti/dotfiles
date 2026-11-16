@@ -62,5 +62,6 @@ Tick every item with `record.sh --check` before you finish.
 - [ ] `malformed` — Malformed payloads and values of the wrong shape.
 - [ ] `partial-failure` — Timeouts, partial failures, retries and unbounded input.
 - [ ] `label-identity` — A display label used as an identity.
-- [ ] `races` — TOCTOU, shared state, async order, side effects that fire twice, lost updates and deadlocks.
+- [ ] `races` — TOCTOU, shared state, async order, side effects that fire twice, lost updates, deadlocks, and shared mutable state with more than one writer.
+- [ ] `idempotent` — An operation that ends in a different state when it runs twice, or again after a crash halfway through.
 - [ ] `test-coverage` — A test for the happy path, the error paths, and each edge or race you found.

@@ -168,4 +168,6 @@ Tick every item with `record.sh --check` before you finish.
 - [ ] `cycles` — Dependency cycles the diff creates.
 - [ ] `removals` — The orphan chain and the surviving callers of a removed contract.
 - [ ] `concept-home` — One concept, one home.
+- [ ] `illegal-states` — Types that let two fields disagree or let a wrong value be written; outside data parsed more than once, or past the boundary unparsed.
+- [ ] `bolt-on` — A requirement bolted onto a design that a smaller redesign would serve.
 - [ ] `patterns` — Variants that share one lifecycle: Strategy, Template Method or a table.

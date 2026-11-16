@@ -154,6 +154,8 @@ Never plan two tasks in one run. One plan, one task.
 
 ## Phase 2 — Draft the plan
 
+Design by section 1 of `~/.claude/skills/_shared/engineering-principles.md`.
+
 ### UI/UX consultation, when the change touches an interface
 
 Before drafting, when the task adds or changes a user-facing screen, component, page or

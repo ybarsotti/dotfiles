@@ -124,4 +124,5 @@ Tick every item with `record.sh --check` before you finish.
 - [ ] `nested-ternary` — No nested ternary, and no `&&` or `||` fallback chain.
 - [ ] `packed-expressions` — Inline logic in JSX props, call arguments and return values.
 - [ ] `repetition` — The same pattern repeated across siblings.
+- [ ] `subtract` — Complexity that the change made unnecessary and left in place: the old path beside the new one, a flag nobody sets.
 - [ ] `reinvention` — An existing helper, a standard-library function, an installed dependency, a second module or a redefined constant, searched with the semantic tools.
