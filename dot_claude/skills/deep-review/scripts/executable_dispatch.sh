@@ -490,6 +490,10 @@ ${focus}
 ## Instructions
 ${body}
 
+## Principles
+Judge the change against the \`ub-mode\` skill. Read \`~/.claude/skills/ub-mode/SKILL.md\`
+before you review. A finding that breaks one of its rules names that rule.
+
 ${OUTPUT_SECTION}
 EOF
 done

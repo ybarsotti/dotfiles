@@ -1,0 +1,3 @@
+#!/bin/sh
+# Runs crapper from its pinned checkout (.chezmoiexternal.toml). Used by the ub-mode skill.
+exec "$HOME/.local/share/unclebob/crapper/crapper" "$@"

@@ -39,7 +39,10 @@ Use each label below, exactly as written, as `<task>` in every event about that 
 2. Write the failing test first. Run it and see it fail for the expected reason.
 3. Write the least code that makes the test pass.
 4. Run the lane test command. Refactor while it stays green.
-   Follow section 2 of `~/.claude/skills/_shared/engineering-principles.md`. When two fixes
+   Follow the `ub-mode` skill: invoke it, or read `~/.claude/skills/ub-mode/SKILL.md`. Before
+   `task_done`, run its gates on the files you wrote: `crapper --threshold 10 <files>`,
+   `dryer --threshold 0.8 <files>`, and `mutator --max-workers 2 --test-command "<lane test
+   command>" <file>` for each source file. When two fixes
    that share one premise fail the same check, stop, test the premise, and emit `question`
    if it is false.
 5. Log every path you wrote with `--files`, then emit `task_done`.

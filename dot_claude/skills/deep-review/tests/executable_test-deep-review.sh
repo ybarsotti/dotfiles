@@ -261,6 +261,29 @@ assert_contains "$SIG_OUT" "overlap-found" "test-signals: a failing recipe still
 assert_contains "$SIG_OUT" "exit=0" "test-signals: a failing recipe does not fail the script"
 rm -rf "$SIG_REPO"
 
+# ─── test-signals.sh: the ub-mode gates, with stub crapper and dryer ───────
+UB_REPO=$(mktemp -d); UB_BIN=$(mktemp -d)
+printf '#!/bin/sh\nmkdir -p .metrics; echo new > .metrics/crap.edn; echo crapper-ran "$@"\n' >"${UB_BIN}/crapper"
+printf '#!/bin/sh\nmkdir -p .metrics; echo new > .metrics/dry.edn\nprintf "DUPLICATE score=0.91\\n  app.py:1-9\\n  lib/old.py:4-12\\nDUPLICATE score=0.85\\n  lib/a.py:1-5\\n  lib/b.py:1-5\\n"\n' >"${UB_BIN}/dryer"
+chmod +x "${UB_BIN}/crapper" "${UB_BIN}/dryer"
+ub() { PATH="${UB_BIN}:/usr/bin:/bin" "$TEST_SIGNALS" "$UB_REPO" "$@"; echo "exit=$?"; }
+touch "${UB_REPO}/app.py" "${UB_REPO}/README.md"
+assert_eq "$(ub HEAD README.md)" "exit=0" "test-signals: no changed source file runs no ub-mode tool"
+UB_OUT=$(ub HEAD "$(printf 'app.py\ngone.py')")
+assert_contains "$UB_OUT" "crapper-ran --no-coverage ./app.py" "test-signals: crapper runs without coverage on the changed files that exist"
+assert_contains "$UB_OUT" "app.py:1-9" "test-signals: dryer keeps a pair that touches a changed file"
+assert_eq "$(grep -c "lib/a.py" <<<"$UB_OUT" || true)" 0 "test-signals: dryer drops a pair that touches no changed file"
+assert_eq "$([ -e "${UB_REPO}/.metrics" ] && echo left || echo removed)" "removed" \
+  "test-signals: the .metrics folder the tools created is removed"
+mkdir -p "${UB_REPO}/.metrics"; echo old >"${UB_REPO}/.metrics/crap.edn"
+UB_OUT=$(DEEP_REVIEW_RUN_TEST_SIGNALS=1 ub HEAD app.py)
+assert_contains "$UB_OUT" "crapper-ran ./app.py" "test-signals: the opt-in runs crapper with coverage"
+assert_eq "$(cat "${UB_REPO}/.metrics/crap.edn")" "old" "test-signals: a metrics file that was there is put back"
+assert_eq "$([ -e "${UB_REPO}/.metrics/dry.edn" ] && echo left || echo removed)" "removed" \
+  "test-signals: a metrics file the tools created is removed"
+assert_eq "$(ub PR-7 app.py)" "exit=0" "test-signals: PR scope runs no ub-mode tool"
+rm -rf "$UB_REPO" "$UB_BIN"
+
 # ─── security-signals.sh: stub scanners on a private PATH ──────────────────
 SEC_REPO=$(mktemp -d); SEC_BIN=$(mktemp -d)
 for t in gitleaks semgrep checkov conftest; do

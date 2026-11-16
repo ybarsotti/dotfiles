@@ -123,6 +123,20 @@ output goes into `context.md` under `## Security signals`. The `security` person
 each hit as a finding or refute it in its `scanners` checklist note. An applicable scanner that
 is not installed is listed as a coverage gap. A pull request scope runs only gitleaks, on the diff.
 
+## Test signals and the ub-mode gates
+
+Each reviewer prompt tells the reviewer to judge the change against the `ub-mode` skill.
+`collect-context.sh` calls `test-signals.sh`, which writes `## Test signals` into `context.md`:
+
+- `crapper` on the changed source files. It runs with `--no-coverage` by default, so it
+  reports the cyclomatic complexity. `DEEP_REVIEW_RUN_TEST_SIGNALS=1` runs the tests for the
+  CRAP score.
+- `dryer --threshold 0.8` on the whole tree, cut to the pairs that touch a changed file.
+- The `mutate` and `test-overlap` just recipes, when the repository defines them.
+
+The `simplicity` persona reads the dryer pairs. The `test-quality` persona reads the rest. A
+pull request scope runs none of them.
+
 ## Cross-tool
 
 This skill lives in `~/.claude/commands/` so it's invoked from Claude. The reviewers themselves run as background subprocesses — half use `claude -p` (default), half use `codex exec`. Switching the orchestrator from Claude to Codex needs an equivalent command file under Codex's prompts directory (not yet built — phase 2).
@@ -147,6 +161,7 @@ This skill lives in `~/.claude/commands/` so it's invoked from Claude. The revie
 │   ├── dispatch.sh                   # main orchestrator
 │   ├── collect-context.sh            # builds context.md
 │   ├── security-signals.sh           # local scanner output for context.md
+│   ├── test-signals.sh               # crapper, dryer and test recipe output for context.md
 │   ├── reviewer.sh                   # runs ONE reviewer
 │   └── aggregate.sh                  # consolidates results
 └── variants/

@@ -116,6 +116,15 @@ This dotfiles setup includes several development tools that are automatically in
   - Usage: `autopep8 --in-place script.py`
 - **`clang-format`** - C/C++ code formatter
   - Usage: `clang-format -i file.cpp`, `clang-format --style=Google file.c`
+- **`crapper`**, **`dryer`**, **`mutator`** - Robert C. Martin's code-quality tools, used by the
+  `ub-mode` skill. They are not Homebrew packages: `.chezmoiexternal.toml` pins each one to a
+  commit in `~/.local/share/unclebob/`, and a wrapper in `~/.local/bin` runs it. The first run
+  of each tool creates its `.venv` (Python 3.11 or later). They write `.metrics/`, which the
+  global git ignore file ignores.
+  - `crapper --changed --threshold 10` - CRAP score per function (complexity and coverage)
+  - `dryer --changed --threshold 0.8` - structural duplication
+  - `mutator --max-workers 2 src/file.py` - mutation testing (survivors and uncovered lines)
+  - Bump: change the commit in the URL and its `checksum.sha256` together
 
 ### Version Managers & Runtimes
 - **`mise`** - Universal runtime version manager (replaces nvm, rbenv, etc.)

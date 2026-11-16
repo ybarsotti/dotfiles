@@ -71,3 +71,24 @@
     checksum.sha256 = "72613618071c6bb75b4dbecfb79844232bcc5eeef2b53d7e3f424cb3ad42b345"
 {{- end }}
 {{ end }}
+
+# Robert C. Martin's code-quality tools, which the ub-mode skill uses: crapper (CRAP score per
+# function), dryer (structural duplication) and mutator (mutation testing). They sit side by
+# side because mutator imports crapper from ../crapper. Each archive is pinned to a commit and
+# its SHA256; bump the commit and the checksum together. Not `exact`, so the .venv that each
+# launcher creates on first use survives an apply. The wrappers in ~/.local/bin call them.
+[".local/share/unclebob/crapper"]
+    type = "archive"
+    url = "https://github.com/unclebob/crapper/archive/c757ec79a6c15dc815238bbd9c2f4601eb54d3cc.tar.gz"
+    checksum.sha256 = "9d807c02d171fc263e9b72db991ee1b09fc5efe04b4d9a3c80287ac5cfcda29c"
+    stripComponents = 1
+[".local/share/unclebob/dryer"]
+    type = "archive"
+    url = "https://github.com/unclebob/dryer/archive/66ff6d21a42c04afcad89c78a80066176d1294b0.tar.gz"
+    checksum.sha256 = "94609c58e1d35a74fba0f9b9385deddbd824d4cb00aa8c842436423eae20f62e"
+    stripComponents = 1
+[".local/share/unclebob/mutator"]
+    type = "archive"
+    url = "https://github.com/unclebob/mutator/archive/830ec7e9c39664d753f8699015bc796df67727b9.tar.gz"
+    checksum.sha256 = "77242e169942bc2ccf762b36d18d14a679cd0f114ebb82258b0a9018469e5b1b"
+    stripComponents = 1
