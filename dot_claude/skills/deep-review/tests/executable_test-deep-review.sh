@@ -31,6 +31,8 @@ VERIFY_EVIDENCE="${ROOT}/dot_claude/skills/deep-review/scripts/executable_verify
 CHECK_STALE="${ROOT}/dot_claude/skills/deep-review/scripts/executable_check-stale.sh"
 TEST_SIGNALS="${ROOT}/dot_claude/skills/deep-review/scripts/executable_test-signals.sh"
 [ -f "$TEST_SIGNALS" ] || TEST_SIGNALS="${ROOT}/dot_claude/skills/deep-review/scripts/test-signals.sh"
+SEC_SIGNALS="${ROOT}/dot_claude/skills/deep-review/scripts/executable_security-signals.sh"
+[ -f "$SEC_SIGNALS" ] || SEC_SIGNALS="${ROOT}/dot_claude/skills/deep-review/scripts/security-signals.sh"
 [ -f "$SARIF" ] || SARIF="${ROOT}/dot_claude/skills/deep-review/scripts/sarif.sh"
 
 # ─── Task 12: SKILL.md points at dispatch.sh's own invocation and reuse of ─
@@ -258,6 +260,43 @@ assert_contains "$SIG_OUT" "survivor-at-app.py:3" "test-signals: mutate output i
 assert_contains "$SIG_OUT" "overlap-found" "test-signals: a failing recipe still shows its output"
 assert_contains "$SIG_OUT" "exit=0" "test-signals: a failing recipe does not fail the script"
 rm -rf "$SIG_REPO"
+
+# ─── security-signals.sh: stub scanners on a private PATH ──────────────────
+SEC_REPO=$(mktemp -d); SEC_BIN=$(mktemp -d)
+for t in gitleaks semgrep checkov; do
+  printf '#!/bin/sh\necho %s-ran "$@"\n' "$t" >"${SEC_BIN}/${t}"
+done
+printf '#!/bin/sh\necho semgrep-failed; exit 3\n' >"${SEC_BIN}/semgrep-fail"
+chmod +x "${SEC_BIN}/gitleaks" "${SEC_BIN}/semgrep" "${SEC_BIN}/checkov" "${SEC_BIN}/semgrep-fail"
+# Only the stubs and the system folders are on PATH, so no real scanner runs. Without
+# gtimeout or timeout there, the script uses its perl fallback.
+SEC_PATH="${SEC_BIN}:/usr/bin:/bin"
+sec() { PATH="$SEC_PATH" "$SEC_SIGNALS" "$SEC_REPO" "$@"; echo "exit=$?"; }
+touch "${SEC_REPO}/README.md" "${SEC_REPO}/app.py" "${SEC_REPO}/Dockerfile" "${SEC_REPO}/go.mod" "${SEC_REPO}/main.go"
+assert_eq "$(sec HEAD README.md </dev/null)" "exit=0" \
+  "security-signals: no applicable file and no diff prints nothing and exits 0"
+SEC_OUT=$(sec HEAD "$(printf 'app.py\nDockerfile\nmain.go\ngone.py')" <<<"+token")
+assert_contains "$SEC_OUT" "## Security signals" "security-signals: output has the section heading"
+assert_contains "$SEC_OUT" "gitleaks-ran stdin" "security-signals: gitleaks scans the diff"
+assert_contains "$SEC_OUT" "semgrep-ran scan --config p/default --metrics off --quiet -- app.py" \
+  "security-signals: semgrep runs on the changed source files that exist"
+assert_eq "$(grep -c "gone.py" <<<"$SEC_OUT" || true)" 0 "security-signals: a deleted file is not scanned"
+assert_contains "$SEC_OUT" "checkov-ran --quiet --compact -f Dockerfile" "security-signals: checkov runs on a Dockerfile"
+assert_contains "$SEC_OUT" "Not installed, so not run (a coverage gap): gosec govulncheck" \
+  "security-signals: an applicable scanner that is missing is listed"
+SEC_OUT=$(sec PR-7 "app.py" <<<"+token")
+assert_contains "$SEC_OUT" "gitleaks-ran stdin" "security-signals: PR scope runs gitleaks on the diff"
+assert_eq "$(grep -c "semgrep-ran" <<<"$SEC_OUT" || true)" 0 "security-signals: PR scope does not scan files on disk"
+assert_contains "$SEC_OUT" "only gitleaks ran" "security-signals: PR scope says why"
+mv "${SEC_BIN}/semgrep-fail" "${SEC_BIN}/semgrep"
+SEC_OUT=$(sec HEAD "app.py" </dev/null)
+assert_contains "$SEC_OUT" "semgrep-failed" "security-signals: a failing scanner still shows its output"
+assert_contains "$SEC_OUT" "exited with 3" "security-signals: a failing scanner reports its status"
+assert_contains "$SEC_OUT" "exit=0" "security-signals: a failing scanner does not fail the script"
+printf '#!/bin/sh\nsleep 5\n' >"${SEC_BIN}/semgrep"; chmod +x "${SEC_BIN}/semgrep"
+SEC_OUT=$(DEEP_REVIEW_SIGNAL_TIMEOUT=1 sec HEAD "app.py" </dev/null)
+assert_contains "$SEC_OUT" "exit=0" "security-signals: a scanner that times out does not fail the script"
+rm -rf "$SEC_REPO" "$SEC_BIN"
 
 # ─── collect-context.sh: server code inside a web app is Backend ───────────
 CC_REPO=$(mktemp -d); CC_RUN=$(mktemp -d)

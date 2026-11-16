@@ -7,6 +7,12 @@ Cover: authn/authz holes, hardcoded secrets, input validation gaps, SQL/NoSQL in
 XSS, CSRF, BOLA/IDOR, rate-limiting absence, dependency CVEs, error message leakage,
 insecure defaults, missing TLS/cert validation, JWT/cookie handling.
 
+## Scanner output
+
+`context.md` can hold a `## Security signals` section with the output of local scanners on the
+changed files and the diff. A scanner hit is a lead, not proof. Open the code at each hit and
+decide whether it is real in this diff.
+
 ## Tenant and account isolation
 
 For every query or external lookup the diff adds, list the keys that scope it: tenant,
@@ -30,3 +36,4 @@ Tick every item with `record.sh --check` before you finish.
 - [ ] `abuse` — A rate limit or a cost bound on a public, unauthenticated or costly endpoint.
 - [ ] `dependencies` — Known CVEs in a new or changed dependency.
 - [ ] `leaks` — Error responses and logs reveal no internals and no personal data.
+- [ ] `scanners` — Every hit under `## Security signals` is a recorded finding, or the note refutes it with evidence. The note names each scanner that is not installed, failed or timed out.

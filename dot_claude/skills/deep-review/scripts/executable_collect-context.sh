@@ -188,4 +188,8 @@ EOF
 "$(dirname "${BASH_SOURCE[0]}")/test-signals.sh" "$REPO_ROOT" "$SCOPE" "$FILES" >> "$OUT" \
   || log "test signals unavailable"
 
+# Local security scanners on the changed files and the diff, for the security reviewer.
+printf '%s\n' "$DIFF_OUTPUT" | "$(dirname "${BASH_SOURCE[0]}")/security-signals.sh" "$REPO_ROOT" "$SCOPE" "$FILES" >> "$OUT" \
+  || log "security signals unavailable"
+
 log "wrote $OUT (${FILE_COUNT} files, $(wc -l < "$OUT") lines)"

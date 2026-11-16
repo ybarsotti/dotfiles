@@ -114,6 +114,15 @@ The `scope-completeness` persona compares the diff to a Jira/Linear task. Auto-d
 
 When the task is found, `collect-context.sh` tries `lineark issue view <id>` to fetch the body. If not available, the task ID is still passed but the persona notes the gap.
 
+## Security signals
+
+`collect-context.sh` calls `security-signals.sh`, which runs the installed local scanners on the
+changed files and the diff: gitleaks, semgrep, gosec, govulncheck, osv-scanner, checkov (or
+`trivy config` without it), zizmor, kube-linter and, with a `policy/` folder, conftest. Their
+output goes into `context.md` under `## Security signals`. The `security` persona must confirm
+each hit as a finding or refute it in its `scanners` checklist note. An applicable scanner that
+is not installed is listed as a coverage gap. A pull request scope runs only gitleaks, on the diff.
+
 ## Cross-tool
 
 This skill lives in `~/.claude/commands/` so it's invoked from Claude. The reviewers themselves run as background subprocesses — half use `claude -p` (default), half use `codex exec`. Switching the orchestrator from Claude to Codex needs an equivalent command file under Codex's prompts directory (not yet built — phase 2).
@@ -137,6 +146,7 @@ This skill lives in `~/.claude/commands/` so it's invoked from Claude. The revie
 ├── scripts/
 │   ├── dispatch.sh                   # main orchestrator
 │   ├── collect-context.sh            # builds context.md
+│   ├── security-signals.sh           # local scanner output for context.md
 │   ├── reviewer.sh                   # runs ONE reviewer
 │   └── aggregate.sh                  # consolidates results
 └── variants/
