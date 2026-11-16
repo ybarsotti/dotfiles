@@ -13,19 +13,27 @@ builds. Review, QA, the PR and the report belong to `~/.claude/skills/_shared/af
 - The approved plan path (`$PLAN`), or the PRD or the issues that the user gave.
 - The current branch. Commit to it. Do not create a new branch.
 
+## Before the first task
+
+Run section 0 of `after-approval.md`: open `/goal` with the finished result "built, reviewed,
+QA green, PR open, report delivered". The goal keeps the session going after the last commit.
+This applies when `/implement` is the first command too.
+
 ## Build
 
 1. Read the plan. Take its tasks in order. When the plan has no tasks, split the work into
    small tasks first, ordered from the foundation up.
 2. Dispatch one implementer agent per task with `superpowers:subagent-driven-development`.
    This session reviews each task. It writes feature code only when the user asks for that.
-   Without subagents, use `superpowers:executing-plans`. While subagents run, watch them on
-   the schedule of `~/.claude/skills/_shared/agent-watch.md`.
+   Without subagents, use `superpowers:executing-plans`. Use only their per-task loop. Skip
+   their last step, `superpowers:finishing-a-development-branch`: it asks to merge, open a PR
+   or keep the branch, and waits. Sections 2 to 9 of `after-approval.md` replace it. While
+   subagents run, watch them on the schedule of `~/.claude/skills/_shared/agent-watch.md`.
 3. Invoke the `ub-mode` skill and build by it. Tell each implementer agent to invoke it too,
    or to read `~/.claude/skills/ub-mode/SKILL.md`. Before each commit, run its gates on the
    changed files: `crapper --changed --threshold 10`, `dryer --changed --threshold 0.8`, and
-   `mutator --max-workers 2 <file>` for each changed source file. Build each task with strict TDD: `superpowers:test-driven-development`, or the `tdd`
-   skill when it is installed. Write the tests at the seams that the plan agreed. Mock only
+   `mutator --max-workers 2 <file>` for each changed source file. Build each task with
+   strict TDD: `superpowers:test-driven-development`, or the `tdd` skill when it is installed. Write the tests at the seams that the plan agreed. Mock only
    the outermost boundaries: the network, a third-party API, the clock.
 4. For a bug or a regression, use `superpowers:systematic-debugging` before you write the fix.
 5. Record each departure from the plan as a `D-NNN` row under the plan's `## Deviations`.
@@ -45,5 +53,7 @@ skip the hooks.
 
 ## Next
 
-Continue with sections 2 to 9 of `~/.claude/skills/_shared/after-approval.md`. Do not run a
-review, QA or PR flow of your own.
+The last commit is not the end. In the same turn, continue with sections 2 to 9 of
+`~/.claude/skills/_shared/after-approval.md`: the review, QA, the fixes, the PR, the report and
+the PR watch. Do not stop to report the build, and do not ask whether to continue. Stop only
+in the cases that `after-approval.md` lists. Do not run a review, QA or PR flow of your own.
