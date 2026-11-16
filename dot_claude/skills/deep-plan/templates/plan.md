@@ -434,7 +434,6 @@ docs). Use `### Q:` / `### A:` headers. If `--skip-grill` was passed, write exac
 - [ ] subagent-driven-development / executing-plans
 - [ ] test-driven-development
 - [ ] verification-before-completion
-- [ ] finishing-a-development-branch
 
 ## Checklist (machine-validated; do NOT hand-edit — call tick-checklist.sh)
 - [ ] code-intel-bootstrapped

@@ -34,7 +34,7 @@ execution half. Invoke each planning-phase skill via the Skill tool at its mappe
 | 6b| `systematic-debugging` | execution (bug/regression tasks) | executor |
 | 6c| `dispatching-parallel-agents` | execution (fallback for parallel slices) | executor |
 | 7 | `/deep-review` + `receiving-code-review` + `qa-ui`/`qa-business` agents | execution | after-approval |
-| 8 | `/pr` + `finishing-a-development-branch` | execution | after-approval |
+| 8 | `/pr --no-watch`, then the PR watch (never `finishing-a-development-branch`, which stops to ask) | execution | after-approval |
 
 Plus deep-plan adds: multi-model planner/reviewer fan-out, the `ticket-matcher` reviewer,
 code-intel bootstrap, and the machine-validated checklist gate.
