@@ -148,6 +148,14 @@ packages:
         - age                 # Simple file encryption (modern GPG alternative)
         - sops                # Encrypted secrets in Git repos
         - trivy               # Container/IaC security scanner
+        - semgrep             # Static analysis for unsafe code patterns
+        - osv-scanner         # Known vulnerabilities in lockfiles
+        - gosec               # Security linter for Go code
+        - checkov             # Misconfiguration in Dockerfiles, workflows, Kubernetes, Terraform
+        - syft                # SBOM of an image or a folder
+        - grype               # Vulnerability scan of an SBOM or an image
+        - cosign              # Sign and verify images and files with Sigstore
+        - conftest            # Test configuration files against Rego policies
 
       # AI & Agent Tools
       ai_agents:

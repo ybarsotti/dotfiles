@@ -348,6 +348,22 @@ For databases and heavy services (PostgreSQL, Kafka, Spark, etc.), use Docker Co
   - Usage: `sops -e secrets.yaml > secrets.enc.yaml`
 - **`trivy`** - Container and IaC security scanner
   - Usage: `trivy image nginx:latest`, `trivy config .`
+- **`semgrep`** - Static analysis for unsafe code patterns
+  - Usage: `semgrep scan --config p/default`
+- **`osv-scanner`** - Known vulnerabilities in lockfiles
+  - Usage: `osv-scanner scan source -r .`
+- **`gosec`** - Security linter for Go code
+  - Usage: `gosec ./...`
+- **`checkov`** - Misconfiguration in Dockerfiles, workflows, Kubernetes and Terraform
+  - Usage: `checkov -d .`
+- **`syft`** - SBOM of an image or a folder
+  - Usage: `syft nginx:latest -o spdx-json=sbom.json`
+- **`grype`** - Vulnerability scan of an SBOM or an image
+  - Usage: `grype sbom:sbom.json --only-fixed`
+- **`cosign`** - Sign and verify images and files with Sigstore
+  - Usage: `cosign verify-blob --bundle file.sigstore.json file`
+- **`conftest`** - Test configuration files against Rego policies
+  - Usage: `conftest test --policy policy deploy.yaml`
 - **`doppler`** - Secrets management
   - Usage: `doppler login`, `doppler secrets`
 - **`aws-vault`** - Securely store and access AWS credentials
