@@ -263,11 +263,11 @@ rm -rf "$SIG_REPO"
 
 # ─── security-signals.sh: stub scanners on a private PATH ──────────────────
 SEC_REPO=$(mktemp -d); SEC_BIN=$(mktemp -d)
-for t in gitleaks semgrep checkov; do
+for t in gitleaks semgrep checkov conftest; do
   printf '#!/bin/sh\necho %s-ran "$@"\n' "$t" >"${SEC_BIN}/${t}"
 done
 printf '#!/bin/sh\necho semgrep-failed; exit 3\n' >"${SEC_BIN}/semgrep-fail"
-chmod +x "${SEC_BIN}/gitleaks" "${SEC_BIN}/semgrep" "${SEC_BIN}/checkov" "${SEC_BIN}/semgrep-fail"
+chmod +x "${SEC_BIN}/gitleaks" "${SEC_BIN}/semgrep" "${SEC_BIN}/checkov" "${SEC_BIN}/conftest" "${SEC_BIN}/semgrep-fail"
 # Only the stubs and the system folders are on PATH, so no real scanner runs. Without
 # gtimeout or timeout there, the script uses its perl fallback.
 SEC_PATH="${SEC_BIN}:/usr/bin:/bin"
@@ -278,10 +278,13 @@ assert_eq "$(sec HEAD README.md </dev/null)" "exit=0" \
 SEC_OUT=$(sec HEAD "$(printf 'app.py\nDockerfile\nmain.go\ngone.py')" <<<"+token")
 assert_contains "$SEC_OUT" "## Security signals" "security-signals: output has the section heading"
 assert_contains "$SEC_OUT" "gitleaks-ran stdin" "security-signals: gitleaks scans the diff"
-assert_contains "$SEC_OUT" "semgrep-ran scan --config p/default --metrics off --quiet -- app.py" \
+assert_contains "$SEC_OUT" "semgrep-ran scan --config p/default --metrics off --quiet --disable-nosem -- ${SEC_REPO}/app.py" \
   "security-signals: semgrep runs on the changed source files that exist"
 assert_eq "$(grep -c "gone.py" <<<"$SEC_OUT" || true)" 0 "security-signals: a deleted file is not scanned"
-assert_contains "$SEC_OUT" "checkov-ran --quiet --compact -f Dockerfile" "security-signals: checkov runs on a Dockerfile"
+assert_contains "$SEC_OUT" "--skip-download --quiet --compact -f ${SEC_REPO}/Dockerfile" "security-signals: checkov runs on a Dockerfile"
+assert_contains "$SEC_OUT" "--ignore-gitleaks-allow" "security-signals: gitleaks ignores allow comments of the change"
+assert_eq "$(grep -c "checkov-ran --config-file ${SEC_REPO}" <<<"$SEC_OUT" || true)" 0 \
+  "security-signals: checkov reads no configuration from the repository"
 assert_contains "$SEC_OUT" "Not installed, so not run (a coverage gap): gosec govulncheck" \
   "security-signals: an applicable scanner that is missing is listed"
 SEC_OUT=$(sec PR-7 "app.py" <<<"+token")
@@ -296,6 +299,13 @@ assert_contains "$SEC_OUT" "exit=0" "security-signals: a failing scanner does no
 printf '#!/bin/sh\nsleep 5\n' >"${SEC_BIN}/semgrep"; chmod +x "${SEC_BIN}/semgrep"
 SEC_OUT=$(DEEP_REVIEW_SIGNAL_TIMEOUT=1 sec HEAD "app.py" </dev/null)
 assert_contains "$SEC_OUT" "exit=0" "security-signals: a scanner that times out does not fail the script"
+mkdir -p "${SEC_REPO}/policy"; touch "${SEC_REPO}/.gitleaks.toml"
+SEC_OUT=$(sec HEAD "$(printf 'Dockerfile\n.gitleaks.toml')" </dev/null)
+assert_eq "$(grep -c "conftest-ran" <<<"$SEC_OUT" || true)" 0 "security-signals: repository policies do not run by default"
+assert_contains "$SEC_OUT" "DEEP_REVIEW_RUN_REPO_POLICIES=1" "security-signals: the skipped policies say how to opt in"
+assert_contains "$SEC_OUT" "edits scanner configuration: .gitleaks.toml" "security-signals: a changed scanner configuration is named"
+SEC_OUT=$(DEEP_REVIEW_RUN_REPO_POLICIES=1 sec HEAD "Dockerfile" </dev/null)
+assert_contains "$SEC_OUT" "conftest-ran test --policy ${SEC_REPO}/policy" "security-signals: the opt-in runs the policies"
 rm -rf "$SEC_REPO" "$SEC_BIN"
 
 # ─── collect-context.sh: server code inside a web app is Backend ───────────
