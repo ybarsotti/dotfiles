@@ -37,6 +37,10 @@ if [ "$OPT_IN" != 1 ]; then
   case "$SCOPE" in PR-*) exit 0 ;; esac
 fi
 REPO_DIR=$(cd "$REPO_DIR" 2>/dev/null && pwd) || exit 0
+# crapper and dryer are Python tools that run with the reviewed tree as the current folder.
+# PYTHONSAFEPATH keeps a module in that tree (crapper.py, tree_sitter/) off sys.path.
+unset PYTHONPATH PYTHONSTARTUP PYTHONHOME
+export PYTHONSAFEPATH=1
 
 # Same fallback chain as reviewer.sh: macOS ships without `timeout`.
 if command -v gtimeout >/dev/null 2>&1; then

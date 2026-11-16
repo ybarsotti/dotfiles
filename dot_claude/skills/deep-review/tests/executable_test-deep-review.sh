@@ -263,7 +263,7 @@ rm -rf "$SIG_REPO"
 
 # ─── test-signals.sh: the ub-mode gates, with stub crapper and dryer ───────
 UB_REPO=$(mktemp -d); UB_BIN=$(mktemp -d)
-printf '#!/bin/sh\nmkdir -p .metrics; echo new > .metrics/crap.edn; echo crapper-ran "$@"\n' >"${UB_BIN}/crapper"
+printf '#!/bin/sh\nmkdir -p .metrics; echo new > .metrics/crap.edn; echo crapper-ran "$@"; echo "safepath=$PYTHONSAFEPATH"\n' >"${UB_BIN}/crapper"
 printf '#!/bin/sh\nmkdir -p .metrics; echo new > .metrics/dry.edn\nprintf "DUPLICATE score=0.91\\n  app.py:1-9\\n  lib/old.py:4-12\\nDUPLICATE score=0.85\\n  lib/a.py:1-5\\n  lib/b.py:1-5\\n"\n' >"${UB_BIN}/dryer"
 chmod +x "${UB_BIN}/crapper" "${UB_BIN}/dryer"
 ub() { PATH="${UB_BIN}:/usr/bin:/bin" "$TEST_SIGNALS" "$UB_REPO" "$@"; echo "exit=$?"; }
@@ -271,6 +271,7 @@ touch "${UB_REPO}/app.py" "${UB_REPO}/README.md"
 assert_eq "$(ub HEAD README.md)" "exit=0" "test-signals: no changed source file runs no ub-mode tool"
 UB_OUT=$(ub HEAD "$(printf 'app.py\ngone.py')")
 assert_contains "$UB_OUT" "crapper-ran --no-coverage ./app.py" "test-signals: crapper runs without coverage on the changed files that exist"
+assert_contains "$UB_OUT" "safepath=1" "test-signals: the Python tools cannot import modules from the reviewed tree"
 assert_contains "$UB_OUT" "app.py:1-9" "test-signals: dryer keeps a pair that touches a changed file"
 assert_eq "$(grep -c "lib/a.py" <<<"$UB_OUT" || true)" 0 "test-signals: dryer drops a pair that touches no changed file"
 assert_eq "$([ -e "${UB_REPO}/.metrics" ] && echo left || echo removed)" "removed" \
