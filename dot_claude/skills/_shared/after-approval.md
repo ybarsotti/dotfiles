@@ -66,15 +66,17 @@ still runs as `plan-routing.md` describes ("How option C runs").
 **Under `/deep-execute`, the lane that owns the code applies every fix.** Run the
 `/deep-review` with `--no-fix --no-simplify`, so the review only reports. Send each fix to
 the owning lane with `reply.sh RUN_DIR LANE "<finding, file, line, fix>"`, gate the fix with
-`round-gate.sh`, then commit. A file that no lane owns goes to a fresh implementer agent.
+`round-gate.sh`, then commit. A file that no lane owns goes to a fresh implementer worker
+(`orca-workers.md`).
 
 ## 2. Review
 
 1. Run `/deep-review default` over the whole change. Each part had its own review; this pass
    checks how the parts fit together. Its Phase 4.5 fixes every CRITICAL, HIGH and MEDIUM finding and
    re-runs the panel, for 2 fix rounds at most.
-2. A separate agent applies the fixes. The reviewer never fixes its own finding. Under
-   `/deep-execute`, that agent is the owning lane (section 1).
+2. A separate agent applies the fixes. The reviewer never fixes its own finding. Start it as
+   `orca-workers.md` describes. Under `/deep-execute`, that agent is the owning lane
+   (section 1).
 3. Fix a MEDIUM finding when the fix is local and does not change behavior. Record every
    finding you do not fix, with the reason, under `## Open findings`.
 
@@ -112,7 +114,7 @@ Run steps 4 and 5 in parallel. They touch different things.
 ## 6. Fix and re-test
 
 1. A separate fixer agent fixes every difference from step 4 and every failure from step 5.
-   The QA agents never fix code.
+   Start it as `orca-workers.md` describes. The QA agents never fix code.
 2. Re-run only the QA agent that found the problem, on the fixed commit.
 3. Stop after 3 rounds. Report what is still open and ask the user. The chain runs unattended,
    so ask each decision as an Inbox question when the Inbox exists, else `AskUserQuestion`

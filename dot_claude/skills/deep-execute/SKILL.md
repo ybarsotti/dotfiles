@@ -109,7 +109,8 @@ the cap on its own.
 Run steps 2 to 9 of `~/.claude/skills/_shared/after-approval.md` in order, unattended, with
 its `/deep-execute` routing: every `/deep-review` runs `--no-fix --no-simplify`, and every fix
 from review or QA goes to the owning lane with `reply.sh`, then `round-gate.sh`, then a
-commit. A file that no lane owns goes to a fresh implementer. Mark the phases with
+commit. A file that no lane owns goes to a fresh implementer worker
+(`~/.claude/skills/_shared/orca-workers.md`). Mark the phases with
 `set-phase.sh RUN_DIR review|qa|delivery` as you reach steps 2, 3 and 7. Record each landed and
 rejected finding with `decision.sh` while it is still true.
 

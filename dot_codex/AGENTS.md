@@ -2,6 +2,28 @@
 
 @RTK.md
 
+# Code Intelligence
+
+Use the code-intelligence MCP servers in `~/.codex/config.toml` when they are available.
+
+## Serena
+- The `serena` MCP server starts with `--context codex --project-from-cwd`, so it activates the project of the current folder.
+- Use Serena for exact symbol lookup, references and surgical symbol edits. Prefer it to raw `grep` and whole-file reads.
+- If Serena is unavailable, continue with normal file reads. Mention the gap only when it lowers your confidence.
+
+## GitNexus
+- If the project has a `.gitnexus/` index, use the `gitnexus` MCP server for architecture, execution flows and blast radius.
+- Before you change a function, class or method in an indexed project, run GitNexus impact analysis on it. Warn before you edit when the risk is HIGH or CRITICAL.
+- If GitNexus reports a stale index, run `npx gitnexus analyze` from the project root first.
+
+## Graphify
+- If `graphify-out/GRAPH_REPORT.md` exists, read it before broad architecture questions.
+- After code changes in a project with `graphify-out/graph.json`, run `graphify update .` when practical.
+
+## Other MCP servers
+- Use the configured MCP servers before a workaround: `context7` for library docs, `obscura` for local pages, `atlassian` for Jira and Confluence, `slack`, `logfire`, `ai-memory` and `memory`.
+- Project instructions override this section when they are more specific.
+
 # graphify
 
 - **graphify** (`~/.Codex/skills/graphify/SKILL.md`) - any input to knowledge graph. Trigger: `/graphify`

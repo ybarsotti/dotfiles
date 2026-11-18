@@ -23,13 +23,14 @@ This applies when `/implement` is the first command too.
 
 1. Read the plan. Take its tasks in order. When the plan has no tasks, split the work into
    small tasks first, ordered from the foundation up.
-2. Dispatch one implementer agent per task with `superpowers:subagent-driven-development`.
-   This session reviews each task. It writes feature code only when the user asks for that.
-   Without subagents, use `superpowers:executing-plans`. Use only their per-task loop. Skip
-   their last step, `superpowers:finishing-a-development-branch`: it asks to merge, open a PR
-   or keep the branch, and waits. Sections 2 to 9 of `after-approval.md` replace it. While
-   subagents run, watch them on the schedule of `~/.claude/skills/_shared/agent-watch.md`.
-3. Invoke the `ub-mode` skill and build by it. Tell each implementer agent to invoke it too,
+2. Start one implementer worker per task, as `~/.claude/skills/_shared/orca-workers.md`
+   describes: an Orca worker when the session runs in Orca, else a subagent. This session
+   reviews each task. It writes feature code only when the user asks for that.
+   In the subagent mode, use the per-task loop of `superpowers:subagent-driven-development`,
+   or `superpowers:executing-plans` without subagents. Skip their last step,
+   `superpowers:finishing-a-development-branch`: it asks to merge, open a PR or keep the
+   branch, and waits. Sections 2 to 9 of `after-approval.md` replace it.
+3. Invoke the `ub-mode` skill and build by it. Tell each implementer worker to invoke it too,
    or to read `~/.claude/skills/ub-mode/SKILL.md`. Before each commit, run its gates on the
    changed files: `crapper --changed --threshold 10`, `dryer --changed --threshold 0.8`, and
    `mutator --max-workers 2 <file>` for each changed source file. Build each task with
@@ -37,7 +38,8 @@ This applies when `/implement` is the first command too.
    the outermost boundaries: the network, a third-party API, the clock.
 4. For a bug or a regression, use `superpowers:systematic-debugging` before you write the fix.
 5. Record each departure from the plan as a `D-NNN` row under the plan's `## Deviations`.
-6. After each task, run the part review of `after-approval.md` section 1. Then commit.
+6. After each task, read its diff and run its tests and the gates of step 3. Then commit.
+   The panel review runs once, in section 2 of `after-approval.md`.
 
 ## Test
 

@@ -184,7 +184,7 @@ startup_timeout_sec = 30
 
 [mcp_servers.serena]
 command = "uvx"
-args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--project-from-cwd"]
+args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "codex", "--project-from-cwd"]
 
 [mcp_servers.notetaker]
 command = "/Users/barsotti/.local/bin/uv"
