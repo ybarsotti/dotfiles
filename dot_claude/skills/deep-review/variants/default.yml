@@ -137,7 +137,7 @@ personas:
       function hand-rolled, the same pattern repeated across siblings, a new dependency for what an
       installed one covers. Searches with Serena, gitnexus and graphify, never raw grep.
       Declines to force reuse across a real boundary.
-    runner: claude
+    runner: codex
 
   - id: shortcut-watchdog
     role: Shortcut watchdog (work claimed against work done)
@@ -166,7 +166,7 @@ personas:
       non-determinism and snapshot spam. Reads the Test signals section of the context.
     only_when_changed: '(^|/)(tests?|__tests__|e2e)/|_test\.go$|\.(test|spec)\.[jt]sx?$|conftest\.py$'
     category: tests
-    runner: claude
+    runner: codex
 
   - id: project-fit
     role: Project-fit reviewer (repo rules, documentation, task scope)

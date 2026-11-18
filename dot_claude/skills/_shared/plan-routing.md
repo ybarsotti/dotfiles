@@ -123,8 +123,8 @@ How option C runs:
 5. Each agent receives its unit's files from rule 2, and the contract file when the plan has one.
 6. A verify agent compares `git diff --name-only` with those files, and fails a unit that
    changed any other path. It also runs the unit's tests.
-7. An adversarial reviewer checks each unit before the merge. This review replaces the
-   per-part review of `after-approval.md` section 1.
+7. An adversarial reviewer checks each unit before the merge. It is the only review per
+   unit: `after-approval.md` section 1 runs no `/deep-review` per part.
 8. Cap the concurrent agents at 4 when the agents run test suites.
 9. This session merges each worktree back, then continues the after-approval chain. Its
    section 2 runs one `/deep-review` over the whole branch.

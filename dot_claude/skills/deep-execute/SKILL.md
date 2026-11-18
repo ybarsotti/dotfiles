@@ -1,6 +1,6 @@
 ---
 name: deep-execute
-description: Runs an approved deep-plan parallel plan as lane workers in one shared git worktree. Use when invoked via /deep-execute, or when the user has an approved plan whose Execution shape declares disjoint lanes and an API contract and wants it built by parallel agents instead of one session. Coordinates fan-out, the event/reply protocol, round gating, contract drift and escalation, then runs the shared after-approval chain with fixes routed through the owning lane — it does not write plans (deep-plan) or review code itself (deep-review, invoked report-only after each round and once over the whole run).
+description: Runs an approved deep-plan parallel plan as lane workers in one shared git worktree. Use when invoked via /deep-execute, or when the user has an approved plan whose Execution shape declares disjoint lanes and an API contract and wants it built by parallel agents instead of one session. Coordinates fan-out, the event/reply protocol, round gating, contract drift and escalation, then runs the shared after-approval chain with fixes routed through the owning lane — it does not write plans (deep-plan) or review code itself (deep-review, invoked report-only once over the whole run).
 ---
 
 # deep-execute
@@ -96,9 +96,8 @@ owning lane with `reply.sh`, rerun the gate — never advance the round on a fai
 `warn` items never block, but read each attribution warning before you commit. After 3 failed
 gates of one round, the gate refuses the round: `AskUserQuestion`.
 
-When the round passes, commit it (`git add -A && git commit`). Then review it report-only:
-`Skill(skill="deep-review", args="default --scope <previous round commit>..HEAD --no-fix
---no-simplify")`. Route each CRITICAL, HIGH and MEDIUM fix to the owning lane, gate, commit.
+When the round passes, commit it (`git add -A && git commit`). Do not run `/deep-review` on
+the round: the panel reviews the whole run once, in Phase 4.
 Round 1 gets orchestrator review before anything reaches the human. Then bump
 `manifest.json`'s `round` and start the next round, or go to Phase 4.
 

@@ -56,16 +56,14 @@ run option B.
 The session that planned orchestrates. It does not write feature code. Build with strict
 TDD. Record each departure from the plan as a `D-NNN` row under the plan's `## Deviations`.
 
-**Review each part when it is done.** A part is a task in option B, a round in option A, a
-stage, or a slice in option D. In option C, the workflow's adversarial reviewer replaces this
-per-part review (`plan-routing.md`, "How option C runs"). Before the next part starts, run
-`/deep-review default --scope <commit before the part>..HEAD`. Fix every CRITICAL, HIGH and
-MEDIUM finding through the agent that wrote the part, then commit. The next part builds on reviewed
-code.
+**Review the whole change once, in step 2.** Do not run `/deep-review` after each part (a task
+in option B, a round in option A, a stage, or a slice in option D). Each part passes its own
+tests and gates before the next part starts. In option C, the workflow's adversarial reviewer
+still runs as `plan-routing.md` describes ("How option C runs").
 
 `/deep-execute` runs steps 2 to 9 itself. For options B, C and D, run them from this session.
 
-**Under `/deep-execute`, the lane that owns the code applies every fix.** Run each
+**Under `/deep-execute`, the lane that owns the code applies every fix.** Run the
 `/deep-review` with `--no-fix --no-simplify`, so the review only reports. Send each fix to
 the owning lane with `reply.sh RUN_DIR LANE "<finding, file, line, fix>"`, gate the fix with
 `round-gate.sh`, then commit. A file that no lane owns goes to a fresh implementer agent.
@@ -120,7 +118,8 @@ Run steps 4 and 5 in parallel. They touch different things.
    so ask each decision as an Inbox question when the Inbox exists, else `AskUserQuestion`
    (`~/.claude/skills/_shared/inbox.md`).
 
-When a fix changes code that the review saw, run `/deep-review` once more on the fix.
+When a fix changes code that the review saw, run `/deep-review default --scope <commit before
+the fixes>..HEAD` once on the fixes only. Do not review the whole change again.
 
 ## 7. Open the PR
 

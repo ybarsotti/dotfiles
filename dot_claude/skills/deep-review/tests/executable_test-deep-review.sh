@@ -204,15 +204,15 @@ assert_contains "$LENS_OUT" "test-quality                   no changed file matc
   "dispatch: test-quality is skipped when no test file changes"
 echo b >>"${LENS_REPO}/web/cart.test.ts"
 LENS_OUT=$(cd "$LENS_REPO" && "$DISPATCH" default --dry-run --scope HEAD 2>/dev/null)
-assert_contains "$LENS_OUT" "test-quality                   → claude" \
-  "dispatch: test-quality runs on Claude when a test file changes"
+assert_contains "$LENS_OUT" "test-quality                   → codex" \
+  "dispatch: test-quality runs on Codex when a test file changes"
 rm -rf "$LENS_REPO"
 
-# ─── test-quality: registered on Claude, owns the mock-boundary rule ───────
+# ─── test-quality: registered on Codex, owns the mock-boundary rule ────────
 PERSONAS_DIR="${ROOT}/dot_claude/skills/deep-review/personas"
 DEFAULT_YML="${ROOT}/dot_claude/skills/deep-review/variants/default.yml"
-assert_eq "$(yq -r '.personas[] | select(.id == "test-quality") | .runner' "$DEFAULT_YML")" claude \
-  "default.yml: test-quality is registered with runner claude"
+assert_eq "$(yq -r '.personas[] | select(.id == "test-quality") | .runner' "$DEFAULT_YML")" codex \
+  "default.yml: test-quality is registered with runner codex"
 MOCK_HEADING="Mock only the outermost call to an external service"
 assert_eq "$(grep -c "$MOCK_HEADING" "${PERSONAS_DIR}/correctness.md" || true)" 0 \
   "correctness.md: the mock-boundary block moved out"
