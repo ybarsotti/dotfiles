@@ -29,7 +29,7 @@ execution half. Invoke each planning-phase skill via the Skill tool at its mappe
 | 4 | `plannotator annotate --gate` | Phase 3 (annotate) | deep-plan |
 | — | — | **handoff** ↓ | **`/deep-execute` or `implement`** |
 | 4 | `using-git-worktrees` | execution | executor |
-| 5 | `subagent-driven-development` / `executing-plans` | execution | executor |
+| 5 | Orca workers (`_shared/orca-workers.md`); `subagent-driven-development` outside Orca | execution | executor |
 | 6 | `test-driven-development` | execution (per task) | executor |
 | 6b| `systematic-debugging` | execution (bug/regression tasks) | executor |
 | 6c| `dispatching-parallel-agents` | execution (fallback for parallel slices) | executor |
@@ -183,7 +183,9 @@ planners draft. Put its `Canvas:` and `Design system:` URLs in the UI design pas
 ~/.claude/skills/deep-plan/scripts/dispatch-planners.sh "$RUN_DIR" "$TASK_DESC"
 ```
 
-The dispatcher spawns in parallel:
+The dispatcher spawns in parallel. The planners and the plan reviewers run headless
+(`claude -p`, `codex exec`), not in Orca: each one writes one file and exits, and the scripts
+read the verdicts. Orca workers start after the approval, in the build chain.
 - `claude -p` (Opus) loaded with `personas/planner-opus.md`
 - `codex exec` (latest) loaded with `personas/planner-codex.md` *(skipped if `--no-codex`)*
 
@@ -349,8 +351,9 @@ The options depend on the harness: Claude Code offers all four, Codex offers A a
 - **A — `/deep-execute "$PLAN"`.** Parallel lane workers in Orca terminals, one shared
   worktree, round gating, contract drift handling, one full `/deep-review`, QA, run report,
   PR. Most machinery, most parallelism; needs disjoint lanes and a real contract.
-- **B — serial** via the `implement` skill (`superpowers:subagent-driven-development`): one
-  implementer agent per task, in order, strict TDD per task. This session reviews each task.
+- **B — serial** via the `implement` skill: one implementer worker per task, in order, strict
+  TDD per task. Each worker runs in its own Orca pane (`_shared/orca-workers.md`); outside Orca
+  it is a subagent. This session reviews each task.
 - **C — Claude `Workflow` (ultracode), Claude Code only.** Parallel worktrees with adversarial review and no
   lane terminals, but no human input during a run. Needs the user's opt-in; test in `plan-routing.md`.
 - **D — Codex-only implementer, Claude Code only.** `codex exec -m gpt-6.1-terra` writes the code; this session orchestrates,

@@ -29,7 +29,8 @@ Start each agent that runs beside this session as an Orca worker: the QA agents,
 orchestration`, then start the worker:
 
 ```bash
-orca orchestration worker-start --worktree current --agent claude --model sonnet --json \
+WT="id:$(orca worktree current --json | jq -r '.result.worktree.id')"
+orca orchestration worker-start --worktree "$WT" --agent claude --model sonnet --json \
   --spec "Read ~/.claude/agents/qa-ui.md and follow it. <the inputs it lists>"
 ```
 
@@ -40,7 +41,7 @@ Opus, Sol or Astra. The build and the plan keep their own models.
 - Start every independent worker, then end your turn. Orca wakes you with each `worker_done`.
 - Add `--keep-open` when the user will talk to the worker, as with the `ui-designer`.
 - A worker that must run without permission prompts starts in its own terminal:
-  `orca terminal create --worktree current --command "claude --dangerously-skip-permissions" --json`,
+  `orca terminal create --worktree "$WT" --command "claude --dangerously-skip-permissions" --json`,
   then `orca orchestration worker-start --task <task_id> --terminal <handle>`.
 - Outside an Orca workspace (`orca worktree current` fails), use the `Agent` tool with the same
   agent name. Never use `claude -p` for an agent that needs the `Artifact` tool.

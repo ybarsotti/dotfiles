@@ -15,10 +15,13 @@ for a file that no lane owns. `/deep-execute` lanes already run in Orca terminal
 Use Orca mode when all three checks pass:
 
 1. `command -v orca` finds the CLI.
-2. `orca status --json` reports `runtimeReachable: true`.
-3. `orca worktree current --json` resolves the current folder to an Orca worktree.
+2. `orca status --json | jq -e '.result.runtime.reachable == true'` exits 0.
+3. `orca worktree current --json | jq -e '.ok == true'` exits 0: the current folder is an
+   Orca worktree.
 
-If one check fails, use the subagent mode (section 3). Say which check failed, in one line.
+Print the result before the first worker, in one line: `Workers: orca` or
+`Workers: subagent (<check> failed: <reason>)`. If one check fails, use the subagent mode
+(section 3). Never use the subagent mode when all three checks pass.
 
 ## 2. Orca mode
 
@@ -31,9 +34,14 @@ If one check fails, use the subagent mode (section 3). Say which check failed, i
    - the code rules: read `~/.claude/skills/_shared/implementer-rules.md`, the Core section
      plus Backend or UI for the files of the task;
    - the evidence that proves it is done: the test command and its output, the gate output.
-3. Start the worker:
-   `orca orchestration worker-start --spec-file <spec> --worktree current --agent claude
-   --model sonnet --effort medium --task-title "<task>" --json`
+3. Start the worker. Pass the worktree by its id: `--worktree current` names the worktree of the
+   Orca terminal that runs this session, which can differ from the folder of the task. It then
+   fails with `selector_not_found`. The id from `orca worktree current` follows the folder.
+   ```bash
+   WT="id:$(orca worktree current --json | jq -r '.result.worktree.id')"
+   orca orchestration worker-start --spec-file <spec> --worktree "$WT" --agent claude \
+     --model sonnet --effort medium --task-title "<task>" --json
+   ```
 4. Run one worker at a time in the shared worktree. Start workers in parallel only for tasks
    whose file sets do not overlap.
 5. End the turn. Orca wakes this session when a worker sends `worker_done`, a question or an
@@ -42,6 +50,8 @@ If one check fails, use the subagent mode (section 3). Say which check failed, i
 6. Answer a question with `orca orchestration reply`. Send a fix to the worker that wrote the
    code with `orca orchestration send --to dispatch:<dispatch_id>`.
 7. After `worker_done`, read the diff, run the task's tests and gates, then commit.
+8. After the commit, close the worker:
+   `orca orchestration worker-release --dispatch <dispatch_id> --json`.
 
 Never poll a worker, and never type into its terminal. A worker is Claude by default. Use
 `--agent codex --model gpt-6.1-terra` only when the user or the plan names Codex for that work.

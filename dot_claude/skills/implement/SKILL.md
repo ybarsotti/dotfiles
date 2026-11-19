@@ -24,10 +24,11 @@ This applies when `/implement` is the first command too.
 1. Read the plan. Take its tasks in order. When the plan has no tasks, split the work into
    small tasks first, ordered from the foundation up.
 2. Start one implementer worker per task, as `~/.claude/skills/_shared/orca-workers.md`
-   describes: an Orca worker when the session runs in Orca, else a subagent. This session
-   reviews each task. It writes feature code only when the user asks for that.
-   In the subagent mode, use the per-task loop of `superpowers:subagent-driven-development`,
-   or `superpowers:executing-plans` without subagents. Skip their last step,
+   describes. Run its three checks before the first task, and print the mode line it names.
+   In Orca, each task runs as an Orca worker in its own pane. This session reviews each task.
+   It writes feature code only when the user asks for that.
+   In the subagent mode, use the per-task loop of `superpowers:subagent-driven-development`.
+   Use `superpowers:executing-plans` only when the harness has no subagent tool. Skip their last step,
    `superpowers:finishing-a-development-branch`: it asks to merge, open a PR or keep the
    branch, and waits. Sections 2 to 9 of `after-approval.md` replace it.
 3. Invoke the `ub-mode` skill and build by it. Tell each implementer worker to invoke it too,
