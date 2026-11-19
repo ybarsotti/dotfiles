@@ -118,6 +118,17 @@ done. Deliver the polished version first. Do not wait for the user to ask.
   before the PR. This applies also when you orchestrate agents without a planning skill. The
   visual pass of the builder does not replace it, and `/pr` refuses to open without it.
 
+# Agent Models
+
+Subagents run on Sonnet by default (`CLAUDE_CODE_SUBAGENT_MODEL`). A `model` argument on the
+`Agent` tool overrides that default, so set it with care.
+
+- Pass `model: "opus"` only to an agent that writes or reviews a plan, a design or an
+  architecture decision.
+- Never pass `model: "opus"` to an agent that writes code, fixes code, rebases, runs QA,
+  reviews code or reads data. Omit `model` for these agents.
+- Give an agent the parts of a long file that it needs, not the whole file.
+
 # Pull Requests
 
 Open a pull request only with `/pr` (the `pr-description` skill). Never run `gh pr create` by
