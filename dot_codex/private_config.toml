@@ -18,6 +18,9 @@ trust_level = "trusted"
 [projects."/Users/barsotti/Developer/Open-Source/zorch"]
 trust_level = "trusted"
 
+[projects."/Users/barsotti/Developer/Personal/diario-velas"]
+trust_level = "trusted"
+
 [projects."/Users/barsotti/Developer/Lab/paperclip-sandbox"]
 trust_level = "trusted"
 
@@ -193,6 +196,10 @@ args = ["--directory", "/Users/barsotti/Developer/Pers/notetaker", "run", "notet
 [mcp_servers.ai-memory]
 url = "http://127.0.0.1:49374/mcp"
 default_tools_approval_mode = "approve"
+
+[mcp_servers.aws-mcp]
+command = "uvx"
+args = ["mcp-proxy-for-aws@latest", "https://aws-mcp.us-east-1.api.aws/mcp", "--metadata", "INSTALL_SOURCE=aws-cli"]
 
 [hooks.state."omo@sisyphuslabs:hooks/session-start-loading-project-rules.json:session_start:0:0"]
 trusted_hash = "sha256:7110bdc6b474f491ba130385898460a217f517315c8a159e4a26c1861597e4b9"
