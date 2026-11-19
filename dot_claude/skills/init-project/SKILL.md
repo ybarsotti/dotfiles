@@ -1,6 +1,6 @@
 ---
 name: init-project
-description: Create, extend or audit a monorepo with the AI monorepo template. Use when invoked via /init-project, or when the user asks to start a new project from the template, to add an app (react-tanstack, django-ninja, fastapi, go, hono-trpc, or another stack) to a project made from it, or to audit an existing project against the template's app contract. New and add modes render with Copier and loop until conformance, check and the containers pass, then set up releases, telemetry, the code index and the commit. Audit mode writes a report and changes nothing else until the user accepts an adopt plan.
+description: Use when invoked via /init-project, or when the user wants to start a project from the AI monorepo template, add an app (react-tanstack, django-ninja, fastapi, go, hono-trpc) to one, or audit a project against it. Audit mode writes only a report.
 ---
 
 # init-project

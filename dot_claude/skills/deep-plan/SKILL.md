@@ -1,6 +1,6 @@
 ---
 name: deep-plan
-description: Multi-agent deep-planning pipeline with ticket/Slack context, requirements traceability, user journey, data model and product-design handoff. Use when invoked via /deep-plan, or when the user wants a deeply reviewed plan before code for a non-trivial feature, refactor or architecture change. Parallel Opus + Codex planners and five reviewers converge before Plannotator approval. After approval it builds, reviews, runs QA, opens the PR and delivers an HTML report unless the user said to stop at the plan.
+description: Use when invoked via /deep-plan, or for a large or risky change (business rules, permissions, migrations, integrations) that needs a deeply reviewed plan before code. Builds and opens the PR after approval. Small or medium change, use simple-plan. Run an approved parallel plan, use deep-execute.
 ---
 
 # deep-plan

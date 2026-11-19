@@ -1,6 +1,6 @@
 ---
 name: qa-test-plan
-description: Plan and execute evidence-backed manual QA for user-facing changes. Use via /qa-plan before implementation ("what should QA check", "write the test plan", "QA plan for this feature"), /qa-execute after review on a frozen commit ("run the QA plan", "test this against staging", "produce QA evidence for the PR"), or /qa-test-plan for both phases. Produces a validated qa-plan.yaml, human Markdown, browser-recorded scenario evidence, annotated screenshots, WebVTT-captioned videos, structured results.json, and an HTML report tied to the tested commit.
+description: Use via /qa-plan before implementation (write the QA test plan), /qa-execute after review on a frozen commit (run the plan, produce QA evidence for the PR), or /qa-test-plan for both. Produces qa-plan.yaml, videos, screenshots and an HTML report.
 ---
 
 # QA test plan

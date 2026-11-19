@@ -1,6 +1,6 @@
 ---
 name: simplify
-description: Light cleanup pass on code that was just written — dead code, guard clauses, nesting, obvious duplicates, unclear names. Use when invoked via /simplify, when deep-review runs its Phase 5 cleanup, or when the user asks to tidy or simplify a change without restructuring it. For code smells, architecture or DRY across a codebase, use /refactor instead.
+description: Use when invoked via /simplify, or when the user asks to tidy code just written (dead code, nesting, duplicates, unclear names) without restructuring. For architecture or codebase-wide smells use /refactor.
 ---
 
 # Simplify - Quick Code Cleanup

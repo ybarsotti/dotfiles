@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Single-session executor for an approved plan, a PRD or a set of issues. Use when the plan routing picks option B (a serial plan, one lane, or no declared execution shape), when invoked via /implement, or when the user asks to implement, build or execute an approved plan in this session. Builds task by task under strict TDD, runs the narrow tests often and the full suite once, commits to the current branch, then hands off to the shared after-approval chain for review, QA and the PR.
+description: Use when invoked via /implement, or when the user asks to build an approved serial plan, PRD or issue set in this session. Builds under strict TDD, commits, then runs the shared after-approval chain (review, QA, PR). For a parallel plan use deep-execute.
 ---
 
 # implement

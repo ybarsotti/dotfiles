@@ -1,6 +1,6 @@
 ---
 name: workflow-finish
-description: Write the finish artifact of a workflow task in a repository that has `.workflow/config.json`, and mark the task ready to review. Use before `/pr` in such a repository, after a fast task is implemented and tested, or after `workflow-post-implementation`. In fast mode it records the rules, tests, correctness and simplicity checks in `workflow.md`; in standard mode it writes `finish.md`. Resolves pending decisions and loops on the verifier until it passes.
+description: Use before /pr in a repository with `.workflow/config.json`, after a fast task is built and tested or after workflow-post-implementation. Writes the checks into `workflow.md` (fast) or `finish.md` (standard). Last stage, before the PR.
 ---
 
 # workflow-finish

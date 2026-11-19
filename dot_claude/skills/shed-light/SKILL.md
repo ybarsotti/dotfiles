@@ -1,6 +1,6 @@
 ---
 name: shed-light
-description: Use when someone must decide whether an implementation is worth its upkeep — a plan that adds infrastructure, a PR that grew machinery, or a question about over-engineering, hidden work, or maintenance burden. Produces an inventory of what the change asks the team to own, ranked by complexity, with a separate maintenance estimate and the external work each piece creates.
+description: Use when someone must decide whether an implementation is worth its upkeep, such as a plan that adds infrastructure, a PR that grew machinery, or a question about over-engineering or maintenance burden. Lists what the team must own, ranked by complexity.
 ---
 
 # Shed Light

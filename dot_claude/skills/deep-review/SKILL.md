@@ -1,6 +1,6 @@
 ---
 name: deep-review
-description: Multi-agent peer review — runs N reviewer personas in parallel (Claude + Codex headless), aggregates findings into a consolidated report. Use when invoked via /deep-review slash command, or when the user asks for "peer review", "multi-perspective review", "panel review", "adversarial review", or wants several agents to look at the same diff with different lenses.
+description: Use when invoked via /deep-review, or when the user asks for a peer, panel, multi-perspective or adversarial review of a diff. Runs reviewer personas in parallel and writes one consolidated report.
 ---
 
 # Review Panel

@@ -1,6 +1,6 @@
 ---
 name: workflow-mode
-description: Choose the workflow mode (fast or standard) of a task in a repository that has `.workflow/config.json`, and write the task's `workflow.md`. Use before the first code of a task in such a repository, when another workflow stage finds no `workflow.md`, or when the user asks which mode a task needs. Recommends a mode with the reason, lets the user confirm it, and records the decision.
+description: Use before the first code of a task in a repository with `.workflow/config.json`, or when asked which mode a task needs. Recommends fast or standard, lets the user confirm, and writes `workflow.md`. Stage 1, before workflow-post-plan, workflow-post-implementation and workflow-finish.
 ---
 
 # workflow-mode

@@ -1,6 +1,6 @@
 ---
 name: annotated-screenshots
-description: Produce annotated feature screenshots for a stakeholder, a PR, or a ticket. Captures the live app or a component rendered with fixture data at 2x through agent-browser, lists element boxes, then draws highlight boxes, numbered callouts with leader lines, and a caption banner that says whether the image is the live app or a fixture render. Use when the user asks for screenshots of a feature, annotated or highlighted screenshots, screenshots "with numbers", a visual walkthrough as images, or before/after images of a UI change. For a narrated demo video, use video-demo instead. For QA evidence tied to a test plan, use qa-test-plan.
+description: Use when the user asks for annotated or highlighted screenshots, numbered callouts, or before/after images of a UI change. Captures the live app or a fixture render and adds boxes and captions. For video use video-demo. For QA evidence use qa-test-plan.
 ---
 
 # Annotated Screenshots

@@ -1,6 +1,6 @@
 ---
 name: address-pr-comments
-description: Fix the valid review comments on an open pull request and nothing else. Use when a review requests changes, when a new actionable comment arrives during the pr-description watch, or when the user asks to address, answer or resolve PR comments. Treats each comment as a claim to verify, fixes only valid in-scope ones, replies in every thread, resolves the addressed threads and reruns the tests. Not for a first review of a PR.
+description: Use when a PR review requests changes, a new actionable comment arrives during the PR watch, or the user asks to address, answer or resolve PR comments. Fixes only valid in-scope comments, replies in each thread, reruns tests. Not for a first review.
 ---
 
 # Address PR comments

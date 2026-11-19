@@ -1,6 +1,6 @@
 ---
 name: simple-plan
-description: Lean planning pipeline for a small or medium change. Use when invoked via /simple-plan, or when the user wants a short reviewed plan that writes the least code possible, follows the project's own patterns, types everything strictly, and validates API input. Produces one plan with a problem statement, ticket requirements and their coverage, an approach, a work-size estimate, conditional diagrams, an edge-case decision table, a TDD test list, and QA validation steps. After approval it builds, reviews, runs QA, opens the PR and delivers an HTML report unless the user said to stop at the plan.
+description: Use when invoked via /simple-plan, or for a small or medium change (one module, no new contract) that needs a short reviewed plan with the least code. Builds and opens the PR after approval. For large or risky work use deep-plan.
 ---
 
 # simple-plan
@@ -76,7 +76,8 @@ path is an assumption, and you must mark it **unknown**.
 
 The brief now says how large the change really is. Recommend `simple-plan` or `/deep-plan`
 with the criteria of `~/.claude/skills/_shared/plan-routing.md`, and follow the question rules
-there. Record the exchange in the plan's front matter. When the user picks `/deep-plan`, stop
+there. Record the exchange in the plan's front matter. When the caller already asked it, for
+example `jira-workflow`, do not ask again: record the user's answer from that exchange. When the user picks `/deep-plan`, stop
 this run and say so; do not plan the task twice.
 
 ## Phase 1 — Grill the plan

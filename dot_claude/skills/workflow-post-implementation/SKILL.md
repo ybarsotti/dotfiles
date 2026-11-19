@@ -1,6 +1,6 @@
 ---
 name: workflow-post-implementation
-description: Write the post-implementation artifact of a standard workflow task in a repository that has `.workflow/config.json`. Use after the build of an approved plan, when the build chain hands over its deep-review and QA results, or when the user asks to record the implementation review. Records the tests, runtime, correctness, simplicity and repo-rules checks (reusing earlier review results), writes `post-implementation.md`, and loops on the verifier until it passes.
+description: Use after the build, with review and QA results in hand, in a standard-mode task of a repository with `.workflow/config.json`. Writes `post-implementation.md` and loops on the verifier. Stage 3, after the code exists and before workflow-finish.
 ---
 
 # workflow-post-implementation

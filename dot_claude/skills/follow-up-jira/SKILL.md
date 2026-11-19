@@ -1,18 +1,6 @@
 ---
 name: follow-up-jira
-description: >
-  Use when the user hands off a Jira ticket that is fixed and deployed, and now
-  wants the reporter's verdict handled without watching it themselves. Covers any
-  standing watch on a ticket's comments — poll it, background-monitor it, follow
-  up until validated, check whether the reporter replied — and any reaction to
-  the verdict that arrives: close/resolve the ticket on approval, or on rejection
-  investigate the reported symptom, fix the root cause, test, update the pull
-  request, and move the ticket back to investigation. Trigger on requests to
-  follow up, watch, monitor, poll, check back on, or track a ticket key until the
-  reporter approves or rejects, on reports that the reporter says it is still
-  broken, and right after the user tells a reporter something is ready to
-  validate. Do not use to read, summarize, or draft replies on a ticket, or to
-  start fresh work on one.
+description: Use when the user hands off a fixed and deployed Jira ticket and wants it watched, followed up or polled until the reporter approves or rejects. Closes it on approval. On rejection it investigates, fixes, updates the PR and moves the ticket back. Not for new work (use jira-workflow).
 ---
 
 # Follow up a Jira ticket until the reporter confirms it

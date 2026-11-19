@@ -1,6 +1,6 @@
 ---
 name: workflow-post-plan
-description: Write the post-plan artifact of a standard workflow task in a repository that has `.workflow/config.json`. Use after the user approves a plan, when `simple-plan` or `deep-plan` hands over its review results, or when the user asks to record the plan review. Copies the plan, records the correctness, simplicity and repo-rules checks (reusing earlier review results), writes `post-plan.md` and `decisions.md`, and loops on the verifier until it passes.
+description: Use right after the user approves a plan in a standard-mode task of a repository with `.workflow/config.json`. Writes `post-plan.md` and `decisions.md` and loops on the verifier. Stage 2, before any code is built.
 ---
 
 # workflow-post-plan

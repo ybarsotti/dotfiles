@@ -1,6 +1,6 @@
 ---
 name: pr-description
-description: Generate and review a pull-request title/body, then open or update assigned PR. Use for /pr, PR-description/opening requests, or deep-plan/jira-workflow handoff. Produces Conventional Commit title plus objective, ticket, Slack threads, reconciled requirements matrix, Mermaid, key decisions, verification and — when the diff touches permissions — a role-by-role access table, with no changed-file inventory. Claude Sonnet writes; Codex reviews.
+description: Use for /pr, or when the user asks to write, open or update a pull request, or on handoff from deep-plan, simple-plan or jira-workflow. Writes a Conventional Commit title and a body with ticket, requirements matrix, Mermaid and verification, then opens the PR assigned to the user.
 ---
 
 # pr-description

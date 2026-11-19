@@ -1,6 +1,6 @@
 ---
 name: deep-execute
-description: Runs an approved deep-plan parallel plan as lane workers in one shared git worktree. Use when invoked via /deep-execute, or when the user has an approved plan whose Execution shape declares disjoint lanes and an API contract and wants it built by parallel agents instead of one session. Coordinates fan-out, the event/reply protocol, round gating, contract drift and escalation, then runs the shared after-approval chain with fixes routed through the owning lane — it does not write plans (deep-plan) or review code itself (deep-review, invoked report-only once over the whole run).
+description: Use when invoked via /deep-execute, or when an approved deep-plan plan has a parallel execution shape with disjoint lanes and the user wants parallel agents to build it. Does not write plans (deep-plan) or run serial plans (implement).
 ---
 
 # deep-execute

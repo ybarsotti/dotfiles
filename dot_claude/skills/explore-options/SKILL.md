@@ -1,6 +1,6 @@
 ---
 name: explore-options
-description: Explores many options for an open, high-stakes decision before it picks one. Use when a decision has several viable answers and the obvious answer is expensive if wrong — architecture, a public API or SDK surface, a schema, the name of a real product, a fuzzy bug with no known root cause — or when the user types /explore-options or asks to brainstorm widely. Runs isolated parallel generators under different frames, then a separate critic that scores, clusters and flags traps, then deepens the best three. Skip it for syntax, lookups, a bug with a known root cause, or a request phrased as "quick", "standard", "canonical" or "textbook".
+description: Use when invoked via /explore-options, or when the user wants wide brainstorming on a decision with several viable answers that is costly if wrong (architecture, public API, schema, product name, bug with no known root cause). Skip for lookups or a quick answer.
 argument-hint: "[the open decision to explore]"
 ---
 

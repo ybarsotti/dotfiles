@@ -1,6 +1,6 @@
 ---
 name: video-demo
-description: "Make a short narrated demo video of a feature: a brief introduction, then the real flow on screen with the real cursor and clicks, camera moves and focus boxes timed to the spoken word, and captions synced word by word. Built on a Remotion template driven by one narration.json, with free edge-tts voices (English and pt-BR). Use when the user asks for a demo video, a video of a feature or a flow, a walkthrough video, a screen recording with narration, or a video for a stakeholder or a customer. Prefer it to guided-tour-video when the video is an edited, narrated demo for a stakeholder or a customer, not a quick evidence recording for a ticket or a pull request. For still images, use annotated-screenshots."
+description: Use when the user asks for a narrated demo or walkthrough video of a feature for a stakeholder or customer. Records the real flow with word-synced captions and edge-tts voices (English, pt-BR). For quick PR evidence use guided-tour-video. For stills use annotated-screenshots.
 ---
 
 # Video Demo

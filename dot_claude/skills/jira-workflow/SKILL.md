@@ -1,24 +1,6 @@
 ---
 name: jira-workflow
-description: |
-  MANDATORY skill whenever a message contains a Jira ticket code — even if that is the
-  ENTIRE message. If the user sends only "PROJ-2982" (or any `[A-Z]{2,}-\d+` pattern —
-  PROJ-123, ABC-456, PLAT-789, XY-42, etc.), treat it as an implicit "start work on
-  this ticket" and invoke this skill immediately. Do NOT fall back to answering without
-  the skill just because the message is short or feels ambiguous; a bare ticket code is
-  always a request to begin the workflow. Also triggers on: pasted Jira URLs
-  (`atlassian.net/browse/<CODE>`), phrases like "jira ticket", "this is related to
-  jira", "start on this", "let's pick up", "work on the ticket", or any mention of a
-  ticket the user wants to work on. The workflow covers: reading + clarifying the
-  ticket, naming the Orca terminal tab, creating a branch (main repo or new worktree),
-  assigning the ticket to the user and moving it to in progress, then delegating the deep
-  planning to /deep-plan (grilling + domain-modeling → brainstorming → writing-plans → 5-persona
-  review incl. ticket-matcher → plannotator → approved plan), which then builds it through the
-  shared after-approval chain — /deep-execute for an approved `Mode: parallel` plan with 2+
-  lanes, the implement skill under strict TDD otherwise, /deep-review, the qa-ui and
-  qa-business agents when flows or screens change, the PR via /pr (conventional title,
-  Mermaid, no file list, assigned to the user), and the PR watch for review feedback and CI
-  until it merges or closes — plus the Jira steps: ticket comment and notifications.
+description: Use when a message contains a Jira ticket key such as PROJ-123 (even alone) or a pasted Jira URL (atlassian.net/browse/KEY), which means start work on the ticket. Also for start on this, let's pick up. Assigns it to you, moves it In Progress, plans with simple-plan or deep-plan (you confirm), builds, opens the PR, and keeps Jira in step to Done. Not for watching a fixed ticket (use follow-up-jira).
 ---
 
 # Jira Ticket Workflow
@@ -54,14 +36,15 @@ items.
 - [ ] **Worktree (if chosen)**: create from `origin/main` at `.claude/worktrees/<slug>`
 - [ ] **Branch**: `<type>/<CODE>-<kebab-description>` (see `.claude/rules/branching.md`)
 - [ ] **Ticket start**: assign the ticket to you and move it to in progress (§1.6)
-- [ ] **Deep planning** — run `/deep-plan "<CODE>" --ticket <CODE>`: grilling + domain-modeling →
-      brainstorming → writing-plans → 5-persona review (incl. **ticket-matcher**, which bats
-      requirements matrix point-by-point against ticket, preserving linked Slack threads) →
-      plannotator → approved plan
-- [ ] **Build to PR** — deep-plan runs `~/.claude/skills/_shared/after-approval.md` once;
-      add the Jira steps of §3
-- [ ] **Jira comment + notifications** (§3)
-- [ ] **PR watch** — `/pr` Phase 5 owns it; add the Jira steps of §4
+- [ ] **Pick the planner** (§2): read `~/.claude/skills/_shared/plan-routing.md`, recommend
+      `/simple-plan` or `/deep-plan` with a one-sentence reason, and wait for the user to confirm
+- [ ] **Plan**: run the chosen planner with `--ticket <CODE>` until the plan is approved
+- [ ] **Build to PR**: the planner runs `~/.claude/skills/_shared/after-approval.md` once. Add
+      the Jira steps of §3
+- [ ] **PR opened** (after-approval section 7): move the ticket to the review status, report the
+      transition name chosen, and comment the PR link (§3)
+- [ ] **PR merged** (after-approval section 9, the PR watch): move the ticket to Done or the
+      project equivalent, and comment (§4)
 
 ---
 
@@ -154,32 +137,39 @@ Branch-type prefix follows `.claude/rules/branching.md` (`feat/`, `fix/`, `refac
 ### 1.6 Ticket start
 
 Run `~/.claude/skills/_shared/ticket-start.md`: assign the ticket to the user, move it to
-in progress, and report the transition name chosen. `/deep-plan` then finds it done.
+in progress, and report the transition name chosen. The planner then finds it done.
 
 ---
 
-## 2. Deep planning — delegate to `/deep-plan`
+## 2. Plan — pick the planner
 
-The heavy engineering (locate → trace → plan → TDD design → plan review) is owned by the
-deep-planning pipeline. Once the ticket is understood and the branch/worktree exists, invoke:
+Once the ticket is clear and the branch exists, choose the planner. Read
+`~/.claude/skills/_shared/plan-routing.md`. Apply its criteria to the ticket:
+
+- `/simple-plan` for a small or medium change: one module, an existing pattern, no new contract.
+- `/deep-plan` for a large or risky change: business behavior, permissions, a migration, a
+  third-party integration, or scope with more than one reasonable reading.
+
+Recommend one planner. Give the reason in one sentence. Stop and wait. The user confirms or
+overrides, and an override needs no reason. Then run the chosen planner:
 
 ```
+/simple-plan "<CODE>" --ticket <CODE>
 /deep-plan "<CODE>" --ticket <CODE>
 ```
 
-`/deep-plan` runs: grilling + domain-modeling → brainstorming → writing-plans → parallel Opus+Codex
-drafts → a 5-persona review loop (architect, project-developer, **ticket-matcher**,
-flow-mapper, qa) that hardens the plan and bats it **point-by-point** against the ticket's
-acceptance criteria → plannotator → an approved plan at
-`~/.claude/deep-plan-runs/<RUN_ID>/plan.md`. After approval it builds through to the PR (§3).
+Each planner owns the engineering work: locate, trace, plan, TDD design and plan review. Both
+end in an approved plan, and then build through to the PR (§3). `/simple-plan` asks the same
+routing question in its Phase 0.5. When the user has already confirmed the planner here, tell
+it so. It does not ask again.
 
-Do NOT hand-trace, hand-write tests, or plan inline here — that duplicates deep-plan. If the
-ticket-matcher flags the plan as vague or missing an acceptance criterion, resolve it inside
-the deep-plan loop before continuing.
+Do NOT hand-trace, hand-write tests, or plan inline here. That duplicates the planner. If the
+plan reviewer flags the plan as vague or missing an acceptance criterion, resolve it inside the
+planner loop before you continue. If the scope grows during planning, recommend again.
 
 ## 3. Build to PR — the Jira steps
 
-After approval, deep-plan picks the executor (`~/.claude/skills/_shared/plan-routing.md`) and
+After approval, the planner picks the executor (`~/.claude/skills/_shared/plan-routing.md`) and
 runs `~/.claude/skills/_shared/after-approval.md` itself: build, review, QA, `/pr` and the
 report. Run that chain once. Do not start a second build, review or QA. Add only these steps:
 
@@ -190,13 +180,20 @@ report. Run that chain once. Do not start a second build, review or QA. Add only
 - **Commit message:** a Conventional Commit with `Implements <CODE>.` in the body. Do not skip
   the hooks.
 - **`/pr` arguments:** `--ticket <CODE> --plan <plan.md> --evidence <qa-report-index.html>`.
-- **After the PR opens:** send `<CODE> PR opened` and the PR URL as the `/pr` Phase 5 rule
-  sends its notices: the Inbox thread `<CODE>`, else a `PushNotification`. Add the PR URL to
-  the ticket:
+- **After the PR opens** (after-approval section 7): do these steps in order.
+  1. Send `<CODE> PR opened` and the PR URL as the `/pr` Phase 5 rule sends its notices: the
+     Inbox thread `<CODE>`, else a `PushNotification`.
+  2. Move the ticket to the review status. List the transitions with
+     `mcp__atlassian__getTransitionsForJiraIssue`. Choose the one named like "In Review" or
+     "Code Review" (case-insensitive). If none matches, choose the transition whose target
+     name reads as review. If still none, ask the user. Apply it with
+     `mcp__atlassian__transitionJiraIssue`. Skip it when the ticket is already in that status.
+     Report the transition name chosen in one line.
+  3. Comment the PR link:
 
-  ```
-  mcp__atlassian__addCommentToJiraIssue(cloudId, issueIdOrKey=<CODE>, commentBody="PR: <url>")
-  ```
+     ```
+     mcp__atlassian__addCommentToJiraIssue(cloudId, issueIdOrKey=<CODE>, commentBody="PR: <url>")
+     ```
 
 ---
 
@@ -207,9 +204,15 @@ state, and merge conflicts, until the PR merges or closes. Do not run a second l
 The jira-workflow parts are these:
 
 - When the PR is ready to merge, send `<CODE> ready to merge` the same way.
-- When the PR merges, offer to move the ticket to its next Jira status.
+- When the PR merges, do these steps:
+  1. List the transitions with `mcp__atlassian__getTransitionsForJiraIssue`. Choose the one
+     named "Done", or the project's equivalent (a transition whose target status category key
+     is `done`, such as "Closed" or "Resolved"). If more than one fits, or none, ask the user.
+  2. Apply it with `mcp__atlassian__transitionJiraIssue`. Report the transition name chosen.
+  3. Comment on the ticket with `mcp__atlassian__addCommentToJiraIssue`: the PR link and
+     "Merged".
 
-The merge is the user's call.
+The merge is the user's call. Move the ticket only after the merge happens.
 
 ---
 
@@ -218,7 +221,7 @@ The merge is the user's call.
 - **Multi-day ticket**: before each `/clear`, offer `/mattpocock-skills:handoff`. The approved
   plan and its run dir carry the decisions, so the next session resumes from them.
 - **Docs, not just code**: Acme repos keep real logic in `docs/`. Confirm the change
-  updates the affected docs (the `/deep-plan` plan lists them; `/deep-review` flags stale ones).
+  updates the affected docs (the plan lists them; `/deep-review` flags stale ones).
 - **Worktree cleanup**: after merge, offer to run `git worktree remove .claude/worktrees/<slug>`.
 - **Commit size**: if review feedback produces 3+ unrelated fixes, one commit per fix
   makes the review reply history cleaner.

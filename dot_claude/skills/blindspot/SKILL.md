@@ -1,6 +1,6 @@
 ---
 name: blindspot
-description: Use before declaring a plan, review, report or PR body done — classifies every claim in the artifact as READ or INFERRED, then opens the surface behind each INFERRED claim or rewrites the claim to what was actually observed. Use after self-review, a roast or a review panel has already come back clean, because those passes share the author's reading history.
+description: Use before declaring a plan, review, report or PR body done, especially after a clean self-review. Marks each claim READ or INFERRED, then checks the source behind each INFERRED claim or rewrites it to what was observed.
 ---
 
 # Blindspot
