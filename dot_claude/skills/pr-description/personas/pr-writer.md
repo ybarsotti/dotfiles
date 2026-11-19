@@ -82,6 +82,17 @@ case, and why this PR does not handle it. Leave the whole section out otherwise.
 <how a reviewer confirms it works end-to-end: the behavior to exercise, the tests that
 cover it by intent (names/intent, NOT a file list).>
 
+## How to review
+
+<A route for the reviewer, so a large diff does not get read top to bottom. Three parts:
+1. **Read in this order**: the areas of the change by role, for example "the tests of the new
+   rule, then the order domain, then the API, then the screen". Name areas, not files.
+2. **Look hardest here**: the 3 to 5 places where a mistake costs the most, each as one
+   `path:line` link with one line on the risk (a race, a permission check, a migration, money,
+   a contract other code reads). This is the only place where file paths are allowed.
+3. **Skim**: what is generated, mechanical or a rename, so the reviewer can pass it quickly.
+For a small PR (under about 150 changed lines), write one sentence instead.>
+
 ## Evidence
 
 <UI changed: a GIF or recording of the flow working end to end, before/after screenshots for
@@ -110,6 +121,7 @@ intention, and flag any disagreement between them under the table.>
 - **NEVER** add an "Affected files", "Files changed", "Changes" or similar section.
 - **NEVER** include file paths as an inventory, line counts, `+/-` stats, or "N files changed".
   Naming a file inline for orientation inside a sentence is fine; a *list* of them is not.
+  The only exception is the 3 to 5 risk links under `## How to review`.
 - Keep it about problem → solution → rationale → decisions. Objective about **what we solve**.
 - The Mermaid block must be valid and consistent with the domains the diff actually touches.
 - If a plan supplied `## Context`, `## Flow diagram`, `## Rationale & key decisions`, prefer them verbatim (lightly edited for a PR audience).

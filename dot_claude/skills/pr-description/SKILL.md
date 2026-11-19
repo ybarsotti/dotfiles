@@ -18,10 +18,12 @@ its concrete fixes, and open/update the PR.
 - **Title = Conventional Commit**: `type(scope): summary`, `type` ∈ `feat` `fix` `refactor` `perf` `docs` `test` `chore`, ≤ 70 chars.
 - **Body contains**: what it solves, **Mermaid**, ticket, Slack threads, requirements matrix,
   rationale/key decisions, verification, **`## Evidence by requirement`** (see Phase 0.5),
-  `## Deviations from the plan`, and — whenever the change touches UI — an
+  `## Deviations from the plan`, `## How to review` (reading order, 3 to 5 risk links, what
+  to skim), and — whenever the change touches UI — an
   **`## Evidence`** section (see Phase 2.5), and — whenever it touches who may do what — an
   **`## Permissions`** section (see Phase 2.6).
-- **Body must NOT contain**: a changed-file list, file paths as an inventory, or file/line counts. Objective about *what we solve*, not *what moved*.
+- **Body must NOT contain**: a changed-file list, file paths as an inventory, or file/line
+  counts. The 3 to 5 risk links of `## How to review` are the only file paths allowed. Objective about *what we solve*, not *what moved*.
 - **Writer is claude Sonnet. Reviewer is codex.** Any additional reviewers on the claude side are Sonnet; the codex reviewer stays codex.
 - **PR is assigned to the user**: `--assignee @me` on create, `--add-assignee @me` on update.
 
@@ -164,7 +166,10 @@ codex exec \
 The reviewer validates, returning concrete fixes:
 - **Title is Conventional Commit?** valid `type`, optional scope, ≤ 70 chars.
 - **Mermaid present and consistent** with the domains in `git diff --name-only main...HEAD`? (no phantom components, no missing major area)
-- **NO file list / no counts** anywhere in the body?
+- **NO file list / no counts** anywhere in the body, except the 3 to 5 risk links of
+  `## How to review`?
+- **How to review** present: a reading order by area, the riskiest places with one line
+  each, and what to skim?
 - **Ticket present** (linked or an explicit `_no ticket_`)?
 - **Slack threads present** (linked when supplied, or explicit `_none found_`)?
 - **Requirements matrix complete** and statuses supported by diff/test evidence?

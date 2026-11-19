@@ -68,49 +68,81 @@ Read the **Core** section, then the section of your work: **Backend**, **UI**, o
 23. Keep secrets and personal data out of code, logs, URLs and telemetry.
 24. Use parameterised queries. Escape HTML, file paths and shell arguments.
 
+### Placement
+
+25. Before you create a file, find the domain module that owns the concept, for example
+    `apps/orders` or `features/assistant`. Write the code there. Domain logic never goes to a
+    `utils` or `shared` module, or to the module of a consumer.
+26. A view, a router, an endpoint and a screen component hold no business rule. They call the
+    domain.
+27. One concept has one home. Do not spread its loader, its rules and its dispatch over
+    several modules.
+28. Files that share a prefix become a package. A function that only uses one object becomes a
+    method of that object. A helper that one class uses lives in that class.
+29. When the owning domain is not clear, ask (a `question` event, or your final report). Do not
+    pick one at random.
+
 ### Structure
 
-25. Put each concept in the layer and module that own it. Dependencies point one way, with no
-    import cycle.
-26. Use the names and the layout of the neighbour files. Keep a file under about 500 lines.
-27. Keep each function under cyclomatic complexity 10. Nest 2 levels at most. Do not nest a
+30. Dependencies point one way, with no import cycle.
+31. Use the names and the layout of the neighbour files. Keep a file under about 500 lines.
+32. Keep each function under cyclomatic complexity 10. Nest 2 levels at most. Do not nest a
     ternary. Use an early return.
 
 ### Tests
 
-28. Write the failing test first. See it fail for the expected reason.
-29. Write one test for each case you handle, and one for the success path.
-30. Make sure each test can fail: break the line it covers and see it fail.
-31. Mock only the outermost external call: HTTP, a broker, an SDK or the clock. Run the code
+33. Write the failing test first. See it fail for the expected reason.
+34. Write one test for each case you handle, and one for the success path.
+35. Make sure each test can fail: break the line it covers and see it fail.
+36. Mock only the outermost external call: HTTP, a broker, an SDK or the clock. Run the code
     of the project for real.
-32. Freeze the clock. Wait on a condition, never on a fixed sleep.
-33. Never weaken a check to make it pass: no lower limit, no skipped test, no `noqa`, no cast,
+37. Freeze the clock. Wait on a condition, never on a fixed sleep.
+38. Never weaken a check to make it pass: no lower limit, no skipped test, no `noqa`, no cast,
     no suppression without a reason on the same line.
 
 ### Before you report done
 
-34. Update the docs, the plan and the specs that your change makes wrong.
-35. Leave no generated output, scratch file or absolute home path in the change.
+39. Update the docs, the plan and the specs that your change makes wrong.
+40. Leave no generated output, scratch file or absolute home path in the change.
 
 ## Backend
 
-36. Avoid N+1 queries. Add an index for each new filter and sort. Bound each result set.
-37. Use the column type that fits: `timestamptz`, `decimal`. Add `NOT NULL`, foreign key,
+41. Avoid N+1 queries. Add an index for each new filter and sort. Bound each result set.
+42. Use the column type that fits: `timestamptz`, `decimal`. Add `NOT NULL`, foreign key,
     unique and check constraints. Put a queried field in a column, not in JSON.
-38. Write one reversible migration per change. Old code still runs during the deploy, so
+43. Write one reversible migration per change. Old code still runs during the deploy, so
     expand first and remove later.
-39. Make no call to an outside service inside a transaction.
+44. Make no call to an outside service inside a transaction.
 
 ## UI
 
-40. Before the code, open the design and read `~/.claude/skills/_shared/ui-quality.md`.
-41. Reuse the components and tokens of the project. Do not hardcode a colour, a spacing or a
+45. Before the code, open the design and read `~/.claude/skills/_shared/ui-quality.md`.
+46. Reuse the components and tokens of the project. Do not hardcode a colour, a spacing or a
     radius.
-42. Build each state: loading, empty, error, pending, success and no permission.
-43. Use native elements. Move focus into a dialog and back out. Announce changes in a live
+47. Build each state: loading, empty, error, pending, success and no permission.
+48. Use native elements. Move focus into a dialog and back out. Announce changes in a live
     region. Give each control a unique accessible name. Colour never carries meaning alone.
-44. At 390 px, the page has no horizontal scroll and each touch target is 44 px or more.
-45. A refetch never overwrites what the user typed. A late response never wins over a newer
+49. At 390 px, the page has no horizontal scroll and each touch target is 44 px or more.
+50. A refetch never overwrites what the user typed. A late response never wins over a newer
     request.
-46. Take screenshots of each state at desktop width and at 390 px. Fix what is weak. This is
+51. Take screenshots of each state at desktop width and at 390 px. Fix what is weak. This is
     your own check: only the `qa-ui` agent proves that the screen matches the canvas.
+
+## When in doubt
+
+Read the source of the rule before you guess. Read only the part you need.
+
+| Doubt | Read |
+|---|---|
+| Where a file, a name or a function goes | `~/.claude/skills/simple-plan/references/constraints.md`, section 11, and `~/.claude/skills/deep-review/personas/project-fit.md` |
+| Layering, module boundaries, types, a design pattern | `~/.claude/skills/deep-review/personas/architecture.md` |
+| A simpler way, reuse, dead code | `~/.claude/skills/deep-review/personas/simplicity.md` |
+| Edge cases, races, retries | `~/.claude/skills/deep-review/personas/correctness.md` |
+| Queries, migrations, transactions, logging | `~/.claude/skills/deep-review/personas/senior-backend.md` |
+| Authentication, permission, input, secrets | `~/.claude/skills/deep-review/personas/security.md` |
+| Test design, mocks, flaky tests | `~/.claude/skills/deep-review/personas/test-quality.md` |
+| A screen, a state, accessibility | `~/.claude/skills/_shared/ui-quality.md` and `~/.claude/skills/deep-review/personas/senior-frontend.md` |
+| The rules of the project | the `CLAUDE.md`, `AGENTS.md`, `.claude/rules/` and `docs/*rules*` of the repository |
+
+When the file does not settle it, ask the orchestrator: a `question` event in a lane, or your
+final report as a worker. Do not start another agent for an opinion.

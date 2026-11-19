@@ -112,6 +112,8 @@ turn:
 - Guard each read-then-write against a race. Make each write safe to repeat. Fail closed, and
   never return success after a failure.
 - Check permission and the account of the caller on every query path.
+- Put the code in the domain module that owns the concept. Views, routers and screens call
+  the domain and hold no business rule. When the owner is unclear, emit `question`.
 - Mock only the outermost external call. Make sure each test can fail. Never weaken a check,
   skip a test or add a suppression to get to green.
 - Your lane rules win over the commit and push steps of `ub-mode`. Never open a pull request:
