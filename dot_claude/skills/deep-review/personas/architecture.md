@@ -123,6 +123,10 @@ the paths above.
 
 Read the diff for the shape of the feature, not only line by line.
 
+- **External service without an adapter.** Domain code that calls a vendor SDK or URL
+  directly, a vendor name in a domain class or method, or a vendor type or error that crosses
+  into the domain. Record it as MEDIUM and name the adapter shape that fits, with the rules of
+  `~/.claude/skills/_shared/external-services.md`.
 - **One concept, one home.** A feature whose logic is spread over several files: the loader in
   a service, a pure function in another module, the severity rule in a third, a branch in a
   dispatcher. Record it as MEDIUM. Name the class or the module that owns the concept, and

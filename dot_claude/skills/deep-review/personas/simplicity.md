@@ -9,7 +9,8 @@ the code before you record it.
 
 Flag:
 
-- Unused abstractions, and an interface with a single implementation.
+- Unused abstractions, and an interface with a single implementation. The adapter of an
+  external service is not one of these: `~/.claude/skills/_shared/external-services.md` requires it.
 - A thin wrapper, an identity function, or a pass-through helper that adds a call and no
   clarity. Recommend the direct call.
 - A generic "magic" mechanism that hides a simple data shape: reflection, dynamic keys or a

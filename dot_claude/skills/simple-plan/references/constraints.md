@@ -17,6 +17,11 @@ Stop at the first option that works:
 Do not add an abstraction that has one implementation. Do not add a configuration value that
 never changes. Do not scaffold for a future requirement.
 
+The exception is an external service. It always sits behind an adapter, and the plan chooses
+its shape: one adapter class, or a port with an injected implementation. Read
+`~/.claude/skills/_shared/external-services.md`. The plan names each external service, the shape, the reason, the
+adapter's place and its domain-named methods.
+
 ## 2. Follow the project, not a generic template
 
 The plan cites real paths as evidence. A claim without a path is an assumption.

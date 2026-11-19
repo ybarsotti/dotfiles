@@ -32,7 +32,8 @@ Read the **Core** section, then the section of your work: **Backend**, **UI**, o
 ### Scope and design
 
 4. Write the smallest change that solves the task. Do not add an interface with one
-   implementation, a speculative parameter, a configuration key or scaffolding.
+   implementation, a speculative parameter, a configuration key or scaffolding. The one
+   exception is the adapter of an external service (rule 30).
 5. Change only the code of the task. Do not refactor, rename or reformat code next to it.
 6. Get the data shape right first. Model the data so that an illegal state cannot exist.
 7. Fix a bug at its root cause, in the shared function that all callers use.
@@ -82,50 +83,55 @@ Read the **Core** section, then the section of your work: **Backend**, **UI**, o
 29. When the owning domain is not clear, ask (a `question` event, or your final report). Do not
     pick one at random.
 
+30. Put every external service (an LLM or classifier, a payment, email or CRM provider, another
+    API) behind an adapter. The domain calls a domain-named method, such as `categorize()`,
+    and never sees the vendor name, SDK types or errors. Choose one adapter class (default) or
+    a port with an injected implementation, as `_shared/external-services.md` says.
+
 ### Structure
 
-30. Dependencies point one way, with no import cycle.
-31. Use the names and the layout of the neighbour files. Keep a file under about 500 lines.
-32. Keep each function under cyclomatic complexity 10. Nest 2 levels at most. Do not nest a
+31. Dependencies point one way, with no import cycle.
+32. Use the names and the layout of the neighbour files. Keep a file under about 500 lines.
+33. Keep each function under cyclomatic complexity 10. Nest 2 levels at most. Do not nest a
     ternary. Use an early return.
 
 ### Tests
 
-33. Write the failing test first. See it fail for the expected reason.
-34. Write one test for each case you handle, and one for the success path.
-35. Make sure each test can fail: break the line it covers and see it fail.
-36. Mock only the outermost external call: HTTP, a broker, an SDK or the clock. Run the code
+34. Write the failing test first. See it fail for the expected reason.
+35. Write one test for each case you handle, and one for the success path.
+36. Make sure each test can fail: break the line it covers and see it fail.
+37. Mock only the outermost external call: HTTP, a broker, an SDK or the clock. Run the code
     of the project for real.
-37. Freeze the clock. Wait on a condition, never on a fixed sleep.
-38. Never weaken a check to make it pass: no lower limit, no skipped test, no `noqa`, no cast,
+38. Freeze the clock. Wait on a condition, never on a fixed sleep.
+39. Never weaken a check to make it pass: no lower limit, no skipped test, no `noqa`, no cast,
     no suppression without a reason on the same line.
 
 ### Before you report done
 
-39. Update the docs, the plan and the specs that your change makes wrong.
-40. Leave no generated output, scratch file or absolute home path in the change.
+40. Update the docs, the plan and the specs that your change makes wrong.
+41. Leave no generated output, scratch file or absolute home path in the change.
 
 ## Backend
 
-41. Avoid N+1 queries. Add an index for each new filter and sort. Bound each result set.
-42. Use the column type that fits: `timestamptz`, `decimal`. Add `NOT NULL`, foreign key,
+42. Avoid N+1 queries. Add an index for each new filter and sort. Bound each result set.
+43. Use the column type that fits: `timestamptz`, `decimal`. Add `NOT NULL`, foreign key,
     unique and check constraints. Put a queried field in a column, not in JSON.
-43. Write one reversible migration per change. Old code still runs during the deploy, so
+44. Write one reversible migration per change. Old code still runs during the deploy, so
     expand first and remove later.
-44. Make no call to an outside service inside a transaction.
+45. Make no call to an outside service inside a transaction.
 
 ## UI
 
-45. Before the code, open the design and read `~/.claude/skills/_shared/ui-quality.md`.
-46. Reuse the components and tokens of the project. Do not hardcode a colour, a spacing or a
+46. Before the code, open the design and read `~/.claude/skills/_shared/ui-quality.md`.
+47. Reuse the components and tokens of the project. Do not hardcode a colour, a spacing or a
     radius.
-47. Build each state: loading, empty, error, pending, success and no permission.
-48. Use native elements. Move focus into a dialog and back out. Announce changes in a live
+48. Build each state: loading, empty, error, pending, success and no permission.
+49. Use native elements. Move focus into a dialog and back out. Announce changes in a live
     region. Give each control a unique accessible name. Colour never carries meaning alone.
-49. At 390 px, the page has no horizontal scroll and each touch target is 44 px or more.
-50. A refetch never overwrites what the user typed. A late response never wins over a newer
+50. At 390 px, the page has no horizontal scroll and each touch target is 44 px or more.
+51. A refetch never overwrites what the user typed. A late response never wins over a newer
     request.
-51. Take screenshots of each state at desktop width and at 390 px. Fix what is weak. This is
+52. Take screenshots of each state at desktop width and at 390 px. Fix what is weak. This is
     your own check: only the `qa-ui` agent proves that the screen matches the canvas.
 
 ## When in doubt
@@ -135,6 +141,7 @@ Read the source of the rule before you guess. Read only the part you need.
 | Doubt | Read |
 |---|---|
 | Where a file, a name or a function goes | `~/.claude/skills/simple-plan/references/constraints.md`, section 11, and `~/.claude/skills/deep-review/personas/project-fit.md` |
+| An external service, a vendor SDK, an adapter or a port | `~/.claude/skills/_shared/external-services.md` |
 | Layering, module boundaries, types, a design pattern | `~/.claude/skills/deep-review/personas/architecture.md` |
 | A simpler way, reuse, dead code | `~/.claude/skills/deep-review/personas/simplicity.md` |
 | Edge cases, races, retries | `~/.claude/skills/deep-review/personas/correctness.md` |

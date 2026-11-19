@@ -7,3 +7,8 @@ enters, a redesign instead of a bolt-on, subtraction before addition, idempotent
 and one writer per shared state. Split the work into verifiable units. Each unit's check
 includes the "Then Make it Right" gates on its files: `crapper` under CRAP 10, `dryer` under
 0.8, and `mutator` with no surviving or uncovered mutant.
+
+Put every external service the change calls behind an adapter, as
+`~/.claude/skills/_shared/external-services.md` says. For each one, the plan names the shape (one adapter class,
+or a port with an injected implementation), the reason, the adapter's place and its
+domain-named methods.
