@@ -24,6 +24,17 @@ Use the code-intelligence MCP servers in `~/.codex/config.toml` when they are av
 - Use the configured MCP servers before a workaround: `context7` for library docs, `obscura` for local pages, `atlassian` for Jira and Confluence, `slack`, `logfire`, `ai-memory` and `memory`.
 - Project instructions override this section when they are more specific.
 
+# Building Code
+
+- When you write production code as a worker of the build chain, read
+  `~/.claude/skills/_shared/implementer-rules.md` as your brief says.
+- Before you write UI code, read `~/.claude/skills/_shared/ui-quality.md`.
+- Write code, identifiers, comments, docs and commit messages in English.
+- Run the tests that cover your change first. Cap the workers: `jest --maxWorkers=2`,
+  `vitest --maxWorkers=2`, `pytest -n 2`. Run one full suite at a time.
+- Open a pull request only with the `pr-description` skill (`/pr`). Never run `gh pr create`
+  by hand.
+
 # graphify
 
 - **graphify** (`~/.Codex/skills/graphify/SKILL.md`) - any input to knowledge graph. Trigger: `/graphify`

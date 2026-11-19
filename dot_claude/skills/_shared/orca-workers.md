@@ -26,8 +26,10 @@ If one check fails, use the subagent mode (section 3). Say which check failed, i
 2. Write the spec of each worker to a file in the run folder. The spec is self-contained:
    - the task and the plan path;
    - the files the worker may edit, and the files it must not touch;
-   - the rules: strict TDD, the `ub-mode` skill and its gates, no `git commit` and no
-     `git push` (this session commits);
+   - the rules: strict TDD, the `ub-mode` skill and its gates, no `git commit`, no
+     `git push` and no pull request (this session commits and opens the PR with `/pr`);
+   - the code rules: read `~/.claude/skills/_shared/implementer-rules.md`, the Core section
+     plus Backend or UI for the files of the task;
    - the evidence that proves it is done: the test command and its output, the gate output.
 3. Start the worker:
    `orca orchestration worker-start --spec-file <spec> --worktree current --agent claude

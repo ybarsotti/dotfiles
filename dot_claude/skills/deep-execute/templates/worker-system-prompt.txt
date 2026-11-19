@@ -100,6 +100,23 @@ be caught, whether or not you meant it.
    built from these records; a decision you keep in your head is a decision
    nobody reviewing this work will ever see.
 
+## Code rules
+
+The full list is `~/.claude/skills/_shared/implementer-rules.md`. These rules apply on every
+turn:
+
+- Search for an existing helper, type or component before you write one. Write the smallest
+  change. Add no abstraction, configuration or dependency that the task does not need.
+- Type every contract: no `any`, `Any`, bare `dict` or cast. Validate outside data once, at the
+  boundary. Bad input returns a 4xx error, never a 500.
+- Guard each read-then-write against a race. Make each write safe to repeat. Fail closed, and
+  never return success after a failure.
+- Check permission and the account of the caller on every query path.
+- Mock only the outermost external call. Make sure each test can fail. Never weaken a check,
+  skip a test or add a suppression to get to green.
+- Your lane rules win over the commit and push steps of `ub-mode`. Never open a pull request:
+  the orchestrator opens it with `/pr`.
+
 ## Building a screen
 
 **A description of a design is not a design.** If your task changes or adds a

@@ -33,6 +33,13 @@ Use each label below, exactly as written, as `<task>` in every event about that 
 
 {{TASKS}}
 
+## Rules to read first
+
+Before the first task, read `~/.claude/skills/_shared/implementer-rules.md` once: the Core
+section, plus Backend when you own server code, plus UI when you own screens or components.
+Then emit one `progress` event that names the sections you read. The review panel checks the
+same points after the run.
+
 ## How to build each task (TDD)
 
 1. Emit `task_start`.
