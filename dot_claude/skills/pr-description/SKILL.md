@@ -154,6 +154,29 @@ targeting the specific fix, then re-review once. Cap: 2 review iterations.
 
 ## Phase 2.5 — EVIDENCE (UI changes)
 
+### UI parity gate
+
+Run this gate first. It applies when the diff changes UI and a design canvas exists for the
+change. Look for the canvas in the `Canvas:` line of the plan, in the run's `decisions.md`, in
+the arguments, and in the conversation: a `claude.ai/artifact/` or `claude.ai/code/artifact/`
+link that the user or a `ui-designer` agent named as the design of this change.
+
+When the gate applies, the PR needs a `qa-ui` report (`~/.claude/agents/qa-ui.md`) with these
+properties:
+
+1. Its verdict line names HEAD, or a commit after which no UI file changed.
+2. Its verdict is `MATCH`. A `DIFFERENT` verdict with HIGH or MEDIUM rows is not done.
+
+When the report is missing, stale or `DIFFERENT`, do not open or update the PR. Report
+`UI parity not verified` and the reason. Then start the `qa-ui` agent with the canvas, as
+`~/.claude/skills/_shared/after-approval.md` section 4 says. The screenshots and the visual
+pass of the agent that built the UI are not parity evidence.
+
+Skip the gate only when the user says so for this PR. Then write
+`UI parity not verified against the canvas` under `## Evidence`.
+
+### Visual evidence
+
 **A UI change without a picture is not reviewable.** Decide first whether this diff changes
 anything a user sees — a new screen, an altered layout, new copy, a changed interaction or
 state. `git diff --name-only main...HEAD` hitting component/template/style/page paths is the

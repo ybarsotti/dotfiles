@@ -112,4 +112,5 @@ Read the **Core** section, then the section of your work: **Backend**, **UI**, o
 44. At 390 px, the page has no horizontal scroll and each touch target is 44 px or more.
 45. A refetch never overwrites what the user typed. A late response never wins over a newer
     request.
-46. Take screenshots of each state at desktop width and at 390 px. Fix what is weak.
+46. Take screenshots of each state at desktop width and at 390 px. Fix what is weak. This is
+    your own check: only the `qa-ui` agent proves that the screen matches the canvas.

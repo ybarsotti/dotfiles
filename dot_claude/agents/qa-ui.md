@@ -20,7 +20,8 @@ agent fixes what you report.
 
 - The plan path. Read its `## UI design pass` and its states table.
 - The `Canvas:` URL from the UI design pass, when the plan has one.
-- The app URL and the routes of the changed screens.
+- The app URL and the routes of the changed screens. When no app runs, the recordings and
+  screenshots of the change, and the code at the commit to test.
 - The output folder. Write every file there.
 
 ## Steps
@@ -41,7 +42,10 @@ agent fixes what you report.
 4. Compare element by element. Check layout, alignment, spacing, size, copy, color, type,
    radius, icon, focus ring, hover, and each state. Check that the 390 px layout stacks and
    does not scroll sideways.
-5. Without a canvas, compare against the UI design pass and section 11 of
+5. When no app runs, do not stop. Take frames from the recordings and the screenshots, and
+   read the code of each element at the commit. Mark each state that no recording shows as
+   `code only`.
+6. Without a canvas, compare against the UI design pass and section 11 of
    `~/.claude/skills/_shared/ui-quality.md`.
 
 ## Output
@@ -55,8 +59,10 @@ Write `report.md` and the screenshots to the output folder. Return the table:
 Severity: **HIGH** when the element is missing, wrong, or unusable. **MEDIUM** when it is
 visibly different. **LOW** when a designer would notice it and a user would not.
 
-End with one verdict line: `MATCH` when there are no HIGH or MEDIUM rows, otherwise
-`DIFFERENT: N HIGH, M MEDIUM`. Name the commit SHA you tested.
+End with one verdict line, in this exact form:
+`Verdict: MATCH at <sha>` when there are no HIGH or MEDIUM rows, otherwise
+`Verdict: DIFFERENT: N HIGH, M MEDIUM at <sha>`. `<sha>` is the full commit you tested.
+`/pr` reads this line.
 
 ## Rules
 

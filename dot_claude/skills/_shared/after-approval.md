@@ -86,12 +86,15 @@ Find the app URL in this order: the `base_url` of `qa-plan.yaml`, the QA steps o
 the project `CLAUDE.md`. Check it with `curl -sf -o /dev/null <url>`.
 
 - It answers: run steps 4 and 5.
-- It does not answer: skip steps 4 and 5. Record "QA skipped: <url> did not answer" in the
-  report. Do not start or rebuild an environment the user did not ask for.
+- It does not answer: skip step 5. Record "QA skipped: <url> did not answer" in the report.
+  Do not start or rebuild an environment the user did not ask for. Run step 4 anyway when a
+  canvas exists: `qa-ui` then compares from the recordings, the screenshots and the code.
 
 ## 4. UI parity — the `qa-ui` agent
 
-Run this step when the plan has a UI design pass. Dispatch the `qa-ui` agent with:
+Run this step when the plan has a UI design pass, or when a canvas exists for the change.
+The visual pass of the agent that built the UI does not replace this step. `/pr` refuses to
+open the PR without a `MATCH` from this agent for the head commit. Dispatch the `qa-ui` agent with:
 
 - the plan path, and the `Canvas:` URL of the UI design pass when the plan has one;
 - the app URL and the routes of the changed screens;
