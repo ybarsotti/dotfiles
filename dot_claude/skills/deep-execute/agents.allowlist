@@ -1,5 +1,8 @@
 # <runner-and-model> <effort>
-opus high
+# Default to medium for a lane. Use high only for a hard lane (concurrency, a migration, a
+# complex business rule), and write the reason in the plan. opus high needs a reason too.
+sonnet medium
 sonnet high
-codex gpt-6.1-terra high
 codex gpt-6.1-terra medium
+codex gpt-6.1-terra high
+opus high

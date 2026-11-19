@@ -309,6 +309,10 @@ stateDiagram-v2
 |---|---|---|---|---|---|---|---|
 | `<lane-name>` | <one sentence: what this lane owns> | `<path glob>`<br>`<path glob>` | `<path glob>`<br>`<path glob>` | `<agent from agents.allowlist, or \`orchestrator\`>` | `<test command>` | `<mock command, or \`none\`>` | `<lane name, or \`none\`>` |
 
+<!-- agent: default to `sonnet medium` or `codex gpt-6.1-terra medium`. Use a `high` line only
+     for a hard lane (concurrency, a migration, a complex business rule), and say why in the
+     lane's scope. `opus high` needs the same reason. -->
+
 ## API contract
 <!-- Required whenever Mode above is `parallel` — lanes cannot build against a contract
      they have not agreed on. Materialize and commit this file before fan-out. -->

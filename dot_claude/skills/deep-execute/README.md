@@ -96,11 +96,15 @@ The plan's `agent` column must be one of the lines in `agents.allowlist`, which
 `validate-plan.sh` checks. That agent runs without a second question; `--agent` overrides it.
 
 ```
-opus high
+sonnet medium
 sonnet high
-codex gpt-6.1-terra high
 codex gpt-6.1-terra medium
+codex gpt-6.1-terra high
+opus high
 ```
+
+A lane defaults to `medium`. Use `high` only for a hard lane, such as concurrency, a migration
+or a complex business rule, and write the reason in the plan. `opus high` needs a reason too.
 
 ## Event / reply protocol
 
