@@ -28,6 +28,8 @@ hand the problem to another command.
    go in the plan's front matter.
 1. **Brainstorm** — `superpowers:brainstorming`, only when the task is unclear, and with at
    most 3 questions.
+1.2 **Grill** — `mattpocock-skills:grilling` on every task, without the 3-question cap.
+   Say "skip grill" to skip it. Resolved decisions go into the plan.
 1.5 **Split** — when the work holds more than one shippable outcome, an agent turns it into
    2-6 deliverable tasks ordered from the foundation up. You pick one; this run plans that one.
 2. **Draft** — when the change touches an interface, first consult

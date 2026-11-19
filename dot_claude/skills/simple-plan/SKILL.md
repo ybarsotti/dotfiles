@@ -92,6 +92,22 @@ Run `Skill(skill="superpowers:brainstorming")` when any of these is true:
 **Ask at most 3 questions.** Batch them into one `AskUserQuestion` call. When 3 questions do
 not settle the design, the task is bigger than one task. Go to Phase 1.5 and split it.
 
+## Phase 1.2 — Grill the plan
+
+Run this phase on every task. Skip it only when the user says "skip grill", and record the skip.
+
+Run `Skill(skill="mattpocock-skills:grilling")` against the task and `$RUN_DIR/context.md`.
+Do not invoke `grill-with-docs`. The Skill tool refuses it, because it sets
+`disable-model-invocation`. Offer `/mattpocock-skills:grill-with-docs` when the user wants to
+drive the interview.
+
+The 3-question cap of Phase 1 does not apply to the grill. Stop when the answers no longer
+change the approach. When the grill finds two or more outcomes that ship separately, go to
+Phase 1.5.
+
+Write each question and answer to `$RUN_DIR/grill.md` as `### Q:` and `### A:` pairs. Phase 2
+copies each decision that the grill resolved into the plan's `Approach` or `Edge cases`.
+
 ## Phase 1.5 — Split the work, when it is more than one task
 
 Enter this phase when any of these holds:
