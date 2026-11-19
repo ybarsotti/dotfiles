@@ -27,6 +27,9 @@ Print the result before the first worker, in one line: `Workers: orca` or
 
 1. Read the guide once per session: `orca skills get orchestration`. Follow its rules.
 2. Write the spec of each worker to a file in the run folder. The spec is self-contained:
+   - the one row of `$RUN_DIR/chain.md` that the worker owns, with its exact command. The
+     worker does that step only: it starts no other step of the chain, and it hands the next
+     step back to this session;
    - the task and the plan path;
    - the files the worker may edit, and the files it must not touch;
    - the rules: strict TDD, the `ub-mode` skill and its gates, no `git commit`, no

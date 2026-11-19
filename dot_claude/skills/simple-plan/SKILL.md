@@ -79,20 +79,7 @@ with the criteria of `~/.claude/skills/_shared/plan-routing.md`, and follow the 
 there. Record the exchange in the plan's front matter. When the user picks `/deep-plan`, stop
 this run and say so; do not plan the task twice.
 
-## Phase 1 — Brainstorm, only when the task is unclear
-
-Skip this phase when the task is small and unambiguous. Record that you skipped it.
-
-Run `Skill(skill="superpowers:brainstorming")` when any of these is true:
-
-- The task description allows two or more reasonable designs.
-- The scope is unclear.
-- The change touches a flow you could not map in Phase 0.
-
-**Ask at most 3 questions.** Batch them into one `AskUserQuestion` call. When 3 questions do
-not settle the design, the task is bigger than one task. Go to Phase 1.5 and split it.
-
-## Phase 1.2 — Grill the plan
+## Phase 1 — Grill the plan
 
 Run this phase on every task. Skip it only when the user says "skip grill", and record the skip.
 
@@ -101,12 +88,25 @@ Do not invoke `grill-with-docs`. The Skill tool refuses it, because it sets
 `disable-model-invocation`. Offer `/mattpocock-skills:grill-with-docs` when the user wants to
 drive the interview.
 
-The 3-question cap of Phase 1 does not apply to the grill. Stop when the answers no longer
+The grill has no question cap. Stop when the answers no longer
 change the approach. When the grill finds two or more outcomes that ship separately, go to
 Phase 1.5.
 
 Write each question and answer to `$RUN_DIR/grill.md` as `### Q:` and `### A:` pairs. Phase 2
 copies each decision that the grill resolved into the plan's `Approach` or `Edge cases`.
+
+## Phase 1.2 — Brainstorm, only when the design is still open
+
+The grill ran first. Skip this phase when the grill settled the design. Record that you skipped it.
+
+Run `Skill(skill="superpowers:brainstorming")` when any of these is still true after the grill:
+
+- The task description allows two or more reasonable designs.
+- The scope is unclear.
+- The change touches a flow you could not map in Phase 0.
+
+**Ask at most 3 questions.** Batch them into one `AskUserQuestion` call. When the grill and 3 questions do
+not settle the design, the task is bigger than one task. Go to Phase 1.5 and split it.
 
 ## Phase 1.5 — Split the work, when it is more than one task
 
@@ -115,7 +115,7 @@ Enter this phase when any of these holds:
 - The work has two or more outcomes that could ship separately.
 - Phase 0 found more than about six files it must change, or two or more directories that
   each need their own change.
-- Three brainstorm questions did not settle the design.
+- The grill and three brainstorm questions did not settle the design.
 - It needs a requirements matrix, a user journey, or parallel lanes.
 
 Dispatch **one** agent to split it. That agent does not plan and does not write code. Give it

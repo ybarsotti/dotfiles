@@ -20,6 +20,25 @@ plan approval, before this chain starts (`plan-routing.md`). This chain never as
    "built, reviewed, QA green, PR open, report delivered". Name the plan path in it.
 2. Record each decision you make on the way in `$RUN_DIR/decisions.md`: the decision, the
    rejected alternative, and the reason. The report reads this file.
+3. Write `$RUN_DIR/chain.md`: one row per step of this chain that applies to the plan, with
+   the exact command and the status `todo`.
+
+   ```markdown
+   | # | Step | Command | Owner | Status |
+   |---|---|---|---|---|
+   | 1 | Build | `Skill(skill="implement", args="<plan>")` | this session + Orca workers | todo |
+   | 2 | Review | `/deep-review default` | this session, fixer worker | todo |
+   | 4 | UI parity | `qa-ui` worker with the canvas | Orca worker | todo |
+   | 5 | Business QA | `qa-business` worker | Orca worker | todo |
+   | 7 | PR | `/pr --no-watch` | this session | todo |
+   | 7.3 | Demo | `video-demo` skill | Orca worker | todo |
+   | 8 | Report | `$RUN_DIR/report/index.html` | this session | todo |
+   | 9 | Watch | `/pr` phase 5 | this session | todo |
+   ```
+
+   When a step ends, set its status to `done: <evidence path>` or `skipped: <reason>`. Before
+   you end a turn or start an agent, read `chain.md`: the first `todo` row is the next action.
+   Never mark a row `done` without its evidence.
 
 ## Parallel agents run in Orca
 
