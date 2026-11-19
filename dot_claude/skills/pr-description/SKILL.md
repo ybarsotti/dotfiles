@@ -75,6 +75,36 @@ Follow sections 2, 4 and 5 of `~/.claude/skills/_shared/spec-evidence.md`.
    reason. Never write `pass` for a proof that did not run.
 4. **Deviations.** Copy the plan's `## Deviations` rows, or `None`.
 
+## Phase 0.6 — Chain gate (before you write anything)
+
+A PR opens only after the build chain ran (`~/.claude/skills/_shared/after-approval.md`). This
+gate applies to every caller: a planning skill, `implement`, `deep-execute`, an orchestrator
+that starts its own agents, or a direct `/pr`. Run the three checks against HEAD.
+
+1. **Code review.** One of these covers HEAD:
+   - a `/deep-review` run: `~/.claude/skills/deep-review/scripts/check-stale.sh <run-dir>`
+     exits 0, and its report has no open CRITICAL or HIGH finding;
+   - the review that the project requires (for example the review receipts of `.fbworkflow`
+     or `.workflow`), recorded for HEAD with no open blocking finding.
+2. **QA.** When the change alters a flow or a screen that a person uses: a `qa-business`
+   report (`~/.claude/agents/qa-business.md`) that names HEAD, with `GO` and no `FAIL`. A
+   report that names an older commit counts only when no product code changed after it. When
+   the environment did not answer, the recorded line `QA skipped: <url> did not answer`
+   counts instead.
+3. **UI parity.** When the change alters UI and a design canvas exists for it: a `qa-ui`
+   report with `Verdict: MATCH at <sha>`, where `<sha>` is HEAD or a commit after which no UI
+   file changed. Look for the canvas in the `Canvas:` line of the plan, in the run's
+   `decisions.md`, in the arguments, and in the conversation (a `claude.ai/artifact/` link
+   named as the design of this change). The screenshots and the visual pass of the agent that
+   built the UI are not parity evidence.
+
+When a check fails, do not open or update the PR. Print `Chain gate: <check> not done` and
+the reason. Then run the missing step as `after-approval.md` describes: sections 2, 4 or 5,
+in an Orca worker when the session runs in Orca. Run `/pr` again after it passes.
+
+Skip a check only when the user says so for this PR. Then write `<check> not done: <reason>`
+under `## Evidence`. A fix to the PR body or the PR title alone does not re-run the gate.
+
 ## Phase 1 — WRITE (claude Sonnet)
 
 Assemble the writer input into `$RUN_DIR/writer-input.md`:
@@ -153,29 +183,6 @@ If the reviewer flags the file-list or ticket rules, those are blocking — re-r
 targeting the specific fix, then re-review once. Cap: 2 review iterations.
 
 ## Phase 2.5 — EVIDENCE (UI changes)
-
-### UI parity gate
-
-Run this gate first. It applies when the diff changes UI and a design canvas exists for the
-change. Look for the canvas in the `Canvas:` line of the plan, in the run's `decisions.md`, in
-the arguments, and in the conversation: a `claude.ai/artifact/` or `claude.ai/code/artifact/`
-link that the user or a `ui-designer` agent named as the design of this change.
-
-When the gate applies, the PR needs a `qa-ui` report (`~/.claude/agents/qa-ui.md`) with these
-properties:
-
-1. Its verdict line names HEAD, or a commit after which no UI file changed.
-2. Its verdict is `MATCH`. A `DIFFERENT` verdict with HIGH or MEDIUM rows is not done.
-
-When the report is missing, stale or `DIFFERENT`, do not open or update the PR. Report
-`UI parity not verified` and the reason. Then start the `qa-ui` agent with the canvas, as
-`~/.claude/skills/_shared/after-approval.md` section 4 says. The screenshots and the visual
-pass of the agent that built the UI are not parity evidence.
-
-Skip the gate only when the user says so for this PR. Then write
-`UI parity not verified against the canvas` under `## Evidence`.
-
-### Visual evidence
 
 **A UI change without a picture is not reviewable.** Decide first whether this diff changes
 anything a user sees — a new screen, an altered layout, new copy, a changed interaction or
@@ -317,6 +324,12 @@ gh pr edit <n> \
 ```
 
 ## Phase 4 — Report
+
+**Demo.** When the change adds or alters a feature that a person uses, the report says
+`Demo: attached` after the `video-demo` skill recorded it and `gh pr edit <n> --attach` added
+it under `## Demo`. Otherwise it says `Demo: not needed: <reason>`, for a refactor, a lone
+migration or an internal API. A missing demo for a user-facing feature is an open item, not a
+pass.
 
 Print the PR URL and a one-line summary, e.g.:
 `opened PR #1421 — feat(webhooks): prevent duplicate delivery — assigned to @me, ticket PROJ-2982`.

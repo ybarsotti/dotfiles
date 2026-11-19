@@ -94,7 +94,7 @@ the project `CLAUDE.md`. Check it with `curl -sf -o /dev/null <url>`.
 
 Run this step when the plan has a UI design pass, or when a canvas exists for the change.
 The visual pass of the agent that built the UI does not replace this step. `/pr` refuses to
-open the PR without a `MATCH` from this agent for the head commit. Dispatch the `qa-ui` agent with:
+open the PR without a `MATCH` from this agent for the head commit (its Phase 0.6 chain gate). Dispatch the `qa-ui` agent with:
 
 - the plan path, and the `Canvas:` URL of the UI design pass when the plan has one;
 - the app URL and the routes of the changed screens;

@@ -132,7 +132,16 @@ Subagents run on Sonnet by default (`CLAUDE_CODE_SUBAGENT_MODEL`). A `model` arg
 # Pull Requests
 
 Open a pull request only with `/pr` (the `pr-description` skill). Never run `gh pr create` by
-hand. This applies to every agent and every workflow.
+hand. This applies to every agent and every workflow. `/pr` refuses to open a PR before the
+build chain ran: a code review at HEAD, QA for a changed flow or screen, and `qa-ui` parity
+when a design canvas exists.
+
+# Agents in Orca
+
+When `orca worktree current` resolves, start each agent that builds, fixes, runs QA or records
+a demo as an Orca worker, as `~/.claude/skills/_shared/orca-workers.md` describes. Use the
+`Agent` tool there only for read-only research and exploration. Outside Orca, use the `Agent`
+tool.
 
 # Test Runs — Machine Load
 
