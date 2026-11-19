@@ -76,7 +76,8 @@ if [ -z "$PATHS" ]; then
   exit 1
 fi
 
-slug() { echo "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-|-$//g'; }
+# shellcheck source=./lib.sh disable=SC1091 # sourced at runtime
+. "${SKILL_DIR}/scripts/lib.sh"
 
 # ─── Decide lane mode vs. legacy directory grouping ────────────────────────
 # A plan with no `## Execution shape` section has nothing to declare — this

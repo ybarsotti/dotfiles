@@ -67,12 +67,9 @@ Follow sections 2, 4 and 5 of `~/.claude/skills/_shared/spec-evidence.md`.
    `~/.claude/skills/_shared/plan-stamp.sh check <plan>`. Exit 1 stops here: report the changed
    plan to the user and open nothing. Exit 2 continues, and `## Verification` says the plan
    carries no approval stamp.
-2. **Run each proof at HEAD.** Take the plan's `## Evidence map`. Without one, build the rows
-   from the requirements matrix, the `## Rules` table and the `Cover now`/`Fail loudly` edge
-   cases, and find the test that proves each one in the diff. Run every `test` and `command`
-   proof. Link every `qa` proof to the `--evidence` artifact. Write one line per row to
-   `$RUN_DIR/evidence.tsv`: id, claim, proof, result (`pass`, `fail`, `not run: <reason>`),
-   and the short SHA of HEAD.
+2. **Run each proof at HEAD.** Run every `test` and `command` proof, link every `qa` proof to
+   the `--evidence` artifact, and write one line per row to `$RUN_DIR/evidence.tsv`. Read
+   `references/proofs.md` before you build the rows. It holds the row sources and the line format.
 3. **A failed or missing proof blocks the PR.** Fix it, or ask the user to defer the row with a
    reason. Never write `pass` for a proof that did not run.
 4. **Deviations.** Copy the plan's `## Deviations` rows, or `None`.
@@ -109,79 +106,19 @@ under `## Evidence`. A fix to the PR body or the PR title alone does not re-run 
 
 ## Phase 1 — WRITE (claude Sonnet)
 
-Assemble the writer input into `$RUN_DIR/writer-input.md`:
-1. The persona prompt: `~/.claude/skills/pr-description/personas/pr-writer.md`
-2. `---`
-3. Context: detected ticket, `git diff --stat main...HEAD` **for the writer's private
-   understanding only** (remind it: never echo file names/counts into the body), the
-   changed-path domains from `git diff --name-only main...HEAD`, the recent commit
-   subjects (`git log --pretty=%s main..HEAD`), and — if a plan exists — the extracted
-   `## Context`, `## Ticket and Slack context`, `## Requirements matrix`,
-   `## Flow diagram`, `## Rationale & key decisions`, `## Stages` and
-   `## Edge cases & failure modes` verbatim, plus `$RUN_DIR/evidence.tsv` and the plan's
-   `## Deviations`. Tell writer to reconcile
-   every requirement against finished diff/tests: `✅ Implemented`, `⚠️ Partial`, or
-   `❌ Missing`; never carry `✅ Planned` forward blindly.
-
-Dispatch the writer headless (mirror `~/.claude/skills/deep-review/scripts/reviewer.sh` flags):
-
-```bash
-claude -p \
-  --model sonnet \
-  --output-format text \
-  --max-turns 4 \
-  --dangerously-skip-permissions \
-  < "$RUN_DIR/writer-input.md" > "$RUN_DIR/draft.md"
-```
-
-The writer returns a single fenced block: `TITLE:` line, then `---`, then the markdown
-body. Parse the title from the `TITLE:` line and the body from everything after `---`.
-Write the parsed body to `$RUN_DIR/pr-body.md` and store the title.
-
-**Reject inline** if the draft body contains an "Affected files"/"Files changed"/"Changes"
-section or a `+/-` stat block — if so, re-dispatch the writer once with an explicit note
-to remove it, then continue.
+Read `references/writer-dispatch.md` before you assemble the writer input. It holds the input
+layout, the `claude -p` command and the parse rules. The writer input never carries file names
+or counts into the body. **Reject inline** a draft body that contains an "Affected files",
+"Files changed" or "Changes" section or a `+/-` stat block: re-dispatch the writer once with a
+note to remove it, then continue.
 
 ## Phase 2 — REVIEW (codex)
 
-Unless `--no-codex`, dispatch a codex reviewer to validate the draft. Assemble
-`$RUN_DIR/review-input.md`:
-- The drafted title + body
-- The output of `git diff --name-only main...HEAD` (the reviewer needs the real
-  changed-path domains to judge the Mermaid diagram)
-- The detected ticket (or "none")
-- The explicit checklist below
+Unless `--no-codex`, dispatch a codex reviewer to validate the draft.
 
-Dispatch (mirror the codex side of `reviewer.sh`):
-
-```bash
-codex exec \
-  --skip-git-repo-check \
-  --dangerously-bypass-approvals-and-sandbox \
-  --color never \
-  --output-last-message "$RUN_DIR/review.md" \
-  - < "$RUN_DIR/review-input.md" >&2
-```
-
-The reviewer validates, returning concrete fixes:
-- **Title is Conventional Commit?** valid `type`, optional scope, ≤ 70 chars.
-- **Mermaid present and consistent** with the domains in `git diff --name-only main...HEAD`? (no phantom components, no missing major area)
-- **NO file list / no counts** anywhere in the body, except the 3 to 5 risk links of
-  `## How to review`?
-- **How to review** present: a reading order by area, the riskiest places with one line
-  each, and what to skim?
-- **Ticket present** (linked or an explicit `_no ticket_`)?
-- **Slack threads present** (linked when supplied, or explicit `_none found_`)?
-- **Requirements matrix complete** and statuses supported by diff/test evidence?
-- **Key decisions preserved** from plan/ticket context?
-- **Stages and deferred edge cases** — a staged plan's stage table is present with the next
-  stage to review; every `Out of scope` edge case ID from the plan is listed?
-- **Evidence present** — when the diff touches UI, an `## Evidence` section with a flow
-  GIF/recording (and before/after for changed screens) or an honest local-asset list; when it
-  does not, the explicit `_no UI change — no visual evidence_`?
-- **Evidence by requirement** — one row per `evidence.tsv` line, each result naming the SHA
-  it ran at, that SHA equal to HEAD, and no `pass` without a proof that ran?
-- Body is objective about *what we solve* (not a changelog of the diff)?
+Read `references/review-dispatch.md` and `references/reviewer-checklist.md` before you assemble
+`$RUN_DIR/review-input.md`. The first holds the input list and the `codex exec` command. The second
+holds the checklist that goes into the input.
 
 Read `$RUN_DIR/review.md` and **apply every concrete fix** to the title / `pr-body.md`.
 If the reviewer flags the file-list or ticket rules, those are blocking — re-run Phase 1
@@ -190,84 +127,22 @@ targeting the specific fix, then re-review once. Cap: 2 review iterations.
 ## Phase 2.5 — EVIDENCE (UI changes)
 
 **A UI change without a picture is not reviewable.** Decide first whether this diff changes
-anything a user sees — a new screen, an altered layout, new copy, a changed interaction or
-state. `git diff --name-only main...HEAD` hitting component/template/style/page paths is the
-signal; when it is ambiguous, assume it does.
+anything a user sees. When it is ambiguous, assume it does. With no UI change, write exactly
+`_no UI change — no visual evidence_` under `## Evidence`. Never leave the section out and never
+invent a screenshot. Never commit media to the repository, on any branch.
 
-If it does not, write exactly `_no UI change — no visual evidence_` under `## Evidence` and
-move on. Never leave the section out and never invent a screenshot.
-
-If it does, the section carries, in this order:
-
-1. **A GIF or recording of the flow working end to end** — the whole path a user takes, not a
-   still of the end state. New screen or changed flow ⇒ this is required.
-2. **Before / after screenshots** for anything that changed on an existing screen.
-3. **A link to the QA evidence report** (`index.html`) that these came from, plus the commit
-   SHA it was captured against.
-
-Source them, in order of preference: the `--evidence` artifacts; the QA run this PR follows
-(the `qa-business` agent and `/qa-execute` already capture annotated screenshots and
-WebVTT-captioned videos); a fresh `agent-browser` pass over the changed flow if neither exists and the app runs
-locally.
-
-**Embedding.** Never commit media to the repository, on any branch. Upload it with the
-`--attach` flag of `gh pr create` or `gh pr edit` (gh 2.99.0 or later):
-
-1. Write the body with relative references, such as `![Login error state](./qa/login.png)`.
-2. Pass each referenced file once: `--attach ./qa/login.png`.
-
-gh uploads each file to `github.com/user-attachments/assets/` and rewrites the reference to that
-URL. The asset has the repository's visibility, so a private repository stays private. Formats:
-PNG, JPEG, GIF, WebP, SVG, MP4, MOV and WebM. Size: 10 MB per image, and 10 MB per video on Free
-or 100 MB on a paid plan. Compress a GIF or video that exceeds the limit; do not drop it.
-
-When `gh` exits nonzero, read which files failed and retry them with `gh pr edit --attach`. When
-`gh` is older than 2.99.0 or the host is GitHub Enterprise Server, list each asset by filename
-with what it demonstrates, say the media is local, and tell the user in Phase 4 to drag it in.
-
-Evidence is captured against the frozen SHA. If the branch moved after the capture, say so
-rather than presenting stale media as current.
+Read `references/evidence.md` before you write the `## Evidence` section. It holds the content
+order, the sources and the `gh --attach` embedding steps.
 
 ## Phase 2.6 — PERMISSIONS (access changes)
 
 **A reviewer cannot approve an access change they have to infer.** Decide whether this diff
-changes who may do what: a new or renamed role, a changed permission or scope, a new guarded
-endpoint or action, an altered policy, decorator, guard, middleware, `can?` rule or row-level
-rule. Changed paths naming `permission`, `role`, `policy`, `scope`, `ability`, `guard`,
-`authoriz`, or a migration on a roles or permissions table are the signal. When it is
-ambiguous, assume it does.
+changes who may do what (a role, permission, scope, guard, policy or row-level rule). When it is
+ambiguous, assume it does. With no access change, leave the section out.
 
-If it does not, leave the section out. This section appears only when access changed.
-
-If it does, the body carries a `## Permissions` table: **every role in the system as a row**,
-and **one column per action this PR adds or changes**. The reader must see, without opening
-the code, which roles gained an ability and which stayed out.
-
-| Role | Create record | Delete record | Enforced at |
-| --- | --- | --- | --- |
-| `owner` | ✅ | ✅ | `policies/record.py:34` |
-| `admin` | ✅ | ✅ | `policies/record.py:34` |
-| `member` | ✅ | ❌ | `policies/record.py:41` |
-| `viewer` | ❌ | ❌ | denied by default |
-
-Rules for the table:
-
-1. **Read the roles from the project, never from memory.** Take them from the role enum,
-   the roles table, the seed or the fixture that defines them, and cite that source under the
-   table. A role you invented is worse than no table.
-2. **Every role appears**, including the ones this PR does not touch. A role missing from the
-   table reads as an oversight, and the reviewer cannot tell which it was.
-3. **`Enforced at` names a `file:line`** for each allowed cell, or says `denied by default`
-   when the role falls through with no rule. A `✅` with nothing behind it is the bug this
-   table exists to catch.
-4. **Mark a role whose access this PR changes.** Add a `Change` column with `+ gained`,
-   `- lost` or `unchanged` when the PR alters existing access rather than adding a new action.
-5. **Say what is not covered.** When an action is guarded in the UI but not on the server, or
-   the reverse, write it under the table as a one-line warning. Do not let the ✅ imply both.
-
-Derive the cells from the code in the diff, not from the ticket's intention. When the two
-disagree, write the table from the code and flag the disagreement — that gap is the most
-valuable thing this section can surface.
+Read `references/permissions.md` before you write the `## Permissions` section. It holds the
+table template and its five rules. Derive every cell from the code in the diff, not from the
+ticket's intention.
 
 ## Phase 2.7 — BLINDSPOT (every PR)
 
@@ -305,107 +180,25 @@ from Phases 1-2** — do not regenerate them from a template.
 4. The body is already at `$RUN_DIR/pr-body.md` — pass it with `--body-file` (HEREDOC not
    needed; the file already exists).
 
-**Create** (no `--update`):
-
-```bash
-gh pr create \
-  [--draft] \
-  --title "$TITLE" \
-  --body-file "$RUN_DIR/pr-body.md" \
-  --assignee @me \
-  --label "$PR_TYPE" \
-  [--reviewer <owner> ...]
-```
-
-Retry without `--label`/`--reviewer` if `gh` errors (remote may lack them), same as pr-open.sh.
-
-**Update** (`--update <n>`):
-
-```bash
-gh pr edit <n> \
-  --title "$TITLE" \
-  --body-file "$RUN_DIR/pr-body.md" \
-  --add-assignee @me
-```
+Read `references/open-pr.md` before you run `gh`. It holds the create and update commands.
 
 ## Phase 4 — Report
 
-**Demo.** When the change adds or alters a feature that a person uses, the report says
-`Demo: attached` after the `video-demo` skill recorded it and `gh pr edit <n> --attach` added
-it under `## Demo`. Otherwise it says `Demo: not needed: <reason>`, for a refactor, a lone
-migration or an internal API. A missing demo for a user-facing feature is an open item, not a
-pass.
-
-Print the PR URL and a one-line summary, e.g.:
-`opened PR #1421 — feat(webhooks): prevent duplicate delivery — assigned to @me, ticket PROJ-2982`.
-
-When the repository has no CI check that a pull request matches its plan, and the user owns that
-CI, suggest once a job that runs `plan-stamp.sh check` and fails on a missing evidence row
-(`_shared/spec-evidence.md` section 6). Do not add it unless the user asks.
+Read `references/report.md` before you print the report. It holds the demo rule, the report line and the CI suggestion.
 
 ## Phase 5 — Watch and address feedback (default; skip with `--no-watch`)
 
 An open PR is not done. Watch it until it merges or closes. Skip this phase for
 `--draft`, `--dry-run` and `--no-watch`.
 
-1. **Poll every 5 minutes** with the `Monitor` tool while CI runs and bots review. Do not
-   poll in a foreground loop. Read:
-   ```bash
-   gh pr view <n> --json state,reviewDecision,reviews,comments,statusCheckRollup,mergeable
-   gh api repos/<owner>/<repo>/pulls/<n>/comments   # inline review comments
-   ```
-   Keep the ids you already handled in `$RUN_DIR/handled-comments.txt`.
-2. **A `CHANGES_REQUESTED` review or a new actionable comment** from a human or a bot: run
-   `Skill(skill="address-pr-comments")`. It verifies each claim, fixes only the valid ones in
-   scope, reruns the tests, then replies in and resolves each thread. Do not reply here.
-3. **A failing check** goes through `superpowers:systematic-debugging`. Do not patch blindly.
-4. **Ask the user first** when a comment changes scope, a requirement or a contract, or when
-   two reviewers disagree.
-5. After each push, rerun Phase 0.5 proofs and update `## Evidence by requirement` if a
-   result changed.
-6. **A merge conflict** (`mergeable: CONFLICTING`): rebase on the base branch, rerun the
-   tests, and push. Ask the user first when the conflict touches logic that another PR changed.
-
-**Two stages.** Human reviewers answer hours later, so a quiet CI does not end the watch.
-
-- *Active*: the 5-minute `Monitor` poll above. It ends when CI is green and one full poll
-  after your last push brings no new comment. Report what you fixed, what you declined and
-  why, and what waits on the user.
-- *Long*: then run `Skill(skill="loop", args="<the watch prompt>")` with no interval, so the
-  loop paces itself with `ScheduleWakeup` at 1200 to 1800 seconds. The watch prompt names the
-  PR URL, `handled-comments.txt`, and steps 1 to 6. A new comment, a `CHANGES_REQUESTED`
-  review, a red check or a conflict starts the active stage again.
-
-When the PR is approved and green, and when a review needs the user, send it to the Inbox
-thread of the ticket or branch, with the PR in `pulls` (`~/.claude/skills/_shared/inbox.md`).
-Without the Inbox, send a `PushNotification`. A `CHANGES_REQUESTED` that `address-pr-comments`
-cannot resolve alone becomes an Inbox question.
-Stop the loop when the PR merges or closes. The loop lives in this session: when the session
-ends, the watch ends. Say so in the final report.
+Read `references/watch.md` before you start the watch. It holds the six watch steps, the two
+stages and the notification rules. Stop the loop when the PR merges or closes.
 
 ## Checklist (orchestrator ticks after Phase 3)
 
-Verify each and report the state to the user:
-
-- [ ] `title-conventional` — title matches `^(feat|fix|refactor|perf|docs|test|chore)(\(.+\))?: .+`, ≤ 70 chars
-- [ ] `mermaid-present` — body has a ```mermaid block, consistent with the changed domains
-- [ ] `no-file-list` — no "Affected files"/"Files changed" section, no path inventory, no `+/-` counts
-- [ ] `ticket-linked-or-n/a` — ticket linked, or an explicit `_no ticket_` when none exists
-- [ ] `slack-linked-or-n/a` — relevant threads linked, or explicit `_none found_`
-- [ ] `requirements-reconciled` — every requirement maps to implementation evidence and status
-- [ ] `key-decisions-present` — important decisions and trade-offs are preserved
-- [ ] `evidence-attached` — UI change ⇒ `## Evidence` carries a flow GIF/recording, before/after
-      screenshots for changed screens, and a link to the QA report + its SHA; no UI change ⇒ the
-      explicit `_no UI change — no visual evidence_`
-- [ ] `permissions-tabled-or-n/a` — access change ⇒ `## Permissions` lists every role in the
-      system, one column per changed action, a `file:line` or `denied by default` behind each
-      cell, and the source the role names came from; no access change ⇒ section absent
-- [ ] `blindspot-passed` — every claim in the body is READ, or rewritten to what was observed
-- [ ] `assigned-to-me` — PR assignee includes `@me`
-- [ ] `codex-review-applied` — codex reviewer ran and its fixes were applied (or `--no-codex` was set)
-
-If any box other than `codex-review-applied` (when `--no-codex`) is unchecked, loop back to
-the relevant phase before declaring done.
+Read `references/checklist.md` and verify each box. Report the state to the user. If any box
+other than `codex-review-applied` (when `--no-codex`) is unchecked, loop back to the relevant phase
+before declaring done.
 
 ## Reuse
 

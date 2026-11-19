@@ -35,12 +35,13 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 2
 fi
 
-slug() { echo "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-|-$//g' | cut -c1-50; }
+# shellcheck source=./lib.sh disable=SC1091 # sourced at runtime
+. "$(dirname "$0")/lib.sh"
 
 if [ -n "$TICKET" ]; then
-  NAME="feat/${TICKET}-$(slug "$TASK_DESC")"
+  NAME="feat/${TICKET}-$(slug "$TASK_DESC" | cut -c1-50)"
 else
-  NAME="feat/$(slug "$TASK_DESC")"
+  NAME="feat/$(slug "$TASK_DESC" | cut -c1-50)"
 fi
 
 # Truncate to keep branch name reasonable.

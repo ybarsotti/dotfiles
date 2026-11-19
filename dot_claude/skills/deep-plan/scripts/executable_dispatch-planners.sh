@@ -43,6 +43,8 @@ WP_SKILL_PATH=$(find "${HOME}/.claude/plugins" "${HOME}/.claude/skills" \
 build_prompt() {
   local persona_file="$1" runner="$2"
   cat "$persona_file"
+  printf '\n'
+  cat "${SKILL_DIR}/personas/planner-design-rules.md"
   printf '\n\n---\n\n## Required skill (load it, do not improvise)\n\n'
   if [ "$runner" = "claude" ]; then
     printf 'Before writing anything, invoke: Skill(skill="superpowers:writing-plans").\n'

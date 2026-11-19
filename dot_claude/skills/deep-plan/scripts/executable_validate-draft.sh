@@ -64,11 +64,8 @@ CHECKLIST_VOCAB=$( { checklist_vocab_from "$TEMPLATE_PLAN"; checklist_vocab_from
 
 RESULTS=()
 
-record() {
-  local item="$1" status="$2" detail="$3"
-  RESULTS+=("$(jq -n --arg i "$item" --arg s "$status" --arg d "$detail" \
-    '{item:$i, status:$s, detail:$d}')")
-}
+# shellcheck source=./lib.sh disable=SC1091 # sourced at runtime
+. "$(dirname "$0")/lib.sh"
 
 # A missing file is a hard, unambiguous truncation signal — record it as a
 # normal failing item (not a script error) so --json output stays uniform

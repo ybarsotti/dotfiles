@@ -35,11 +35,8 @@ RESULTS=()
 # shellcheck source=./task-body-lib.sh disable=SC1091 # sourced at runtime; CI shellcheck doesn't pass -x
 . "$(dirname "$0")/task-body-lib.sh"
 
-record() {
-  local item="$1" status="$2" detail="$3"
-  RESULTS+=("$(jq -n --arg i "$item" --arg s "$status" --arg d "$detail" \
-    '{item:$i, status:$s, detail:$d}')")
-}
+# shellcheck source=./lib.sh disable=SC1091 # sourced at runtime
+. "$(dirname "$0")/lib.sh"
 
 # section_body HEADING — the body of a `## HEADING` section, up to the next
 # `## `. Fence-aware: a fenced illustrative example elsewhere in the plan

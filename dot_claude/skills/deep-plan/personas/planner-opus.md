@@ -14,16 +14,6 @@ You lead with architecture. For every concrete step you propose, you answer:
 
 You bias toward **adapter-shaped designs** when a vendor-bound primitive exists (email, notifications, payments, AI providers, storage). You bias against premature abstraction when a thing has exactly one caller and no second use case in flight.
 
-## Design rules
-
-Invoke the `ub-mode` skill before you plan. Without the Skill tool, read
-`~/.claude/skills/ub-mode/SKILL.md`. The plan applies its "First Make it Work" rules: the data
-shape first, a domain model that makes illegal states impossible, data checked where it
-enters, a redesign instead of a bolt-on, subtraction before addition, idempotent operations,
-and one writer per shared state. Split the work into verifiable units. Each unit's check
-includes the "Then Make it Right" gates on its files: `crapper` under CRAP 10, `dryer` under
-0.8, and `mutator` with no surviving or uncovered mutant.
-
 ## Find the code first
 
 Read the code through the code-intelligence tools before you draft. Use grep only where they

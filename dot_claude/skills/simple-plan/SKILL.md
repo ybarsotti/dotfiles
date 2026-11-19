@@ -48,26 +48,9 @@ across runs — skip Phase 1.5 when a breakdown already answers it.
 
 Gather evidence before you draft. Write the result to `$RUN_DIR/context.md`.
 
-1. Find the affected directories from the task description.
-2. Read the root `CLAUDE.md`, and every `CLAUDE.md` inside an affected directory.
-3. Read every rule source that exists: `.claude/rules/`, `AGENTS.md`, `docs/business-rules/`,
-   `docs/technical-rules/` and `docs/adr/`. Read every rule file that applies.
-4. Read two or three existing files of the same kind as the files the change touches.
-   Record the naming convention, the error style, the dependency-injection style, and the
-   test layout.
-5. Read the dependency manifest. List the libraries that the change will use.
-6. Read the documentation of each of those libraries for the parts the change touches. Use
-   the Context7 MCP server when it is available. Record the idiom the library expects.
-7. Find the code with the code-intelligence tools first, and use grep only where they have
-   no answer. Run `~/.claude/skills/deep-plan/scripts/bootstrap-codeintel.sh "$RUN_DIR"` to
-   refresh the indexes. Serena serves the working directory and needs no activation.
-   - Serena: `find_symbol`, `find_referencing_symbols` and `get_symbols_overview` for the
-     symbols the change touches.
-   - GitNexus: `query` and `context` for the flows, and `impact` for the blast radius.
-   - Graphify: read `graphify-out/GRAPH_REPORT.md` when it exists.
-8. When the task names a ticket, or the branch name holds a ticket key, read the ticket. Copy
-   each acceptance criterion and each stated requirement into the brief, word for word. For a
-   Jira key, run `~/.claude/skills/_shared/ticket-start.md` once.
+Read `~/.claude/skills/simple-plan/references/context-brief.md` before you gather the evidence.
+It lists the eight steps: the affected directories, the rule sources, sibling files, the
+dependency manifest, library documentation, the code-intelligence tools and the ticket.
 
 Every line of the brief carries a path, such as `src/api/orders.py:42`. A line without a
 path is an assumption, and you must mark it **unknown**.
@@ -119,41 +102,19 @@ Enter this phase when any of these holds:
 - The grill and three brainstorm questions did not settle the design.
 - It needs a requirements matrix, a user journey, or parallel lanes.
 
-Dispatch **one** agent to split it. That agent does not plan and does not write code. Give it
-`$RUN_DIR/context.md` and `~/.claude/skills/simple-plan/references/constraints.md`, and require an
-ordered list where:
+Dispatch **one** agent to split it. That agent does not plan and does not write code. Read
+`~/.claude/skills/simple-plan/references/breakdown.md` before you dispatch it. It holds the
+requirements for the list and the exact file format. Give the agent `$RUN_DIR/context.md` and
+`~/.claude/skills/simple-plan/references/constraints.md`.
 
-- **Each task ships on its own.** A person can exercise it and say whether it works. A task
-  that cannot be validated alone is merged into the one that makes it validatable.
-- **Each names the observable outcome** that proves it is done — what a reviewer sees, not
-  what the code does.
-- **The first task is the foundation** the rest build on: the schema, the type, the contract,
-  the seam. Later tasks depend only on earlier ones.
-- **The list holds 2 to 6 tasks.** More than six means the split is still too coarse; tell the
-  agent to group them.
+Rules for the list:
 
-The agent writes the list to `$RUN_DIR/breakdown.md` in exactly this shape, so the next step
-can parse it:
+- **Each task ships on its own** and names the observable outcome that proves it is done.
+- **The first task is the foundation.** It depends on nothing. Later tasks depend only on earlier ones.
+- **The list holds 2 to 6 tasks.** More than six means the split is too coarse; group them.
 
-```markdown
-## Task 1 — <short title>
-- **Delivers:** <the observable outcome a person can check>
-- **Validated by:** <what someone does to confirm it, in one sentence>
-- **Touches:** <paths or directories>
-- **Depends on:** none
-
-## Task 2 — <short title>
-- **Delivers:** ...
-- **Validated by:** ...
-- **Touches:** ...
-- **Depends on:** Task 1
-```
-
-When the user chooses stages (below), each task also carries `- **Class:** light|full`,
-`- **Status:** planned` and `- **Commit:** -`, and the file follows
+The agent writes the list to `$RUN_DIR/breakdown.md`. When the user chooses stages (below), the file also follows
 `~/.claude/skills/_shared/stages.md`.
-
-Task 1 depends on nothing. Every later task depends only on earlier ones.
 
 Copy the list to `docs/superpowers/plans/<YYYY-MM-DD>-<slug>-breakdown.md` inside the project,
 beside where the plans live. `$RUN_DIR` is keyed to this invocation's arguments, so a file left
@@ -177,37 +138,13 @@ each task lists the "Then Make it Right" gates on its files: `crapper`, `dryer` 
 ### UI/UX consultation, when the change touches an interface
 
 Before drafting, when the task adds or changes a user-facing screen, component, page or
-layout, consult the design intelligence and dispatch one UI/UX agent:
-
-0. Read `~/.claude/skills/_shared/ui-quality.md`. It is the quality bar the plan, the
-   implementer and the reviewers share.
-1. `Skill(skill="ui-ux-pro-max:ui-ux-pro-max")` for this project's stack — styles, palettes,
-   font pairings, UX guidelines, motion presets and component guidance.
-2. One `Agent` with the reviewer persona at
-   `~/.claude/skills/deep-review/personas/ui-ux.md`, pointed at the **existing** UI rather
-   than at a diff. Give it `$RUN_DIR/context.md`, `~/.claude/skills/simple-plan/references/constraints.md` and the task description, and ask for: the
-   components and design tokens this change should reuse, with `path:line`; the screen the new
-   one should follow as a pattern; the states it must design for; where the component
-   boundaries fall and where the logic goes; the feedback the user needs for each action; the
-   breakpoints this project supports and how the layout reflows at the narrowest one; and the
-   accessibility this screen owes — keyboard path, focus handling on anything that opens, the
-   accessible name of every icon-only control, and how errors get announced.
+layout, read `~/.claude/skills/simple-plan/references/ui-consultation.md` and follow it. It reads
+`~/.claude/skills/_shared/ui-quality.md`, runs `ui-ux-pro-max`, dispatches one UI/UX agent and
+starts the `ui-designer` worker.
 
 The plan states the breakpoints and the keyboard path as acceptance criteria, not as good
-intentions. A screen whose plan is silent about them gets built without them.
-
-3. Start the `ui-designer` agent as an Orca worker with `--keep-open`
-   (`~/.claude/skills/_shared/after-approval.md`, "Parallel agents run in Orca"). Give it the
-   app URL or run command. It maps the project's design system from the code, reads and
-   screenshots the screens it changes, then draws them on a Design canvas while you draft. The user can iterate on the canvas in parallel. Record its `Canvas:` and
-   `Design system:` URLs in the UI design pass.
-
-Fold the answer into the plan's `UI design pass` section, and into `Project fit`, `Affected
-files` and `Edge cases`. The plan names the existing component it reuses instead of leaving
-the implementer to invent one.
-`Skill(skill="frontend-design:frontend-design")` applies when the change needs visual direction rather than
-pattern-matching.
-
+intentions. Fold the answer into the plan's `UI design pass` section, and into `Project fit`,
+`Affected files` and `Edge cases`. The plan names the existing component it reuses.
 Skip this when the change touches no interface, and record that you skipped it.
 
 Invoke `Skill(skill="superpowers:writing-plans")` and follow it completely. Never paraphrase
@@ -230,135 +167,15 @@ Every later phase reads the plan from `$PLAN_PATH`.
 
 ### Required sections
 
-**0. Front matter — the pipeline decision.** The record from Phase 0.5, as YAML at the top of
-the plan. One entry per decision, appended in order:
-
-```yaml
----
-pipeline_decisions:
-  - recommended: simple-plan
-    reason: One module, a pattern src/api/orders.py:42 already uses, no new contract
-    user_response: "go with simple"
-    selected: simple-plan
----
-```
-
-`user_response` holds what the user actually said. An empty `user_response` means the run
-never got an answer, and the plan is not ready to present.
-
-**1. Problem** — What is wrong or missing today, in 3 sentences or fewer. Cite the evidence.
-
-**1b. Ticket requirements** — *Only when the plan comes from a ticket.* Give the ticket key and
-link. Then write one row per acceptance criterion or stated requirement, quoted from the ticket:
-
-| ID | Requirement (from the ticket) | Coverage | Where |
-|---|---|---|---|
-| R1 | "Admins can export orders as CSV" | Covered | Approach step 2, test `test_export_csv` |
-| R2 | "The export includes refunds" | Partial | Approach step 2; the refund reason is a non-goal |
-| R3 | "Email the file when it is ready" | Not covered | Task 2 of the breakdown |
-
-A `Covered` row names the approach step and the test that proves it. A `Partial` or
-`Not covered` row says why, and where the rest goes: a non-goal, a breakdown task, or a
-question for the user. End with one line, such as `Coverage: 1 of 3 covered, 1 partial, 1 not
-covered.` An approach step that serves no requirement is scope creep. Remove it, or ask the user.
-
-**2. Non-goals** — What this change does not do. This section blocks scope creep during
-implementation. It is mandatory and it is never empty.
-
-**3. Approach** — How we solve it, in the fewest steps. For each step, name the rung of
-constraint rule 1 that you stopped at. Example: "reuse `src/shared/result.ts` (rule 1.2)".
-When a step removes or renames a route, an exported symbol, an event, a queue name, a
-configuration key or a response field, list its callers. Search the latest base branch
-(`git fetch origin` first), by path and by name, and count a test mock of the removed path as a
-caller. Give the search command, and say how each caller moves.
-
-**4. Project fit** — The conventions this change follows, each with the path that proves it.
-Name the existing helpers and types it reuses. Name the library idiom it follows. Then the
-rules: the rule sources you read in Phase 0, and each rule that applies, with its path and how
-the plan honors it. When none applies, say so and name the sources you read.
-
-**5. Types and contracts** — The concrete type declarations the implementation will add or
-change. Show the real fields and the real field types, as code. Show the API request and
-response models, and the validator that guards each endpoint. Constraint rules 3 and 4 apply.
-A reviewer reads this section to prove that the typing is real, because a type checker cannot.
-
-**6. Data structure changes** — *Only when the change alters a persisted structure*, such as a
-table, a column, a stored document, or an on-disk format. Show the new structure as a Mermaid
-`erDiagram` or `classDiagram`. Show the migration step, and the deploy order that keeps the
-previous release working while the migration runs.
-
-**6b. Query cost** — *Only when the change adds or changes a query*, including an ORM call or a
-serializer that loads a relation. Fill the query cost table of
-`~/.claude/skills/_shared/query-check.md`: where each query runs, the queries per request, the
-rows it reads at production size, the index it uses, and the optimization. Write the
-optimization now. When the cost depends on production volume, ask the user for the
-read-only production check of that file before you present the plan.
-
-**7. Flow** — *Only when the flow has three or more actors, or an asynchronous step, or a
-retry.* Show a Mermaid `sequenceDiagram` or `flowchart`. Otherwise omit this section. Do not
-draw a diagram for a straight-line call.
-
-**7b. UI design pass** — *Only when the change touches an interface.* Fill the same fields as
-the `## UI design pass` section of `~/.claude/skills/deep-plan/templates/plan.md`: who uses
-the screen and for which task, the reference screen, reuse, hierarchy, layout and mobile,
-actions, feedback and motion, content, accessibility, shortcuts, and a states table. The
-states table holds loading, error and success at minimum, plus every other state the screen
-has. Each row names the effect, the copy and the action.
-
-**8. Affected files** — A table of path, action (add, edit, delete), and one line of reason.
-Constraint rule 9 applies: the table holds only files the task needs. It lists no refactor,
-no rename, and no reformat that the task does not require. When the plan wants to change
-nearby logic, it asks the user first and records the answer.
-
-**8b. Work size** — How big the work is, piece by piece. First name the piece of the larger
-work that this plan covers, such as `Task 2 of 4 in <breakdown path>`, or `the whole ticket`.
-Then write one row per piece of this plan, such as a migration, an endpoint, a component, or
-the tests:
-
-| Piece | What it is | Files | Estimated lines |
-|---|---|---|---|
-| Model and migration | `refund_total` column on `Order` | 2 | ~40 |
-| Export endpoint | CSV stream for admins | 2 | ~80 |
-| Tests | TDD plan rows 1 to 4 | 2 | ~120 |
-| **Total** | | **6** | **~240 (production ~120, tests ~120)** |
-
-Base each estimate on a similar change in this repository. Name its commit and the line count
-from `git show --stat <sha>`. Mark an estimate without a precedent as `guess`. Then give the size:
-**S** under 100 changed lines, **M** 100 to 400, **L** over 400. An L plan returns to Phase 1.5
-for a split.
-
-**9. Edge cases** — A table. Constraint rule 7 defines the decisions.
-
-| ID | Case | Criticality | Decision |
-|---|---|---|---|
-| EC-001 | Two requests update the same order at once | High | Cover now |
-| EC-002 | The upstream API returns a 500 | Medium | Fail loudly |
-| EC-003 | The user has no locale set | Low | Out of scope |
-
-The ID stays with the case from the plan to the PR. The PR lists every `Out of scope` row under
-`## Deferred edge cases`.
-
-Raise race conditions and failure modes here. Do not implement them here. If every row says
-`Cover now`, the plan is not simple. Re-read constraint rule 7 and reduce it.
-
-**10. TDD plan** — The test list, written before the code. One test per `Cover now` row, plus
-one test for the success path. For each test, give the name, the file, the assertion, and the mock
-target. Constraint rule 10 applies: each test mocks only the outermost call to an external
-service (HTTP request, broker enqueue, SDK call, or clock), and runs this project's services,
-repositories, dispatchers, and clients for real. Name the exact mock target, for example
-`httpx.AsyncClient.post` or `apps.billing.tasks.deliver_invoice_link_task.delay`. A row
-whose mock target is a class or method of this project is a plan defect. The
-implementation follows `superpowers:test-driven-development`: write the failing test, watch it
-fail, then write the code.
-
-**11. Validation** — Two parts.
-
-- *Commands*: the exact checks the implementer runs, such as `mypy --strict src/`,
-  `ruff check`, `tsc --noEmit`, and the test command. Name the real commands for this project.
-- *QA steps*: what the QA agent verifies in a live environment. Write one numbered step per
-  observable behavior. When the change touches a user-facing flow or screen, run `/qa-plan`
-  in Phase 4 and reference the generated `qa-plan.yaml` here instead of writing the steps by
-  hand.
+Read `~/.claude/skills/simple-plan/references/plan-sections.md` before you write the sections.
+It holds the full text of each section. The sections, in order: 0 Front matter (pipeline
+decision; an empty `user_response` means the plan is not ready to present), 1 Problem, 1b Ticket
+requirements (ticket only), 2 Non-goals (mandatory, never empty), 3 Approach (the fewest steps,
+each with its rung of constraint rule 1; list the callers of any removed contract), 4 Project fit,
+5 Types and contracts, 6 Data structure changes, 6b Query cost (`_shared/query-check.md`), 7 Flow,
+7b UI design pass, 8 Affected files (constraint rule 9), 8b Work size (an L plan returns to
+Phase 1.5), 9 Edge cases (if every row says `Cover now`, the plan is not simple), 10 TDD plan
+(mock only the outermost external call, constraint rule 10), 11 Validation, 12 Evidence map.
 
 ## Phase 3 — Review
 
@@ -370,42 +187,14 @@ Run the reviewers in parallel, in a single message with one `Agent` call each.
 | Project fit | `Agent` with the persona at `~/.claude/skills/deep-plan/personas/project-developer.md` | Does the plan match this codebase | always |
 | Data | `Agent` with the persona at `~/.claude/skills/deep-review/personas/senior-backend.md` | Does the schema make sense, and will the queries hold | the plan touches a table, a column, a migration or a query |
 
-### The data reviewer
+Read `~/.claude/skills/simple-plan/references/reviewers.md` before you start the reviewers. It holds
+the data reviewer questions and the project-fit and test-coverage instructions. Give the
+project-fit reviewer `$PLAN_PATH`, `$RUN_DIR/context.md` and the constraints file. It rejects the
+plan when any constraint rule is broken, and it quotes the rule number. Both reviewers check each
+TDD row against constraint rule 10.
 
-Run it whenever the plan adds or changes a table, a column, an index, a migration, or a query
-— including an ORM call or a serializer that loads a relation. Skip it otherwise and record
-that you skipped it.
-
-Point it at the plan, not at a diff, and tell it to answer two questions:
-
-1. **Does the structure make sense?** Not "is it valid" — whether the shape matches what the
-   data is. Judge the column types, the nullability, the keys and constraints, whether a JSON
-   column holds fields the code will query by, whether the normalisation fits how the data is
-   written and read, and whether the table has a growth and retention story. Its schema pass
-   lists what to look for; constraint rule 13 governs the migration count.
-2. **Will the queries hold at real size?** The plan's new reads, judged against the indexes
-   that will exist after the migration: a query with no supporting index, an N+1 the plan sets
-   up, an unbounded result set, `OFFSET` pagination on a table that grows. When a dev database
-   is reachable, it reconstructs the SQL and runs `EXPLAIN (ANALYZE)` on a seeded table rather
-   than guessing; when it is not, it says so and gives the exact `EXPLAIN` to run. It checks
-   the section 6b table, and it names each query that needs the production check of
-   `~/.claude/skills/_shared/query-check.md`. You ask the user for that check, run it, and
-   update the table.
-
-A finding here is cheap now and expensive later: a wrong column type ships as a migration, and
-a missing index ships as an outage. The plan states the final schema, the indexes and the
-migration count before implementation starts.
-
-Give the project-fit reviewer `$PLAN_PATH`, `$RUN_DIR/context.md`, and
-`~/.claude/skills/simple-plan/references/constraints.md`. Tell it to reject the plan when any constraint rule is broken,
-and to quote the rule number.
-
-Both reviewers check test coverage against constraint rule 10. For every row of the TDD
-plan, the reviewer confirms that the mock target is the outermost call to an external
-service. The reviewer rejects a row that mocks a service, repository, dispatcher, client, or
-model method of this project, and names the outermost call to mock instead. Example finding:
-"TDD row 3 mocks `VendorInvoiceLinkDispatcher` (rule 10). Use the real dispatcher and mock
-`deliver_invoice_link_task.delay`."
+Run the data reviewer whenever the plan adds or changes a table, a column, an index, a migration
+or a query. Skip it otherwise and record that you skipped it.
 
 Apply the findings. Re-run the reviewers. **Stop after two rounds.** Record any finding you
 did not apply, with the reason, in a `## Open findings` section at the end of the plan.
@@ -426,11 +215,6 @@ did not check.
 
 Apply the rewrites to the plan before Phase 4. Say in the presentation which claims stay
 unverified, and why.
-
-**12. Evidence map** — One row per requirement (`R-001` onward), per applicable rule and per
-`Cover now` or `Fail loudly` edge case, with the test, command or QA step that proves it. The
-format is in section 4 of `~/.claude/skills/_shared/spec-evidence.md`. The PR turns each row
-into a line of evidence, so a row with no runnable proof says why.
 
 ## Phase 4 — Present the plan
 
