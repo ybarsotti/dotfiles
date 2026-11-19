@@ -1402,7 +1402,7 @@ assert_contains "$(cat "$SKILL_MD")" "/deep-execute" \
 # planning session out of the implementer seat by default.
 assert_contains "$(cat "$SKILL_MD")" "Execution recommendation" \
   "SKILL.md: Phase 3.5 execution recommendation survives"
-assert_contains "$(cat "$SKILL_MD")" "superpowers:subagent-driven-development" \
+assert_contains "$(cat "$SKILL_MD")" "one implementer worker per task, in order" \
   "SKILL.md: option B (serial, one implementer agent per task) survives"
 # shellcheck disable=SC2016 # literal backticked markdown, not a command substitution
 assert_contains "$(cat "$SKILL_MD")" 'Claude `Workflow`' \
