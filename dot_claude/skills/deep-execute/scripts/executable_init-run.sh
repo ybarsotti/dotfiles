@@ -8,7 +8,7 @@
 #
 #   --max-rounds N      the round cap recorded in manifest.json (default 3)
 #   --agent LANE=AGENT  replaces the plan's agent for LANE; AGENT is one line of
-#                       agents.allowlist, for example "codex gpt-6-sol medium"
+#                       agents.allowlist, for example "codex gpt-6.1-terra medium"
 #   --dry-run           scaffolds into a temporary directory, prints the lanes,
 #                       agents, contract and expected review count, then deletes
 #                       it. RUN_DIR is not touched.

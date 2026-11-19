@@ -190,7 +190,7 @@ expect_fail_item "lane-agent-in-allowlist" "$TMP/bad-agent.md"
 
 # 7. lane-test-command-present
 # shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
-sed 's/| `codex gpt-5.6-terra high` | `tests\/execution.sh` | `none` | `orchestrator` |/| `codex gpt-5.6-terra high` | `none` | `none` | `orchestrator` |/' \
+sed 's/| `codex gpt-6.1-terra high` | `tests\/execution.sh` | `none` | `orchestrator` |/| `codex gpt-6.1-terra high` | `none` | `none` | `orchestrator` |/' \
   "$FIXTURE" > "$TMP/no-test-cmd.md"
 expect_fail_item "lane-test-command-present" "$TMP/no-test-cmd.md"
 
@@ -259,7 +259,7 @@ expect_fail_item "depends-on-no-self" "$TMP/self-dep.md"
 # 20. depends-on-acyclic — planning and execution depend on each other.
 # shellcheck disable=SC2016 # literal backticked plan text in the sed pattern, not a command substitution
 sed -e 's/| `opus high` | `tests\/planning.sh` | `none` | `orchestrator` |/| `opus high` | `tests\/planning.sh` | `none` | `execution` |/' \
-    -e 's/| `codex gpt-5.6-terra high` | `tests\/execution.sh` | `none` | `orchestrator` |/| `codex gpt-5.6-terra high` | `tests\/execution.sh` | `none` | `planning` |/' \
+    -e 's/| `codex gpt-6.1-terra high` | `tests\/execution.sh` | `none` | `orchestrator` |/| `codex gpt-6.1-terra high` | `tests\/execution.sh` | `none` | `planning` |/' \
     "$FIXTURE" > "$TMP/cycle.md"
 expect_fail_item "depends-on-acyclic" "$TMP/cycle.md"
 

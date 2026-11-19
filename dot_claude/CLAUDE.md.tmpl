@@ -127,6 +127,9 @@ Subagents run on Sonnet by default (`CLAUDE_CODE_SUBAGENT_MODEL`). A `model` arg
   architecture decision.
 - Never pass `model: "opus"` to an agent that writes code, fixes code, rebases, runs QA,
   reviews code or reads data. Omit `model` for these agents.
+- Codex follows the same split. Code, fixes, QA and code review run on `gpt-6.1-terra`:
+  pass `-m gpt-6.1-terra` to `codex exec` and `--model gpt-6.1-terra` to an Orca Codex worker.
+  Use `gpt-6.1-sol` only for plans, designs and brainstorming.
 - Give an agent the parts of a long file that it needs, not the whole file.
 
 # Pull Requests

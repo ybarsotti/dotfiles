@@ -387,9 +387,9 @@ assert_exit 1 "$VALIDATE_STATE" "$RUN_L" --json
 # ─── 12. Agent override, dry run, codex brief on every turn ────────────────
 
 REPO_M=$(new_repo)
-RUN_M=$(new_run "$REPO_M" "$FIXTURE_PLAN" --agent "backend=codex gpt-6-sol medium" --max-rounds 5)
+RUN_M=$(new_run "$REPO_M" "$FIXTURE_PLAN" --agent "backend=codex gpt-6.1-terra medium" --max-rounds 5)
 assert_eq "$(jq -r '.workers[] | select(.name == "backend") | "\(.runner) \(.model) \(.effort)"' "${RUN_M}/launch/manifest.json" 2>/dev/null)" \
-  "codex gpt-6-sol medium" "--agent: the override is persisted in the launch manifest"
+  "codex gpt-6.1-terra medium" "--agent: the override is persisted in the launch manifest"
 assert_eq "$(jq -r '.workers[] | select(.lane == "backend") | .runner' "${RUN_M}/manifest.json" 2>/dev/null)" codex \
   "--agent: the run manifest records the confirmed runner"
 assert_eq "$(jq -r '.max_rounds' "${RUN_M}/manifest.json" 2>/dev/null)" 5 "--max-rounds: init-run.sh records the cap"
@@ -428,7 +428,7 @@ stop_loop "$RUN_M" backend "$LOOP_N"
 for RUNNER_O in claude codex; do
   REPO_O=$(new_repo)
   if [ "$RUNNER_O" = codex ]; then
-    RUN_O=$(new_run "$REPO_O" "$FIXTURE_PLAN" --agent "backend=codex gpt-6-sol medium")
+    RUN_O=$(new_run "$REPO_O" "$FIXTURE_PLAN" --agent "backend=codex gpt-6.1-terra medium")
   else
     RUN_O=$(new_run "$REPO_O")
   fi

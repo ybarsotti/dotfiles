@@ -32,6 +32,9 @@ Use the code-intelligence MCP servers in `~/.codex/config.toml` when they are av
 - Write code, identifiers, comments, docs and commit messages in English.
 - Run the tests that cover your change first. Cap the workers: `jest --maxWorkers=2`,
   `vitest --maxWorkers=2`, `pytest -n 2`. Run one full suite at a time.
+- Implementation, fixes, QA and code review run on `gpt-6.1-terra`. `gpt-6.1-sol` is for plans,
+  designs and brainstorming. When you start another Codex agent for code, pass
+  `-m gpt-6.1-terra`.
 - Open a pull request only with the `pr-description` skill (`/pr`). Never run `gh pr create`
   by hand.
 

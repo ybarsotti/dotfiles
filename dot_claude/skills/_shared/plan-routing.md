@@ -44,7 +44,7 @@ Option C is the one exception. It needs ultracode, and only the user can turn ul
 | A | every rule of the option A test below holds | `/deep-execute "$PLAN"` |
 | B | every other plan, and the default | `Skill(skill="implement", args="$PLAN")` |
 | C | the option A test fails, and the option C test below holds | a `Workflow` run (ultracode) |
-| D | the user wants Codex to write one self-contained slice | `codex exec`, this session reviews |
+| D | the user wants Codex to write one self-contained slice | `codex exec -m gpt-6.1-terra`, this session reviews |
 
 Every option starts agents. The session that started them watches them on the schedule of
 `_shared/agent-watch.md`.

@@ -44,7 +44,7 @@ If one check fails, use the subagent mode (section 3). Say which check failed, i
 7. After `worker_done`, read the diff, run the task's tests and gates, then commit.
 
 Never poll a worker, and never type into its terminal. A worker is Claude by default. Use
-`--agent codex` only when the user or the plan names Codex for that work.
+`--agent codex --model gpt-6.1-terra` only when the user or the plan names Codex for that work.
 
 If `worker-start` fails, do not rerun it. Read `failedStage`, follow
 `orca skills get orchestration --reference references/recovery-and-cleanup.md`, and use the

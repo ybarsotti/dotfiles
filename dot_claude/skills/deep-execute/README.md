@@ -98,8 +98,8 @@ The plan's `agent` column must be one of the lines in `agents.allowlist`, which
 ```
 opus high
 sonnet high
-codex gpt-5.6-terra high
-codex gpt-6-sol medium
+codex gpt-6.1-terra high
+codex gpt-6.1-terra medium
 ```
 
 ## Event / reply protocol

@@ -97,7 +97,7 @@ sequenceDiagram
 | orchestrator | Shared contract and README wiring | `contract.schema.json`<br>`README.md` | `backend/**`<br>`frontend/**`<br>`dot_claude/skills/deep-review/**` | `orchestrator` | `true` | `none` | `none` |
 | backend | Backend service | `backend/**` | `frontend/**`<br>`dot_claude/skills/deep-review/**` | `opus high` | `true` | `none` | `orchestrator` |
 | frontend | Frontend app | `frontend/**` | `backend/**`<br>`dot_claude/skills/deep-review/**` | `sonnet high` | `true` | `none` | `orchestrator` |
-| review | Final acceptance checklist | `dot_claude/skills/deep-review/**` | `backend/**`<br>`frontend/**` | `codex gpt-5.6-terra high` | `true` | `none` | `none` |
+| review | Final acceptance checklist | `dot_claude/skills/deep-review/**` | `backend/**`<br>`frontend/**` | `codex gpt-6.1-terra high` | `true` | `none` | `none` |
 
 ## API contract
 

@@ -206,7 +206,7 @@ Loop, starting at iteration 1:
    - When the plan has a `## Query cost` table or a schema change, also run the data reviewer of
      `simple-plan` Phase 3 as an `Agent`. Treat its findings as `proposed_edits`.
 
-   Reviewers are always **Sonnet** on the Claude side; the Codex side runs `gpt-6-sol` at
+   Reviewers are always **Sonnet** on the Claude side; the Codex side runs `gpt-6.1-sol` at
    `model_reasoning_effort=high` (pinned in `scripts/runner.sh`, overridable with
    `DEEP_PLAN_CODEX_MODEL` / `DEEP_PLAN_CODEX_EFFORT`). Each persona gets `plan.md`, the project's `CLAUDE.md`, the ticket body (when a ticket is set), and a short context snapshot. Each writes a verdict JSON to `$RUN_DIR/verdict-<persona>-iter<N>.json`:
 
@@ -353,7 +353,7 @@ The options depend on the harness: Claude Code offers all four, Codex offers A a
   implementer agent per task, in order, strict TDD per task. This session reviews each task.
 - **C — Claude `Workflow` (ultracode), Claude Code only.** Parallel worktrees with adversarial review and no
   lane terminals, but no human input during a run. Needs the user's opt-in; test in `plan-routing.md`.
-- **D — Codex-only implementer, Claude Code only.** `codex exec` writes the code; this session orchestrates,
+- **D — Codex-only implementer, Claude Code only.** `codex exec -m gpt-6.1-terra` writes the code; this session orchestrates,
   gates, reviews and commits. Use when the change is one coherent slice and you want a
   second model's hands on the implementation.
 

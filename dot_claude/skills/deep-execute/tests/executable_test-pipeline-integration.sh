@@ -34,7 +34,7 @@ done
 ALLOW="${ROOT}/dot_claude/skills/deep-execute/agents.allowlist"
 assert_exit 0 test -f "$ALLOW"
 assert_exit 0 grep -qx 'opus high' "$ALLOW"
-assert_exit 0 grep -qx 'codex gpt-5.6-terra high' "$ALLOW"
+assert_exit 0 grep -qx 'codex gpt-6.1-terra high' "$ALLOW"
 
 # ─── End-to-end handoff: fixture parallel plan through validate-plan.sh, ───
 # init-run.sh, validate-contract.sh and validate-run-state.sh — the same

@@ -23,7 +23,7 @@
 |---|---|---|---|---|---|---|---|
 | orchestrator | Shared contract, justfile and README wiring | `justfile`<br>`README.md`<br>`src/shared/contract.schema.json` | `src/planning/**`<br>`src/execution/**`<br>`src/review/**` | `orchestrator` | `tests/orchestrator.sh` | `none` | `none` |
 | planning | Catalog parsing rules | `src/planning/**` | `src/execution/**`<br>`src/review/**` | `opus high` | `tests/planning.sh` | `none` | `orchestrator` |
-| execution | Sync runner | `src/execution/**` | `src/planning/**`<br>`src/review/**` | `codex gpt-5.6-terra high` | `tests/execution.sh` | `none` | `orchestrator` |
+| execution | Sync runner | `src/execution/**` | `src/planning/**`<br>`src/review/**` | `codex gpt-6.1-terra high` | `tests/execution.sh` | `none` | `orchestrator` |
 | review | Final checklist and acceptance tests | `src/review/**` | `src/planning/**`<br>`src/execution/**` | `sonnet high` | `tests/review.sh` | `none` | `none` |
 
 ## API contract
