@@ -131,6 +131,12 @@ Subagents run on Sonnet by default (`CLAUDE_CODE_SUBAGENT_MODEL`). A `model` arg
   pass `-m gpt-6.1-terra` to `codex exec` and `--model gpt-6.1-terra` to an Orca Codex worker.
   Use `gpt-6.1-sol` only for plans, designs and brainstorming.
 - Give an agent the parts of a long file that it needs, not the whole file.
+- Each new agent writes its whole starting context to the cache, and every turn reads it
+  again. Start fewer agents: give one agent a batch of small related tasks (several review
+  fixes, several checks) instead of one agent per task.
+- Send a follow-up or a fix to the agent that already holds the context: `SendMessage` to a
+  subagent, `orca orchestration send` to an Orca worker. Start a new agent only when the work
+  needs a clean context or a different model.
 
 # Pull Requests
 
