@@ -7,7 +7,14 @@ and the report is delivered. `deep-plan`, `simple-plan`, `jira-workflow`, `imple
 
 Stop early only in these cases:
 
-- The user said to stop at the plan, for example "only plan" or "não implementa".
+- The user said not to build, for example "only plan", "plan only", "do not implement",
+  "não implementa" or "só o plano".
+
+A request to approve the plan is not a stop. "Stop at the plan for my approval", "wait for my
+approval" and "I want to review the plan first" ask for the Plannotator gate, which every plan
+has. When the gate approves, the chain starts. When you cannot tell whether the user wants the
+build, ask one question at the approval: build now, or stop at the plan. Never close the run
+on a guess.
 - A decision changes a requirement, a business rule, a contract or the scope. Ask the user.
 - A loop below reaches its round limit with failures left. Report them and ask.
 
@@ -36,7 +43,8 @@ plan approval, before this chain starts (`plan-routing.md`). This chain never as
 
 The Stop hook `~/.claude/hooks/workflow-gate.sh` blocks the end of a turn while a step is
 `todo`. The `review` step cannot be skipped after code was built. When the user stops the run,
-run `workflow.sh close <file> "<reason>"`.
+run `workflow.sh close <file> "<reason>"`. When the user then asks for the build, run
+`workflow.sh reopen <file> "<reason>"` and start the chain at its first open step.
 
 ## Parallel agents run in Orca
 

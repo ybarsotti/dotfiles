@@ -49,8 +49,10 @@ When you start the first agent of this run (an explorer, a planner of `dispatch-
 a review persona, the `ui-designer`), schedule the 5-minute check of
 `~/.claude/skills/_shared/agent-watch.md`. It finds an agent that stalled, hangs on a command,
 loops, or went off its question, and sends the correction. Delete the job when the last
-agent of the phase finished. When the user asks for the
-plan only, run `workflow.sh close "$RUN_DIR/chain.md" "plan only"` after the approval.
+agent of the phase finished. When the user says not to
+build ("only plan", "do not implement", "não implementa"), run
+`workflow.sh close "$RUN_DIR/chain.md" "plan only"` after the approval. "Stop at the plan for
+my approval" is not that: it asks for the gate, and the build starts when the gate approves.
 
 Verify binaries: `git`, `claude`, `jq`. Verify `codex` unless `no_codex` is true.
 

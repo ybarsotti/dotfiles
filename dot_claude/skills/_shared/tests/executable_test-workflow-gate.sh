@@ -45,6 +45,10 @@ ok "review can be skipped before any build" '"$W" skip "$F" review "plan only" >
 ok "review cannot be skipped after a build step is done" '! "$W" skip "$F" review "no time" 2>/dev/null'
 ok "close refuses to skip review after a build" '! "$W" close "$F" "stop" 2>/dev/null'
 
+G="$TMP/test-runs/r2/chain.md"; "$W" init "$G" simple-plan >/dev/null; "$W" close "$G" "plan only" >/dev/null
+"$W" reopen "$G" "plan only" >/dev/null
+ok "reopen opens again the steps that close skipped" 'grep -q "^- \[ \] build " "$G" && grep -q "^- \[ \] review " "$G" && grep -q "^- \[x\] setup " "$G"'
+
 "$W" wait "$F" build.2 "worker w1" >/dev/null
 ok "check passes while a step waits" '"$W" check "$F" >/dev/null'
 "$W" todo "$F" build.2 >/dev/null

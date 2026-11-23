@@ -11,7 +11,8 @@ and still respects the project's patterns, its frameworks, and strict typing.
 `simple-plan` plans, and after your approval it drives the build to an open PR through
 `~/.claude/skills/_shared/after-approval.md`. The planning session does not write production code.
 
-`simple-plan` runs one drafter, two reviewers, and at most two review rounds. It plans **one
+`simple-plan` runs one drafter, one or two `plan-reviewer` agents, and at most three review
+rounds. It plans **one
 task**, never a programme of work.
 
 When the task arrives too big for that, do not hand it to another command and do not plan it
@@ -39,7 +40,10 @@ the build chain. Mark each step when it ends, as section 0 of
 reason, `wait` or `block` before you end a turn. After each phase, run `$W status` and tell
 the user what is done, what is next and what is left. The Stop hook
 `~/.claude/hooks/workflow-gate.sh` blocks the end of a turn while a step is open. When the
-user asks for the plan only, run `$W close "$RUN_DIR/chain.md" "plan only"` after the approval.
+user says not to build ("only plan", "do not implement", "não implementa"), run
+`$W close "$RUN_DIR/chain.md" "plan only"` after the approval. "Stop at the plan for my
+approval" is not that: it asks for the gate, and the build starts when the gate approves.
+Read the stop cases at the top of `~/.claude/skills/_shared/after-approval.md`.
 
 When you start the first agent of this run (an explorer, the breakdown or UI/UX agent, a
 `plan-reviewer`, the `ui-designer`), schedule the 5-minute check of
