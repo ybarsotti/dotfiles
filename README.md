@@ -398,7 +398,7 @@ For databases and heavy services (PostgreSQL, Kafka, Spark, etc.), use Docker Co
 
 **Browsers:** Arc, Brave, Firefox
 
-**Development:** Apidog (API testing), Beekeeper Studio (SQL editor), Conductor (Claude Code + GitHub), OrbStack (containers and Linux VMs), Figma, Ghostty (terminal emulator), Wave Terminal (block/widget terminal with local-LLM AI panel), Visual Studio Code, P4Merge (visual merge tool)
+**Development:** Apidog (API testing), Beekeeper Studio (SQL editor), Conductor (Claude Code + GitHub), OrbStack (containers and Linux VMs), Figma, Ghostty (terminal emulator), Wave Terminal (block/widget terminal with local-LLM AI panel), Visual Studio Code, P4Merge (visual merge tool), Slack CLI (create, run and deploy Slack apps: `slack login`, `slack create`, `slack run`, `slack deploy`)
 
 **Productivity:** Alt-Tab (window switcher), Raycast (launcher), BetterDisplay, Stats (menu bar monitor), Slack, Notion
 

@@ -187,6 +187,7 @@ packages:
         - wave                # Wave Terminal (blocks/widgets, wsh, local-LLM AI panel)
         - visual-studio-code  # IDE
         - p4v                 # Perforce Visual Merge Tool (P4Merge) for Git merge conflicts
+        - slack-cli           # Slack CLI: create, run and deploy Slack apps
 
       # Productivity & Utilities
       productivity:
