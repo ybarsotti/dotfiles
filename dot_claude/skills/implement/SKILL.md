@@ -20,7 +20,10 @@ QA green, PR open, report delivered". The goal keeps the session going after the
 This applies when `/implement` is the first command too.
 
 Find the step file. The plan header names it (`**Step file:**`). When the plan has none,
-create it: `~/.claude/skills/_shared/workflow.sh init "$RUN_DIR/chain.md" implement --plan "$PLAN"`.
+create it in a new run folder:
+`RUN_DIR=~/.claude/implement-runs/$(date +%Y%m%d-%H%M%S)`, then
+`~/.claude/skills/_shared/workflow.sh init "$RUN_DIR/chain.md" implement --plan "$PLAN"`.
+The Stop hook trusts only step files under `~/.claude/*-runs/`.
 Add one `build.<n>` row per task, in order: `workflow.sh add <file> build.<n> "<task>" --after build`.
 
 ## Build

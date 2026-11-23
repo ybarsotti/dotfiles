@@ -20,6 +20,9 @@ WORKFLOW="${WORKFLOW_SH:-$HOME/.claude/skills/_shared/workflow.sh}"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/workflow-gate"
 LOG="$STATE_DIR/gate.log"
 ESCAPE="encerrar mesmo assim"
+# Only a step file inside a run folder is trusted. Any text in the transcript (a fetched page,
+# a file the agent read) can contain a tracking line, so the path alone proves nothing.
+TRUSTED_ROOT="${WORKFLOW_TRUSTED_ROOT:-$HOME/.claude}"
 
 command -v jq >/dev/null 2>&1 || exit 0
 [ -x "$WORKFLOW" ] || exit 0
@@ -35,6 +38,12 @@ TRANSCRIPT=$(jq -r '(.agent_transcript_path // "") as $a | if $a != "" then $a e
 
 FILE=$(grep -o -- '\[workflow-gate\] tracking [^"\\ ]*' "$TRANSCRIPT" | tail -1 | cut -d' ' -f3-)
 [ -n "${FILE:-}" ] && [ -f "$FILE" ] || exit 0
+case "$FILE" in
+  *..*) exit 0 ;;
+  "$TRUSTED_ROOT"/*-runs/*) ;;
+  *) exit 0 ;;
+esac
+head -1 "$FILE" | grep -q '^# Workflow: ' || exit 0
 [ -n "$(find "$FILE" -mtime -2 2>/dev/null)" ] || exit 0
 
 # The escape phrase counts only in a message that the user typed, not in a hook message.

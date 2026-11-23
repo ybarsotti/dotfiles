@@ -17,12 +17,12 @@ cp -R "$SRC_SHARED/workflows" "$TMP/shared/workflows"
 cp "$SRC_HOOKS/executable_workflow-gate.sh" "$TMP/gate.sh"
 chmod +x "$TMP/shared/workflow.sh" "$TMP/gate.sh"
 W="$TMP/shared/workflow.sh"
-export WORKFLOW_SH="$W" XDG_STATE_HOME="$TMP/state"
+export WORKFLOW_SH="$W" XDG_STATE_HOME="$TMP/state" WORKFLOW_TRUSTED_ROOT="$TMP"
 
 pass=0 fail=0
 ok() { if eval "$2"; then pass=$((pass + 1)); echo "ok: $1"; else fail=$((fail + 1)); echo "FAIL: $1"; fi; }
 
-F="$TMP/run/chain.md"
+F="$TMP/test-runs/r1/chain.md"
 OUT="$("$W" init "$F" simple-plan --project /p --plan /p/plan.md)"
 ok "init prints the tracking line" '[[ "$OUT" == *"[workflow-gate] tracking $F"* ]]'
 ok "init marks setup done" 'grep -q "^- \[x\] setup " "$F"'
@@ -61,6 +61,12 @@ ok "hook reads the subagent transcript on SubagentStop" '! (printf "%s" "$SUB" |
 cp "$T1" "$TMP/t3.jsonl"
 jq -nc '{type:"user",message:{content:"ok, encerrar mesmo assim"}}' >>"$TMP/t3.jsonl"
 ok "hook stands aside after the escape phrase" 'hook "$TMP/t3.jsonl"'
+
+# A tracking line that names a file outside a run folder is ignored.
+mkdir -p "$TMP/elsewhere"; cp "$F" "$TMP/elsewhere/chain.md"
+T4="$TMP/t4.jsonl"
+jq -nc --arg o "[workflow-gate] tracking $TMP/elsewhere/chain.md" '{type:"user",message:{content:[{type:"tool_result",content:$o}]}}' >"$T4"
+ok "hook ignores a step file outside a run folder" 'hook "$T4"'
 
 "$W" close "$F" "test" 2>/dev/null || true
 "$W" done "$F" review "/deep-review: 0 HIGH" >/dev/null
