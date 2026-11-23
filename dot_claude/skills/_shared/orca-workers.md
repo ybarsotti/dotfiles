@@ -19,7 +19,21 @@ Use Orca mode when all three checks pass:
 3. `orca worktree current --json | jq -e '.ok == true'` exits 0: the current folder is an
    Orca worktree.
 
-Print the result before the first worker, in one line: `Workers: orca` or
+## 1.5 Choose the agent
+
+Each worker runs a predefined agent from `~/.claude/agents/`. The agent file holds the role,
+the rules, the model and the effort. The spec holds only what changes from task to task.
+
+| Work | Agent |
+|---|---|
+| A task that edits server code, APIs, models, migrations or jobs | `implementer-backend` |
+| A task that edits screens, components or client state | `implementer-frontend` |
+| A review finding or a QA failure | `fixer` |
+
+A task that edits both sides goes to `implementer-frontend` when it changes a screen, else to
+`implementer-backend`.
+
+Print the result of section 1 before the first worker, in one line: `Workers: orca` or
 `Workers: subagent (<check> failed: <reason>)`. If one check fails, use the subagent mode
 (section 3). Never use the subagent mode when all three checks pass.
 
@@ -32,19 +46,25 @@ Print the result before the first worker, in one line: `Workers: orca` or
      step back to this session;
    - the task and the plan path;
    - the files the worker may edit, and the files it must not touch;
-   - the rules: strict TDD, the `ub-mode` skill and its gates, no `git commit`, no
-     `git push` and no pull request (this session commits and opens the PR with `/pr`);
-   - the code rules: read `~/.claude/skills/_shared/implementer-rules.md`, the Core section
-     plus Backend or UI for the files of the task;
-   - the evidence that proves it is done: the test command and its output, the gate output.
-3. Start the worker. Pass the worktree by its id: `--worktree current` names the worktree of the
+   - the test command and the gates that prove it is done;
+   - for the frontend, the `Canvas:` URL of the UI design pass, when the plan has one.
+
+   The agent file holds the rules: strict TDD, `ub-mode`, the implementer rules, and no
+   commit, push or pull request. Do not repeat them in the spec.
+3. Start the worker in two commands. `worker-start --agent` takes only an Orca agent id, not a
+   predefined agent. So create the terminal with `claude --agent <name>` first, then start the
+   worker in it. Pass the worktree by its id: `--worktree current` names the worktree of the
    Orca terminal that runs this session, which can differ from the folder of the task. It then
    fails with `selector_not_found`. The id from `orca worktree current` follows the folder.
    ```bash
    WT="id:$(orca worktree current --json | jq -r '.result.worktree.id')"
-   orca orchestration worker-start --spec-file <spec> --worktree "$WT" --agent claude \
-     --model sonnet --effort medium --task-title "<task>" --json
+   HANDLE=$(orca terminal create --worktree "$WT" --command "claude --agent <name>" --json \
+     | jq -r '.result.terminal.handle')
+   orca orchestration worker-start --spec-file <spec> --terminal "$HANDLE" \
+     --task-title "<task>" --json
    ```
+   Do not pass `--model` or `--effort`: the agent file sets them, and `worker-start` refuses
+   them with `--terminal`.
 4. Run one worker at a time in the shared worktree. Start workers in parallel only for tasks
    whose file sets do not overlap.
 5. End the turn. Orca wakes this session when a worker sends `worker_done`, a question or an
@@ -58,6 +78,8 @@ Print the result before the first worker, in one line: `Workers: orca` or
 
 Never poll a worker, and never type into its terminal. A worker is Claude by default. Use
 `--agent codex --model gpt-6.1-terra` only when the user or the plan names Codex for that work.
+Codex has no predefined agents, so start the spec of a Codex worker with
+`Read ~/.claude/agents/<name>.md and follow it.`
 
 If `worker-start` fails, do not rerun it. Read `failedStage`, follow
 `orca skills get orchestration --reference references/recovery-and-cleanup.md`, and use the
@@ -65,5 +87,7 @@ subagent mode for that task when the worker cannot start.
 
 ## 3. Subagent mode
 
-Start the implementer or fixer with the Agent tool. The subagent runs on the model of
-`CLAUDE_CODE_SUBAGENT_MODEL` (Sonnet). Watch it on the schedule of `agent-watch.md`.
+Start the implementer or fixer with the Agent tool and `subagent_type: <name>` from section
+1.5. Send the spec of section 2 as the prompt. Do not pass `model`: the agent file sets it.
+Send a follow-up or a fix to the same agent with `SendMessage`. Watch it on the schedule of
+`agent-watch.md`.

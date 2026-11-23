@@ -746,6 +746,14 @@ QA has one route: the chain starts the `qa-ui` and `qa-business` agents. `qa-bus
 plan's `qa-plan.yaml` through `/qa-test-plan` when it names one, and drives `agent-browser`
 itself otherwise.
 
+The build and the fixes use predefined agents in `dot_claude/agents/`: `implementer-backend`,
+`implementer-frontend` and `fixer`. Each agent file fixes the role, the rules, the model
+(Sonnet) and the effort (medium). The spawn message carries only the task. In Orca, the chain
+starts the agent with `orca terminal create --command "claude --agent <name>"`, then
+`orca orchestration worker-start --terminal <handle>`. Outside Orca, it uses the `Agent` tool
+with `subagent_type: <name>`. The settings set `subagentPromptCacheTtl` to `1h` and leave agent
+teams off.
+
 ##### The Stop hook that refuses to lose the run report
 
 Phase 5 was the only phase without a gate, and across three real runs the report was never built

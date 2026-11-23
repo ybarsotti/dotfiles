@@ -14,12 +14,12 @@
     "defaultMode": "bypassPermissions"
   },
   "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet",
     "CODE_MODERNIZATION_TELEMETRY": "0"{{ if env "CLAUDE_CODE_OAUTH_TOKEN" }},
     "CLAUDE_CODE_OAUTH_TOKEN": "{{ env "CLAUDE_CODE_OAUTH_TOKEN" }}"{{ end }}
   },
   "teammateMode": "auto",
+  "subagentPromptCacheTtl": "1h",
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh",
