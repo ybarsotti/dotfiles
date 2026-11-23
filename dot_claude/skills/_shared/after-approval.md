@@ -94,7 +94,7 @@ the owning lane with `reply.sh RUN_DIR LANE "<finding, file, line, fix>"`, gate 
 1. Run `/deep-review default` over the whole change, with its full process: every phase, the
    fix rounds and the simplify pass. Each part had its own review; this pass checks how the
    parts fit together. Its Phase 4.5 fixes every CRITICAL, HIGH and MEDIUM finding and
-   re-runs the panel, for 2 fix rounds at most.
+   re-runs the panel, for 3 fix rounds at most.
 2. A separate agent applies the fixes. The reviewer never fixes its own finding. Start the
    `fixer` agent as `orca-workers.md` describes. Under `/deep-execute`, that agent is the owning lane
    (section 1).

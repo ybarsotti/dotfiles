@@ -108,7 +108,7 @@ than a question. Do not stop at the report and wait to be asked.
    each `prod-check:` QUESTION by `~/.claude/skills/_shared/query-check.md` §2; it can move a severity.
 2. **Re-run the panel on the fix**, scoped to the changed files. A fix that introduces its own
    finding is common, and the second pass is what catches it.
-3. **Stop after two fix rounds.** What survives goes in a `## Open findings` section with the
+3. **Stop after three fix rounds.** What survives goes in a `## Open findings` section with the
    reason, and you say plainly which findings remain.
 4. **LOW and QUESTION are the user's call.** List them and ask; do not fix them silently.
 

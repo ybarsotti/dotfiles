@@ -39,7 +39,7 @@ hand the problem to another command.
    the non-goals, the approach, the project fit, the concrete types, the affected files, an
    edge-case decision table, the TDD test list, and the validation steps.
 3. **Review** — the `plan-reviewer` agent, one per side that the plan changes (backend,
-   frontend), in parallel, for at most 2 rounds. It checks scope drift, the plan format,
+   frontend), in parallel, for at most 3 rounds. It checks scope drift, the plan format,
    types, project patterns, clean and reusable code, callers and flows the plan missed,
    external systems, architecture, edge cases, tests, and the data or UI of its lens.
 3.5 **Blindspot** — `blindspot`, over the plan itself. The Phase 3 reviewers share the

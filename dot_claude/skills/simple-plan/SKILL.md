@@ -206,7 +206,7 @@ systems, architecture, edge cases, tests, and data or UI for its lens.
 
 Each agent writes `$RUN_DIR/plan-review-<lens>-r<round>.md`. Apply every CRITICAL and HIGH
 finding. Apply a MEDIUM finding when the fix stays in scope. Re-run the agents on the new plan.
-**Stop after two rounds.** Record any finding you did not apply, with the reason, in a
+**Stop after three rounds.** Record any finding you did not apply, with the reason, in a
 `## Open findings` section at the end of the plan. Mark the `plan-review` step done with the
 paths of the last verdict files.
 

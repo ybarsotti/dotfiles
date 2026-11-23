@@ -37,5 +37,5 @@ model method of this project, and names the outermost call to mock instead. Exam
 "TDD row 3 mocks `VendorInvoiceLinkDispatcher` (rule 10). Use the real dispatcher and mock
 `deliver_invoice_link_task.delay`."
 
-Apply the findings. Re-run the reviewers. **Stop after two rounds.** Record any finding you
+Apply the findings. Re-run the reviewers. **Stop after three rounds.** Record any finding you
 did not apply, with the reason, in a `## Open findings` section at the end of the plan.
