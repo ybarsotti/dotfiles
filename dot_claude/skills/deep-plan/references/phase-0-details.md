@@ -63,8 +63,9 @@ When it is large but splits into working slices that ship in one PR, recommend s
 and has no such slices. `deep-plan` is the default for this command, and a recommendation that
 always fires teaches the user to skip it.
 
-## Phase 0.1 — Plan mode rationale
+## Phase 0.1 — Why deep-plan does not use plan mode
 
 deep-plan reads, indexes, interviews and writes plan artifacts under `$RUN_DIR`, and touches no
-project file. Plan mode makes the Plannotator `ExitPlanMode` hook fire at Phase 3, so the user
-approves the plan in the Plannotator UI instead of a terminal wall of text.
+project file. The skill rule enforces that. Plan mode adds its own instructions, which compete
+with this workflow, and Codex has no plan mode. The `plannotator annotate --gate` loop in Phase 3
+is the only approval, so the user approves the plan once.

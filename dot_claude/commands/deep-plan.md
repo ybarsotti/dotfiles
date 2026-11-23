@@ -9,8 +9,7 @@ plan, the same session builds it, reviews it, runs QA, opens the PR and delivers
 report, without waiting for you (`~/.claude/skills/_shared/after-approval.md`). Say "only
 plan" to stop at the approved plan.
 
-0. **Plan mode** — `EnterPlanMode` first; every phase up to approval runs inside it, no
-   project file is touched.
+0. **No project edits** — no plan mode; no project file is touched before the approval.
 1. **Clarify + grill** — `AskUserQuestion` sweep, then `grill-with-docs` (relentless
    interview + ADRs/glossary).
 2. **Brainstorm** — `superpowers:brainstorming`.
@@ -23,8 +22,8 @@ plan" to stop at the approved plan.
 5. **QA plan** — when flows/screens change, `/qa-plan` maps requirements and journeys into
    reviewed `qa-plan.yaml` before implementation.
 6. **Present** — `finalize-plan.sh` validate/repair/tick gate, then **Plannotator**:
-   `plannotator annotate <plan> --gate` for the full plan, then `ExitPlanMode` (its hook
-   re-opens the UI for final approval).
+   `plannotator annotate <plan> --gate` for the full plan, in a loop. The pass with no
+   annotations is the approval.
 7. **Execution recommendation** — pick the executor from the plan's `## Execution shape`
    (`~/.claude/skills/_shared/plan-routing.md`).
 8. **Build to PR** — run `~/.claude/skills/_shared/after-approval.md` end to end.

@@ -56,7 +56,7 @@ If any are missing, loop back once into Phase 2 with a synthetic CHANGES_REQUEST
 
 **Present the plan through Plannotator (mandatory — never a terminal wall of text):**
 
-The plan is always reviewed in the Plannotator UI, in two passes:
+The plan is always reviewed in the Plannotator UI:
 
 1. **Gate the plan page.** `plannotator annotate "$RUN_DIR/plan.html" --gate` blocks until the
    user approves or returns annotations. Address **every** annotation in `plan.md`, re-run
@@ -66,13 +66,11 @@ The plan is always reviewed in the Plannotator UI, in two passes:
    ~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR" plannotator-annotate
    ```
 
-2. **Approve the plan-mode summary.** Call `ExitPlanMode` with the humanized distillation
-   (goal, approach, key decisions, risks, sequence, link to `$RUN_DIR/plan.md`). With the
-   `plannotator` plugin enabled, its `PermissionRequest` hook intercepts `ExitPlanMode` and
-   opens the same UI for the final approve / request-changes; on request-changes the
-   annotations come back — apply them and call `ExitPlanMode` again (Plannotator shows the
-   plan diff between submissions). If the plugin is not installed, `ExitPlanMode` just
-   behaves normally and pass 1 was the annotation gate.
+   The gate pass that returns no annotations is the approval.
+
+2. **Print the summary.** Print the humanized distillation in the chat: goal, approach, key
+   decisions, risks, sequence, and the link to `$RUN_DIR/plan.md`. Do not call
+   `ExitPlanMode`.
 
 Do **not** paste the full `plan.md` into the chat — the file path plus the humanized summary
 is what the user reads; Plannotator carries the detail.

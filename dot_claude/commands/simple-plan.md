@@ -47,8 +47,8 @@ hand the problem to another command.
    author's reading history. This pass labels every claim READ or INFERRED, then opens the
    surface behind each INFERRED claim or rewrites the claim to what was observed.
 4. **Present** — when the plan adds machinery, `shed-light` first, so the approval covers
-   the upkeep and not only the design. Then `plannotator annotate --gate`, then
-   `ExitPlanMode`.
+   the upkeep and not only the design. Then `plannotator annotate --gate` in a loop. The
+   pass with no annotations is the approval.
 5. **Build to PR** — `/qa-plan` first when a flow or screen changes, then
    `~/.claude/skills/_shared/after-approval.md` end to end, then the next task from the
    breakdown.

@@ -19,7 +19,7 @@ hands off the execution half. Invoke each planning-phase skill via the Skill too
 phase. These are **mandatory workflows, not suggestions.** Read `references/superpowers-mapping.md`
 for the full table of skills, phases and owners.
 
-Order: `EnterPlanMode` (0.1), `grilling` + `domain-modeling` (0.7), `brainstorming` (1),
+Order: `grilling` + `domain-modeling` (0.7), `brainstorming` (1),
 `writing-plans` (1.5), `/qa-plan` (2.4, when user flows or screens change), the plan page and
 `plannotator annotate --gate` (3). Then handoff to `/deep-execute` or `implement`.
 
@@ -41,12 +41,11 @@ Verify binaries: `git`, `claude`, `jq`. Verify `codex` unless `no_codex` is true
 
 If `dry_run` is true: print the list of phases below with the spawned-agent counts and exit. Do not spawn anything.
 
-## Phase 0.1 — Enter plan mode (mandatory)
+## Phase 0.1 — No project edits before approval (mandatory)
 
-**Before any exploration, bootstrap, question, or draft**, call `EnterPlanMode()`. Skip it when
-already in plan mode. Phase 0.2 through Phase 3 run **inside plan mode** and touch **no project
-file**; artifacts go under `$RUN_DIR`. Never leave plan mode before the Phase 3 `ExitPlanMode`.
-If a phase seems to need a project edit, it belongs in the plan.
+Do not use plan mode. Phase 0.2 through Phase 3 touch **no project file**; artifacts go under
+`$RUN_DIR`. If a phase seems to need a project edit, it belongs in the plan. The Phase 3
+Plannotator gate is the only approval.
 
 ## Phase 0.2 — Bootstrap code intelligence (mandatory)
 
@@ -168,9 +167,9 @@ Plannotator, never as a terminal wall of text:
 
 1. `plannotator annotate "$RUN_DIR/plan.html" --gate`. Address **every** annotation in `plan.md`,
    rerun `finalize-plan.sh`, re-render, reopen. Loop until approved with no annotations. Record it
-   with `superpowers-invoke.sh "$RUN_DIR" plannotator-annotate`.
-2. Call `ExitPlanMode` with the humanized summary (goal, approach, key decisions, risks, sequence,
-   link to `$RUN_DIR/plan.md`). Apply returned annotations and call it again.
+   with `superpowers-invoke.sh "$RUN_DIR" plannotator-annotate`. That pass is the approval.
+2. Print the humanized summary in the chat: goal, approach, key decisions, risks, sequence, and
+   the link to `$RUN_DIR/plan.md`.
 
 Do **not** paste the full `plan.md` into the chat.
 
@@ -219,9 +218,9 @@ TDD enforcement: `superpowers:test-driven-development`.
 - A spawned agent times out: mark its verdict CHANGES_REQUESTED with note "timeout", continue.
 - Plan iter cap reached with disagreements: `AskUserQuestion` tiebreak; never silently force-approve.
 - `plannotator` CLI missing: say so, print the humanized summary inline (never the whole `plan.md`),
-  point at the file path, proceed to `ExitPlanMode`. Install: `curl -fsSL https://plannotator.ai/install.sh | bash`.
+  point at the file path, and ask for approval with `AskUserQuestion` (in Codex, ask in the chat
+  and wait). Install: `curl -fsSL https://plannotator.ai/install.sh | bash`.
 - `plannotator annotate --gate` exits without feedback: treat as approved, note it, continue.
-- Not in plan mode at Phase 3: still run the `annotate --gate` pass; skip `ExitPlanMode`.
 
 ## Long or multi-day planning
 

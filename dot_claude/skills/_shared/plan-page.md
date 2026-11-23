@@ -60,8 +60,8 @@ When no trigger holds, record this line in the plan: `Plan page: local — <reas
 3. Send the page URL to the open `ui-designer` worker, with `orca terminal send` to its
    terminal, or `SendMessage` when it runs as an `Agent`. The worker adds a `Plan:` link to the
    canvas.
-4. Put the page URL in the `ExitPlanMode` summary.
-5. Before `ExitPlanMode`, read the page comments with `ArtifactComments`. Treat each comment as
+4. Put the page URL in the plan summary that the chat shows.
+5. Before the final `plannotator annotate --gate` pass, read the page comments with `ArtifactComments`. Treat each comment as
    an annotation from step 6 of section 1.
 6. After the stamp (`plan-stamp.sh approve`), publish the page again with an "Approved" banner
    and the stamp hash from `plan-stamp.sh hash`.

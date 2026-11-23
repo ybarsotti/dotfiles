@@ -9,7 +9,7 @@ through the shared after-approval chain, unless the user said to stop at the pla
 ```
                   ┌─────────────────────────────────────────────┐
    /deep-plan ──▶  │ Phase 0:   parse-args.sh (flags → JSON)      │
-                  │ Phase 0.1: EnterPlanMode (plan mode on)      │
+                  │ Phase 0.1: no project edits (no plan mode)   │
                   │ Phase 0.7: grill-with-docs (interview+ADRs)  │
                   │ Phase 1:   brainstorming                     │
                   │ Phase 1.5: Draft (Opus + Codex in parallel)  │
@@ -79,14 +79,13 @@ clarifying Qs, Mermaid, rationale, QA flag, machine-validated checklist).
 
 Always through **Plannotator**, never a terminal dump: render the humanized `plan.html` per
 `~/.claude/skills/_shared/plan-page.md`, gate it with `plannotator annotate plan.html --gate`
-(loop until no annotations), then `ExitPlanMode` with the humanized summary — the plannotator plugin's `PermissionRequest` hook re-opens the UI for final
-approve / request-changes with a plan diff between submissions.
+(loop until no annotations). The pass with no annotations is the approval. The chat then shows
+the humanized summary.
 
 ## Requirements
 
 - `claude` CLI, `codex` CLI (unless `--no-codex`), `jq`, `git`
-- `plannotator` CLI (`curl -fsSL https://plannotator.ai/install.sh | bash`) + the
-  `plannotator@plannotator` plugin enabled (for the ExitPlanMode hook)
+- `plannotator` CLI (`curl -fsSL https://plannotator.ai/install.sh | bash`)
 - Runtime deps for the pipeline: `mattpocock-skills:grilling`, `mattpocock-skills:domain-modeling`,
   `superpowers:*`, and the Plannotator visual explainer that `_shared/plan-page.md` reads
   (installed plugins, not vendored here)

@@ -7,7 +7,6 @@ execution half. Invoke each planning-phase skill via the Skill tool at its mappe
 
 | # | superpowers / skill | deep-plan phase | run by |
 |---|---------------------|----------------|--------|
-| ✳ | `EnterPlanMode` (plan mode on) | Phase 0.1 | deep-plan |
 | 0 | `grilling` + `domain-modeling` | Phase 0.7 | deep-plan |
 | 1 | `brainstorming` | Phase 1 | deep-plan |
 | 2 | `writing-plans` | Phase 1.5 | deep-plan |

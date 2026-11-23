@@ -21,7 +21,8 @@ down, for its own run.
 
 ## Setup
 
-Run every phase inside plan mode. Call `EnterPlanMode` before Phase 0.
+Do not use plan mode. Until the plan is approved, write only `$RUN_DIR` and the plan file.
+Change no other project file. The Phase 4 Plannotator gate is the only approval.
 
 Set the run directory:
 
@@ -225,8 +226,9 @@ unverified, and why.
    and not only the design. Skip it when the plan only changes code the team already owns.
 1. Render the plan page and decide where it lives per `~/.claude/skills/_shared/plan-page.md`.
    Then gate it: `plannotator annotate "${PLAN_PATH%.md}.html" --gate`.
-2. Apply the annotations that come back to `$PLAN_PATH`, then render the page again.
-3. `ExitPlanMode` for the final approval.
+2. Apply the annotations that come back to `$PLAN_PATH`. Render the page again, then gate it
+   again.
+3. Loop until a gate pass returns no annotations. That pass is the final approval.
 4. Stamp the approved plan: `~/.claude/skills/_shared/plan-stamp.sh approve "$PLAN_PATH"`.
    Commit the plan and its `.approved` stamp together.
 5. When `.workflow/config.json` exists, run `Skill(skill="workflow-post-plan")` with the Phase 3 reviewer results as evidence.
@@ -258,7 +260,8 @@ Rules for this pipeline inside that chain:
 ## Failure handling
 
 - `plannotator` CLI is missing → print a short summary of the plan inline, print
-  `$PLAN_PATH`, and continue to `ExitPlanMode`. Install it with
+  `$PLAN_PATH`, and ask for approval with `AskUserQuestion`. In Codex, ask in the chat and
+  wait for the answer. Install it with
   `curl -fsSL https://plannotator.ai/install.sh | bash`.
 - `plannotator annotate --gate` exits with no feedback → treat the plan as approved, record
   that, and continue.
