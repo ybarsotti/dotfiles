@@ -92,6 +92,11 @@ Check every item for your lens. A finding states the problem, the evidence and t
     cost, as `reviewers.md` asks.
 13. **Frontend lens only: UI.** Every state (loading, empty, error, pending, success), the
     390 px layout, the keyboard path, and the reuse of the design system components.
+14. **User-facing copy, both lenses.** Each text the plan writes for users (UI, emails,
+    notifications, error messages, exports) follows section 6b of `ui-quality.md`: it says
+    what the user sees or gets, in the user's words. Flag each text that explains internals
+    (a job, a schedule, a sync, a queue, an API) or uses code terms. Quote it and propose the
+    replacement.
 
 ## Output
 

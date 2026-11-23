@@ -74,6 +74,23 @@ The plan lists every state of the screen. The implementation builds each one.
 - Test each screen with one item, many items, a very long name, and a number wider than its
   column.
 
+## 6b. Copy says what the user sees and gets
+
+This applies to every text a user reads: labels, buttons, hints, empty states, toasts, errors,
+emails, notifications, exports and any page made for users.
+
+- Say what is on the screen, what an action does for the user, or the information they need.
+  Nothing else.
+- Never explain how the system works underneath. No jobs, schedules, crons, queues,
+  webhooks, syncs, retries, caches, tables, APIs, models, flags, internal ids or status codes.
+  - Wrong: "A background job runs every hour to sync your invoices from Stripe."
+  - Right: "Invoices update automatically." Or show the fact: "Updated 10:42".
+- Use the words of the user, not the words of the code. "Customer", not `account_owner`.
+- An error says what happened and what the user can do next. Never a code, an exception name
+  or a stack trace.
+- Do not explain a rule the user cannot act on. Show its result instead.
+- Keep it short and plain. One idea per sentence.
+
 ## 7. Visual finish
 
 - Icons come from the project's icon set. Use one size per context and one stroke style. Put

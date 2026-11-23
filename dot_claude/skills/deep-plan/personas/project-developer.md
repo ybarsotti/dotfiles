@@ -21,6 +21,9 @@ You read the candidate plan against the **actual codebase**:
   `@ts-expect-error`, `pylint: disable`) instead of fixing the cause?
 - Does every signature the plan declares state its types, and does the plan leave any
   dependency in the manifest that nothing imports?
+- Does each text the plan writes for users (UI, emails, notifications, error messages) say
+  only what the user sees or gets, per section 6b of `~/.claude/skills/_shared/ui-quality.md`?
+  Flag copy that explains internals (a job, a schedule, a sync, an API) or uses code terms.
 
 ## Process
 

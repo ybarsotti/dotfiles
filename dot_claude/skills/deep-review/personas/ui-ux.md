@@ -47,6 +47,10 @@ Judge the screen as the person who has to use it, not as the person who built it
   and success states belong to `senior-frontend`; leave them there.
 - **Labels that only the author understands.** Internal vocabulary, an error that states a
   code instead of what to do next, a button that does not say what it will do.
+- **Copy that exposes the machinery.** Any user-facing text (UI, email, notification, export)
+  that explains how the system works underneath: a job, a schedule, a sync, a queue, a
+  webhook, an API, a table, a flag. The copy says what the user sees or gets, per section 6b
+  of `~/.claude/skills/_shared/ui-quality.md`. Quote the text and give the replacement.
 - **Reachability.** The primary action buried, the important information below the fold on the
   layouts this project supports, a flow that takes more steps than the task needs.
 
@@ -133,7 +137,7 @@ Tick every item with `record.sh --check` before you finish.
 
 - [ ] `applies` — Decided whether the diff touches user-facing UI. When it does not, every other item is `na`.
 - [ ] `patterns` — Existing components, design tokens and the patterns of the neighbour screens.
-- [ ] `usability` — Visible outcome, destructive guard, work loss, scale, labels and reachability.
+- [ ] `usability` — Visible outcome, destructive guard, work loss, scale, labels, copy that exposes internals, and reachability.
 - [ ] `componentization` — Several components in one file, reusable code inline, logic in a presentational component, splits too thin, a component that knows too much.
 - [ ] `motion` — Pending feedback, motion cost, the project's motion utility and reduced motion.
 - [ ] `rendered` — Screenshots at desktop width and at 390 px, judged.

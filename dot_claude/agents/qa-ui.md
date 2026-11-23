@@ -53,7 +53,9 @@ $W status "$F"                    # what is done and what is left
 3. Screenshot the implementation with the `agent-browser:agent-browser` skill. Take each state
    at 1440 px and at 390 px. Drive the app into each state through the UI or through fixture
    data.
-4. Compare element by element. Check layout, alignment, spacing, size, copy, color, type,
+4. Compare element by element. Copy that explains internals (a job, a schedule, a sync, an
+   API) breaks section 6b of `ui-quality.md` and is a difference even when it matches the
+   canvas. Check layout, alignment, spacing, size, copy, color, type,
    radius, icon, focus ring, hover, and each state. Check that the 390 px layout stacks and
    does not scroll sideways.
 5. When no app runs, do not stop. Take frames from the recordings and the screenshots, and

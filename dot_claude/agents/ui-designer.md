@@ -80,7 +80,9 @@ new project, no screens` in `design-map.md` with the evidence, such as an empty 
 3. Draw one artboard per screen and per state: loading, empty, error, pending action and
    success, plus every other state in the plan's states table. Add each screen at 390 px.
 4. Draw the real components from step 1 with their real variants. Use the real copy from the
-   ticket. Put a placeholder such as `[ORDER COUNT]` where a value is not known.
+   ticket. Put a placeholder such as `[ORDER COUNT]` where a value is not known. Write every
+   text per section 6b of `~/.claude/skills/_shared/ui-quality.md`: what the user sees or
+   gets, never how the system works underneath.
 5. Keep the layout of the current screen from step 2. Change only what the ticket changes, and
    draw it inside the existing regions. A new screen follows the layout of its reference
    screens.

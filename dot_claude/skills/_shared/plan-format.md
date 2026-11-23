@@ -128,6 +128,9 @@ A step is ready when the implementer can write exactly one reasonable thing from
 - **A reference to another task:** point to the Interfaces block of that task. Do not repeat
   its code.
 
+Exact user-facing copy in the plan follows section 6b of `~/.claude/skills/_shared/ui-quality.md`:
+it says what the user sees or gets, never how the system works underneath.
+
 A plan holds the decisions that the implementer cannot make alone. A plan longer than its code
 is a transcript, not a plan. A line that decides nothing ("TBD", "handle edge cases", "add
 validation", a type that no task defines) is a gap.
