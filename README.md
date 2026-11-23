@@ -790,8 +790,9 @@ flowchart TD
     G --> R["plan review<br/>plan-reviewer ×1-2 (simple) · 5 personas (deep)<br/>≤ 3 rounds"]
     R --> A[Plannotator gate<br/>no annotations = approved]
     A --> B["build: implement or /deep-execute<br/>one build.n row per task"]
-    B -. every 10 min .-> W["agent-watch: stalled or off course?<br/>send the correction"]
+    B -. every 5 min .-> W["agent-watch: stalled or off course?<br/>send the correction"]
     W -.-> B
+    G -. every 5 min .-> W
     B --> DR["final /deep-review, full process<br/>≤ 3 fix rounds · cannot be skipped"]
     DR --> Q[qa-ui · qa-business → fixer, ≤ 3 rounds]
     Q --> D[demo → run report]
@@ -802,9 +803,13 @@ flowchart TD
 
 ##### Watching the agents
 
-`_shared/agent-watch.md` schedules a check every 10 minutes when the first agent starts
-(`CronCreate`; a 10-minute wait timeout under Codex). The check reads each agent's step file,
-its output and its diff. A **stalled** agent shows no progress or waits on a prompt. An **off
+`_shared/agent-watch.md` schedules a check every 5 minutes when the first agent starts
+(`CronCreate`; a 5-minute wait timeout under Codex). It covers the planning agents (explorers,
+planners, plan reviewers, the `ui-designer`) and the build agents. The check reads each agent's
+step file, its output and its diff. A **stalled** agent shows no progress, waits on a prompt,
+hangs on a command (watch mode, a foreground server, an editor, stdin), loops on the same
+command or error, or stays busy with no change to its steps or diff. The orchestrator
+interrupts a hung command (`orca terminal send --interrupt`, `TaskStop`) and breaks a loop. An **off
 course** agent edits files outside its task, does what the plan does not ask, skips a step such
 as the failing test, or works around a gate. The orchestrator sends the correction at once,
 logs it with `workflow.sh log`, and asks the user when the same agent fails twice. It is the

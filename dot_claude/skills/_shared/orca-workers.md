@@ -78,7 +78,7 @@ Print the result of section 1 before the first worker, in one line: `Workers: or
    `orca orchestration worker-release --dispatch <dispatch_id> --json`.
 
 Never type into the terminal of a worker. Do not poll a worker between checks: the only
-poll is the 10-minute check of `agent-watch.md`, which looks for a stalled worker and for a
+poll is the 5-minute check of `agent-watch.md`, which looks for a stalled worker and for a
 worker that went off its task. A worker is Claude by default. Use
 `--agent codex --model gpt-6.1-terra` only when the user or the plan names Codex for that work.
 Codex has no predefined agents, so start the spec of a Codex worker with

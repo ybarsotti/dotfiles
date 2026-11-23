@@ -43,7 +43,13 @@ It lists every phase and every step of the build chain. Mark each step when it e
 section 0 of `~/.claude/skills/_shared/after-approval.md` says. After each phase, run
 `workflow.sh status` and tell the user what is done, what is next and what is left. The Stop
 hook `~/.claude/hooks/workflow-gate.sh` blocks the end of a turn while a step is open. Write
-the step file path in the `**Step file:**` line of the plan header. When the user asks for the
+the step file path in the `**Step file:**` line of the plan header.
+
+When you start the first agent of this run (an explorer, a planner of `dispatch-planners.sh`,
+a review persona, the `ui-designer`), schedule the 5-minute check of
+`~/.claude/skills/_shared/agent-watch.md`. It finds an agent that stalled, hangs on a command,
+loops, or went off its question, and sends the correction. Delete the job when the last
+agent of the phase finished. When the user asks for the
 plan only, run `workflow.sh close "$RUN_DIR/chain.md" "plan only"` after the approval.
 
 Verify binaries: `git`, `claude`, `jq`. Verify `codex` unless `no_codex` is true.

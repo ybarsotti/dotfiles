@@ -41,6 +41,12 @@ the user what is done, what is next and what is left. The Stop hook
 `~/.claude/hooks/workflow-gate.sh` blocks the end of a turn while a step is open. When the
 user asks for the plan only, run `$W close "$RUN_DIR/chain.md" "plan only"` after the approval.
 
+When you start the first agent of this run (an explorer, the breakdown or UI/UX agent, a
+`plan-reviewer`, the `ui-designer`), schedule the 5-minute check of
+`~/.claude/skills/_shared/agent-watch.md`. It finds an agent that stalled, hangs on a command,
+loops, or went off its question, and sends the correction. Delete the job when the last
+agent of the phase finished.
+
 `$RUN_DIR` holds `context.md`, the review notes, and the `qa/` bundle. The plan is not stored
 there. The plan lives where `~/.claude/skills/_shared/plan-format.md` saves it:
 `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md` inside the project. `$RUN_DIR/plan.md`

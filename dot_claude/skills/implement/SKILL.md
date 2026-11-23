@@ -33,7 +33,7 @@ Add one `build.<n>` row per task, in order: `workflow.sh add <file> build.<n> "<
 2. Start one implementer worker per task, as `~/.claude/skills/_shared/orca-workers.md`
    describes. Run its three checks before the first task, and print the mode line it names.
    In Orca, each task runs as an Orca worker in its own pane. This session reviews each task.
-   When the first agent starts, schedule the 10-minute check of
+   When the first agent starts, schedule the 5-minute check of
    `~/.claude/skills/_shared/agent-watch.md`. It finds an agent that stalled or went off the
    task, and sends it the correction. Delete the job after the last task.
    It writes feature code only when the user asks for that.

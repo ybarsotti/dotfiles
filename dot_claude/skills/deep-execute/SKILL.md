@@ -55,7 +55,7 @@ knows only the first four goes silent on a crash, and silence reads as "still wo
 
 The `Monitor` catches the events that a lane emits. It does not catch a lane that emits
 nothing, or a lane that works on the wrong thing. When `orca-launch.sh` returns, also start the
-10-minute check of `~/.claude/skills/_shared/agent-watch.md` on `board.sh RUN_DIR`, the lane
+5-minute check of `~/.claude/skills/_shared/agent-watch.md` on `board.sh RUN_DIR`, the lane
 logs and each lane's diff against its subplan. It corrects a stalled or off-course lane.
 
 **Acknowledge each event trigger after you acted on it:** `monitor-events.sh RUN_DIR --ack
