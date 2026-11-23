@@ -7,9 +7,14 @@
    gh api repos/<owner>/<repo>/pulls/<n>/comments   # inline review comments
    ```
    Keep the ids you already handled in `$RUN_DIR/handled-comments.txt`.
-2. **A `CHANGES_REQUESTED` review or a new actionable comment** from a human or a bot: run
+2. **A `CHANGES_REQUESTED` review or any new comment** from a human or a bot: run
    `Skill(skill="address-pr-comments")`. It verifies each claim, fixes only the valid ones in
    scope, reruns the tests, then replies in and resolves each thread. Do not reply here.
+   Every feedback you handle ends with a reply and a resolved thread: a fix gets its commit
+   SHA, a declined comment gets the reason and the evidence, a question gets the answer. Only
+   a thread that waits on a decision of the user stays open. After each round, check that no
+   other thread is open:
+   `~/.claude/skills/pr-approved/scripts/pr-approved.sh state <n> | jq .open_threads`.
 3. **A failing check** goes through `superpowers:systematic-debugging`. Do not patch blindly.
 4. **Ask the user first** when a comment changes scope, a requirement or a contract, or when
    two reviewers disagree.

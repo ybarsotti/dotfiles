@@ -2,21 +2,24 @@
 
 A global Claude Code skill + slash command that runs a hardened **deep-planning** pipeline
 for any non-trivial task. After approval it builds, reviews, runs QA and opens the PR
-through the shared after-approval chain, unless the user said to stop at the plan.
+through the shared after-approval chain, unless the user said to stop at the plan. Every
+phase and every chain step is a row of the step file `$RUN_DIR/chain.md`
+(`_shared/workflow.sh`). The `workflow-gate.sh` Stop hook blocks the end of a turn while a row
+is open.
 
 ## What it does
 
 ```
                   ┌─────────────────────────────────────────────┐
-   /deep-plan ──▶  │ Phase 0:   parse-args.sh (flags → JSON)      │
+   /deep-plan ──▶  │ Phase 0:   parse-args.sh, workflow.sh init   │
                   │ Phase 0.1: no project edits (no plan mode)   │
                   │ Phase 0.7: grill-with-docs (interview+ADRs)  │
                   │ Phase 1:   brainstorming                     │
-                  │ Phase 1.5: Draft (Opus + Codex in parallel)  │
+                  │ Phase 1.5: Draft, plan-format.md (2 models)  │
                   │ Phase 2:   Review loop (5 personas, ≤ 3 iter)│
                   │ Phase 2.5: Subplan fan-out                   │
                   │ Phase 3:   finalize-plan.sh + Plannotator    │
-                  │ Phase 4:   after-approval chain → PR         │
+                  │ Phase 4:   after-approval chain → PR + watch │
                   └─────────────────────────────────────────────┘
 ```
 

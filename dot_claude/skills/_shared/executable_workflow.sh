@@ -15,6 +15,7 @@
 #   workflow.sh block  <file> <id> <question>      a question to the user
 #   workflow.sh todo   <file> <id>                 open the step again
 #   workflow.sh close  <file> <reason>             skip every open step (the user stopped the run)
+#   workflow.sh log    <file> <text>               add a line to the Log (a correction, a job id)
 #   workflow.sh status <file>                      what is done, what is next, what is left
 #   workflow.sh check  <file>                      exit 0 when no step is open, else exit 1
 #
@@ -188,7 +189,7 @@ cmd_check() {
   exit 0
 }
 
-[ $# -ge 2 ] || { sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+[ $# -ge 2 ] || { sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 cmd="$1"; file="$2"; shift 2
 [ "$cmd" = init ] || [ -f "$file" ] || die "no step file $file. Run init first."
 case "$cmd" in
@@ -200,6 +201,7 @@ case "$cmd" in
   block)  [ $# -ge 1 ] || die "block <file> <id> <question>"; cmd_mark "$file" "$1" "!" blocked "${2:-}" ;;
   todo)   [ $# -ge 1 ] || die "todo <file> <id>"; set_row "$file" "$1" " " ""; log_line "$file" "reopened $1" ;;
   close)  cmd_close "$file" "${1:-}" ;;
+  log)    [ $# -ge 1 ] || die "log <file> <text>"; log_line "$file" "$1" ;;
   status) cmd_status "$file" ;;
   check)  cmd_check "$file" ;;
   *) die "unknown command $cmd" ;;

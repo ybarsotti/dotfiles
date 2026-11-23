@@ -23,6 +23,14 @@ it. Used standalone via `/pr`, and as a runtime dependency of `deep-plan`
 /pr --no-codex                             # Sonnet self-review instead of codex
 ```
 
+## Watch
+
+After the PR opens, Phase 5 watches it (`references/watch.md`) until it merges or closes. Every
+comment goes through `address-pr-comments`: a fix gets its commit SHA, a declined comment gets
+the reason, a question gets the answer, and then the thread is resolved. Only a thread that
+waits on the user stays open. `--no-watch` skips this phase. When the reviewer approves,
+`/pr-approved` resolves what is left, waits for green CI, squash-merges and cleans up.
+
 ## Reviewers
 
 - The **writer** is always **claude Sonnet** (headless `claude -p --model sonnet`).

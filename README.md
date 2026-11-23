@@ -701,8 +701,8 @@ Three slash commands chain together for planning and parallel execution of non-t
   `board.sh` / `monitor-events.sh` with `--ack` / `reply.sh`), contract drift
   (`contract-bump.sh`), per-round gating (`round-gate.sh`: round complete → lane tests →
   acceptance → contract → run state), a report-only `/deep-review` per round, a round cap with
-  escalation, then steps 2 to 9 of `_shared/after-approval.md`: review, QA, frozen SHA, PR,
-  the **run report** (below), PR watch. The orchestrator is the sole `git` committer between
+  escalation, then steps 2 to 8 of `_shared/after-approval.md`: the final review, QA, frozen
+  SHA, the **run report** (below), then the PR with its watch. The orchestrator is the sole `git` committer between
   rounds; lane workers never run `git` themselves. `_shared/plan-routing.md` says when a plan
   qualifies.
 - **`/deep-review`** - Multi-persona peer review of a diff (Claude + Codex headless
@@ -778,7 +778,51 @@ a session whose transcript holds the `[workflow-gate] tracking <file>` line that
 so work outside a workflow is never blocked. It blocks the end of a turn while a step is
 `todo`, and prints what is done, what is next and what is left. It stands aside for a `waiting`
 or `blocked` step, on `stop_hook_active`, for a step file older than 2 days, and when the user
-says "encerrar mesmo assim". The test is `_shared/tests/executable_test-workflow-gate.sh`.
+says "encerrar mesmo assim". It trusts only a step file under `~/.claude/*-runs/` that starts
+with `# Workflow:`, because any text in a transcript can contain a tracking line. The test is
+`_shared/tests/executable_test-workflow-gate.sh`.
+
+The whole flow, from the plan to the merge:
+
+```mermaid
+flowchart TD
+    P["/simple-plan or /deep-plan<br/>workflow.sh init → chain.md"] --> G[grill, brainstorm, draft<br/>plan-format.md]
+    G --> R["plan review<br/>plan-reviewer ×1-2 (simple) · 5 personas (deep)<br/>≤ 3 rounds"]
+    R --> A[Plannotator gate<br/>no annotations = approved]
+    A --> B["build: implement or /deep-execute<br/>one build.n row per task"]
+    B -. every 10 min .-> W["agent-watch: stalled or off course?<br/>send the correction"]
+    W -.-> B
+    B --> DR["final /deep-review, full process<br/>≤ 3 fix rounds · cannot be skipped"]
+    DR --> Q[qa-ui · qa-business → fixer, ≤ 3 rounds]
+    Q --> D[demo → run report]
+    D --> PR["/pr with watch<br/>every comment: reply + resolve"]
+    PR --> PA["/pr-approved<br/>threads → CI → squash merge → cleanup"]
+    S{{"workflow-gate.sh<br/>Stop / SubagentStop"}} -. blocks while a step is todo .-> B
+```
+
+##### Watching the agents
+
+`_shared/agent-watch.md` schedules a check every 10 minutes when the first agent starts
+(`CronCreate`; a 10-minute wait timeout under Codex). The check reads each agent's step file,
+its output and its diff. A **stalled** agent shows no progress or waits on a prompt. An **off
+course** agent edits files outside its task, does what the plan does not ask, skips a step such
+as the failing test, or works around a gate. The orchestrator sends the correction at once,
+logs it with `workflow.sh log`, and asks the user when the same agent fails twice. It is the
+only poll: between checks the orchestrator ends its turn.
+
+##### Closing an approved PR — `/pr-approved`
+
+`/pr-approved [<pr>]` runs the `pr-approved` skill when the reviewer approved:
+
+1. **threads** — `address-pr-comments` replies to and resolves every open thread. A thread
+   that waits on the user blocks the merge.
+2. **ci** — waits for the checks; a red one goes through systematic debugging and starts again.
+3. **merge** — `gh pr merge --squash`, only when `pr-approved.sh state` reports `ready`.
+4. **tasks** — `pr-approved.sh pending <worktree>` keeps the worktree when it has uncommitted
+   or unpushed work, open steps of another run, or a breakdown with more tasks.
+5. **cleanup** — deletes the remote branch, then `orca worktree rm --delete-branch` in Orca.
+
+The `/pr` watch follows the same rule for each comment: fix or decline, reply, then resolve.
 
 ##### The Stop hook that refuses to lose the run report
 

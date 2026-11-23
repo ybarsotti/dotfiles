@@ -36,6 +36,8 @@ ok "add keeps the build rows in order after build" '[ "$(grep -o "^- \[ \] build
 ok "done refuses a missing evidence path" '! "$W" done "$F" context /nope/missing 2>/dev/null'
 "$W" done "$F" context "$F" >/dev/null
 ok "done logs what is next" 'grep -q "done context: .*Next: pipeline" "$F"'
+"$W" log "$F" "watch job abc" >/dev/null
+ok "log adds a line to the Log" 'grep -q "watch job abc. Next:" "$F"'
 
 ok "review can be skipped before any build" '"$W" skip "$F" review "plan only" >/dev/null'
 "$W" todo "$F" review >/dev/null

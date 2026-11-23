@@ -1,0 +1,8 @@
+# /pr-approved: one row per section of the skill.
+setup|Run folder, this step file and the first state read
+threads|Reply to and resolve every open review thread (section 1)
+ci|Green checks, mergeable, ready is true (section 2)
+merge|Squash merge; state is MERGED (section 3)
+tasks|Check whether work is left in this worktree (section 4)
+cleanup|Delete the remote branch, remove the Orca worktree (section 5)
+report|Final report to the user (section 6)

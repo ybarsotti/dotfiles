@@ -128,6 +128,10 @@ the skipped ones too. A `fail` blocks the round; `warn` never does. A child vali
 crashes is a `fail`. The default cap is max 3 rounds (`--max-rounds N`). After 3 failed gates of
 one round, the gate refuses the round until a human decides. After each passing round the
 orchestrator commits, then runs a report-only `/deep-review` and routes the fixes to the lanes.
+After the last fix round, one `/simplify` pass runs in the orchestrator, so the run completes
+the full `/deep-review` process. A 10-minute check (`_shared/agent-watch.md`) reads each lane's
+diff against its subplan and corrects a stalled or off-course lane. The run report comes
+before the PR, and `/pr` then opens the PR with its watch.
 
 ## Contract drift
 
