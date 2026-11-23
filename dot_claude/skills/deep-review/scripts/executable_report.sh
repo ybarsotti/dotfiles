@@ -45,7 +45,8 @@ fi
 
 # A failed reviewer checked nothing, so an empty report does not clear the change.
 BAD=0
-[ -f "$STATUS" ] && BAD=$(awk -F'\t' '$3!="ok"{n++} END{print n+0}' "$STATUS")
+# A persona that only_when_changed skipped had no file to check, so it is not a failure.
+[ -f "$STATUS" ] && BAD=$(awk -F'\t' '$3!="ok" && $3 !~ /^skipped: no changed file matches/{n++} END{print n+0}' "$STATUS")
 [ "$VERDICT" = "APPROVE" ] && [ "$BAD" -gt 0 ] && VERDICT="INCOMPLETE"
 
 printf '# Review Panel Report\n\n'

@@ -425,6 +425,12 @@ assert_contains "$RP_OUT" "- security (codex): failed after 40s (reported 2 find
   "report: an empty report still lists the failed reviewer"
 printf 'security\tcodex\tok\n' > "${RP_DIR}/status.tsv"
 assert_contains "$("$REPORT" "$RP_DIR")" "**Verdict: APPROVE**" "report: no findings with every reviewer ok is APPROVE"
+printf 'security\tcodex\tok\nsenior-backend\t-\tskipped: no changed file matches \\.py$\n' > "${RP_DIR}/status.tsv"
+assert_contains "$("$REPORT" "$RP_DIR")" "**Verdict: APPROVE**" \
+  "report: a persona that only_when_changed skipped does not block APPROVE"
+printf 'security\tcodex\tok\natlassian\t-\tskipped: requires_mcp atlassian is not connected\n' > "${RP_DIR}/status.tsv"
+assert_contains "$("$REPORT" "$RP_DIR")" "**Verdict: INCOMPLETE**" \
+  "report: a persona skipped for another reason still blocks APPROVE"
 rm -rf "$RP_DIR"
 
 assert_summary
