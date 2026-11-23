@@ -88,8 +88,10 @@ Check every item for your lens. A finding states the problem, the evidence and t
     permission and timezone inputs. For each field and upload that the user fills, check the
     plan against the out-of-pattern input catalog of `~/.claude/skills/qa-test-plan/SKILL.md`:
     blank and whitespace, length limits, number and date formats, special text, identity
-    formats, choices outside the list, files, and repeated submits. The plan states what the
-    user sees for each class that applies, and a test covers it.
+    formats, choices outside the list, files, repeated submits, the project's own limits
+    (column size, validators, schema, business rules), and AI input (prompt injection,
+    jailbreak, prompt leak, hidden instructions in files or pages, actions outside scope).
+    The plan states what the user sees for each class that applies, and a test covers it.
 11. **Tests.** Each requirement has a test. Each TDD row mocks only the outermost external
     call (constraint rule 10).
 12. **Backend lens only: data.** The schema, the indexes, the migration count and the query

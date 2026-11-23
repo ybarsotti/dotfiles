@@ -104,6 +104,12 @@ Require mapper to write only structured `QA_PLAN` containing:
 
 **Out-of-pattern input catalog.**
 
+Start from the rules of the project, not from generic values. For each field, read its limits
+where the code defines them: the column size and type, the model or ORM validators, the API
+schema (serializer, pydantic, zod), the form rules in the frontend, and the business rules in
+the plan and the ticket. Test at each limit, one step past it, and where the frontend and the
+backend disagree. A free-text field that a user fills gets the most cases.
+
 | Class | Values to try |
 |---|---|
 | Empty and blank | empty, only spaces, only a line break, a required field left out |
@@ -117,8 +123,14 @@ Require mapper to write only structured `QA_PLAN` containing:
 | Choices | a value outside the list sent through the URL or the API, no selection, a removed option |
 | Files | empty file, wrong type with the right extension, a file over the size limit, a long name with accents, the same file twice |
 | Repetition | double click on submit, the back button after submit, a refresh in the middle, two tabs editing the same record |
+| Project limits | the exact limit of each field from the model, the schema and the business rules; one past it; a value that the frontend accepts and the backend refuses, or the reverse |
+| AI input (a field, a file or a message that reaches a model) | "ignore all previous instructions and …"; a request for the system prompt or the hidden rules; a role-play or jailbreak that asks to drop the guardrails; instructions hidden in an uploaded file, a pasted URL, an email or a web page the feature reads; a request to act outside its scope (send, delete, pay, read another account); a request for another user's or tenant's data; a prompt in another language; a text long enough to blow the token budget; a request whose answer would carry HTML, a script or a link that the UI then renders |
 
-Mark a class `n/a` with the reason when it does not apply. Never skip it silently.
+Mark a class `n/a` with the reason when it does not apply. Never skip it silently. For AI
+input, the expected result is that the feature keeps its rules: it refuses or ignores the
+injected instruction, reveals no prompt and no other user's data, takes no action without the
+user's confirmation, stays within the cost limit, and renders the model output as plain
+text.
 - objective acceptance rules;
 - evidence policy per step;
 - **a design-comparison scenario for every screen the change adds or alters.** Ask first

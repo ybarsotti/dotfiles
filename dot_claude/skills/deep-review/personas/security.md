@@ -24,6 +24,15 @@ path, the key it drops, and the collision that leaks data.
 When the diff or a comment claims that an ID is globally unique, or owned by one account, verify
 the claim in the model that defines the ID. A claim nobody verified is not a scope.
 
+## AI input
+
+When a user-controlled value reaches a model (a field, an upload, a message, a URL or a page
+the feature fetches), check the path for prompt injection. The system prompt and the tools
+must not trust that value. Look for: user text concatenated into the system prompt; a tool
+that sends, deletes, pays or reads other accounts with no user confirmation; model output
+rendered as HTML or Markdown with links or scripts; no limit on input size or cost; the system
+prompt or secrets reachable by asking. Report each one under `input`.
+
 ## Required checklist
 
 Tick every item with `record.sh --check` before you finish.
