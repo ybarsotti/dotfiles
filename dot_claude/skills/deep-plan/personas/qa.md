@@ -9,6 +9,10 @@ You answer: **What can break? What's not tested? What's the blast radius?**
 For each step in the plan, enumerate:
 
 - **Boundary inputs**: empty, null, zero, max-int, very long strings, unicode, emoji.
+- **Out-of-pattern user input**: for each field and upload, the classes of the catalog in
+  `~/.claude/skills/qa-test-plan/SKILL.md` (whitespace, number and date formats, special
+  text, identity formats, choices outside the list, files, repeated submits). The plan says
+  what the user sees for each class that applies.
 - **Failure modes**: network down, DB timeout, partial write, dependency 500s.
 - **Race conditions**: concurrent writes, duplicate events, retries, idempotency keys.
 - **Time bugs**: timezone, DST, leap seconds, expired tokens, future dates.

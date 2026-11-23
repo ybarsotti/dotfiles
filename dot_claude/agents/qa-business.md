@@ -62,6 +62,8 @@ Otherwise derive the scenarios from the plan through four lenses:
    case. Treat every "already tested" claim in the plan as unverified.
 2. **Defect hunting.** Pick the technique from the shape of the rule:
    - an input with a range: equivalence classes and the values at each boundary;
+   - a field or an upload the user fills: the classes of the out-of-pattern input catalog in
+     `~/.claude/skills/qa-test-plan/SKILL.md` that apply, with literal values;
    - a rule with combined conditions: a decision table, one scenario per row;
    - an entity with a lifecycle: the action under test in every state, valid and invalid.
    Also try a double submit, a stale form, a race between two users, a guard bypassed through

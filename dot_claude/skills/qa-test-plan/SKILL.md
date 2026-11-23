@@ -96,6 +96,29 @@ Require mapper to write only structured `QA_PLAN` containing:
 - explicit preconditions and isolated test data;
 - happy path plus invalid, empty, permission, refresh/back, concurrency, boundary, and
   dependency-failure cases when applicable;
+- **out-of-pattern user input, for every field and every upload of the flow.** Write these as
+  scenarios with steps and the literal value in `input`, not only as a line in `edge_cases`.
+  The expected result names what the user sees (the field message, the disabled action) and
+  what does not happen (no row saved, no email sent). Pick the classes that apply from the
+  catalog below.
+
+**Out-of-pattern input catalog.**
+
+| Class | Values to try |
+|---|---|
+| Empty and blank | empty, only spaces, only a line break, a required field left out |
+| Whitespace | leading and trailing spaces, double spaces, a tab, a pasted line break |
+| Length | 1 character, the maximum, the maximum + 1, a very long text (10 000 characters) |
+| Numbers | 0, negative, decimal in an integer field, comma vs dot decimal, thousands separator, `1e5`, a value above the limit, letters in a number field |
+| Money and percent | more decimals than the currency allows, a currency symbol pasted in, 100.01 % |
+| Dates and times | 31 Feb, 29 Feb in a non-leap year, a past date where a future one is needed, the other locale's format (`02/03`), DST change, end before start |
+| Text content | accents, emoji, right-to-left text, `<script>alert(1)</script>`, `' OR 1=1 --`, `{{7*7}}`, a URL, a value copied with formatting |
+| Identity values | an email with `+tag`, upper case, no TLD, spaces; a phone with country code, dashes and spaces; a tax id with and without its mask |
+| Choices | a value outside the list sent through the URL or the API, no selection, a removed option |
+| Files | empty file, wrong type with the right extension, a file over the size limit, a long name with accents, the same file twice |
+| Repetition | double click on submit, the back button after submit, a refresh in the middle, two tabs editing the same record |
+
+Mark a class `n/a` with the reason when it does not apply. Never skip it silently.
 - objective acceptance rules;
 - evidence policy per step;
 - **a design-comparison scenario for every screen the change adds or alters.** Ask first
