@@ -115,6 +115,10 @@ commit. A file that no lane owns goes to a fresh implementer worker
 rejected finding with `decision.sh` while it is still true. Mark each chain step in the step
 file that the plan header names (`**Step file:**`) with `~/.claude/skills/_shared/workflow.sh`.
 The final `/deep-review` over the whole change always runs; its step cannot be skipped.
+After the last fix round converges and before the freeze, run `Skill(skill="simplify")` once over
+the changed files, in this session. The lanes are idle by then, so one pass does not fight a
+lane. Gate it with `round-gate.sh`, then commit. This completes the full `/deep-review` process
+that the report-only rounds skipped.
 
 Before step 7, freeze: commit, record the full `git rev-parse HEAD`, and run `plan-stamp.sh
 check PLAN`. Never finish on a changed plan or on stale QA evidence. Build the report of
