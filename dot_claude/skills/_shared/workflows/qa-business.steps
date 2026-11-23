@@ -1,0 +1,5 @@
+preflight|Pre-flight: depth, build SHA, credentials, testability (section 1)
+scenarios|Build the scenarios (section 2)
+run|Run the scenarios and log each result at once (section 3)
+classify|Classify the findings (section 4)
+report|Write the report and reply with GO or NO-GO (Output)

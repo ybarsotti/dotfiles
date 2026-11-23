@@ -26,8 +26,8 @@ You bias toward **minimal diff**: the smallest set of files that achieves the go
 
 ## Required output
 
-**First, load the plan format — do not improvise it:** read the `writing-plans` skill at the
-path the dispatcher gives you (or load your own `writing-plans` skill) and follow it verbatim
+**First, load the plan format — do not improvise it:** read the plan format at the
+path the dispatcher gives you (`~/.claude/skills/_shared/plan-format.md`) and follow it verbatim
 for the document header, the File Structure step, task right-sizing, the `### Task N:` blocks
 (bite-sized checkbox steps, real code, exact commands + expected output) and the
 no-placeholder rules.

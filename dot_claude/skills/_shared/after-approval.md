@@ -20,25 +20,23 @@ plan approval, before this chain starts (`plan-routing.md`). This chain never as
    "built, reviewed, QA green, PR open, report delivered". Name the plan path in it.
 2. Record each decision you make on the way in `$RUN_DIR/decisions.md`: the decision, the
    rejected alternative, and the reason. The report reads this file.
-3. Write `$RUN_DIR/chain.md`: one row per step of this chain that applies to the plan, with
-   the exact command and the status `todo`.
+3. Keep the step file `$RUN_DIR/chain.md` with `~/.claude/skills/_shared/workflow.sh`. The
+   planning skill creates it at its start, with the planning steps and the chain steps of
+   `_shared/workflows/chain.steps`. When `/implement` starts without a planning run, create it:
+   `workflow.sh init "$RUN_DIR/chain.md" implement --plan <plan>`.
+4. Add one build row per task of the plan, in order:
+   `workflow.sh add "$RUN_DIR/chain.md" build.<n> "<task>" --after build`.
+5. Mark each step when it ends, with its evidence:
+   - `workflow.sh done <file> <id> "<path, URL, or command and result>"`;
+   - `workflow.sh skip <file> <id> "<reason>"` when the step does not apply;
+   - `workflow.sh wait <file> <id> "<worker>"` before you end a turn to wait for a worker;
+   - `workflow.sh block <file> <id> "<question>"` before you ask the user.
+6. At the end of each task and each step, run `workflow.sh status <file>`. Tell the user in one
+   short block what is done, what is next, and what is left.
 
-   ```markdown
-   | # | Step | Command | Owner | Status |
-   |---|---|---|---|---|
-   | 1 | Build | `Skill(skill="implement", args="<plan>")` | this session + Orca workers | todo |
-   | 2 | Review | `/deep-review default` | this session, fixer worker | todo |
-   | 4 | UI parity | `qa-ui` worker with the canvas | Orca worker | todo |
-   | 5 | Business QA | `qa-business` worker | Orca worker | todo |
-   | 7 | PR | `/pr --no-watch` | this session | todo |
-   | 7.3 | Demo | `video-demo` skill | Orca worker | todo |
-   | 8 | Report | `$RUN_DIR/report/index.html` | this session | todo |
-   | 9 | Watch | `/pr` phase 5 | this session | todo |
-   ```
-
-   When a step ends, set its status to `done: <evidence path>` or `skipped: <reason>`. Before
-   you end a turn or start an agent, read `chain.md`: the first `todo` row is the next action.
-   Never mark a row `done` without its evidence.
+The Stop hook `~/.claude/hooks/workflow-gate.sh` blocks the end of a turn while a step is
+`todo`. The `review` step cannot be skipped after code was built. When the user stops the run,
+run `workflow.sh close <file> "<reason>"`.
 
 ## Parallel agents run in Orca
 
@@ -81,7 +79,9 @@ in option B, a round in option A, a stage, or a slice in option D). Each part pa
 tests and gates before the next part starts. In option C, the workflow's adversarial reviewer
 still runs as `plan-routing.md` describes ("How option C runs").
 
-`/deep-execute` runs steps 2 to 9 itself. For options B, C and D, run them from this session.
+`/deep-execute` runs steps 2 to 8 itself. For options B, C and D, run them from this session.
+Under every option, the final `/deep-review` of step 2 runs over the whole change. No executor
+skips it.
 
 **Under `/deep-execute`, the lane that owns the code applies every fix.** Run the
 `/deep-review` with `--no-fix --no-simplify`, so the review only reports. Send each fix to
@@ -91,8 +91,9 @@ the owning lane with `reply.sh RUN_DIR LANE "<finding, file, line, fix>"`, gate 
 
 ## 2. Review
 
-1. Run `/deep-review default` over the whole change. Each part had its own review; this pass
-   checks how the parts fit together. Its Phase 4.5 fixes every CRITICAL, HIGH and MEDIUM finding and
+1. Run `/deep-review default` over the whole change, with its full process: every phase, the
+   fix rounds and the simplify pass. Each part had its own review; this pass checks how the
+   parts fit together. Its Phase 4.5 fixes every CRITICAL, HIGH and MEDIUM finding and
    re-runs the panel, for 2 fix rounds at most.
 2. A separate agent applies the fixes. The reviewer never fixes its own finding. Start the
    `fixer` agent as `orca-workers.md` describes. Under `/deep-execute`, that agent is the owning lane
@@ -146,16 +147,20 @@ Run steps 4 and 5 in parallel. They touch different things.
 When a fix changes code that the review saw, run `/deep-review default --scope <commit before
 the fixes>..HEAD` once on the fixes only. Do not review the whole change again.
 
-## 7. Open the PR
+## 7. Demo, report and PR
 
-0. When `.workflow/config.json` exists, run `Skill(skill="workflow-post-implementation")` with the step 2 review and the QA results as evidence. It chains to `workflow-finish`.
-1. Freeze the commit SHA. Every result in the report names this SHA.
-2. Run `/pr --no-watch`. It attaches the screenshots and the video with `gh --attach`, opens
-   the PR and returns. The watch starts in step 9, after the report.
+1. When `.workflow/config.json` exists, run `Skill(skill="workflow-post-implementation")` with
+   the step 2 review and the QA results as evidence. It chains to `workflow-finish`.
+2. Freeze the commit SHA. Every result in the report names this SHA.
 3. When the change adds or alters a feature a person uses, record a narrated demo with the
-   `video-demo` skill after the PR is open. Attach it with `gh pr edit <n> --attach` under a
-   `## Demo` heading, and link it in the report. Skip it for a refactor, a lone migration or
-   an internal API, and say why.
+   `video-demo` skill. Skip it for a refactor, a lone migration or an internal API, and say
+   why.
+4. Build the report of section 8.
+5. Run `/pr`, with its watch. It attaches the screenshots and the demo with `gh --attach`,
+   opens the PR, and watches it as Phase 5 of `~/.claude/skills/pr-description/SKILL.md`
+   describes: review comments go to `address-pr-comments`, failing checks to systematic
+   debugging, until the PR merges or closes. Mark the `pr` step done with the PR URL when the
+   PR is open.
 
 ## 8. Deliver the report
 
@@ -163,7 +168,7 @@ the fixes>..HEAD` once on the fixes only. Do not review the whole change again.
 records of a run (`manifest.json`, `events.jsonl`, `decision.sh` output), which options B, C
 and D do not write. For options B, C and D, write `$RUN_DIR/report/index.html` yourself. It is one self-contained page with these sections:
 
-1. **Summary** — what was built, the ticket, the PR link, the frozen SHA.
+1. **Summary** — what was built, the ticket, the branch, the frozen SHA.
 2. **Requirements** — the ticket coverage table, each row with its proof.
 3. **Decisions** — each row of `decisions.md` and each `D-NNN` deviation.
 4. **Review** — the findings, what was fixed, and the open findings.
@@ -175,12 +180,7 @@ and D do not write. For options B, C and D, write `$RUN_DIR/report/index.html` y
 Copy each image and video into `$RUN_DIR/report/media/` and link it by a relative path.
 Then run `open "$RUN_DIR/report/index.html"` and give the user the absolute path.
 
-Send the finished-work summary to the Inbox thread of the ticket or branch: the PR in `pulls`,
-the QA screenshots in the body, and the report and videos in `attachments` (`_shared/inbox.md`).
-
-## 9. Watch the PR
-
-Start the watch of Phase 5 of `~/.claude/skills/pr-description/SKILL.md` on the PR number:
-review comments go to `address-pr-comments`, failing checks to systematic debugging, until the
-PR merges or closes. Under `/deep-execute`, a fix still goes to the owning lane while its loop
-runs.
+After `/pr` opens the PR, send the finished-work summary to the Inbox thread of the ticket or
+branch: the PR in `pulls`, the QA screenshots in the body, and the report and videos in
+`attachments` (`_shared/inbox.md`). Under `/deep-execute`, a fix during the watch still goes to
+the owning lane.

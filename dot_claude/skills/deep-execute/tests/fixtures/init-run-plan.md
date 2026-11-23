@@ -1,6 +1,6 @@
 # Deep-execute Init-run Fixture Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** Build this plan with the `implement` skill, or with the executor that `~/.claude/skills/_shared/plan-routing.md` picks. After the build, run `~/.claude/skills/_shared/after-approval.md` to the end, through the final deep review and the PR. Track each step with `~/.claude/skills/_shared/workflow.sh` in the step file below. Do not use `superpowers:finishing-a-development-branch`.
 
 **Goal:** Fixture plan exercising `init-run.sh`'s full `validate-plan.sh --root` gate for the deep-execute test suite.
 

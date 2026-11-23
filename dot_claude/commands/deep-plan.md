@@ -13,8 +13,8 @@ plan" to stop at the approved plan.
 1. **Clarify + grill** — `AskUserQuestion` sweep, then `grill-with-docs` (relentless
    interview + ADRs/glossary).
 2. **Brainstorm** — `superpowers:brainstorming`.
-3. **Draft** — `superpowers:writing-plans` defines the plan format (always — the skill is
-   invoked, never paraphrased); plan captures ticket/Slack context, requirements matrix,
+3. **Draft** — `~/.claude/skills/_shared/plan-format.md` defines the plan format (always —
+   read, never paraphrased); plan captures ticket/Slack context, requirements matrix,
    applicable user journey, table/column population, and substantial-UI design prompt;
    two parallel planners (Opus + Codex) → one merged plan.
 4. **Review** — 5 parallel personas (architect, project-developer, ticket-matcher on

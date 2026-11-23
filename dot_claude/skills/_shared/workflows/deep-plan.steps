@@ -1,0 +1,15 @@
+# deep-plan: one row per phase. Format: id|title. The chain steps follow.
+setup|Parse args, run folder and this step file (Phase 0)
+codeintel|Code intelligence bootstrap (Phase 0.2)
+ticket|Ticket and Slack context (Phase 0.3)
+pipeline|Right pipeline check (Phase 0.4)
+clarify|Clarifying questions (Phase 0.5)
+grill|Grill-with-docs, unless --skip-grill (Phase 0.7)
+brainstorm|Brainstorm (Phase 1)
+draft|Two planners in parallel (Phase 1.5)
+plan-review|Persona review loop, --max-plan-iter rounds at most (Phase 2)
+qa-plan|/qa-plan, when a flow or a screen changes (Phase 2.4)
+subplans|Subplan fan-out, when the plan is parallel (Phase 2.5)
+gate|finalize-plan.sh and Plannotator gate (Phase 3)
+executor|Execution recommendation (Phase 3.5)
+@include chain.steps

@@ -20,7 +20,7 @@ phase. These are **mandatory workflows, not suggestions.** Read `references/supe
 for the full table of skills, phases and owners.
 
 Order: `grilling` + `domain-modeling` (0.7), `brainstorming` (1),
-`writing-plans` (1.5), `/qa-plan` (2.4, when user flows or screens change), the plan page and
+the plan format `_shared/plan-format.md` (1.5), `/qa-plan` (2.4, when user flows or screens change), the plan page and
 `plannotator annotate --gate` (3). Then handoff to `/deep-execute` or `implement`.
 
 ## Phase 0 — Parse args & sanity checks
@@ -36,6 +36,15 @@ surface it to the user verbatim.
 Refuse to proceed when the task is trivially small (typo, single one-line change, rename of a single symbol). Tell the user to just do it inline.
 
 Set `RUN_DIR=~/.claude/deep-plan-runs/$(date +%Y%m%d-%H%M%S)-$(echo "$ARGUMENTS" | sha1sum | cut -c1-6)`. Create it with `mkdir -p`. All artifacts (plan drafts, verdicts, final plan) live there.
+
+Create the step file of the run:
+`~/.claude/skills/_shared/workflow.sh init "$RUN_DIR/chain.md" deep-plan --project "$PWD"`.
+It lists every phase and every step of the build chain. Mark each step when it ends, as
+section 0 of `~/.claude/skills/_shared/after-approval.md` says. After each phase, run
+`workflow.sh status` and tell the user what is done, what is next and what is left. The Stop
+hook `~/.claude/hooks/workflow-gate.sh` blocks the end of a turn while a step is open. Write
+the step file path in the `**Step file:**` line of the plan header. When the user asks for the
+plan only, run `workflow.sh close "$RUN_DIR/chain.md" "plan only"` after the approval.
 
 Verify binaries: `git`, `claude`, `jq`. Verify `codex` unless `no_codex` is true.
 
@@ -95,15 +104,15 @@ Before any draft, invoke `superpowers:brainstorming` via the Skill tool against 
 description. Its output seeds `Context` and `Rationale & key decisions`, and goes verbatim to both
 planners. Then run `~/.claude/skills/deep-plan/scripts/superpowers-invoke.sh "$RUN_DIR" brainstorming`.
 
-## Phase 1.5 — Two-track planner drafting (superpowers:writing-plans)
+## Phase 1.5 — Two-track planner drafting (plan format)
 
-`superpowers:writing-plans` is the **single source of truth** for the plan's shape. deep-plan
-never restates those rules. It **invokes the skill** on every run, then records it with
-`superpowers-invoke.sh "$RUN_DIR" writing-plans`. `templates/plan.md` only adds deep-plan's
-extra sections around it.
+`~/.claude/skills/_shared/plan-format.md` is the **single source of truth** for the plan's shape. Do not invoke
+`superpowers:writing-plans`: its header and its execution handoff stop the build chain. Read the
+plan format on every run, then record it with `superpowers-invoke.sh "$RUN_DIR" writing-plans`
+(the receipt keeps its old name). `templates/plan.md` only adds deep-plan's extra sections.
 
-1. Invoke `Skill(skill="superpowers:writing-plans")`.
-2. Record the invocation.
+1. Read `~/.claude/skills/_shared/plan-format.md`.
+2. Record the receipt.
 3. Start the `ui-designer` agent as an Orca worker with `--keep-open` when the change touches an
    interface.
 4. Run `~/.claude/skills/deep-plan/scripts/dispatch-planners.sh "$RUN_DIR" "$TASK_DESC"`. It runs

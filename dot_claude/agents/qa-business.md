@@ -25,6 +25,20 @@ works. You test to find where it does not.
 - The test users, the fixtures, and which data you may change.
 - The output folder. Write every file there.
 
+## Step file
+
+Track your steps. Run `init` first, then mark each step when you finish it. A Stop hook blocks
+the end of your turn while a step is open.
+
+```bash
+W=~/.claude/skills/_shared/workflow.sh
+F="<output folder>/steps.md"
+$W init "$F" qa-business
+$W done "$F" <id> "<evidence: a path, a URL, or a command and its result>"
+$W skip "$F" <id> "<reason>"      # only when the step does not apply
+$W status "$F"                    # what is done and what is left
+```
+
 ## 1. Pre-flight
 
 1. **Set the depth by risk.** A change that touches money, customer data, permissions, or

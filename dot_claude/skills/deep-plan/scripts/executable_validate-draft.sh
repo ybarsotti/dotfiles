@@ -37,7 +37,7 @@ command -v jq >/dev/null 2>&1 || { echo "validate-draft.sh: jq required" >&2; ex
 
 # The canonical checklist item vocabulary — read from the templates rather
 # than hardcoded here a second time, so `draft-tail-complete` (below) can
-# never quietly drift from what superpowers:writing-plans actually emits.
+# never quietly drift from what _shared/plan-format.md defines.
 # Both templates matter: a subplan's `## Checklist` is a strict subset of a
 # root plan's, but reading only one would still be a second copy of the
 # other's item names in spirit.
@@ -93,7 +93,7 @@ else
   record "draft-non-empty" "fail" "file is empty (0 bytes)"
 fi
 
-# 2. Header complete — the superpowers:writing-plans title line plus a
+# 2. Header complete — the _shared/plan-format.md title line plus a
 # genuinely filled Goal/Architecture/Tech Stack (not just present-but-blank,
 # and not a template placeholder like `<one sentence...>`). Same anchored
 # patterns validate-plan.sh's writing-plans-header check already proves
@@ -142,7 +142,7 @@ fi
 
 # 4. Tail complete — the draft reached its final section instead of getting
 # cut off partway through. `## Checklist` is always the last section
-# superpowers:writing-plans emits, and `superpowers-all-invoked` is one of
+# _shared/plan-format.md defines, and `superpowers-all-invoked` is one of
 # its late, standard items — but plans that extend the checklist (this
 # session's own drafts do, with lane/contract items appended after it) can
 # legitimately keep going past it, so this does NOT require it to be the

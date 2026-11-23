@@ -26,12 +26,12 @@ have no answer.
 ## Required output
 
 **First, load the plan format — do not improvise it:** invoke
-`Skill(skill="superpowers:writing-plans")` and follow it verbatim for the document header,
+read `~/.claude/skills/_shared/plan-format.md` and follow it verbatim for the document header,
 the File Structure step, task right-sizing, the `### Task N:` blocks (bite-sized checkbox
 steps, real code, exact commands + expected output) and the no-placeholder rules.
 
 Then fill **every** section of the skeleton you are given (`templates/plan.md`) — it wraps
-the writing-plans structure with deep-plan's extra sections. Write to the path you are told.
+the plan-format structure with deep-plan's extra sections. Write to the path you are told.
 Markdown only, no commentary.
 
 ## Constraints

@@ -23,10 +23,24 @@ The spawn message gives you:
 - the findings: for each one, the file, the line, the problem and the expected fix;
 - the plan path;
 - the files you may edit;
-- your row of `$RUN_DIR/chain.md`, with its exact command;
+- the run folder `$RUN_DIR` and your row of `$RUN_DIR/chain.md`, with its exact command;
 - the test command and the gates.
 
 When an input is missing, ask for it.
+
+## Step file
+
+Track your steps. Run `init` first, then mark each step when you finish it. A Stop hook blocks
+the end of your turn while a step is open.
+
+```bash
+W=~/.claude/skills/_shared/workflow.sh
+F="$RUN_DIR/agents/fixer-<round>.md"
+$W init "$F" fixer
+$W done "$F" <id> "<evidence: a path, a URL, or a command and its result>"
+$W skip "$F" <id> "<reason>"      # only when the step does not apply
+$W status "$F"                    # what is done and what is left
+```
 
 ## Rules
 

@@ -37,7 +37,7 @@ before advancing.
 **You orchestrate; you never write lane code.** The run does not pause to check in: it goes
 end to end and stops only on a blocker no agent can settle alone.
 
-Once the lanes are done, the skill runs steps 2 to 9 of
+Once the lanes are done, the skill runs steps 2 to 8 of
 `~/.claude/skills/_shared/after-approval.md`: the full `/deep-review`, the `qa-ui` and
 `qa-business` agents, frozen SHA, the PR, the run report built from the run directory, and the
 PR watch. Every fix goes back to the lane that owns the code.

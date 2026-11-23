@@ -1,0 +1,4 @@
+read|Read the plan, the context brief and the files of the lens
+callers|Trace every caller and every flow of the code that the plan changes
+checklist|Run each checklist item of the lens against the plan and the code
+verdict|Write the verdict file and reply

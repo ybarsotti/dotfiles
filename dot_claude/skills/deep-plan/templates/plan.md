@@ -1,6 +1,6 @@
 # <Feature Name> Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** Build this plan with the `implement` skill, or with the executor that `~/.claude/skills/_shared/plan-routing.md` picks. After the build, run `~/.claude/skills/_shared/after-approval.md` to the end, through the final deep review and the PR. Track each step with `~/.claude/skills/_shared/workflow.sh` in the step file below. Do not use `superpowers:finishing-a-development-branch`.
 
 **Goal:** <one sentence describing what this builds>
 
@@ -8,8 +8,10 @@
 
 **Tech Stack:** <key technologies / libraries>
 
+**Step file:** <absolute path of $RUN_DIR/chain.md>
+
 ## Global Constraints
-<!-- Per `superpowers:writing-plans` — fill exactly as that skill specifies. Keep the
+<!-- Per `~/.claude/skills/_shared/plan-format.md` — fill exactly as that file specifies. Keep the
      language line: it applies to every plan, whatever language the chat uses. -->
 - Write code, identifiers, comments, docs, commit messages, the PR, and this plan in English, even when the chat is in Portuguese. Text shown to the product's users follows the product's i18n setup.
 - Keep each helper where its callers are: a private helper that one class uses is a `@staticmethod`, `@classmethod` or method of that class, never a module-level `_foo`; only a helper that two or more classes or modules use stays free. Code reads top down: public API first, helpers in call order, one level of abstraction per function, guard clauses, 2 levels of nesting at most. The project's own organization wins (`~/.claude/skills/simple-plan/references/constraints.md` rules 11 and 15).
@@ -268,8 +270,8 @@ stateDiagram-v2
 ```
 
 ## Affected files
-<!-- This is the "File Structure" step of `superpowers:writing-plans` — follow that skill's
-     rules for it. One line per file: path — the single responsibility it owns. -->
+<!-- This is the "File structure" section of `~/.claude/skills/_shared/plan-format.md` — follow its
+     rules. One line per file: path — the single responsibility it owns. -->
 - `path/to/file.ext` — <what changes; what it is responsible for>
 - `path/to/new_file.ext` — <new; single responsibility>
 
@@ -346,8 +348,8 @@ stateDiagram-v2
 | Reuse existing utility `X`? | yes/no | <reason> |
 
 ## Implementation tasks
-<!-- DO NOT invent a task format here. Load `superpowers:writing-plans` and follow ITS
-     task structure, granularity and no-placeholder rules verbatim — that skill is the
+<!-- DO NOT invent a task format here. Read `~/.claude/skills/_shared/plan-format.md` and follow ITS
+     task structure, granularity and no-placeholder rules verbatim — that file is the
      single source of truth for this section. Fill it with `### Task N:` blocks it defines.
      If `## Execution shape` above declares lanes, tag every task with its owning lane on
      its own line directly under the `### Task N:` title:

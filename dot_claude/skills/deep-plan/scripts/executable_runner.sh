@@ -22,7 +22,7 @@ TIMEOUT="${4:-900}"
 CODEX_MODEL="${DEEP_PLAN_CODEX_MODEL:-gpt-6.1-sol}"
 CODEX_EFFORT="${DEEP_PLAN_CODEX_EFFORT:-medium}"
 
-# A planner must invoke the Skill tool, read the writing-plans skill, and
+# A planner must read _shared/plan-format.md, and
 # then emit a full multi-task plan — 8 turns is not enough budget for that
 # and the old default silently truncated drafts mid-generation (validated
 # now by validate-draft.sh, but the fix is to stop starving the planner in

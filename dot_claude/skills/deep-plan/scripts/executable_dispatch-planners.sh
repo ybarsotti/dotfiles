@@ -26,37 +26,26 @@ VALIDATE_DRAFT="${SKILL_DIR}/scripts/validate-draft.sh"
 [ -f "$VALIDATE_DRAFT" ] || VALIDATE_DRAFT="${SKILL_DIR}/scripts/executable_validate-draft.sh"
 mkdir -p "${RUN_DIR}/logs"
 
-# A planner must invoke the Skill tool, read the writing-plans skill, and
+# A planner must read _shared/plan-format.md and
 # then write a full multi-task plan — 900s was not enough headroom and a
 # planner that ran out mid-stream still exited 0, so its truncated draft
 # went straight to review looking legitimate. Override with
 # DEEP_PLAN_PLANNER_TIMEOUT.
 PLANNER_TIMEOUT="${DEEP_PLAN_PLANNER_TIMEOUT:-1800}"
 
-# The planners must LOAD superpowers:writing-plans themselves — we never paste its body
-# into the prompt. Claude planners invoke the Skill tool; codex reads the skill file, so
-# resolve its path here (newest install wins) and hand over the path only.
-WP_SKILL_PATH=$(find "${HOME}/.claude/plugins" "${HOME}/.claude/skills" \
-  -path '*writing-plans/SKILL.md' -not -path '*temp_git_*' 2>/dev/null | sort | tail -1)
+# The planners read the plan format themselves — we never paste its body into the prompt.
+PLAN_FORMAT_PATH="${HOME}/.claude/skills/_shared/plan-format.md"
 
 # shellcheck disable=SC2016  # backticks below are Markdown, not command substitution
 build_prompt() {
-  local persona_file="$1" runner="$2"
+  local persona_file="$1"  # $2 (the runner) no longer changes the prompt
   cat "$persona_file"
   printf '\n'
   cat "${SKILL_DIR}/personas/planner-design-rules.md"
   printf '\n\n---\n\n## Required skill (load it, do not improvise)\n\n'
-  if [ "$runner" = "claude" ]; then
-    printf 'Before writing anything, invoke: Skill(skill="superpowers:writing-plans").\n'
-    printf 'Follow it verbatim for the plan header, File Structure and `### Task N:` blocks.\n'
-  else
-    if [ -n "$WP_SKILL_PATH" ]; then
-      printf 'Before writing anything, read the writing-plans skill at:\n  %s\n' "$WP_SKILL_PATH"
-    else
-      printf 'Before writing anything, load your `writing-plans` skill.\n'
-    fi
-    printf 'Follow it verbatim for the plan header, File Structure and `### Task N:` blocks.\n'
-  fi
+  printf 'Before writing anything, read the plan format at:\n  %s\n' "$PLAN_FORMAT_PATH"
+  printf 'Follow it verbatim for the plan header, File structure and `### Task N:` blocks.\n'
+  printf 'Do not invoke superpowers:writing-plans.\n'
   printf '\n\n---\n\n## Task\n%s\n' "$TASK_DESC"
   if [ -f "$RELATED_CONTEXT" ]; then
     printf '\n\n---\n\n## Related ticket and Slack context\n\n'

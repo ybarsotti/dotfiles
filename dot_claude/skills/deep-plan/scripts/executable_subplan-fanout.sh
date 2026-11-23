@@ -158,7 +158,7 @@ generate_subplan() {
       { print }
     ' "${out}.tmp" >"$out"
   else
-    sed "s|{{TASKS}}|<!-- no lane-tagged tasks found in the root plan for this chapter; author them by hand, following \`superpowers:writing-plans\`. -->|g" \
+    sed "s|{{TASKS}}|<!-- no lane-tagged tasks found in the root plan for this chapter; author them by hand, following \`_shared/plan-format.md\`. -->|g" \
       "${out}.tmp" >"$out"
   fi
   rm -f "${out}.tmp"

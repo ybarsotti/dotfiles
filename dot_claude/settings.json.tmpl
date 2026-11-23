@@ -43,6 +43,11 @@
           },
           {
             "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/workflow-gate.sh",
+            "timeout": 10
+          },
+          {
+            "type": "command",
             "command": "~/.claude/hooks/session-log.sh",
             "timeout": 10
           }
@@ -334,6 +339,16 @@
       }
     ],
     "SubagentStop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/workflow-gate.sh",
+            "timeout": 10
+          }
+        ]
+      },
       {
         "matcher": "",
         "hooks": [

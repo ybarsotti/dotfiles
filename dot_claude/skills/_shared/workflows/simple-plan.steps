@@ -1,0 +1,17 @@
+# simple-plan: one row per phase. Format: id|title. The chain steps follow.
+setup|Run folder and this step file (Setup)
+context|Project context brief (Phase 0)
+pipeline|Recommend the pipeline and get the answer (Phase 0.5)
+grill|Grill the plan (Phase 1)
+brainstorm|Brainstorm, when the design is open (Phase 1.2)
+breakdown|Split the work, when it is more than one task (Phase 1.5)
+ui|UI/UX consultation, when the change touches an interface (Phase 2)
+draft|Draft the plan in the plan format (Phase 2)
+plan-review|plan-reviewer agents in parallel, 2 rounds at most (Phase 3)
+blindspot|Blindspot pass (Phase 3.5)
+shed-light|shed-light, when the plan adds machinery (Phase 4)
+gate|Plan page and Plannotator gate until no annotations (Phase 4)
+stamp|Stamp and commit the approved plan (Phase 4)
+post-plan|workflow-post-plan, when .workflow/config.json exists (Phase 4)
+qa-plan|/qa-plan, when a flow or a screen changes (Phase 5)
+@include chain.steps

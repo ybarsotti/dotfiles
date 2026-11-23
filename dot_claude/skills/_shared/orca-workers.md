@@ -29,6 +29,7 @@ the rules, the model and the effort. The spec holds only what changes from task 
 | A task that edits server code, APIs, models, migrations or jobs | `implementer-backend` |
 | A task that edits screens, components or client state | `implementer-frontend` |
 | A review finding or a QA failure | `fixer` |
+| A plan review in `simple-plan` | `plan-reviewer` |
 
 A task that edits both sides goes to `implementer-frontend` when it changes a screen, else to
 `implementer-backend`.

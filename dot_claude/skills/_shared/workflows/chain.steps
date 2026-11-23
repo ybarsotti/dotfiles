@@ -1,0 +1,13 @@
+# The build chain of after-approval.md. Add one build.<n> row per task with
+# `workflow.sh add <file> build.<n> "<task>" --after build`.
+goal|Open /goal and decisions.md (chain 0)
+build|Build every task of the plan (chain 1)
+review|/deep-review default over the whole change, full process (chain 2)
+env|Check that the app URL answers (chain 3)
+qa-ui|qa-ui agent, when a UI design pass or a canvas exists (chain 4)
+qa-business|qa-business agent, when the environment answers (chain 5)
+fix|Fix and re-test with the fixer, 3 rounds at most (chain 6)
+post-impl|workflow-post-implementation, when .workflow/config.json exists (chain 7)
+demo|Narrated demo, when the change is a user feature (chain 7)
+report|Run report at $RUN_DIR/report/index.html (chain 7)
+pr|Open the PR with /pr and watch it (chain 7)

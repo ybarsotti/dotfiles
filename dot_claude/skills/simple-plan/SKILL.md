@@ -29,10 +29,20 @@ Set the run directory:
 ```bash
 RUN_DIR=~/.claude/simple-plan-runs/$(date +%Y%m%d-%H%M%S)-$(printf '%s' "$ARGUMENTS" | shasum | cut -c1-6)
 mkdir -p "$RUN_DIR"
+W=~/.claude/skills/_shared/workflow.sh
+$W init "$RUN_DIR/chain.md" simple-plan --project "$PWD"
 ```
 
+`$RUN_DIR/chain.md` is the step file of this run. It lists every phase below and every step of
+the build chain. Mark each step when it ends, as section 0 of
+`~/.claude/skills/_shared/after-approval.md` says: `done` with its evidence, `skip` with the
+reason, `wait` or `block` before you end a turn. After each phase, run `$W status` and tell
+the user what is done, what is next and what is left. The Stop hook
+`~/.claude/hooks/workflow-gate.sh` blocks the end of a turn while a step is open. When the
+user asks for the plan only, run `$W close "$RUN_DIR/chain.md" "plan only"` after the approval.
+
 `$RUN_DIR` holds `context.md`, the review notes, and the `qa/` bundle. The plan is not stored
-there. The plan lives where `superpowers:writing-plans` saves it:
+there. The plan lives where `~/.claude/skills/_shared/plan-format.md` saves it:
 `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md` inside the project. `$RUN_DIR/plan.md`
 is a one-line pointer file that contains that path.
 
@@ -148,14 +158,14 @@ intentions. Fold the answer into the plan's `UI design pass` section, and into `
 `Affected files` and `Edge cases`. The plan names the existing component it reuses.
 Skip this when the change touches no interface, and record that you skipped it.
 
-Invoke `Skill(skill="superpowers:writing-plans")` and follow it completely. Never paraphrase
-it from memory. That skill owns the document header, the task structure (Files, Interfaces,
-and checkbox steps), the no-placeholder rule, the self-review, the save location, and the
-execution handoff. `simple-plan` never replaces or relocates anything that
-`superpowers:writing-plans` prescribes.
+Read `~/.claude/skills/_shared/plan-format.md` and follow it completely. It owns the document
+header, the task structure (Files, Interfaces, and checkbox steps), the no-placeholder rule,
+the self-review and the save location. Do not invoke `superpowers:writing-plans`: its header
+and its execution handoff stop the build chain. Write the path of `$RUN_DIR/chain.md` in the
+`**Step file:**` line of the header.
 
-`simple-plan` only adds the sections below. Insert them between the writing-plans header and
-the first task, in this order.
+`simple-plan` only adds the sections below. Insert them between the header and the first task,
+in this order.
 
 After the plan is saved, record its path:
 
@@ -180,25 +190,25 @@ Phase 1.5), 9 Edge cases (if every row says `Cover now`, the plan is not simple)
 
 ## Phase 3 — Review
 
-Run the reviewers in parallel, in a single message with one `Agent` call each.
+Start the `plan-reviewer` agent once per side that the plan changes:
 
-| Reviewer | How | Lens | When |
-|---|---|---|---|
-| Over-engineering | `Skill(skill="ponytail:ponytail-review")` against `$PLAN_PATH` | What can be deleted from the plan | always |
-| Project fit | `Agent` with the persona at `~/.claude/skills/deep-plan/personas/project-developer.md` | Does the plan match this codebase | always |
-| Data | `Agent` with the persona at `~/.claude/skills/deep-review/personas/senior-backend.md` | Does the schema make sense, and will the queries hold | the plan touches a table, a column, a migration or a query |
+- the plan changes backend and frontend code: two agents, `lens: backend` and
+  `lens: frontend`, in parallel, in a single message;
+- the plan changes one side only: one agent with that lens.
 
-Read `~/.claude/skills/simple-plan/references/reviewers.md` before you start the reviewers. It holds
-the data reviewer questions and the project-fit and test-coverage instructions. Give the
-project-fit reviewer `$PLAN_PATH`, `$RUN_DIR/context.md` and the constraints file. It rejects the
-plan when any constraint rule is broken, and it quotes the rule number. Both reviewers check each
-TDD row against constraint rule 10.
+In Orca, start each one as an Orca worker with `claude --agent plan-reviewer`
+(`~/.claude/skills/_shared/orca-workers.md`). Outside Orca, use the `Agent` tool with
+`subagent_type: plan-reviewer`. Send each agent the lens, `$PLAN_PATH`, `$RUN_DIR/context.md`,
+`$RUN_DIR`, the round number, and the scope sources: the ticket, the user request, and the
+breakdown task when one exists. The agent file holds the checklist: scope drift, plan format,
+types, project patterns, clean and reusable code, least code, callers and flows, external
+systems, architecture, edge cases, tests, and data or UI for its lens.
 
-Run the data reviewer whenever the plan adds or changes a table, a column, an index, a migration
-or a query. Skip it otherwise and record that you skipped it.
-
-Apply the findings. Re-run the reviewers. **Stop after two rounds.** Record any finding you
-did not apply, with the reason, in a `## Open findings` section at the end of the plan.
+Each agent writes `$RUN_DIR/plan-review-<lens>-r<round>.md`. Apply every CRITICAL and HIGH
+finding. Apply a MEDIUM finding when the fix stays in scope. Re-run the agents on the new plan.
+**Stop after two rounds.** Record any finding you did not apply, with the reason, in a
+`## Open findings` section at the end of the plan. Mark the `plan-review` step done with the
+paths of the last verdict files.
 
 ## Phase 3.5 — Blindspot pass
 
@@ -228,7 +238,8 @@ unverified, and why.
    Then gate it: `plannotator annotate "${PLAN_PATH%.md}.html" --gate`.
 2. Apply the annotations that come back to `$PLAN_PATH`. Render the page again, then gate it
    again.
-3. Loop until a gate pass returns no annotations. That pass is the final approval.
+3. Loop until a gate pass returns no annotations. That pass is the final approval. Mark the
+   `gate` step done with the gate output.
 4. Stamp the approved plan: `~/.claude/skills/_shared/plan-stamp.sh approve "$PLAN_PATH"`.
    Commit the plan and its `.approved` stamp together.
 5. When `.workflow/config.json` exists, run `Skill(skill="workflow-post-plan")` with the Phase 3 reviewer results as evidence.

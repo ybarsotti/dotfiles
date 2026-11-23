@@ -106,34 +106,36 @@ the cap on its own.
 
 ## Phase 4 — The shared chain, through the lanes
 
-Run steps 2 to 9 of `~/.claude/skills/_shared/after-approval.md` in order, unattended, with
+Run steps 2 to 8 of `~/.claude/skills/_shared/after-approval.md` in order, unattended, with
 its `/deep-execute` routing: every `/deep-review` runs `--no-fix --no-simplify`, and every fix
 from review or QA goes to the owning lane with `reply.sh`, then `round-gate.sh`, then a
 commit. A file that no lane owns goes to a fresh implementer worker
 (`~/.claude/skills/_shared/orca-workers.md`). Mark the phases with
 `set-phase.sh RUN_DIR review|qa|delivery` as you reach steps 2, 3 and 7. Record each landed and
-rejected finding with `decision.sh` while it is still true.
+rejected finding with `decision.sh` while it is still true. Mark each chain step in the step
+file that the plan header names (`**Step file:**`) with `~/.claude/skills/_shared/workflow.sh`.
+The final `/deep-review` over the whole change always runs; its step cannot be skipped.
 
 Before step 7, freeze: commit, record the full `git rev-parse HEAD`, and run `plan-stamp.sh
-check PLAN`. Never finish on a changed plan or on stale QA evidence. Open the PR with
-`--no-watch`, so the report comes before the watch.
+check PLAN`. Never finish on a changed plan or on stale QA evidence. Build the report of
+Phase 5 first. Then open the PR with `/pr` and its watch.
 
 ## Phase 5 — Run report (step 8 of the chain)
 
 ```bash
 build-run-report.sh RUN_DIR --final-sha <full-sha> \
-  --review ~/.claude/deep-review-runs/<RUN_ID>/report.md --qa <qa-index.html> --pr <pr-url>
+  --review ~/.claude/deep-review-runs/<RUN_ID>/report.md --qa <qa-index.html>
 ```
 
 It writes `RUN_DIR/report/index.html` from the run directory alone: what was built, the
 lanes, every recorded decision, `decisions.md`, the `D-NNN` deviations, drift, the board and
-timeline, review, QA, open findings and the PR. Omit `--review`/`--qa`/`--pr` only when that
-artifact does not exist; the page says so. **Do not hand-write or supplement this page from
+timeline, review, QA, open findings and the PR. Omit `--review` or `--qa` only when that
+artifact does not exist; the page says so. The PR does not exist yet: `/pr` links the report. **Do not hand-write or supplement this page from
 memory.** A decision no one recorded is absent from it, and that absence is the truthful
 output. Close with `finish-run.sh RUN_DIR [--qa PATH]`, which refuses a missing or unrendered
 report. Send the report summary to the run's Inbox thread with `report/index.html` in
-`attachments` (`_shared/inbox.md`). Then start the PR watch (step 9) and leave the lane loops
-alive; teardown (`lanes/<lane>/stop`) is a separate step the user confirms.
+`attachments` (`_shared/inbox.md`). Then open the PR with `/pr` and its watch, and leave the
+lane loops alive; teardown (`lanes/<lane>/stop`) is a separate step the user confirms.
 
 ## Resume (`--resume RUN_DIR`)
 

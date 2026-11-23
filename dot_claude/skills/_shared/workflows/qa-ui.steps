@@ -1,0 +1,5 @@
+list|List the elements and states to check (Steps 1)
+canvas|Read the canvas and screenshot its artboards, when there is one (Steps 2)
+shots|Screenshot each state at 1440 px and 390 px (Steps 3 and 5)
+compare|Compare element by element (Steps 4 and 6)
+report|Write the report and reply with the verdict (Output)

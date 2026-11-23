@@ -43,7 +43,7 @@ items.
       the Jira steps of §3
 - [ ] **PR opened** (after-approval section 7): move the ticket to the review status, report the
       transition name chosen, and comment the PR link (§3)
-- [ ] **PR merged** (after-approval section 9, the PR watch): move the ticket to Done or the
+- [ ] **PR merged** (after-approval section 7, the watch of `/pr`): move the ticket to Done or the
       project equivalent, and comment (§4)
 
 ---

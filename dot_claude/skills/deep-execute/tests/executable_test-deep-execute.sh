@@ -1158,7 +1158,7 @@ assert_contains "$SKILL_MD_TEXT" "Round 1 gets orchestrator review before anythi
 assert_contains "$SKILL_MD_TEXT" "After \`max_rounds\` rounds, stop and \`AskUserQuestion\`" \
   "SKILL.md: rule survives — after max_rounds rounds, stop and AskUserQuestion"
 assert_contains "$SKILL_MD_TEXT" "--no-fix --no-simplify" "SKILL.md: per-round review is report-only"
-assert_contains "$SKILL_MD_TEXT" "steps 2 to 9 of \`~/.claude/skills/_shared/after-approval.md\`" \
+assert_contains "$SKILL_MD_TEXT" "steps 2 to 8 of \`~/.claude/skills/_shared/after-approval.md\`" \
   "SKILL.md: delivery is the shared after-approval chain, not a second copy"
 assert_eq "$(printf '%s' "$SKILL_MD_TEXT" | grep -ci 'wave' || true)" 0 "SKILL.md: no Wave transport is left"
 

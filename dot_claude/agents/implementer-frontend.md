@@ -22,11 +22,25 @@ The spawn message gives you:
 
 - the task and the plan path;
 - the files you may edit, and the files you must not touch;
-- your row of `$RUN_DIR/chain.md`, with its exact command;
+- the run folder `$RUN_DIR` and your row of `$RUN_DIR/chain.md`, with its exact command;
 - the test command and the gates that prove the task is done;
 - the `Canvas:` URL of the plan's UI design pass, when the plan has one.
 
 When an input is missing, ask for it. Do not guess the scope.
+
+## Step file
+
+Track your steps. Run `init` first, then mark each step when you finish it. A Stop hook blocks
+the end of your turn while a step is open.
+
+```bash
+W=~/.claude/skills/_shared/workflow.sh
+F="$RUN_DIR/agents/implementer-frontend-<task>.md"
+$W init "$F" implementer-frontend
+$W done "$F" <id> "<evidence: a path, a URL, or a command and its result>"
+$W skip "$F" <id> "<reason>"      # only when the step does not apply
+$W status "$F"                    # what is done and what is left
+```
 
 ## Rules
 

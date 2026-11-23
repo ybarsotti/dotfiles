@@ -1,0 +1,5 @@
+read|Read the findings, the plan and the rules files
+fix|For each finding: root cause, regression test, fix
+green|Run the test command: it passes
+gates|Run the ub-mode gates on the changed files
+report|Reply with one line per finding

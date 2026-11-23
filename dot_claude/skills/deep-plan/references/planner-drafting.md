@@ -1,17 +1,18 @@
 # Planner drafting details
 
-## Phase 1.5 — Two-track planner drafting (superpowers:writing-plans)
+## Phase 1.5 — Two-track planner drafting (plan format)
 
-`superpowers:writing-plans` is the **single source of truth** for the plan's shape — the
+`~/.claude/skills/_shared/plan-format.md` is the **single source of truth** for the plan's shape — the
 document header, the File Structure step, task right-sizing, the `### Task N:` blocks with
 their bite-sized checkbox steps, and the no-placeholder rules. deep-plan never restates or
-paraphrases those rules: it **invokes the skill** and follows what it returns, on every run.
+paraphrases those rules: it **reads the file** and follows it, on every run. Never invoke
+`superpowers:writing-plans`.
 `templates/plan.md` only adds deep-plan's extra sections (requirements, journey, data model,
 design handoff, context links, clarifying Qs, flow, rationale, QA flag, checklist) around it.
 
 **Step 1 — invoke the skill via the Skill tool:**
 ```
-Skill(skill="superpowers:writing-plans")
+Read ~/.claude/skills/_shared/plan-format.md
 ```
 
 **Step 2 — record the invocation:**
@@ -36,8 +37,7 @@ read the verdicts. Orca workers start after the approval, in the build chain.
 - `claude -p` (Opus) loaded with `personas/planner-opus.md`
 - `codex exec` (latest) loaded with `personas/planner-codex.md` *(skipped if `--no-codex`)*
 
-Both are told to **load `writing-plans` themselves** before drafting (the Claude planner via
-the Skill tool, the codex planner by reading the resolved skill path) — the dispatcher passes
+Both are told to **read `plan-format.md` themselves** before drafting — the dispatcher passes
 a pointer, never a copy of the skill body. Both receive the task description +
 `templates/plan.md` as their skeleton. Each writes its draft to `$RUN_DIR/draft-opus.md` and `$RUN_DIR/draft-codex.md`.
 

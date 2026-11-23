@@ -190,7 +190,7 @@ else
   record "clarifying-questions-asked" "fail" "Q=$QPAIRS A=$APAIRS (need ≥1 matched non-placeholder pair or '_no ambiguity_')"
 fi
 
-# 4.6. superpowers:writing-plans task format — `### Task N:` blocks with Files/Interfaces
+# 4.6. _shared/plan-format.md task format — `### Task N:` blocks with Files/Interfaces
 # and bite-sized checkbox steps. Placeholder task titles (`### Task 1: <Component Name>`)
 # don't count: an unedited template must fail. Fence-aware: a task's own body may show an
 # illustrative `### Task N:` example inside a ``` block (as Task 3's own real-plan body
@@ -201,7 +201,7 @@ TASK_TITLES=$(task_title_count "$PLAN")
 if [ "$TASK_TITLES" -ge 1 ]; then
   record "tasks-≥1" "pass" "$TASK_TITLES task block(s)"
 else
-  record "tasks-≥1" "fail" "no '### Task N: <name>' blocks (superpowers:writing-plans format required)"
+  record "tasks-≥1" "fail" "no '### Task N: <name>' blocks (_shared/plan-format.md format required)"
 fi
 
 # Every task block must declare Files + Interfaces, and carry ≥4 checkbox steps
@@ -236,20 +236,23 @@ fi
 # ─── Root-only checks ─────────────────────────────────────────────────────
 
 if [ "$MODE" = "root" ]; then
-  # 5.5 superpowers:writing-plans document header (title + worker sub-skill line + Goal/Architecture/Tech Stack)
+  # 5.5 Plan header of _shared/plan-format.md (title + agentic-worker line that points to
+  # after-approval.md + Goal/Architecture/Tech Stack). The superpowers execution skills stop
+  # the chain, so a header that names them fails.
   HEADER_MISS=()
   grep -qE '^# .+ Implementation Plan$' "$PLAN" || HEADER_MISS+=("title-not-'# X Implementation Plan'")
-  grep -qE 'REQUIRED SUB-SKILL' "$PLAN"          || HEADER_MISS+=("no-agentic-worker-line")
+  grep -qE 'after-approval\.md' "$PLAN"         || HEADER_MISS+=("no-agentic-worker-line-to-after-approval")
+  grep -qE 'superpowers:(subagent-driven-development|executing-plans)' "$PLAN" && HEADER_MISS+=("names-superpowers-executor")
   grep -qE '^\*\*Goal:\*\* *[^<[:space:]]' "$PLAN"         || HEADER_MISS+=("no-Goal")
   grep -qE '^\*\*Architecture:\*\* *[^<[:space:]]' "$PLAN" || HEADER_MISS+=("no-Architecture")
   grep -qE '^\*\*Tech Stack:\*\* *[^<[:space:]]' "$PLAN"   || HEADER_MISS+=("no-Tech-Stack")
   if [ ${#HEADER_MISS[@]} -eq 0 ]; then
-    record "writing-plans-header" "pass" "header matches superpowers:writing-plans"
+    record "writing-plans-header" "pass" "header matches _shared/plan-format.md"
   else
     record "writing-plans-header" "fail" "missing: ${HEADER_MISS[*]}"
   fi
 
-  # 5.6 Global Constraints section filled (writing-plans: every task inherits it)
+  # 5.6 Global Constraints section filled (plan-format.md: every task inherits it)
   GC_LINES=$(section_body "Global Constraints" | grep -cE '^- [^<]')
   if [ "$GC_LINES" -ge 1 ]; then
     record "global-constraints-present" "pass" "$GC_LINES constraint(s)"

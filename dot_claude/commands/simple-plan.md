@@ -35,14 +35,13 @@ hand the problem to another command.
 2. **Draft** — when the change touches an interface, first consult
    `ui-ux-pro-max:ui-ux-pro-max` and one UI/UX agent against the existing UI, so the plan
    names the components and tokens to reuse instead of inventing them.
-   `superpowers:writing-plans` defines the format. The plan states the problem,
+   `~/.claude/skills/_shared/plan-format.md` defines the format. The plan states the problem,
    the non-goals, the approach, the project fit, the concrete types, the affected files, an
    edge-case decision table, the TDD test list, and the validation steps.
-3. **Review** — in parallel, for at most 2 rounds: `ponytail:ponytail-review` for
-   over-engineering, the deep-plan `project-developer` persona for project fit, and — when the
-   plan touches a table, column, migration or query — the `senior-backend` persona as the data
-   reviewer, asking whether the schema shape makes sense and whether the queries hold at real
-   size, with `EXPLAIN` against a seeded dev database when one is reachable.
+3. **Review** — the `plan-reviewer` agent, one per side that the plan changes (backend,
+   frontend), in parallel, for at most 2 rounds. It checks scope drift, the plan format,
+   types, project patterns, clean and reusable code, callers and flows the plan missed,
+   external systems, architecture, edge cases, tests, and the data or UI of its lens.
 3.5 **Blindspot** — `blindspot`, over the plan itself. The Phase 3 reviewers share the
    author's reading history. This pass labels every claim READ or INFERRED, then opens the
    surface behind each INFERRED claim or rewrites the claim to what was observed.

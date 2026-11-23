@@ -1,0 +1,7 @@
+read|Read the task, the plan, implementer-rules (Core, UI), ui-quality, external-services and ub-mode
+red|Write the failing tests and run them: they fail
+code|Write the code of the task, with every UI state
+green|Run the test command of the task: it passes
+gates|Run the ub-mode gates on the changed files
+visual|Visual pass of ui-quality.md section 11 at 1440 px and 390 px
+report|Reply with the summary of the Output section

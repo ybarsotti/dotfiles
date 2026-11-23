@@ -18,7 +18,7 @@ repo's HEAD commit): it proves the script ran, not that the skill itself ran —
 of `scripts/superpowers-invoke.sh` for the full guarantee.
 
 Confirm the plan includes, at minimum:
-- The **`superpowers:writing-plans` document header** + an **`## Implementation tasks`** section in that skill's exact task format (`### Task N:` + Files + Interfaces + bite-sized checkbox steps with real code).
+- The **`_shared/plan-format.md` document header** + an **`## Implementation tasks`** section in that file's exact task format (`### Task N:` + Files + Interfaces + bite-sized checkbox steps with real code).
 - A **Mermaid flow diagram** (sequence or flowchart) under `## Flow diagram` — required. It
   shows the runtime path.
 - An **`## Architecture diagram`** (`classDiagram` or `C4Component`) whenever the change adds

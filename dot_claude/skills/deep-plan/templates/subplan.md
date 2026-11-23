@@ -25,7 +25,7 @@ sequenceDiagram
 ```
 
 ## Implementation tasks
-<!-- Load `superpowers:writing-plans` and follow its task structure verbatim — same rules
+<!-- Read `~/.claude/skills/_shared/plan-format.md` and follow its task structure verbatim — same rules
      as the root plan. Populated by subplan-fanout.sh: every `### Task N:` block tagged for
      this lane, copied verbatim from the root plan. -->
 {{TASKS}}

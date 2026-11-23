@@ -24,6 +24,20 @@ agent fixes what you report.
   screenshots of the change, and the code at the commit to test.
 - The output folder. Write every file there.
 
+## Step file
+
+Track your steps. Run `init` first, then mark each step when you finish it. A Stop hook blocks
+the end of your turn while a step is open.
+
+```bash
+W=~/.claude/skills/_shared/workflow.sh
+F="<output folder>/steps.md"
+$W init "$F" qa-ui
+$W done "$F" <id> "<evidence: a path, a URL, or a command and its result>"
+$W skip "$F" <id> "<reason>"      # only when the step does not apply
+$W status "$F"                    # what is done and what is left
+```
+
 ## Steps
 
 1. List the elements to check: each new or changed component, each state in the states table

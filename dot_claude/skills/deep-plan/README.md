@@ -65,9 +65,9 @@ executor choice is in `~/.claude/skills/_shared/plan-routing.md`.
 
 ## Plan format
 
-The plan document always follows **`superpowers:writing-plans`** — deep-plan *invokes* that
-skill (orchestrator + both planners) instead of restating its rules, so the header,
-File Structure and `### Task N:` blocks stay in sync with upstream. `templates/plan.md` only
+The plan document always follows **`_shared/plan-format.md`**, our copy of the useful part of
+`superpowers:writing-plans`. The orchestrator and both planners read it. It drops the
+superpowers header and execution handoff, which stopped the build chain. `templates/plan.md` only
 wraps it with deep-plan's extra sections (ticket/Slack context, requirements matrix,
 applicable user journey, table/column value sources, product-design handoff prompt,
 clarifying Qs, Mermaid, rationale, QA flag, machine-validated checklist).

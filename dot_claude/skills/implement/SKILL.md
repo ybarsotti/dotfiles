@@ -19,6 +19,10 @@ Run section 0 of `after-approval.md`: open `/goal` with the finished result "bui
 QA green, PR open, report delivered". The goal keeps the session going after the last commit.
 This applies when `/implement` is the first command too.
 
+Find the step file. The plan header names it (`**Step file:**`). When the plan has none,
+create it: `~/.claude/skills/_shared/workflow.sh init "$RUN_DIR/chain.md" implement --plan "$PLAN"`.
+Add one `build.<n>` row per task, in order: `workflow.sh add <file> build.<n> "<task>" --after build`.
+
 ## Build
 
 1. Read the plan. Take its tasks in order. When the plan has no tasks, split the work into
@@ -27,10 +31,12 @@ This applies when `/implement` is the first command too.
    describes. Run its three checks before the first task, and print the mode line it names.
    In Orca, each task runs as an Orca worker in its own pane. This session reviews each task.
    It writes feature code only when the user asks for that.
-   In the subagent mode, use the per-task loop of `superpowers:subagent-driven-development`.
-   Use `superpowers:executing-plans` only when the harness has no subagent tool. Skip their last step,
-   `superpowers:finishing-a-development-branch`: it asks to merge, open a PR or keep the
-   branch, and waits. Sections 2 to 9 of `after-approval.md` replace it.
+   In the subagent mode, run this loop per task: start the predefined implementer agent with
+   the `Agent` tool, read its diff, run the task's tests and gates, send a fix back with
+   `SendMessage` when one fails, then commit. When the harness has no subagent tool, build the
+   task in this session with the same steps. Do not use `superpowers:subagent-driven-development`,
+   `superpowers:executing-plans` or `superpowers:finishing-a-development-branch`: they stop to
+   ask, and the chain of `after-approval.md` replaces them.
 3. Invoke the `ub-mode` skill and build by it. Tell each implementer worker to invoke it too,
    or to read `~/.claude/skills/ub-mode/SKILL.md`. Before each commit, run its gates on the
    changed files: `crapper --changed --threshold 10`, `dryer --changed --threshold 0.8`, and
@@ -40,7 +46,9 @@ This applies when `/implement` is the first command too.
 4. For a bug or a regression, use `superpowers:systematic-debugging` before you write the fix.
 5. Record each departure from the plan as a `D-NNN` row under the plan's `## Deviations`.
 6. After each task, read its diff and run its tests and the gates of step 3. Then commit.
-   The panel review runs once, in section 2 of `after-approval.md`.
+   Mark its row: `workflow.sh done <file> build.<n> "<commit sha>: <test command and result>"`.
+   Run `workflow.sh status <file>` and tell the user what is done, what is next and what is
+   left. The panel review runs once, in section 2 of `after-approval.md`.
 
 ## Test
 
@@ -56,7 +64,7 @@ skip the hooks.
 
 ## Next
 
-The last commit is not the end. In the same turn, continue with sections 2 to 9 of
-`~/.claude/skills/_shared/after-approval.md`: the review, QA, the fixes, the PR, the report and
-the PR watch. Do not stop to report the build, and do not ask whether to continue. Stop only
+The last commit is not the end. Mark the `build` step done. In the same turn, continue with
+sections 2 to 8 of `~/.claude/skills/_shared/after-approval.md`: the final `/deep-review` with
+its full process, QA, the fixes, the demo, the report, and the PR with its watch. Do not stop to report the build, and do not ask whether to continue. Stop only
 in the cases that `after-approval.md` lists. Do not run a review, QA or PR flow of your own.

@@ -754,6 +754,32 @@ starts the agent with `orca terminal create --command "claude --agent <name>"`, 
 with `subagent_type: <name>`. The settings set `subagentPromptCacheTtl` to `1h` and leave agent
 teams off.
 
+`simple-plan` reviews each plan with the `plan-reviewer` agent: one per side that the plan
+changes (backend, frontend), in parallel. It checks scope drift, the plan format, types, project
+patterns, reuse, the callers and flows the plan missed, external systems, architecture and edge
+cases.
+
+Plans follow `dot_claude/skills/_shared/plan-format.md`, not `superpowers:writing-plans`. The
+superpowers header sent the build to `subagent-driven-development`, which ends in
+`finishing-a-development-branch` and stops to ask. The plan header now points to `implement`
+and `after-approval.md`.
+
+##### The step file and the workflow gate
+
+Every planning run keeps a step file, `$RUN_DIR/chain.md`, with
+`dot_claude/skills/_shared/executable_workflow.sh`. `init` lists every planning phase and every
+step of the build chain (`_shared/workflows/*.steps`). The orchestrator marks each step `done`
+with evidence, `skip` with a reason, or `wait` and `block` before it ends a turn. Each spawned
+agent (`implementer-*`, `fixer`, `plan-reviewer`, `qa-ui`, `qa-business`) keeps its own step
+file the same way. The final `review` step cannot be skipped once code was built.
+
+`dot_claude/hooks/executable_workflow-gate.sh` runs on `Stop` and `SubagentStop`. It acts only on
+a session whose transcript holds the `[workflow-gate] tracking <file>` line that `init` prints,
+so work outside a workflow is never blocked. It blocks the end of a turn while a step is
+`todo`, and prints what is done, what is next and what is left. It stands aside for a `waiting`
+or `blocked` step, on `stop_hook_active`, for a step file older than 2 days, and when the user
+says "encerrar mesmo assim". The test is `_shared/tests/executable_test-workflow-gate.sh`.
+
 ##### The Stop hook that refuses to lose the run report
 
 Phase 5 was the only phase without a gate, and across three real runs the report was never built

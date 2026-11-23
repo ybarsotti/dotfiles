@@ -981,7 +981,7 @@ chmod +x "${FIN_STUB_DIR}/claude"
 # shellcheck disable=SC2016 # literal markdown fixture text, no expansion wanted
 FIN_ROOT_ONE_SUB='# Widget Refactor Implementation Plan
 
-REQUIRED SUB-SKILL: superpowers:writing-plans
+> **For agentic workers:** Build with `implement`, then run `~/.claude/skills/_shared/after-approval.md`.
 
 **Goal:** Ship the widget refactor.
 **Architecture:** Adapter-based.
