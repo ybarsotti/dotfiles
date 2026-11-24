@@ -6,8 +6,9 @@
 # Install REA (reverse engineering for coding agents) and register it with the
 # agents whose config chezmoi does not manage.
 #
-# Codex and Cursor are absent on purpose. Their MCP config lives in
-# dot_codex/private_config.toml and dot_cursor/private_mcp.json, so chezmoi owns
+# Codex, Cursor and OpenCode are absent on purpose. Their MCP config lives in
+# dot_codex/private_config.toml, dot_cursor/private_mcp.json and
+# dot_config/opencode/opencode.jsonc, so chezmoi owns
 # the rea entry there. Letting `rea setup` write those files too would make every
 # apply rewrite them without rea, and the next setup add it back — a drift loop.
 #
@@ -31,6 +32,15 @@ fi
 
 # --yes approves the user-owned actions only. Hopper needs --install-hopper, so
 # a native analysis engine is never installed without an explicit request.
-echo "Registering REA with Claude Code and OpenCode"
-rea setup --yes --client claude_code --client opencode
+echo "Registering REA with Claude Code"
+# rea setup exits non-zero with status needs_human after it applies every action,
+# when only optional work remains (Hopper, a running Claude Desktop). That is a
+# warning, not a failed install.
+if ! SETUP_OUT=$(rea setup --yes --client claude_code 2>&1); then
+  if ! printf '%s\n' "$SETUP_OUT" | grep -q '^status: needs_human'; then
+    printf '%s\n' "$SETUP_OUT" >&2
+    exit 1
+  fi
+  echo "rea setup needs manual follow-up; run 'rea setup' to see it"
+fi
 {{- end -}}

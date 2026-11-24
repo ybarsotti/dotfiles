@@ -146,6 +146,12 @@
     // an Anthropic model 400s while this server is enabled. opencode 1.14.30's
     // `tools` config map does not filter MCP tools, so the whole server has to
     // go. Real fix is upstream: drop the top-level `anyOf` from that schema.
+    // chezmoi owns this entry, so `rea setup` does not write this file.
+    "rea": {
+      "type": "local",
+      "command": ["npx", "-y", "rea-agents@latest", "mcp"],
+      "enabled": true
+    },
     "ai-memory": {
       "type": "remote",
       "url": "http://127.0.0.1:49374/mcp",
