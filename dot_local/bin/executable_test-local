@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
-"""Run one local test command at a time, without a worker pool."""
+"""Run local test commands in a small number of slots, without a worker pool.
+
+A command waits in the queue for a free slot, up to TEST_LOCAL_WAIT seconds (default 540),
+so an agent does not need its own retry loop. TEST_LOCAL_SLOTS (default 2) sets how many
+commands run at the same time on this machine. Each command still runs serially inside.
+"""
 
 import fcntl
+import os
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 COMMANDS = {
@@ -43,12 +50,28 @@ def main():
             return 64
     state = Path.home() / ".cache" / "test-local"
     state.mkdir(mode=0o700, parents=True, exist_ok=True)
-    with (state / "run.lock").open("a") as lock:
-        try:
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            print("test-local: another local test command holds the slot; try again after it exits.", file=sys.stderr)
-            return 75
+    slots = max(1, int(os.environ.get("TEST_LOCAL_SLOTS", "2")))
+    deadline = time.monotonic() + int(os.environ.get("TEST_LOCAL_WAIT", "540"))
+    said = False
+    while True:
+        for n in range(slots):
+            lock = (state / f"run.{n}.lock").open("a")
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except BlockingIOError:
+                lock.close()
+        else:
+            if time.monotonic() > deadline:
+                print("test-local: every slot stayed busy; try again after a run exits.", file=sys.stderr)
+                return 75
+            if not said:
+                print(f"test-local: all {slots} slots are busy; waiting in the queue.", file=sys.stderr, flush=True)
+                said = True
+            time.sleep(3)
+            continue
+        break
+    with lock:
         try:
             result = subprocess.run([*COMMANDS[runner], *args], check=False, pass_fds=(lock.fileno(),))
         except FileNotFoundError as exc:

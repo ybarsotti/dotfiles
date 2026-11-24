@@ -163,7 +163,7 @@ memory and swap and stall every other application. CI is the place for test suit
 - Locally, run only the focused tests of your change: the failing test and the passing test
   of the TDD cycle, and the test files of the code you changed.
 - On this Mac, run focused tests through `~/.local/bin/test-local` with pytest, jest, vitest, or playwright from the package directory.
-  The command runs serially and shares one slot across local sessions. If busy, defer rather than starting another run.
+  The command runs serially in one of two slots that all local sessions share. When both slots are busy, it waits in a queue for up to 9 minutes. Give the Bash call a timeout of 600000 ms, or run it in the background. Do not write a retry loop: exit 75 means the queue stayed full, so do other work and try once more later.
   Do not bypass it with direct commands, containers, package scripts, or delegated workers.
   Do not use watch or UI mode.
 - Reuse the test database. Pass `--create-db` only when a migration changed.
