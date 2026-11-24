@@ -13,6 +13,9 @@ If it does, the section carries, in this order:
 1. **A GIF or recording of the flow working end to end** — the whole path a user takes, not a
    still of the end state. New screen or changed flow ⇒ this is required.
 2. **Before / after screenshots** for anything that changed on an existing screen.
+   Run `~/.claude/skills/_shared/scripts/video-check.sh <file>` on each video and GIF first.
+   A file that fails shows a still screen, not a flow: never attach it. Record the flow with
+   the `video-demo` skill, or attach screenshots and say that no video exists.
 3. **A link to the QA evidence report** (`index.html`) that these came from, plus the commit
    SHA it was captured against.
 

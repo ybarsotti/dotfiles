@@ -58,6 +58,7 @@ node scripts/collect.cjs
 ```
 
 - Keep each clip 10 to 25 seconds. Glide to the element, hold, act, hold on the result.
+- Each clip performs its action in the UI: type, click, send. Never write the result to the database or an API to skip the action. Run `~/.claude/skills/_shared/scripts/video-check.sh <clip>` on each clip; a clip that fails shows a still screen, so record it again.
 - Hover every element that the narration points at. The hover records its box for the camera and the focus boxes.
 - When the page cannot be recorded (for example, single sign-on blocks the automated browser), capture stills at 1440x900 and 2x into `public/shots/`. Use `image` instead of `clip` in the scene.
 

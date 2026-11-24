@@ -87,7 +87,10 @@ with the `agent-browser:agent-browser` skill and record one video per scenario y
 For each scenario:
 
 1. **Capture the state before** in every system you can reach, not only the screen.
-2. **Act.**
+2. **Act through the UI, on camera.** The video shows a person doing the action: type, click,
+   send, and the screen that changes after it. Data that you write to the database or an API
+   is setup for the state before, never the action of the video. When the UI cannot do the
+   action, say so in the report and attach no video for that scenario.
 3. **Check every side effect at its source.** Build a coverage matrix first: one row per
    system and expected effect (database row, API response, email, queue message, file, log),
    with the columns `access`, `evidence`, `gap`. A system you cannot reach is a **gap**, never
@@ -127,4 +130,6 @@ the open questions. End with:
   did not create.
 - Use only test users and test data. Never act on real customer data.
 - A PASS needs evidence: a video, a screenshot, or the query output.
+- Before you list a video as evidence, run `~/.claude/skills/_shared/scripts/video-check.sh
+  <video>`. A video that fails shows a still screen: record the action again, or drop it.
 - A code change after the tested SHA makes the evidence stale. Re-run the affected scenarios.
