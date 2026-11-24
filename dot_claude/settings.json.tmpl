@@ -12,11 +12,14 @@
   "agentPushNotifEnabled": true,
   "inputNeededNotifEnabled": true,
   "permissions": {
-    "defaultMode": "bypassPermissions"
+    "defaultMode": "bypassPermissions",
+    "denyInsteadOfPrompting": true
   },
   "env": {
     "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet",
     "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "400000",
+    "CLAUDE_CODE_SUBAGENT_EFFORT": "medium",
+    "CLAUDE_CODE_DISABLE_AGENT_PROGRESS_SUMMARIES": "1",
     "CLAUDE_CODE_PLUGIN_DIRS": "~/.claude/mods/keep-warm"{{ if env "CLAUDE_CODE_OAUTH_TOKEN" }},
     "CLAUDE_CODE_OAUTH_TOKEN": "{{ env "CLAUDE_CODE_OAUTH_TOKEN" }}"{{ end }}
   },
