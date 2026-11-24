@@ -1,6 +1,6 @@
 ---
 name: video-demo
-description: Use when the user asks for a narrated demo or walkthrough video of a feature for a stakeholder or customer. Records the real flow with word-synced captions and edge-tts voices (English, pt-BR). For quick PR evidence use guided-tour-video. For stills use annotated-screenshots.
+description: Use when the user asks for a narrated demo or walkthrough video of a feature for a stakeholder or customer. Records the real flow with word-synced captions and edge-tts voices (English, pt-BR). For stills use annotated-screenshots.
 ---
 
 # Video Demo
