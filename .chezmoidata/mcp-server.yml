@@ -10,13 +10,6 @@ mcp_servers:
       type: http
       url: http://127.0.0.1:49374/mcp
 
-    rea:
-      command: npx
-      args:
-        - -y
-        - rea-agents@latest
-        - mcp
-
 
 
     # The global npm install (run_once_03). npx resolved @latest on each session start and
@@ -97,6 +90,13 @@ mcp_servers:
   # Optional / situational (uncomment and move to the right section):
   #
   # shared:
+  #   rea:
+  #     command: npx
+  #     args:
+  #       - -y
+  #       - rea-agents@latest
+  #       - mcp
+  #
   #   playwright:
   #     command: npx
   #     args:
