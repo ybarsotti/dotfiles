@@ -43,7 +43,9 @@ head="$(git -C "$cwd" rev-parse HEAD 2>/dev/null || true)"
 if [ -n "$head" ] && [ -f "$cwd/.gitnexus/meta.json" ] && command -v gitnexus >/dev/null; then
   if [ "$(jq -r '.lastCommit // ""' "$cwd/.gitnexus/meta.json" 2>/dev/null)" != "$head" ]; then
     # --index-only: a plain analyze also rewrites CLAUDE.md, AGENTS.md and skill files in the repo.
-    refresh_bg "gitnexus analyze --index-only"
+    # GITNEXUS_MEMORY=off keeps the 4 GB heap: analyze otherwise sizes it from total RAM (36 GB
+    # here) and a large repo then holds 5 GB or more. Two workers keep the refresh in the background.
+    refresh_bg "GITNEXUS_MEMORY=off NODE_OPTIONS=--max-old-space-size=4096 gitnexus analyze --index-only --workers 2"
   fi
 fi
 # Only when git ignores graphify-out: an update of a committed graph dirties the worktree.
@@ -80,7 +82,7 @@ print(fallback)
 PY
 )"
   fi
-  parts+=("gitnexus: .gitnexus index detected for ${repo_name:-$(basename "$cwd")}. Use GitNexus MCP for architecture, flows, impact analysis before symbol edits, and detect_changes before commits. If stale, run npx gitnexus analyze.")
+  parts+=("gitnexus: .gitnexus index detected for ${repo_name:-$(basename "$cwd")}. Use GitNexus MCP for architecture, flows, impact analysis before symbol edits, and detect_changes before commits. If stale, run gitnexus analyze --index-only.")
 fi
 
 graph_roots=()

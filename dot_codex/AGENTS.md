@@ -14,7 +14,7 @@ Use the code-intelligence MCP servers in `~/.codex/config.toml` when they are av
 ## GitNexus
 - If the project has a `.gitnexus/` index, use the `gitnexus` MCP server for architecture, execution flows and blast radius.
 - Before you change a function, class or method in an indexed project, run GitNexus impact analysis on it. Warn before you edit when the risk is HIGH or CRITICAL.
-- If GitNexus reports a stale index, run `npx gitnexus analyze` from the project root first.
+- If GitNexus reports a stale index, run `gitnexus analyze --index-only` from the project root first.
 
 ## Graphify
 - If `graphify-out/GRAPH_REPORT.md` exists, read it before broad architecture questions.
