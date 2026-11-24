@@ -37,7 +37,8 @@ Read `$ARGUMENTS`. Extract:
 - `--ticket KEY-123` — explicit ticket (else auto-detect)
 - `--update <pr-number>` — update this PR instead of creating (else create)
 - `--draft` — open as draft (create only)
-- `--no-codex` — skip the codex reviewer, Sonnet self-review only
+- `--no-codex` — skip the codex reviewer, Sonnet self-review only. Implied when the repository workflow
+  reviews the PR (`_shared/repo-workflow.md`)
 - `--no-watch` — open the PR and stop; skip Phase 5
 - `--evidence <path>` — a QA evidence dir or `index.html` (screenshots, recordings) to source
   the `## Evidence` section from. Repeatable. When omitted, look for the newest

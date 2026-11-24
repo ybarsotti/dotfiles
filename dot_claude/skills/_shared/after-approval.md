@@ -89,6 +89,9 @@ Opus, Sol or Astra. The build and the plan keep their own models.
 - Outside an Orca workspace (`orca worktree current` fails), use the `Agent` tool with the same
   agent name. Never use `claude -p` for an agent that needs the `Artifact` tool.
 
+**The repository's own workflow comes first.** When the repository defines one, it owns each
+stage it covers, and this chain runs only the steps it lacks (`_shared/repo-workflow.md`).
+
 ## 1. Build
 
 The executor comes from the last section of `~/.claude/skills/_shared/plan-routing.md`:
@@ -106,8 +109,8 @@ tests and gates before the next part starts. In option C, the workflow's adversa
 still runs as `plan-routing.md` describes ("How option C runs").
 
 `/deep-execute` runs steps 2 to 8 itself. For options B, C and D, run them from this session.
-Under every option, the final `/deep-review` of step 2 runs over the whole change. No executor
-skips it.
+Under every option, the final review of step 2 runs over the whole change: `/deep-review`, or
+the code review stage of the repository workflow. No executor skips it.
 
 **Under `/deep-execute`, the lane that owns the code applies every fix.** Run the
 `/deep-review` with `--no-fix --no-simplify`, so the review only reports. Send each fix to
@@ -117,7 +120,8 @@ the owning lane with `reply.sh RUN_DIR LANE "<finding, file, line, fix>"`, gate 
 
 ## 2. Review
 
-1. Run `/deep-review default` over the whole change, with its full process: every phase, the
+1. When the repository workflow has a code review stage, run it and skip this step
+   (`_shared/repo-workflow.md`). Otherwise run `/deep-review default` over the whole change, with its full process: every phase, the
    fix rounds and the simplify pass. Each part had its own review; this pass checks how the
    parts fit together. Its Phase 4.5 fixes every CRITICAL, HIGH and MEDIUM finding and
    re-runs the panel on the fix delta only (`--scope <round base> --prior <run>`), for 3 fix

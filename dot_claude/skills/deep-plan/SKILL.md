@@ -132,6 +132,9 @@ Read `references/planner-drafting.md` before you start step 3.
 
 ## Phase 2 — Review loop (≤ `--max-plan-iter`)
 
+When the repository workflow has a plan review stage (`_shared/repo-workflow.md`), run that
+stage instead of this loop.
+
 1. Run `dispatch-reviewers.sh "$RUN_DIR" "$ITER"`. It starts the Sonnet and Codex reviewers in
    parallel. Each writes `verdict-<persona>-iter<N>.json`.
 2. Run `aggregate-verdicts.sh "$RUN_DIR" "$ITER"`. Exit 0 means all APPROVED: go to Phase 3.

@@ -195,7 +195,8 @@ Phase 1.5), 9 Edge cases (if every row says `Cover now`, the plan is not simple)
 
 ## Phase 3 — Review
 
-Start the `plan-reviewer` agent once per side that the plan changes:
+When the repository workflow has a plan review stage (`_shared/repo-workflow.md`), run that
+stage instead and skip this phase. Otherwise start the `plan-reviewer` agent once per side that the plan changes:
 
 - the plan changes backend and frontend code: two agents, `lens: backend` and
   `lens: frontend`, in parallel, in a single message;
