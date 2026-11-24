@@ -17,8 +17,7 @@
   "env": {
     "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet",
     "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "400000",
-    "CLAUDE_CODE_PLUGIN_DIRS": "~/.claude/mods/keep-warm",
-    "CODE_MODERNIZATION_TELEMETRY": "0"{{ if env "CLAUDE_CODE_OAUTH_TOKEN" }},
+    "CLAUDE_CODE_PLUGIN_DIRS": "~/.claude/mods/keep-warm"{{ if env "CLAUDE_CODE_OAUTH_TOKEN" }},
     "CLAUDE_CODE_OAUTH_TOKEN": "{{ env "CLAUDE_CODE_OAUTH_TOKEN" }}"{{ end }}
   },
   "teammateMode": "auto",
@@ -479,8 +478,7 @@
     "cybersecurity-skills@anthropic-cybersecurity-skills": false,
     "slack@claude-plugins-official": true,
     "typesafe@typesafe-ai": true,
-    "logfire@pydantic-skills": true,
-    "code-modernization@claude-plugins-official": true
+    "logfire@pydantic-skills": true
   },
   "extraKnownMarketplaces": {
     "plannotator": {
