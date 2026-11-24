@@ -152,14 +152,20 @@ a demo as an Orca worker, as `~/.claude/skills/_shared/orca-workers.md` describe
 `Agent` tool there only for read-only research and exploration. Outside Orca, use the `Agent`
 tool.
 
-# Test Runs — Machine Load
+# Test Runs — CI First
 
 Several agent sessions share this machine. A full suite with default parallelism can fill
-memory and swap and stall every other application.
+memory and swap and stall every other application. CI is the place for test suites.
 
-- Run the tests that cover your change first. Run a full suite only before a commit or a PR.
-- Run one full suite at a time. Do not start the frontend and the backend suites together.
-- Cap the workers: `jest --maxWorkers=2`, `vitest --maxWorkers=2`, `pytest -n 2`.
+- Leave full suites, end-to-end runs, lint and type checks of the whole project to CI. Push
+  the branch and read the result with `gh pr checks` or `gh run watch`. The `/pr` watch fixes
+  a red check. Run a full suite locally only when the user asks for it.
+- Locally, run only the focused tests of your change: the failing test and the passing test
+  of the TDD cycle, and the test files of the code you changed.
+- On this Mac, run focused tests through `~/.local/bin/test-local` with pytest, jest, vitest, or playwright from the package directory.
+  The command runs serially and shares one slot across local sessions. If busy, defer rather than starting another run.
+  Do not bypass it with direct commands, containers, package scripts, or delegated workers.
+  Do not use watch or UI mode.
 - Reuse the test database. Pass `--create-db` only when a migration changed.
 - Run containers you start for a test with `--rm`, and stop them when the run ends.
 

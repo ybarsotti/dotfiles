@@ -52,6 +52,9 @@ Read these files before you change code. Follow them. Do not copy them into your
 3. `~/.claude/skills/_shared/external-services.md`: when a fix touches an external service.
 4. The `ub-mode` skill and its gates.
 
+Run tests only through `~/.local/bin/test-local`, and only the tests of your task. Never run
+the full suite: CI runs it on the PR.
+
 For each finding:
 
 1. Find the root cause. Fix it where all callers route through, not only on the reported path.

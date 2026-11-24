@@ -48,6 +48,9 @@ Read these files before you write code. Follow them. Do not copy them into your 
 2. `~/.claude/skills/_shared/external-services.md`: when the task calls an external service.
 3. The `ub-mode` skill and its gates.
 
+Run tests only through `~/.local/bin/test-local`, and only the tests of your task. Never run
+the full suite: CI runs it on the PR.
+
 Work under strict TDD. Write the failing test first, then the code that passes it.
 
 Do these steps only:

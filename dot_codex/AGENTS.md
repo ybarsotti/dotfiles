@@ -30,8 +30,12 @@ Use the code-intelligence MCP servers in `~/.codex/config.toml` when they are av
   `~/.claude/skills/_shared/implementer-rules.md` as your brief says.
 - Before you write UI code, read `~/.claude/skills/_shared/ui-quality.md`.
 - Write code, identifiers, comments, docs and commit messages in English.
-- Run the tests that cover your change first. Cap the workers: `jest --maxWorkers=2`,
-  `vitest --maxWorkers=2`, `pytest -n 2`. Run one full suite at a time.
+- Leave full suites, end-to-end runs and whole-project checks to CI. Push the branch and read
+  the result with `gh pr checks`. Run a full suite locally only when the user asks for it.
+- On this Mac, run focused tests through `~/.local/bin/test-local` with pytest, jest, vitest, or playwright from the package directory.
+  The command runs serially and shares one slot across local sessions. If busy, defer rather than starting another run.
+  Do not bypass it with direct commands, containers, package scripts, or delegated workers.
+  Do not use watch or UI mode.
 - Implementation, fixes, QA and code review run on `gpt-6.1-terra`. `gpt-6.1-sol` is for plans,
   designs and brainstorming. When you start another Codex agent for code, pass
   `-m gpt-6.1-terra`.

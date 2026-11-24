@@ -116,8 +116,9 @@ An explicit `patch`, `minor`, `major` or `X.Y.Z` argument wins. When the project
 ## 5. Run the checks
 
 Run the gate that the project defines: read `CLAUDE.md`, `AGENTS.md` and the CI workflows to
-find it, for example `just check` or `make check`. Run one full suite at a time, with capped
-workers. A failure stops the release. Report the command and its result.
+find it, for example `just check` or `make check`. Prefer the CI result of the release
+commit: `gh run list --commit <sha>`. Run the gate locally only when CI does not cover it,
+one suite at a time. A failure stops the release. Report the command and its result.
 
 ## 6. Ask for confirmation
 

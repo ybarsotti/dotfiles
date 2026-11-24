@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""Run one local test command at a time, without a worker pool."""
+
+import fcntl
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+COMMANDS = {
+    "pytest": ("uv", "run", "--no-sync", "pytest", "-p", "no:xdist", "-p", "no:xdist.looponfail"),
+    "jest": ("pnpm", "exec", "jest", "--runInBand"),
+    "vitest": ("pnpm", "exec", "vitest", "run", "--no-file-parallelism", "--maxConcurrency=1"),
+    "playwright": ("pnpm", "exec", "playwright", "test", "--workers=1"),
+}
+OVERRIDE = re.compile(
+    r"^(?:-n|-w|-d|-f|-o|-g|-p|-c)"
+    r"|^--(?:numprocesses|dist|tx|maxWorkers|max-workers|minWorkers|min-workers|"
+    r"maxConcurrency|max-concurrency|fileParallelism|file-parallelism|"
+    r"no-file-parallelism|workers|fully-parallel|fullyParallel|experimental-worker|"
+    r"watch|watchAll|watch-all|ui|looponfail|config-file|override-ini)(?:=|$)"
+)
+PYTEST_ONLY_SHORT = ("-n", "-d", "-f", "-p", "-o")
+NODE_ONLY_SHORT = ("-w",)
+
+
+def conflicting_flag(runner, arg):
+    if not arg.startswith("-"):
+        return False
+    if arg.startswith("--"):
+        return bool(OVERRIDE.search(arg))
+    return arg.startswith(PYTEST_ONLY_SHORT if runner == "pytest" else NODE_ONLY_SHORT)
+
+
+def main():
+    if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
+        print("Usage: test-local {pytest|jest|vitest|playwright} [test selectors and options]", file=sys.stderr)
+        return 64
+    runner, *args = sys.argv[1:]
+    for arg in args:
+        if conflicting_flag(runner, arg):
+            print(f"test-local: {arg} conflicts with the local test limit; remove it.", file=sys.stderr)
+            return 64
+    state = Path.home() / ".cache" / "test-local"
+    state.mkdir(mode=0o700, parents=True, exist_ok=True)
+    with (state / "run.lock").open("a") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            print("test-local: another local test command holds the slot; try again after it exits.", file=sys.stderr)
+            return 75
+        try:
+            result = subprocess.run([*COMMANDS[runner], *args], check=False, pass_fds=(lock.fileno(),))
+        except FileNotFoundError as exc:
+            print(f"test-local: {exc}", file=sys.stderr)
+            return 127
+        except KeyboardInterrupt:
+            return 130
+        return result.returncode if result.returncode >= 0 else 128 - result.returncode
+
+
+if __name__ == "__main__":
+    sys.exit(main())
