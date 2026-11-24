@@ -61,7 +61,7 @@ Add one `build.<n>` row per task, in order: `workflow.sh add <file> build.<n> "<
 - Run only the focused tests of the change locally, through `~/.local/bin/test-local`: the
   TDD test of each task and the test files of the changed code. Run the type checker on the
   changed files.
-- Do not run the full suite locally. CI runs it on the PR, and the `/pr` watch fixes a red
+- Do not run the full suite locally. CI runs it on the PR, and the `/ship-it` watch fixes a red
   check. Run it locally only when the user asks.
 - Do not weaken a test, a lint rule or a threshold to get to green.
 

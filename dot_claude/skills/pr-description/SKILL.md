@@ -1,6 +1,6 @@
 ---
 name: pr-description
-description: Use for /pr, or when the user asks to write, open or update a pull request, or on handoff from deep-plan, simple-plan or jira-workflow. Writes a Conventional Commit title and a body with ticket, requirements matrix, Mermaid and verification, then opens the PR assigned to the user.
+description: Use for /ship-it, or when the user asks to write, open or update a pull request, or on handoff from deep-plan, simple-plan or jira-workflow. Writes a Conventional Commit title and a body with ticket, requirements matrix, Mermaid and verification, then opens the PR assigned to the user.
 ---
 
 # pr-description
@@ -78,7 +78,7 @@ Follow sections 2, 4 and 5 of `~/.claude/skills/_shared/spec-evidence.md`.
 
 A PR opens only after the build chain ran (`~/.claude/skills/_shared/after-approval.md`). This
 gate applies to every caller: a planning skill, `implement`, `deep-execute`, an orchestrator
-that starts its own agents, or a direct `/pr`. Run the three checks against HEAD.
+that starts its own agents, or a direct `/ship-it`. Run the three checks against HEAD.
 
 1. **Code review.** One of these covers HEAD:
    - a `/deep-review` run: `~/.claude/skills/deep-review/scripts/check-stale.sh <run-dir>`
@@ -99,7 +99,7 @@ that starts its own agents, or a direct `/pr`. Run the three checks against HEAD
 
 When a check fails, do not open or update the PR. Print `Chain gate: <check> not done` and
 the reason. Then run the missing step as `after-approval.md` describes: sections 2, 4 or 5,
-in an Orca worker when the session runs in Orca. Run `/pr` again after it passes.
+in an Orca worker when the session runs in Orca. Run `/ship-it` again after it passes.
 
 Skip a check only when the user says so for this PR. Then write `<check> not done: <reason>`
 under `## Evidence`. A fix to the PR body or the PR title alone does not re-run the gate.

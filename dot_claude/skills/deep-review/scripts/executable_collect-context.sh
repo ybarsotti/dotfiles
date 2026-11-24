@@ -192,4 +192,18 @@ EOF
 printf '%s\n' "$DIFF_OUTPUT" | "$(dirname "${BASH_SOURCE[0]}")/security-signals.sh" "$REPO_ROOT" "$SCOPE" "$FILES" >> "$OUT" \
   || log "security signals unavailable"
 
+# A fix round: the diff above holds only the fix. Reviewers check the earlier findings
+# against it and review only the lines it changed.
+if [ -n "${PRIOR_RUN:-}" ] && [ -f "${PRIOR_RUN}/findings.jsonl" ]; then
+  {
+    printf '\n## Fix round\n\n'
+    printf 'This review covers only the fix of the findings below. The diff above is the fix.\n'
+    printf 'For each finding, say whether the diff fixes it. Review only the lines that the diff\n'
+    printf 'changed, and report a new finding only when those lines cause it. Do not report on\n'
+    printf 'code outside the diff: the earlier round already reviewed it.\n\n'
+    jq -r 'select(.severity != "LOW" and .severity != "QUESTION")
+      | "- [\(.severity)] \(.persona): \(.title) (\(.file):\(.line))"' "${PRIOR_RUN}/findings.jsonl"
+  } >> "$OUT"
+fi
+
 log "wrote $OUT (${FILE_COUNT} files, $(wc -l < "$OUT") lines)"

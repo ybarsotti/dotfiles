@@ -266,7 +266,7 @@ stop to recommend commands. Stop at the plan only when the user said so, such as
 
 Rules for this pipeline inside that chain:
 
-- Before `/pr`, rebase onto the latest base branch. Repeat the caller search for every removed
+- Before `/ship-it`, rebase onto the latest base branch. Repeat the caller search for every removed
   contract in the plan. Run `plan-stamp.sh check "$PLAN_PATH"`; the PR body proves each
   evidence-map row at the shipped SHA.
 - For stages, run the build, review and QA once per stage with the gate of its class, commit

@@ -118,7 +118,8 @@ the owning lane with `reply.sh RUN_DIR LANE "<finding, file, line, fix>"`, gate 
 1. Run `/deep-review default` over the whole change, with its full process: every phase, the
    fix rounds and the simplify pass. Each part had its own review; this pass checks how the
    parts fit together. Its Phase 4.5 fixes every CRITICAL, HIGH and MEDIUM finding and
-   re-runs the panel, for 3 fix rounds at most.
+   re-runs the panel on the fix delta only (`--scope <round base> --prior <run>`), for 3 fix
+   rounds at most.
 2. A separate agent applies the fixes. The reviewer never fixes its own finding. Start the
    `fixer` agent as `orca-workers.md` describes. Under `/deep-execute`, that agent is the owning lane
    (section 1).
@@ -149,7 +150,7 @@ canvas, the build checks each screen as soon as it renders:
 The step below is the final pass over every screen.
 
 Run this step when the plan has a UI design pass, or when a canvas exists for the change.
-The visual pass of the agent that built the UI does not replace this step. `/pr` refuses to
+The visual pass of the agent that built the UI does not replace this step. `/ship-it` refuses to
 open the PR without a `MATCH` from this agent for the head commit (its Phase 0.6 chain gate). Dispatch the `qa-ui` agent with:
 
 - the plan path, and the `Canvas:` URL of the UI design pass when the plan has one;
@@ -191,7 +192,7 @@ the fixes>..HEAD` once on the fixes only. Do not review the whole change again.
    `video-demo` skill. Skip it for a refactor, a lone migration or an internal API, and say
    why.
 4. Build the report of section 8.
-5. Run `/pr`, with its watch. It attaches the screenshots and the demo with `gh --attach`,
+5. Run `/ship-it`, with its watch. It attaches the screenshots and the demo with `gh --attach`,
    opens the PR, and watches it as Phase 5 of `~/.claude/skills/pr-description/SKILL.md`
    describes: review comments go to `address-pr-comments`, failing checks to systematic
    debugging, until the PR merges or closes. Mark the `pr` step done with the PR URL when the
@@ -215,7 +216,7 @@ and D do not write. For options B, C and D, write `$RUN_DIR/report/index.html` y
 Copy each image and video into `$RUN_DIR/report/media/` and link it by a relative path.
 Then run `open "$RUN_DIR/report/index.html"` and give the user the absolute path.
 
-After `/pr` opens the PR, send the finished-work summary to the Inbox thread of the ticket or
+After `/ship-it` opens the PR, send the finished-work summary to the Inbox thread of the ticket or
 branch: the PR in `pulls`, the QA screenshots in the body, and the report and videos in
 `attachments` (`_shared/inbox.md`). Under `/deep-execute`, a fix during the watch still goes to
 the owning lane.

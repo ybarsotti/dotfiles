@@ -5,7 +5,7 @@ import { extractEdges, frontmatter } from "./skills-map.mjs";
 
 const known = {
   skills: new Set(["deep-review", "simplify", "plan", "qa-test-plan"]),
-  commands: new Set(["pr", "deep-review"]),
+  commands: new Set(["ship-it", "deep-review"]),
   agents: new Set(["qa-ui"]),
   shared: new Set(["after-approval.md"]),
   namespaces: new Set(["superpowers"]),
@@ -43,8 +43,8 @@ test("spawns agent: known names, agents path, subagent_type", () => {
 });
 
 test("runs command: only real names, never a path segment", () => {
-  assert.deepEqual(edges("run `/pr`, then /deep-review default"), [
-    "command:command:pr@1",
+  assert.deepEqual(edges("run `/ship-it`, then /deep-review default"), [
+    "command:command:ship-it@1",
     "command:command:deep-review@1",
   ]);
   assert.deepEqual(edges("$RUN_DIR/plan.md tmp/<slug>/plan ~/pr /unknown"), []);

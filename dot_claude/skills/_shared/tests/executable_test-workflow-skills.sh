@@ -42,7 +42,7 @@ assert_contains "$(text workflow-mode)" "AskUserQuestion" "mode: asks the user"
 assert_contains "$(text workflow-post-plan)" 'Next: Skill(skill="workflow-post-implementation")' "post-plan: next is post-implementation"
 assert_contains "$(text workflow-post-implementation)" 'Next: Skill(skill="workflow-finish")' "post-implementation: next is finish"
 # shellcheck disable=SC2016 # The backticks are literal Markdown.
-assert_contains "$(text workflow-finish)" 'Next: run `/pr`' "finish: points to /pr"
+assert_contains "$(text workflow-finish)" 'Next: run `/ship-it`' "finish: points to /ship-it"
 assert_eq "$(text workflow-finish | grep -c 'Next: Skill(')" 0 "finish: has no next skill"
 
 for pair in post-plan:workflow-post-plan post-implementation:workflow-post-implementation finish:workflow-finish; do

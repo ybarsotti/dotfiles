@@ -2,7 +2,7 @@
 
 Generate **and** review a pull-request title + description, then open (or update) the PR
 assigned to you. A **claude Sonnet** agent writes the title/body; a **codex** agent reviews
-it. Used standalone via `/pr`, and as a runtime dependency of `deep-plan`
+it. Used standalone via `/ship-it`, and as a runtime dependency of `deep-plan`
 (Phase 6 handoff) and `jira-workflow` (PR step).
 
 ## What it produces
@@ -16,11 +16,11 @@ it. Used standalone via `/pr`, and as a runtime dependency of `deep-plan`
 ## Invocation
 
 ```bash
-/pr                                        # draft from git diff main...HEAD, auto-detect ticket
-/pr --plan <deep-plan plan.md> --ticket PROJ-2982
-/pr --update 1421 --draft                  # update an existing PR
-/pr --dry-run                              # print title + body, don't touch the PR
-/pr --no-codex                             # Sonnet self-review instead of codex
+/ship-it                                        # draft from git diff main...HEAD, auto-detect ticket
+/ship-it --plan <deep-plan plan.md> --ticket PROJ-2982
+/ship-it --update 1421 --draft                  # update an existing PR
+/ship-it --dry-run                              # print title + body, don't touch the PR
+/ship-it --no-codex                             # Sonnet self-review instead of codex
 ```
 
 ## Watch
@@ -44,7 +44,7 @@ waits on the user stays open. `--no-watch` skips this phase. When the reviewer a
 ```
 ~/.claude/skills/pr-description/
 ├── README.md                # this file
-├── SKILL.md                 # protocol the orchestrator follows when /pr runs
+├── SKILL.md                 # protocol the orchestrator follows when /ship-it runs
 └── personas/
     └── pr-writer.md         # fixed Sonnet writer prompt
 ```

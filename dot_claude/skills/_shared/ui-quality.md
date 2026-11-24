@@ -157,7 +157,7 @@ Do this after the UI builds and before review. A screen nobody looked at is not 
 7. Keep the final screenshots. The review and the PR use them as evidence.
 
 This pass is the check of the builder. It does not prove that the screen matches a design
-canvas. When a canvas exists, the `qa-ui` agent makes that comparison, and `/pr` requires it.
+canvas. When a canvas exists, the `qa-ui` agent makes that comparison, and `/ship-it` requires it.
 
 When no local environment can run, render the component with fixture data, and say so in the
 evidence.

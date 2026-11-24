@@ -1,6 +1,6 @@
 ---
 name: workflow-finish
-description: Use before /pr in a repository with `.workflow/config.json`, after a fast task is built and tested or after workflow-post-implementation. Writes the checks into `workflow.md` (fast) or `finish.md` (standard). Last stage, before the PR.
+description: Use before /ship-it in a repository with `.workflow/config.json`, after a fast task is built and tested or after workflow-post-implementation. Writes the checks into `workflow.md` (fast) or `finish.md` (standard). Last stage, before the PR.
 ---
 
 # workflow-finish
@@ -57,4 +57,4 @@ Fix each violation with the table in the reference, and run it again. Stop after
 with violations left, and ask the user. Commit the artifacts when the verifier passes. The
 hash excludes `.workflow/`, so this commit keeps it current.
 
-Next: run `/pr`.
+Next: run `/ship-it`.

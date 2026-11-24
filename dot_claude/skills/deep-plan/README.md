@@ -108,7 +108,7 @@ See `~/.claude/commands/deep-plan.md` for full arg grammar. Common:
 
 Each run writes to `~/.claude/deep-plan-runs/<RUN_ID>/`:
 
-- `plan.md` — final approved plan (consumed by `/pr` and `jira-workflow`)
+- `plan.md` — final approved plan (consumed by `/ship-it` and `jira-workflow`)
 - `related-context.md` — ticket and Slack source links supplied to planners/reviewers
 - `draft-opus.md`, `draft-codex.md` — initial drafts
 - `verdict-<persona>-iter<N>.json` — reviewer verdicts per iteration

@@ -43,7 +43,7 @@ items.
       the Jira steps of §3
 - [ ] **PR opened** (after-approval section 7): move the ticket to the review status, report the
       transition name chosen, and comment the PR link (§3)
-- [ ] **PR merged** (after-approval section 7, the watch of `/pr`): move the ticket to Done or the
+- [ ] **PR merged** (after-approval section 7, the watch of `/ship-it`): move the ticket to Done or the
       project equivalent, and comment (§4)
 
 ---
@@ -170,18 +170,18 @@ planner loop before you continue. If the scope grows during planning, recommend 
 ## 3. Build to PR — the Jira steps
 
 After approval, the planner picks the executor (`~/.claude/skills/_shared/plan-routing.md`) and
-runs `~/.claude/skills/_shared/after-approval.md` itself: build, review, QA, `/pr` and the
+runs `~/.claude/skills/_shared/after-approval.md` itself: build, review, QA, `/ship-it` and the
 report. Run that chain once. Do not start a second build, review or QA. Add only these steps:
 
 - **Bug or regression ticket:** the executor drives the fix through
   `superpowers:systematic-debugging` before it writes the fix.
-- **Before `/pr`:** run `Skill(skill="superpowers:verification-before-completion")`. Every
+- **Before `/ship-it`:** run `Skill(skill="superpowers:verification-before-completion")`. Every
   test, new and existing, is green. Do not open the PR on red.
 - **Commit message:** a Conventional Commit with `Implements <CODE>.` in the body. Do not skip
   the hooks.
-- **`/pr` arguments:** `--ticket <CODE> --plan <plan.md> --evidence <qa-report-index.html>`.
+- **`/ship-it` arguments:** `--ticket <CODE> --plan <plan.md> --evidence <qa-report-index.html>`.
 - **After the PR opens** (after-approval section 7): do these steps in order.
-  1. Send `<CODE> PR opened` and the PR URL as the `/pr` Phase 5 rule sends its notices: the
+  1. Send `<CODE> PR opened` and the PR URL as the `/ship-it` Phase 5 rule sends its notices: the
      Inbox thread `<CODE>`, else a `PushNotification`.
   2. Move the ticket to the review status. List the transitions with
      `mcp__atlassian__getTransitionsForJiraIssue`. Choose the one named like "In Review" or
@@ -199,7 +199,7 @@ report. Run that chain once. Do not start a second build, review or QA. Add only
 
 ## 4. Watch the PR
 
-`/pr` Phase 5 owns the watch: CI, every review comment from a human or a bot, the review
+`/ship-it` Phase 5 owns the watch: CI, every review comment from a human or a bot, the review
 state, and merge conflicts, until the PR merges or closes. Do not run a second loop here.
 The jira-workflow parts are these:
 

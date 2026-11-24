@@ -91,7 +91,7 @@ visibly different. **LOW** when a designer would notice it and a user would not.
 End with one verdict line, in this exact form:
 `Verdict: MATCH at <sha>` when there are no HIGH or MEDIUM rows, otherwise
 `Verdict: DIFFERENT: N HIGH, M MEDIUM at <sha>`. `<sha>` is the full commit you tested.
-`/pr` reads this line.
+`/ship-it` reads this line.
 
 ## Rules
 

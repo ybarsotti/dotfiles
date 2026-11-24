@@ -116,7 +116,7 @@ done. Deliver the polished version first. Do not wait for the user to ask.
   desktop width and at 390 px, critique them, and fix what is weak.
 - When a design canvas exists for the change, the `qa-ui` agent compares the screens with it
   before the PR. This applies also when you orchestrate agents without a planning skill. The
-  visual pass of the builder does not replace it, and `/pr` refuses to open without it.
+  visual pass of the builder does not replace it, and `/ship-it` refuses to open without it.
 
 # Agent Models
 
@@ -140,8 +140,8 @@ Subagents run on Sonnet by default (`CLAUDE_CODE_SUBAGENT_MODEL`). A `model` arg
 
 # Pull Requests
 
-Open a pull request only with `/pr` (the `pr-description` skill). Never run `gh pr create` by
-hand. This applies to every agent and every workflow. `/pr` refuses to open a PR before the
+Open a pull request only with `/ship-it` (the `pr-description` skill). Never run `gh pr create` by
+hand. This applies to every agent and every workflow. `/ship-it` refuses to open a PR before the
 build chain ran: a code review at HEAD, QA for a changed flow or screen, and `qa-ui` parity
 when a design canvas exists.
 
@@ -158,7 +158,7 @@ Several agent sessions share this machine. A full suite with default parallelism
 memory and swap and stall every other application. CI is the place for test suites.
 
 - Leave full suites, end-to-end runs, lint and type checks of the whole project to CI. Push
-  the branch and read the result with `gh pr checks` or `gh run watch`. The `/pr` watch fixes
+  the branch and read the result with `gh pr checks` or `gh run watch`. The `/ship-it` watch fixes
   a red check. Run a full suite locally only when the user asks for it.
 - Locally, run only the focused tests of your change: the failing test and the passing test
   of the TDD cycle, and the test files of the code you changed.

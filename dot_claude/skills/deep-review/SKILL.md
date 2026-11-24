@@ -104,10 +104,10 @@ Skip it for the run you just finished in this session, where nothing has changed
 A finding reported and not fixed is not a reviewed change, so this phase is the default rather
 than a question. Do not stop at the report and wait to be asked.
 
-1. **Fix every CRITICAL, HIGH and MEDIUM**, from each finding's file, line and suggestion. First run
-   each `prod-check:` QUESTION by `~/.claude/skills/_shared/query-check.md` §2; it can move a severity.
-2. **Re-run the panel on the fix**, scoped to the changed files. A fix that introduces its own
-   finding is common, and the second pass is what catches it.
+1. **Save `ROUND_BASE=$(git rev-parse HEAD)`, then fix** every CRITICAL, HIGH and MEDIUM. First
+   run each `prod-check:` QUESTION by `_shared/query-check.md` §2; it can move a severity.
+2. **Re-review only the fix**, never the whole PR: `dispatch.sh <variant> --scope "$ROUND_BASE"
+   --prior <previous run dir>`. `--prior` lists the findings the fix addresses.
 3. **Stop after three fix rounds.** What survives goes in a `## Open findings` section with the
    reason, and you say plainly which findings remain.
 4. **LOW and QUESTION are the user's call.** List them and ask; do not fix them silently.

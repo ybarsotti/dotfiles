@@ -37,7 +37,7 @@ const CLUSTERS = {
   review: ["deep-review", "simplify", "shed-light", "blindspot"],
   qa: ["qa-plan", "qa-execute", "qa-test-plan", "qa-business", "qa-ui"],
   "pr-ticket": [
-    "pr",
+    "ship-it",
     "pr-description",
     "address-pr-comments",
     "jira-workflow",
@@ -261,7 +261,7 @@ function buildGraph() {
   const sortedNodes = [...nodes.values()].sort(
     (a, b) => cmp(typeRank(a), typeRank(b)) || cmp(a.name, b.name),
   );
-  // A skill that mentions the command wrapping it (pr-description -> /pr) is not a flow.
+  // A skill that mentions the command wrapping it (pr-description -> /ship-it) is not a flow.
   const wraps = new Set(
     [...edges.values()]
       .filter((e) => e.type === "invoke" && e.from.startsWith("c_"))
@@ -387,7 +387,7 @@ const CHAIN_NODES = [
   ["qtp", "qa", "/qa-test-plan", "c_qa_test_plan"],
   ["fix", "qa", "separate fixer agent", null],
   ["wf", "pr", "workflow-finish", "s_workflow_finish"],
-  ["pr", "pr", "/pr (pr-description)", "c_pr"],
+  ["pr", "pr", "/ship-it (pr-description)", "c_ship_it"],
   ["bs", "pr", "blindspot", "s_blindspot"],
   ["rep", "pr", "HTML run report", null],
   ["watch", "watch", "PR watch: Monitor, then loop", null],

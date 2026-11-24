@@ -1,11 +1,58 @@
 ---
-description: Ship the branch - the same command as /pr. Writes and reviews the PR title and body, opens or updates the PR, then watches it until it is merged or closed
-argument-hint: [same arguments as /pr]
+description: Generate + review a conventional-commit PR title/body with objective, ticket, Slack threads, requirements matrix, Mermaid, decisions, verification and UI evidence (GIF/screenshots), then open/update PR
 ---
 
 # /ship-it
 
-`/ship-it` is another name for `/pr`. Run `/pr` with the same arguments: invoke the
-`pr-description` skill and follow `~/.claude/commands/pr.md` exactly, including its watch.
+Write a crisp, reviewer-friendly pull-request title and description, have a second
+model review it, then open (or update) the PR assigned to you.
+
+- **Title** is a Conventional Commit (`feat`/`fix`/`refactor`/`perf`/`docs`/`test`/`chore` + optional scope), ≤ 70 chars.
+- **Body** states what change solves, linked ticket/Slack threads, requirement-by-requirement
+  implementation status, **Mermaid** flow, rationale, key decisions, and verification.
+- **Evidence** — when the diff touches UI, an `## Evidence` section with a GIF/recording of the
+  flow working end to end, before/after screenshots for changed screens, and a link to the QA
+  report plus the SHA it was captured against. No UI change ⇒ an explicit
+  `_no UI change — no visual evidence_`, never a silent omission.
+- **Permissions** — when the diff changes who may do what (a role, a permission, a policy, a
+  guard, a roles migration), a `## Permissions` table with every role as a row, one column per
+  changed action, and the `file:line` that enforces each one. Absent when access did not change.
+- **Blindspot** — before the PR opens, every claim in the body is labelled READ or INFERRED.
+  A claim about tests, CI, or a system this PR does not touch is verified or rewritten to what
+  was observed.
+- **Body never** lists changed files or file/line counts — it is about *what we solve*, not *what moved*.
+- A **claude Sonnet** agent writes it; a **codex** agent reviews it. The PR is assigned to you (`@me`).
 
 **Arguments:** `$ARGUMENTS`
+
+## Argument grammar
+
+```
+/ship-it [flags]
+
+FLAGS
+  --plan <path>       deep-plan plan.md to source context, requirements, links, flow and decisions
+  --ticket KEY-123    explicit ticket key (else auto-detected from branch/commit)
+  --evidence <path>   QA evidence dir or index.html (screenshots/recordings); repeatable
+  --update <pr-number> update an existing PR instead of creating one
+  --draft             open the PR as a draft
+  --no-codex          skip the codex reviewer (Sonnet self-review only)
+  --no-watch          open the PR and stop (default: watch reviews + CI until merge or close)
+  --dry-run           print the drafted title + body, do not open/update the PR
+```
+
+## What you must do
+
+You are the **orchestrator**. Invoke the `pr-description` skill — do NOT write the PR
+title/body inline yourself. The writer (Sonnet) drafts it, the reviewer (codex) checks
+it, you apply fixes and open the PR.
+
+The skill lives at `~/.claude/skills/pr-description/SKILL.md`. Follow its phases exactly.
+
+### Quick examples
+
+```bash
+/ship-it
+/ship-it --plan ~/.claude/deep-plan-runs/20260713-101500-a3f9c2/plan.md --ticket PROJ-2982
+/ship-it --update 1421 --draft
+```

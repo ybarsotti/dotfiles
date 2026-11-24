@@ -69,7 +69,7 @@ The skill lives at `~/.claude/skills/deep-review/SKILL.md` and its scripts at
 4. Report goes to stdout and to `~/.claude/deep-review-runs/<RUN_ID>/report.md`, beside
    `findings.jsonl` (and `findings.sarif` with `--sarif`).
 5. Fix every CRITICAL, HIGH and MEDIUM with an agent other than the reviewer that found it, then
-   re-run the panel on the fix. At most three rounds; what survives goes to `## Open findings`.
+   re-run the panel on the fix only: `--scope <sha before the fix> --prior <previous run dir>`. At most three rounds; what survives goes to `## Open findings`.
 6. Run `/simplify` on the reviewed scope, unless `--no-simplify` was passed.
 
 ### Findings

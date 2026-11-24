@@ -120,7 +120,7 @@ turn:
 - Mock only the outermost external call. Make sure each test can fail. Never weaken a check,
   skip a test or add a suppression to get to green.
 - Your lane rules win over the commit and push steps of `ub-mode`. Never open a pull request:
-  the orchestrator opens it with `/pr`.
+  the orchestrator opens it with `/ship-it`.
 
 ## Building a screen
 

@@ -130,7 +130,7 @@ one round, the gate refuses the round until a human decides. After each passing 
 orchestrator commits, then runs a report-only `/deep-review` and routes the fixes to the lanes.
 After the last fix round, one `/simplify` pass runs in the orchestrator, so the run completes
 the full `/deep-review` process. The run report comes
-before the PR, and `/pr` then opens the PR with its watch.
+before the PR, and `/ship-it` then opens the PR with its watch.
 
 ## Contract drift
 

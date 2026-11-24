@@ -120,7 +120,7 @@ that the report-only rounds skipped.
 
 Before step 7, freeze: commit, record the full `git rev-parse HEAD`, and run `plan-stamp.sh
 check PLAN`. Never finish on a changed plan or on stale QA evidence. Build the report of
-Phase 5 first. Then open the PR with `/pr` and its watch.
+Phase 5 first. Then open the PR with `/ship-it` and its watch.
 
 ## Phase 5 — Run report (step 8 of the chain)
 
@@ -132,11 +132,11 @@ build-run-report.sh RUN_DIR --final-sha <full-sha> \
 It writes `RUN_DIR/report/index.html` from the run directory alone: what was built, the
 lanes, every recorded decision, `decisions.md`, the `D-NNN` deviations, drift, the board and
 timeline, review, QA, open findings and the PR. Omit `--review` or `--qa` only when that
-artifact does not exist; the page says so. The PR does not exist yet: `/pr` links the report. **Do not hand-write or supplement this page from
+artifact does not exist; the page says so. The PR does not exist yet: `/ship-it` links the report. **Do not hand-write or supplement this page from
 memory.** A decision no one recorded is absent from it, and that absence is the truthful
 output. Close with `finish-run.sh RUN_DIR [--qa PATH]`, which refuses a missing or unrendered
 report. Send the report summary to the run's Inbox thread with `report/index.html` in
-`attachments` (`_shared/inbox.md`). Then open the PR with `/pr` and its watch, and leave the
+`attachments` (`_shared/inbox.md`). Then open the PR with `/ship-it` and its watch, and leave the
 lane loops alive: the PR watch can send review fixes to them. `/pr-approved` closes the lane
 tabs after the merge. When the user drops the run, stop each lane (`lanes/<lane>/stop`) and
 close its tab (`orca terminal close --terminal <block_ref> --tab --json`).

@@ -13,7 +13,7 @@ Read the **Core** section, then the section of your work: **Backend**, **UI**, o
   They override the commit and push steps of `ub-mode`.
 - The `ub-mode` gates (`crapper`, `dryer`, `mutator`) set how many tests you write. One test
   per handled case is the floor, not the ceiling.
-- Open a pull request only through `/pr` (the `pr-description` skill). Never run
+- Open a pull request only through `/ship-it` (the `pr-description` skill). Never run
   `gh pr create` or open one by hand. A worker never opens one: the orchestrator does.
 - When a better design needs files outside your scope, do not edit them. Report it as a
   `question` or `blocked` event, or in your final report.

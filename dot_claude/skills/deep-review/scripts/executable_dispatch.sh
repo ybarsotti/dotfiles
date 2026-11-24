@@ -2,7 +2,7 @@
 # dispatch.sh — orchestrates a /deep-review run end-to-end.
 #
 # Usage:
-#   dispatch.sh <variant> [--reviewers N] [--ratio C:X] [--scope ref]
+#   dispatch.sh <variant> [--reviewers N] [--ratio C:X] [--scope ref] [--prior RUN_DIR]
 #               [--task id] [--timeout secs] [--lens PATH]... [--keep-artifacts] [--dry-run]
 #
 # --lens adds a review skill that the reviewed repository owns (its SKILL.md path) as one
@@ -31,6 +31,7 @@ KEEP_ARTIFACTS=0
 DRY_RUN=0
 SARIF=0
 LENSES=()
+PRIOR=""
 
 log() { printf '[deep-review] %s\n' "$*" >&2; }
 err() { printf '[deep-review] ERROR: %s\n' "$*" >&2; exit 1; }
@@ -52,6 +53,7 @@ while [ $# -gt 0 ]; do
     --dry-run)          DRY_RUN=1; shift ;;
     --sarif)            SARIF=1; shift ;;
     --lens)             LENSES+=("$2"); shift 2 ;;
+    --prior)            PRIOR="$2"; shift 2 ;;
     *)                  err "unknown flag: $1" ;;
   esac
 done
@@ -316,7 +318,10 @@ done
 
 # --- Phase 1: Collect context ---
 log "collecting context (scope=${SCOPE})..."
-"${SCRIPT_DIR}/collect-context.sh" "$RUN_DIR" "$SCOPE" "$TASK"
+if [ -n "$PRIOR" ] && [ ! -f "${PRIOR}/findings.jsonl" ]; then
+  err "--prior: no findings.jsonl in ${PRIOR}"
+fi
+PRIOR_RUN="$PRIOR" "${SCRIPT_DIR}/collect-context.sh" "$RUN_DIR" "$SCOPE" "$TASK"
 
 # --- Phase 2: Build per-reviewer prompts ---
 OUTPUT_SCHEMA=$(yq '.output_schema' "$VARIANT_FILE")

@@ -801,12 +801,10 @@ flowchart TD
     B --> DR["final /deep-review, full process<br/>≤ 3 fix rounds · cannot be skipped"]
     DR --> Q[qa-ui · qa-business → fixer, ≤ 3 rounds]
     Q --> D[demo → run report]
-    D --> PR["/pr with watch<br/>every comment: reply + resolve"]
+    D --> PR["/ship-it with watch<br/>every comment: reply + resolve"]
     PR --> PA["/pr-approved<br/>threads → CI → squash merge → cleanup"]
     S{{"workflow-gate.sh<br/>Stop / SubagentStop"}} -. blocks while a step is todo .-> B
 ```
-
-`/ship-it` is another name for `/pr`. It runs the same skill with the same arguments.
 
 ##### Closing an approved PR — `/pr-approved`
 
@@ -820,7 +818,7 @@ flowchart TD
    or unpushed work, open steps of another run, or a breakdown with more tasks.
 5. **cleanup** — deletes the remote branch, then `orca worktree rm --delete-branch` in Orca.
 
-The `/pr` watch follows the same rule for each comment: fix or decline, reply, then resolve.
+The `/ship-it` watch follows the same rule for each comment: fix or decline, reply, then resolve.
 
 ##### The Stop hook that refuses to lose the run report
 

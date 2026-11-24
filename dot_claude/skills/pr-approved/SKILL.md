@@ -55,7 +55,7 @@ The state must be `MERGED`. When branch protection refuses the merge, report the
 stop. Do not use `--admin`.
 
 When the run uses `jira-workflow`, do its "PR merged" step: move the ticket to Done and
-comment. When this session runs the PR watch of `/pr`, stop it (`ScheduleWakeup` with
+comment. When this session runs the PR watch of `/ship-it`, stop it (`ScheduleWakeup` with
 `stop: true`, or `CronDelete`).
 
 ## 4. tasks — is work left in this worktree?
