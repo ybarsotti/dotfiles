@@ -124,6 +124,19 @@ else
     echo "Note: uv should be installed via the language runtimes script."
 fi
 
+# --- Install Serena (MCP server and hooks) via uv ---
+# The MCP config and the hooks call the installed `serena` and `serena-hooks` binaries.
+# `uvx --from git+...` fetched the repository on every session start.
+if command -v uv &>/dev/null; then
+    if uv tool list 2>/dev/null | grep -q "^serena-agent"; then
+        echo "✅ serena is already installed."
+    elif uv tool install "git+https://github.com/oraios/serena" 2>&1; then
+        echo "✅ serena installed successfully."
+    else
+        echo "⚠️  Failed to install serena. Continuing."
+    fi
+fi
+
 # --- Install gh extensions ---
 echo "Installing gh extensions..."
 

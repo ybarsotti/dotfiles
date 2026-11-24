@@ -1,0 +1,1 @@
+{ "name": "keep-warm", "version": "0.1.0", "description": "Per-session prompt-cache keep-alive: a tiny forked request every 55 minutes while idle, so the 1-hour cache is never rewritten", "types": "./types/index.d.ts" }

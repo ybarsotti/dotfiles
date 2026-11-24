@@ -16,6 +16,8 @@
   },
   "env": {
     "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "400000",
+    "CLAUDE_CODE_PLUGIN_DIRS": "~/.claude/mods/keep-warm",
     "CODE_MODERNIZATION_TELEMETRY": "0"{{ if env "CLAUDE_CODE_OAUTH_TOKEN" }},
     "CLAUDE_CODE_OAUTH_TOKEN": "{{ env "CLAUDE_CODE_OAUTH_TOKEN" }}"{{ end }}
   },
@@ -126,12 +128,7 @@
           },
           {
             "type": "command",
-            "command": "CMD=$(python3 -c \"import json,sys; d=json.load(sys.stdin); print(d.get('tool_input',d).get('command',''))\" 2>/dev/null || true); case \"$CMD\" in *grep*|*rg\\ *|*ripgrep*|*find\\ *|*fd\\ *|*ack\\ *|*ag\\ *)   [ -f graphify-out/graph.json ] &&   echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"graphify: Knowledge graph exists. Read graphify-out/GRAPH_REPORT.md for god nodes and community structure before searching raw files.\"}}'   || true ;; esac",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "uvx --from git+https://github.com/oraios/serena serena-hooks remind --client=claude-code",
+            "command": "{{ .chezmoi.homeDir }}/.claude/hooks/graphify-nudge.sh",
             "timeout": 10
           }
         ]
@@ -216,7 +213,7 @@
           },
           {
             "type": "command",
-            "command": "uvx --from git+https://github.com/oraios/serena serena-hooks activate --client=claude-code",
+            "command": "serena-hooks activate --client=claude-code",
             "timeout": 10,
             "statusMessage": "Activating Serena..."
           }

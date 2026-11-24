@@ -17,24 +17,17 @@ mcp_servers:
         - rea-agents@latest
         - mcp
 
-    memory:
-      command: npx
-      args:
-        - -y
-        - "@modelcontextprotocol/server-memory"
 
-    sequential-thinking:
-      command: npx
-      args:
-        - -y
-        - "@modelcontextprotocol/server-sequential-thinking"
 
+    # The global npm install (run_once_03). npx resolved @latest on each session start and
+    # kept one wrapper process per session.
     gitnexus:
-      command: npx
+      command: gitnexus
       args:
-        - -y
-        - gitnexus@latest
         - mcp
+      env:
+        # Caps the graph database buffer pool at 512 MB for each session's server.
+        GITNEXUS_LBUG_BUFFER_POOL_SIZE: "536870912"
 
     # Cloudflare Kitesurf — a remote headless browser built for agents (Browser Run).
     # Nothing installs locally: the browser runs on Cloudflare Workers, and the only local
@@ -70,12 +63,10 @@ mcp_servers:
         - -c
         - exec "$HOME/.local/share/obscura/obscura" mcp --allow-private-network
 
+    # The uv tool install (run_once_03). uvx fetched the git repository on each start.
     serena:
-      command: uvx
+      command: serena
       args:
-        - --from
-        - git+https://github.com/oraios/serena
-        - serena
         - start-mcp-server
         - --context
         - claude-code

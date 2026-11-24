@@ -1,3 +1,7 @@
+# Compact before the context grows past this; long contexts dominate the cost.
+model_auto_compact_token_limit = 300000
+# Token budget for each tool output kept in history.
+tool_output_token_limit = 10000
 model = "gpt-6-sol"
 model_reasoning_effort = "medium"
 approval_policy = "never"
@@ -183,8 +187,8 @@ args = [ "-y", "rea-agents@latest", "mcp" ]
 startup_timeout_sec = 30
 
 [mcp_servers.serena]
-command = "uvx"
-args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "codex", "--project-from-cwd"]
+command = "serena"
+args = ["start-mcp-server", "--context", "codex", "--project-from-cwd"]
 
 [mcp_servers.notetaker]
 command = "/Users/barsotti/.local/bin/uv"

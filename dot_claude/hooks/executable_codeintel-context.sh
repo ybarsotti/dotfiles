@@ -27,6 +27,34 @@ fi
 
 parts=()
 
+# Refresh a stale index in the background, at low priority. One refresh runs at a time on
+# this machine, because an analyze of a large repo takes gigabytes of memory and many
+# sessions start in parallel. A busy lock skips the refresh; the next session tries again.
+LOCK="${XDG_CACHE_HOME:-$HOME/.cache}/codeintel-refresh.lock"
+refresh_bg() {
+  mkdir -p "$(dirname "$LOCK")"
+  # A lock older than two hours belongs to a refresh that died.
+  find "$LOCK" -maxdepth 0 -mmin +120 -exec rmdir {} \; 2>/dev/null || true
+  mkdir "$LOCK" 2>/dev/null || return 0
+  (cd "$cwd" && nohup nice -n 19 sh -c "$1" >/dev/null 2>&1; rmdir "$LOCK") </dev/null >/dev/null 2>&1 &
+  disown 2>/dev/null || true
+}
+head="$(git -C "$cwd" rev-parse HEAD 2>/dev/null || true)"
+if [ -n "$head" ] && [ -f "$cwd/.gitnexus/meta.json" ] && command -v gitnexus >/dev/null; then
+  if [ "$(jq -r '.lastCommit // ""' "$cwd/.gitnexus/meta.json" 2>/dev/null)" != "$head" ]; then
+    # --index-only: a plain analyze also rewrites CLAUDE.md, AGENTS.md and skill files in the repo.
+    refresh_bg "gitnexus analyze --index-only"
+  fi
+fi
+# Only when git ignores graphify-out: an update of a committed graph dirties the worktree.
+if [ -n "$head" ] && [ -f "$cwd/graphify-out/graph.json" ] && command -v graphify >/dev/null \
+  && git -C "$cwd" check-ignore -q graphify-out/graph.json; then
+  commit_time="$(git -C "$cwd" log -1 --format=%ct 2>/dev/null || echo 0)"
+  if [ "$(stat -f %m "$cwd/graphify-out/graph.json")" -lt "$commit_time" ]; then
+    refresh_bg "graphify update ."
+  fi
+fi
+
 if [ -f "$cwd/.serena/project.yml" ]; then
   parts+=("serena: .serena/project.yml detected. Serena serves this working directory; use it for symbol-level exploration and edits.")
 fi
