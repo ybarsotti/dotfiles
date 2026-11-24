@@ -45,11 +45,7 @@ section 0 of `~/.claude/skills/_shared/after-approval.md` says. After each phase
 hook `~/.claude/hooks/workflow-gate.sh` blocks the end of a turn while a step is open. Write
 the step file path in the `**Step file:**` line of the plan header.
 
-When you start the first agent of this run (an explorer, a planner of `dispatch-planners.sh`,
-a review persona, the `ui-designer`), schedule the 5-minute check of
-`~/.claude/skills/_shared/agent-watch.md`. It finds an agent that stalled, hangs on a command,
-loops, or went off its question, and sends the correction. Delete the job when the last
-agent of the phase finished. When the user says not to
+When the user says not to
 build ("only plan", "do not implement", "não implementa"), run
 `workflow.sh close "$RUN_DIR/chain.md" "plan only"` after the approval. "Stop at the plan for
 my approval" is not that: it asks for the gate, and the build starts when the gate approves.

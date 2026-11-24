@@ -46,9 +46,6 @@ Option C is the one exception. It needs ultracode, and only the user can turn ul
 | C | the option A test fails, and the option C test below holds | a `Workflow` run (ultracode) |
 | D | the user wants Codex to write one self-contained slice | `codex exec -m gpt-6.1-terra`, this session reviews |
 
-Every option starts agents. The session that started them watches them on the schedule of
-`_shared/agent-watch.md`.
-
 **The options depend on the harness that runs the session.**
 
 - **Claude Code** offers all four options.

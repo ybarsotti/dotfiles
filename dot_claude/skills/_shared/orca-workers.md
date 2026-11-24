@@ -77,9 +77,9 @@ Print the result of section 1 before the first worker, in one line: `Workers: or
 8. After the commit, close the worker:
    `orca orchestration worker-release --dispatch <dispatch_id> --json`.
 
-Never type into the terminal of a worker. Do not poll a worker between checks: the only
-poll is the 5-minute check of `agent-watch.md`, which looks for a stalled worker and for a
-worker that went off its task. A worker is Claude by default. Use
+Never type into the terminal of a worker, and never poll a worker. Orca wakes this session
+when a worker finishes or asks. When you read its diff, check that it stays inside its task
+and its allowed files before you commit. A worker is Claude by default. Use
 `--agent codex --model gpt-6.1-terra` only when the user or the plan names Codex for that work.
 Codex has no predefined agents, so start the spec of a Codex worker with
 `Read ~/.claude/agents/<name>.md and follow it.` A Codex worker or `codex exec` that builds,
@@ -95,5 +95,4 @@ subagent mode for that task when the worker cannot start.
 
 Start the implementer or fixer with the Agent tool and `subagent_type: <name>` from section
 1.5. Send the spec of section 2 as the prompt. Do not pass `model`: the agent file sets it.
-Send a follow-up or a fix to the same agent with `SendMessage`. Watch it on the schedule of
-`agent-watch.md`.
+Send a follow-up or a fix to the same agent with `SendMessage`.

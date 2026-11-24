@@ -45,12 +45,6 @@ user says not to build ("only plan", "do not implement", "não implementa"), run
 approval" is not that: it asks for the gate, and the build starts when the gate approves.
 Read the stop cases at the top of `~/.claude/skills/_shared/after-approval.md`.
 
-When you start the first agent of this run (an explorer, the breakdown or UI/UX agent, a
-`plan-reviewer`, the `ui-designer`), schedule the 5-minute check of
-`~/.claude/skills/_shared/agent-watch.md`. It finds an agent that stalled, hangs on a command,
-loops, or went off its question, and sends the correction. Delete the job when the last
-agent of the phase finished.
-
 `$RUN_DIR` holds `context.md`, the review notes, and the `qa/` bundle. The plan is not stored
 there. The plan lives where `~/.claude/skills/_shared/plan-format.md` saves it:
 `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md` inside the project. `$RUN_DIR/plan.md`

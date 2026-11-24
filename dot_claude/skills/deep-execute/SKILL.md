@@ -53,10 +53,7 @@ the happy path and the failure path alike: `waiting`, `blocked`, `question`, `do
 `invalid_event`, `vanished_pane`, `fatal_signature`, `monitor_error`, `timeout`. A filter that
 knows only the first four goes silent on a crash, and silence reads as "still working".
 
-The `Monitor` catches the events that a lane emits. It does not catch a lane that emits
-nothing, or a lane that works on the wrong thing. When `orca-launch.sh` returns, also start the
-5-minute check of `~/.claude/skills/_shared/agent-watch.md` on `board.sh RUN_DIR`, the lane
-logs and each lane's diff against its subplan. It corrects a stalled or off-course lane.
+The `Monitor` catches the events that a lane emits.
 
 **Acknowledge each event trigger after you acted on it:** `monitor-events.sh RUN_DIR --ack
 <seq>`. Until then every call returns the same trigger, so nothing is lost when you crash
