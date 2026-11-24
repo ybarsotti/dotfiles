@@ -98,6 +98,8 @@ class QAScenario(FrozenModel):
     steps: Annotated[list[QAStep], Field(min_length=1)]
     edge_cases: Annotated[list[NonEmptyText], Field(min_length=1)]
     acceptance_rules: Annotated[list[NonEmptyText], Field(min_length=1)]
+    # The highest of blast radius, reversibility and data risk, 1 to 5. Sets the depth.
+    risk: Annotated[int, Field(ge=1, le=5)] | None = None
 
 
 class QAPlan(FrozenModel):

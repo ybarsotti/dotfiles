@@ -95,6 +95,11 @@ version.
 Report a short table: app, current version, next version, commits by type, PRs, risks and
 post-release steps.
 
+Run the detailed review in `references/release-review.md` when the user asks for it, or when
+the release ships a migration, a money change or an auth change. It classifies each
+migration and sizes each data rewrite, checks old and new versions side by side, reads CI on
+every commit and what each environment runs, and scores the risk on six dimensions.
+
 ## 4. Compute the next version
 
 release-please computes the version itself. Read it from the Release PR title or body. A

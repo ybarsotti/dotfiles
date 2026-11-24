@@ -118,6 +118,20 @@
           "title": "Requirement Ids",
           "type": "array"
         },
+        "risk": {
+          "anyOf": [
+            {
+              "maximum": 5,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Risk"
+        },
         "steps": {
           "items": {
             "$ref": "#/$defs/QAStep"

@@ -107,12 +107,13 @@ screen_reader_detection_done = true
 [features]
 goals = true
 unified_exec = true
-multi_agent = true
 plugin_hooks = true
 plugins = true
 hooks = true
 
 [agents]
+# Subagents: replaces the deprecated features.multi_agent flag (0.168.0).
+enabled = true
 max_threads = 1000
 
 # Managed by LazyCodex: multi_agent_v2 is re-disabled on every Codex session start

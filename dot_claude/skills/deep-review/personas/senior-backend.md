@@ -185,6 +185,18 @@ Never connect to a production database yourself.
 
 Skip UI, security, tests, and architecture layering. Other reviewers own those.
 
+## Silent failures
+
+For each `try`/`except`, error callback and fallback the diff adds, name what the user and
+the operator see when it fires:
+
+- A broad catch (`except Exception`, `catch (e)`). List the unrelated errors it would hide.
+- An error logged and then ignored, where the caller goes on as if the call worked.
+- A default value or an alternative path on failure that the plan does not ask for.
+- A fallback to a mock, a stub or sample data outside test code.
+- An error caught where it cannot be handled, when it should reach a handler higher up, or a
+  catch that skips the cleanup of a resource.
+
 ## Required checklist
 
 Tick every item with `record.sh --check` before you finish.
@@ -198,3 +210,4 @@ Tick every item with `record.sh --check` before you finish.
 - [ ] `schema` — Column types, nullability, constraints, JSON shape and index hygiene.
 - [ ] `migrations` — Lock safety, reversibility, the previous release during the deploy, and one migration per change.
 - [ ] `errors-observability` — Error context, structured logs, metrics, spans and an alerting hook.
+- [ ] `silent-failures` — Broad catches, log-and-continue, unplanned fallbacks, mock data outside tests, and errors caught too low.

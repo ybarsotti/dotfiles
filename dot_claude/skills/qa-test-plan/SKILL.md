@@ -92,6 +92,11 @@ Require mapper to write only structured `QA_PLAN` containing:
 
 - stable requirement, persona, scenario, and step IDs;
 - every requirement mapped to at least one scenario;
+- **a risk score for each scenario**, so the depth follows the risk. Score blast radius,
+  reversibility and data risk from 1 to 5, and keep the highest as the scenario's risk.
+  Reversibility 5 means a data rewrite, a sent email or a payment. Order the scenarios by
+  risk. A scenario at 4 or 5 gets every applicable edge case and checks each side effect in
+  each system it reaches. A scenario at 1 or 2 gets the happy path and one failure case;
 - one scenario per meaningful persona/flow combination;
 - explicit preconditions and isolated test data;
 - happy path plus invalid, empty, permission, refresh/back, concurrency, boundary, and

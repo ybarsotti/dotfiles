@@ -68,6 +68,9 @@ $W status "$F"                    # what is done and what is left
    and keyframes with the spec. A missing hover, a missing transition or an animation with
    another easing is a difference. Check each theme that the design has, and
    `prefers-reduced-motion`.
+   On each screen, with or without a motion spec, run the interaction audit:
+   `agent-browser eval "$(cat ~/.claude/skills/_shared/scripts/interaction-audit.js)"`.
+   Each element it lists (no `cursor: pointer`, or no `:hover` rule) is a difference row.
 6. When no app runs, do not stop. Take frames from the recordings and the screenshots, and
    read the code of each element at the commit. Mark each state that no recording shows as
    `code only`.

@@ -89,6 +89,17 @@ those, leave it to them, and cover its ground yourself when `ui-ux` is not on th
 panel. You keep accessibility, responsiveness and the loading/error/empty/success states. For stack-specific component and styling guidance, consult
 `Skill(skill="ui-ux-pro-max:ui-ux-pro-max")`.
 
+## Silent failures
+
+For each failed request, rejected promise and `catch` the diff adds, name what the user
+sees:
+
+- A failure with no message, where the screen stays empty or keeps stale data.
+- A message that does not say what went wrong or what the user can do next.
+- Optional chaining or `??` that turns a missing required value into a blank, so the bug
+  never shows.
+- A fallback to sample or placeholder data in production code.
+
 ## Required checklist
 
 Tick every item with `record.sh --check` before you finish.
@@ -101,3 +112,4 @@ Tick every item with `record.sh --check` before you finish.
 - [ ] `names-contrast` — Accessible names and roles, live regions, colour alone, contrast and alt text.
 - [ ] `responsive` — Overflow, reflow, touch targets and images at the project's breakpoints.
 - [ ] `design-fidelity` — The changed screen against its design, or the missing design.
+- [ ] `silent-failures` — Failures with no user feedback, vague messages, `?.`/`??` hiding a required value, and sample data in production.

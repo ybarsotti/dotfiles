@@ -16,6 +16,7 @@ scenarios:
     requirement_ids:
       - REQ-1
     persona_id: <persona-id>
+    risk: <1-5, the highest of blast radius, reversibility and data risk>
     preconditions:
       - <exact starting state>
     test_data:

@@ -80,7 +80,8 @@ The task is done when all of these are true:
 - the new tests fail without your change and pass with it;
 - the test command of the task passes;
 - the gates of `ub-mode` pass;
-- the visual pass of `ui-quality.md` section 11 is done at desktop width and at 390 px.
+- the visual pass of `ui-quality.md` section 11 is done at desktop width and at 390 px;
+- the interaction audit of section 11 step 6 lists no failure on any screen of the task.
 
 ## Output
 
@@ -90,5 +91,5 @@ Reply with a short summary:
 2. The file paths that you changed.
 3. The test command and the last lines of its output.
 4. The gate output.
-5. The paths of the visual pass screenshots.
+5. The paths of the visual pass screenshots and of the interaction audit output.
 6. Each departure from the plan, with the reason.

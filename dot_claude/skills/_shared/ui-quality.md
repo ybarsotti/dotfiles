@@ -57,7 +57,9 @@ The plan lists every state of the screen. The implementation builds each one.
 - Every click, submit and toggle produces a visible response within 100 ms.
 - Everything clickable shows that it is clickable: `cursor: pointer` and a hover style on
   buttons, links, clickable rows and clickable cards. A non-clickable element never gets
-  them.
+  them. Tailwind v4 resets `button` to `cursor: default`, so a project on it needs one base
+  rule: `button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }`.
+  `scripts/interaction-audit.js` checks this on the running page (section 11).
 - An icon-only action shows a tooltip on hover and on keyboard focus that says what it does.
 - A toast reports the result of an action whose effect is not visible on the screen. Do not
   use a toast for an error that belongs to a field.
@@ -148,7 +150,11 @@ Do this after the UI builds and before review. A screen nobody looked at is not 
    weak point down.
 4. Fix each weak point.
 5. Take the screenshots again, and repeat until no weak point is left.
-6. Keep the final screenshots. The review and the PR use them as evidence.
+6. On each screen, run the interaction audit in the page and fix each failure it lists:
+   `agent-browser eval "$(cat ~/.claude/skills/_shared/scripts/interaction-audit.js)"`.
+   It lists each visible clickable element without `cursor: pointer` or without a `:hover`
+   rule. Done when `failures` is empty. Save the output next to the screenshots.
+7. Keep the final screenshots. The review and the PR use them as evidence.
 
 This pass is the check of the builder. It does not prove that the screen matches a design
 canvas. When a canvas exists, the `qa-ui` agent makes that comparison, and `/pr` requires it.
