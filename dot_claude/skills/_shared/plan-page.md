@@ -19,19 +19,29 @@ Do these steps for every plan.
 2. Distill `plan.md` to the human altitude: the goal, the approach, each key decision with its
    reason, the risks, and the phases in sequence. Leave out file lists, task steps and the TDD
    list.
-3. Reuse the Mermaid diagrams of the plan. Do not draw a second version of a diagram.
-4. Write the page beside the plan as `plan.html` (`$RUN_DIR/plan.html` or
+3. Keep every contract the user approves, in full, even when it is technical. Distilling never
+   drops one of these:
+   - **Data**: each new or changed table, with its columns, types, nullability, defaults,
+     keys, indexes and constraints; each removed column; the migration count; and the ER
+     diagram. Show it as a table per entity, not as prose.
+   - **API and events**: each new or changed endpoint, payload, event or job contract.
+   - **Permissions**: the role table, when access changes.
+   - **UI**: the canvas link and the design images, when the plan has a UI design pass.
+   - **User-facing copy**: each new text, as the user will read it.
+   When the plan changes none of these, say so in one line on the page.
+4. Reuse the Mermaid diagrams of the plan. Do not draw a second version of a diagram.
+5. Write the page beside the plan as `plan.html` (`$RUN_DIR/plan.html` or
    `${PLAN_PATH%.md}.html`). Follow the Plan path structure: summary strip, timeline, SVG flow,
    risks, open questions.
-5. Run the gate:
+6. Run the gate:
 
    ```bash
    plannotator annotate plan.html --gate
    ```
 
-6. Map each annotation back to its section in `plan.md`. Edit `plan.md`, then render the page
+7. Map each annotation back to its section in `plan.md`. Edit `plan.md`, then render the page
    again.
-7. Repeat steps 5 and 6 until the user approves with no annotations.
+8. Repeat steps 6 and 7 until the user approves with no annotations.
 
 ## 2. Decide where the page lives
 
@@ -62,7 +72,7 @@ When no trigger holds, record this line in the plan: `Plan page: local — <reas
    canvas.
 4. Put the page URL in the plan summary that the chat shows.
 5. Before the final `plannotator annotate --gate` pass, read the page comments with `ArtifactComments`. Treat each comment as
-   an annotation from step 6 of section 1.
+   an annotation from step 7 of section 1.
 6. After the stamp (`plan-stamp.sh approve`), publish the page again with an "Approved" banner
    and the stamp hash from `plan-stamp.sh hash`.
 7. A comment that arrives after the approval is a deviation. Record it in `## Deviations`
