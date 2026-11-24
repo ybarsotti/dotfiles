@@ -179,6 +179,19 @@ each tool creates its `.venv`. Run each tool from the project root.
   more fails the gate at any coverage.
 - mutator runs the tests once for each mutant. Start with the file you changed, not the tree.
   Cap the workers with `--max-workers 2` when other sessions share the machine.
+### Where the gates run
+
+Tests run in CI, not on this machine. A gate that runs the tests follows that rule.
+
+- **Locally**, run only the gates that do not run tests: `crapper --no-coverage --threshold 10`
+  (complexity) and `dryer --threshold 0.8`, on the changed files.
+- **In CI**: `mutator` and `crapper` with coverage. When the project's CI has a job for them
+  (for example `just mutate`), read its result on the PR with `gh pr checks`, and treat a red
+  job like a failing test. When the CI has no such job, do not run them locally. Record the
+  line "mutation and coverage CRAP gates: not in CI" in the open items of the run report and
+  in the verification of the PR.
+- Run `mutator` or `crapper` with coverage locally only when the user asks for it.
+
 - The tools write `.metrics/` in the project, and mutator writes `target/`. The global git
   ignore file ignores `.metrics/`. Commit it only when the project already tracks it.
 

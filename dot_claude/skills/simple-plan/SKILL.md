@@ -154,7 +154,8 @@ Never plan two tasks in one run. One plan, one task.
 ## Phase 2 — Draft the plan
 
 Invoke the `ub-mode` skill and design by its "First Make it Work" rules. The verification of
-each task lists the "Then Make it Right" gates on its files: `crapper`, `dryer` and `mutator`.
+each task lists the "Then Make it Right" gates on its files: `crapper` and `dryer` locally,
+`mutator` and coverage CRAP in CI ("Where the gates run" in `ub-mode`).
 
 ### UI/UX consultation, when the change touches an interface
 

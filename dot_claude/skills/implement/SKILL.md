@@ -44,9 +44,10 @@ Add one `build.<n>` row per task, in order: `workflow.sh add <file> build.<n> "<
    `superpowers:executing-plans` or `superpowers:finishing-a-development-branch`: they stop to
    ask, and the chain of `after-approval.md` replaces them.
 3. Invoke the `ub-mode` skill and build by it. Tell each implementer worker to invoke it too,
-   or to read `~/.claude/skills/ub-mode/SKILL.md`. Before each commit, run its gates on the
-   changed files: `crapper --changed --threshold 10`, `dryer --changed --threshold 0.8`, and
-   `mutator --max-workers 2 <file>` for each changed source file. Build each task with
+   or to read `~/.claude/skills/ub-mode/SKILL.md`. Before each commit, run its local gates on the
+   changed files: `crapper --changed --no-coverage --threshold 10` and
+   `dryer --changed --threshold 0.8`. `mutator` and coverage CRAP run in CI, as "Where the
+   gates run" in the `ub-mode` skill says. Build each task with
    strict TDD: `superpowers:test-driven-development`, or the `tdd` skill when it is installed. Write the tests at the seams that the plan agreed. Mock only
    the outermost boundaries: the network, a third-party API, the clock.
 4. For a bug or a regression, use `superpowers:systematic-debugging` before you write the fix.
