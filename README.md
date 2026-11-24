@@ -806,6 +806,7 @@ flowchart TD
     S{{"workflow-gate.sh<br/>Stop / SubagentStop"}} -. blocks while a step is todo .-> B
 ```
 
+`/ship-it` is another name for `/pr`. It runs the same skill with the same arguments.
 
 ##### Closing an approved PR — `/pr-approved`
 
