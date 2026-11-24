@@ -102,6 +102,9 @@ emails, notifications, exports and any page made for users.
 
 ## 8. Motion
 
+- When a design exists, its motion spec is the contract: build every hover, focus, active
+  and open state, transition, entrance and loop it lists, with its exact easing and duration.
+  The defaults below apply only where the design says nothing.
 - Use the project's animation utility or library. Do not add a new animation library for one
   effect.
 - Transition between states with a short fade or slide, 150 ms to 250 ms.

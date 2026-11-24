@@ -60,10 +60,18 @@ $W status "$F"                    # what is done and what is left
    canvas. Check layout, alignment, spacing, size, copy, color, type,
    radius, icon, focus ring, hover, and each state. Check that the 390 px layout stacks and
    does not scroll sideways.
-5. When no app runs, do not stop. Take frames from the recordings and the screenshots, and
+5. Check the motion against the motion spec, when the plan has one. For each interactive
+   element, hover it, focus it with the keyboard, press it and open it with the
+   `agent-browser:agent-browser` skill. Screenshot each state, and record a short video of
+   each animation: entrances, loops, counters, progress fills. Read the computed
+   `transition` and `animation` of the element, and compare the property, duration, easing
+   and keyframes with the spec. A missing hover, a missing transition or an animation with
+   another easing is a difference. Check each theme that the design has, and
+   `prefers-reduced-motion`.
+6. When no app runs, do not stop. Take frames from the recordings and the screenshots, and
    read the code of each element at the commit. Mark each state that no recording shows as
    `code only`.
-6. Without a canvas, compare against the UI design pass and section 11 of
+7. Without a canvas, compare against the UI design pass and section 11 of
    `~/.claude/skills/_shared/ui-quality.md`.
 
 ## Output

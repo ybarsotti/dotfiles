@@ -153,6 +153,7 @@ erDiagram
 - Reference screen: <`path` of the existing screen this one follows visually, and its screenshot from the `ui-designer`>
 - Canvas: <Design canvas URL from the `ui-designer` agent, or `none — reason`>
 - Design images: <folder of the artboard PNGs at 1440 and 390 px from the `ui-designer`, or `none — reason`>
+- Motion spec: <motion-spec.md from the `ui-designer`: hover, focus, transitions, keyframes, themes, or `none — reason`>
 - Design system: <the project's Design System artifact URL, or `none — reason`>
 - Reuse: <existing components, tokens and icons this change uses, with `path`>
 - Hierarchy: <title, groups, and what shows once instead of on every row>

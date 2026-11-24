@@ -97,14 +97,25 @@ that reads the source as text does not see the design.
 2. Save each one as `<output folder>/design/<artboard>-<width>.png`.
 3. Open two of the images and check that they show the artboard, not a blank or a login page.
    When the canvas does not render, say so and stop. Do not hand over without images.
-4. Re-export every artboard that changes after a comment.
+4. When the design has a light and a dark theme, export each artboard in both.
+5. Write `<output folder>/design/motion-spec.md`. An image does not show motion, so copy the
+   interaction rules from the CSS of each artboard, exactly:
+   - the easing curves, durations and keyframes, as tokens when artboards share them;
+   - each interactive component in each state: rest, hover, focus, active, open, pressed,
+     disabled, loading, with the property that changes and its transition;
+   - the motion of each screen: entrances, staggered lists, counters, progress fills, loops
+     such as a shimmer or an icon that swings;
+   - the rules of each theme, and the `prefers-reduced-motion` fallback.
+   When the design has no motion, write that in one line.
+6. Re-export every artboard and update the spec when the canvas changes after a comment.
 
 ## 6. Hand over
 
 Return:
 
 - `Canvas: <url>` and `Design system: <url>`, which the plan records in its UI design pass;
-- `Design images: <output folder>/design/`, which the plan records in its UI design pass;
+- `Design images: <output folder>/design/` and `Motion spec: <output folder>/design/motion-spec.md`,
+  which the plan records in its UI design pass;
 - the screenshot path of each current screen and reference screen, from step 2;
 - one line per artboard: the screen, the state, and the component it reuses;
 - every assumption you made, as a list.

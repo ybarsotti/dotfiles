@@ -55,6 +55,10 @@ Read these files before you write code. Follow them. Do not copy them into your 
 5. The design images of the screens of your task. Open each PNG with the Read tool before you
    write the screen, and again before you report done. Match them: layout, spacing, type,
    color, copy and states. The canvas source is not a substitute for the images.
+6. The motion spec (`Motion spec:` in the UI design pass). Build every interaction of your
+   components as it says: hover, focus, active, open, pressed and loading, with the exact
+   easing, duration and keyframes, the theme rules, and the reduced-motion fallback. A static
+   screen that matches the images is not done.
 
 Run tests only through `~/.local/bin/test-local`, and only the tests of your task. Never run
 the full suite: CI runs it on the PR.

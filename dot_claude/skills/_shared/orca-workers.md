@@ -84,7 +84,8 @@ worker that went off its task. A worker is Claude by default. Use
 Codex has no predefined agents, so start the spec of a Codex worker with
 `Read ~/.claude/agents/<name>.md and follow it.` A Codex worker or `codex exec` that builds,
 fixes or reviews UI gets the design images as images: `codex exec -i <png> -i <png> ...`. In
-the spec, list each image path and tell it to open them. Never send only the canvas source.
+the spec, list each image path and the motion spec, and tell it to open them. Never send only
+the canvas source.
 
 If `worker-start` fails, do not rerun it. Read `failedStage`, follow
 `orca skills get orchestration --reference references/recovery-and-cleanup.md`, and use the

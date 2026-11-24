@@ -776,6 +776,10 @@ of the user such as "validate with Codex before you build" becomes its own row b
 A step whose id starts with `visual` or `qa-ui` is done only with screenshots as evidence. In a
 plan with UI, `qa-ui` checks each screen as soon as it renders, against the PNGs that the
 `ui-designer` exports at 1440 and 390 px; a Codex worker gets those PNGs with `codex exec -i`.
+Images do not show motion, so the `ui-designer` also writes `motion-spec.md` from the canvas CSS:
+easing, durations, keyframes, each state of each interactive component, screen animations,
+themes and the reduced-motion fallback. The builder implements it, and `qa-ui` hovers, focuses
+and opens each element, records the animations, and compares the computed transitions.
 
 `dot_claude/hooks/executable_workflow-gate.sh` runs on `Stop` and `SubagentStop`. It acts only on
 a session whose transcript holds the `[workflow-gate] tracking <file>` line that `init` prints,

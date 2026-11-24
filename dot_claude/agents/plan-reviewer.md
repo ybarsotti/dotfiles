@@ -97,7 +97,10 @@ Check every item for your lens. A finding states the problem, the evidence and t
 12. **Backend lens only: data.** The schema, the indexes, the migration count and the query
     cost, as `reviewers.md` asks.
 13. **Frontend lens only: UI.** Every state (loading, empty, error, pending, success), the
-    390 px layout, the keyboard path, and the reuse of the design system components.
+    390 px layout, the keyboard path, and the reuse of the design system components. When a
+    design exists, the plan names its design images and its motion spec, and a task builds
+    the interactions: hover, focus, active and open states, transitions, entrances, loops,
+    the theme variants and the reduced-motion fallback.
 14. **User-facing copy, both lenses.** Each text the plan writes for users (UI, emails,
     notifications, error messages, exports) follows section 6b of `ui-quality.md`: it says
     what the user sees or gets, in the user's words. Flag each text that explains internals
