@@ -175,3 +175,5 @@ first, open a PR with the bump, wait for its merge, and tag the merge commit.
    comment per ticket and the changelog body. It never posts.
 2. Report: the tags, the release URLs, the post-release steps in order, and what to watch
    after the deploy.
+3. When the band is MEDIUM or HIGH, or a flag turns on in production, offer the
+   `release-watch` skill with the watch plan. It runs in its own session.

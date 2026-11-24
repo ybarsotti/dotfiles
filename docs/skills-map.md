@@ -12,7 +12,7 @@ The generator reads `dot_claude/skills/**/*.md`, `dot_claude/commands/*.md`, `do
 It writes `docs/skills-map.md` and `docs/skills-map.html`. A second run gives no diff.
 Run `node --test docs/skills-map.test.mjs` to test the edge extraction.
 
-Counts: 28 skills, 17 commands, 9 agents, 14 shared docs, 16 external references. 228 edges: 89 invokes skill, 11 spawns agent, 51 runs command, 77 reads shared doc.
+Counts: 28 skills, 17 commands, 9 agents, 14 shared docs, 17 external references. 229 edges: 90 invokes skill, 11 spawns agent, 51 runs command, 77 reads shared doc.
 
 ## Diagram 1: the main chains
 
@@ -574,6 +574,7 @@ flowchart LR
   subgraph cl_external["external"]
     direction TB
     x_loop[["loop"]]:::external
+    x_release_watch[["release-watch"]]:::external
     x_superpowers_systematic_debugging[["superpowers:systematic-debugging"]]:::external
     x_superpowers_verification_before_completion[["superpowers:verification-before-completion"]]:::external
   end
@@ -646,6 +647,7 @@ flowchart LR
   s_pr_description --> x_loop
   s_pr_description --> x_superpowers_systematic_debugging
   s_release --> s_release_announce
+  s_release --> x_release_watch
   s_release_announce --o d_inbox
   linkStyle 0 stroke:#2563eb
   linkStyle 1 stroke:#2563eb
@@ -673,7 +675,8 @@ flowchart LR
   linkStyle 23 stroke:#2563eb
   linkStyle 24 stroke:#2563eb
   linkStyle 25 stroke:#2563eb
-  linkStyle 26 stroke:#9ca3af
+  linkStyle 26 stroke:#2563eb
+  linkStyle 27 stroke:#9ca3af
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
@@ -1089,6 +1092,7 @@ References to skills, agents or shared docs that this repository does not define
 - `loop`: `dot_claude/skills/pr-description/references/watch.md:31`
 - `mattpocock-skills:domain-modeling`: `dot_claude/skills/deep-plan/README.md:92`, `dot_claude/skills/deep-plan/SKILL.md:96`, `dot_claude/skills/deep-plan/references/phase-0-details.md:40`
 - `mattpocock-skills:grilling`: `dot_claude/skills/deep-plan/README.md:92`, `dot_claude/skills/deep-plan/SKILL.md:95`, `dot_claude/skills/deep-plan/references/phase-0-details.md:39`, `dot_claude/skills/simple-plan/SKILL.md:85`, `dot_claude/commands/simple-plan.md:29`
+- `release-watch`: `dot_claude/skills/release/SKILL.md:179`, `dot_claude/skills/release/references/release-review.md:110`
 - `superpowers:brainstorming`: `dot_claude/skills/deep-plan/SKILL.md:107`, `dot_claude/skills/explore-options/SKILL.md:135`, `dot_claude/skills/simple-plan/SKILL.md:101`, `dot_claude/commands/deep-plan.md:15`, `dot_claude/commands/simple-plan.md:31`
 - `superpowers:executing-plans`: `dot_claude/skills/implement/SKILL.md:41`
 - `superpowers:finishing-a-development-branch`: `dot_claude/skills/deep-plan/templates/plan.md:3`, `dot_claude/skills/implement/SKILL.md:41`, `dot_claude/skills/_shared/plan-format.md:51`
@@ -1164,19 +1168,19 @@ References to skills, agents or shared docs that this repository does not define
 | /simple-plan | invokes skill | superpowers:brainstorming | `dot_claude/commands/simple-plan.md:31` |
 | /simple-plan | invokes skill | ui-ux-pro-max:ui-ux-pro-max | `dot_claude/commands/simple-plan.md:36` |
 | /simplify | invokes skill | simplify | `dot_claude/commands/simplify.md:19` |
-| after-approval.md | spawns agent | fixer | `dot_claude/skills/_shared/after-approval.md:123` |
-| after-approval.md | spawns agent | qa-business | `dot_claude/skills/_shared/after-approval.md:164` |
+| after-approval.md | spawns agent | fixer | `dot_claude/skills/_shared/after-approval.md:124` |
+| after-approval.md | spawns agent | qa-business | `dot_claude/skills/_shared/after-approval.md:165` |
 | after-approval.md | spawns agent | qa-ui | `dot_claude/skills/_shared/after-approval.md:69` |
 | after-approval.md | runs command | /deep-execute | `dot_claude/skills/_shared/after-approval.md:93` |
 | after-approval.md | runs command | /deep-review | `dot_claude/skills/_shared/after-approval.md:101` |
-| after-approval.md | runs command | /ship-it | `dot_claude/skills/_shared/after-approval.md:152` |
-| after-approval.md | reads shared doc | inbox.md | `dot_claude/skills/_shared/after-approval.md:180` |
+| after-approval.md | runs command | /ship-it | `dot_claude/skills/_shared/after-approval.md:153` |
+| after-approval.md | reads shared doc | inbox.md | `dot_claude/skills/_shared/after-approval.md:181` |
 | after-approval.md | reads shared doc | orca-workers.md | `dot_claude/skills/_shared/after-approval.md:86` |
 | after-approval.md | reads shared doc | plan-routing.md | `dot_claude/skills/_shared/after-approval.md:92` |
 | after-approval.md | runs command | implement | `dot_claude/skills/_shared/after-approval.md:32` |
 | after-approval.md | invokes skill | implement | `dot_claude/skills/_shared/after-approval.md:93` |
-| after-approval.md | invokes skill | video-demo | `dot_claude/skills/_shared/after-approval.md:191` |
-| after-approval.md | invokes skill | workflow-post-implementation | `dot_claude/skills/_shared/after-approval.md:187` |
+| after-approval.md | invokes skill | video-demo | `dot_claude/skills/_shared/after-approval.md:192` |
+| after-approval.md | invokes skill | workflow-post-implementation | `dot_claude/skills/_shared/after-approval.md:188` |
 | implementer-rules.md | spawns agent | qa-ui | `dot_claude/skills/_shared/implementer-rules.md:135` |
 | implementer-rules.md | runs command | /deep-execute | `dot_claude/skills/_shared/implementer-rules.md:4` |
 | implementer-rules.md | runs command | /deep-review | `dot_claude/skills/_shared/implementer-rules.md:5` |
@@ -1280,16 +1284,17 @@ References to skills, agents or shared docs that this repository does not define
 | pr-description | spawns agent | qa-business | `dot_claude/skills/pr-description/SKILL.md:89` |
 | pr-description | runs command | /deep-review | `dot_claude/skills/pr-description/SKILL.md:84` |
 | pr-description | runs command | /pr-approved | `dot_claude/skills/pr-description/README.md:32` |
-| pr-description | runs command | /qa-execute | `dot_claude/skills/pr-description/references/evidence.md:20` |
+| pr-description | runs command | /qa-execute | `dot_claude/skills/pr-description/references/evidence.md:23` |
 | pr-description | reads shared doc | after-approval.md | `dot_claude/skills/pr-description/SKILL.md:79` |
 | pr-description | reads shared doc | inbox.md | `dot_claude/skills/pr-description/references/watch.md:37` |
 | pr-description | reads shared doc | spec-evidence.md | `dot_claude/skills/pr-description/SKILL.md:64` |
 | pr-description | invokes skill | address-pr-comments | `dot_claude/skills/pr-description/references/watch.md:11` |
 | pr-description | invokes skill | blindspot | `dot_claude/skills/pr-description/SKILL.md:154` |
-| pr-description | invokes skill | video-demo | `dot_claude/skills/pr-description/references/report.md:4` |
+| pr-description | invokes skill | video-demo | `dot_claude/skills/pr-description/references/evidence.md:18` |
 | pr-description | invokes skill | loop | `dot_claude/skills/pr-description/references/watch.md:31` |
 | pr-description | invokes skill | superpowers:systematic-debugging | `dot_claude/skills/pr-description/references/watch.md:18` |
 | release | invokes skill | release-announce | `dot_claude/skills/release/SKILL.md:174` |
+| release | invokes skill | release-watch | `dot_claude/skills/release/SKILL.md:179` |
 | release-announce | reads shared doc | inbox.md | `dot_claude/skills/release-announce/SKILL.md:122` |
 | simple-plan | spawns agent | plan-reviewer | `dot_claude/skills/simple-plan/SKILL.md:198` |
 | simple-plan | spawns agent | ui-designer | `dot_claude/skills/simple-plan/references/ui-consultation.md:25` |

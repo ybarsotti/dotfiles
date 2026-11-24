@@ -107,7 +107,7 @@ Score the release on six dimensions, 1 (low) to 5 (high), each with one line tie
 | Test coverage | every changed path tested | untested paths |
 
 The band follows the highest score, not the average: any 5 is HIGH, any 4 is MEDIUM.
-A HIGH band needs a watch plan (the metric, the dashboard, how long) and a rollback plan.
+A HIGH band needs a watch plan (the metric, the dashboard, how long) and a rollback plan. The `release-watch` skill runs the watch plan after the deploy.
 Recommend a database snapshot before a deploy that ships a data rewrite or a destructive
 schema change.
 
