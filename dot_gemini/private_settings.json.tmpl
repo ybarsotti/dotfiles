@@ -56,7 +56,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -f '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -r '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -x '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ]; then /bin/sh '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh'; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "command": "if [ -n \"${ORCA_PANE_KEY-}${ORCA_AGENT_PANE-}\" ] && [ -f '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -r '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -x '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ]; then /bin/sh '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh'; else printf '%s\\n' '{}'; { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
             "timeout": 10000
           }
         ]
@@ -76,7 +76,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -f '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -r '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -x '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ]; then /bin/sh '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh'; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "command": "if [ -n \"${ORCA_PANE_KEY-}${ORCA_AGENT_PANE-}\" ] && [ -f '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -r '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -x '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ]; then /bin/sh '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh'; else printf '%s\\n' '{}'; { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
             "timeout": 10000
           }
         ]
@@ -98,7 +98,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -f '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -r '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -x '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ]; then /bin/sh '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh'; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "command": "if [ -n \"${ORCA_PANE_KEY-}${ORCA_AGENT_PANE-}\" ] && [ -f '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -r '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -x '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ]; then /bin/sh '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh'; else printf '%s\\n' '{}'; { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
             "timeout": 10000
           }
         ]
@@ -109,7 +109,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -f '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -r '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -x '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ]; then /bin/sh '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh'; else { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
+            "command": "if [ -n \"${ORCA_PANE_KEY-}${ORCA_AGENT_PANE-}\" ] && [ -f '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -r '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ] && [ -x '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh' ]; then /bin/sh '{{ .chezmoi.homeDir }}/.orca/agent-hooks/gemini-hook.sh'; else printf '%s\\n' '{}'; { command -p cat 2>/dev/null || cat; } >/dev/null 2>&1 || :; fi",
             "timeout": 10000
           }
         ]
