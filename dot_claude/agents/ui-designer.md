@@ -87,11 +87,24 @@ new project, no screens` in `design-map.md` with the evidence, such as an empty 
    draw it inside the existing regions. A new screen follows the layout of its reference
    screens.
 
-## 5. Hand over
+## 5. Export the artboards as images
+
+The builders and the reviewers compare against images, not against the canvas source. A model
+that reads the source as text does not see the design.
+
+1. Screenshot each artboard in its focused view with the `agent-browser:agent-browser` skill,
+   at 1440 px and at 390 px.
+2. Save each one as `<output folder>/design/<artboard>-<width>.png`.
+3. Open two of the images and check that they show the artboard, not a blank or a login page.
+   When the canvas does not render, say so and stop. Do not hand over without images.
+4. Re-export every artboard that changes after a comment.
+
+## 6. Hand over
 
 Return:
 
 - `Canvas: <url>` and `Design system: <url>`, which the plan records in its UI design pass;
+- `Design images: <output folder>/design/`, which the plan records in its UI design pass;
 - the screenshot path of each current screen and reference screen, from step 2;
 - one line per artboard: the screen, the state, and the component it reuses;
 - every assumption you made, as a list.

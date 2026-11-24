@@ -19,7 +19,9 @@ agent fixes what you report.
 ## Input
 
 - The plan path. Read its `## UI design pass` and its states table.
-- The `Canvas:` URL from the UI design pass, when the plan has one.
+- The `Canvas:` URL and the `Design images:` folder from the UI design pass, when the plan
+  has one. Compare against the images. When the folder is missing, export the artboards first
+  (step 2), then compare.
 - The app URL and the routes of the changed screens. When no app runs, the recordings and
   screenshots of the change, and the code at the commit to test.
 - The output folder. Write every file there.

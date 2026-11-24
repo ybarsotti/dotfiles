@@ -41,6 +41,16 @@ plan approval, before this chain starts (`plan-routing.md`). This chain never as
 6. At the end of each task and each step, run `workflow.sh status <file>`. Tell the user in one
    short block what is done, what is next, and what is left.
 
+**An instruction of the user is a step.** When the user says "before X, do Y" (validate with
+Codex, show me first, run it against staging), add Y as a row before X at once:
+`workflow.sh add <file> <id> "<Y, in the user's words>" --after <the step before X>`. Do not
+start X while that row is open. Its evidence is what Y produces, not proof that a tool ran.
+
+**Evidence is the output of the check.** A step is done when its evidence shows the check
+itself: the test output, the diff, the report, the images. "The tool could read the files" is
+not the evidence of a review. A step whose id starts with `visual` or `qa-ui` needs images:
+`workflow.sh done` refuses it without an existing image file or a folder that holds images.
+
 The Stop hook `~/.claude/hooks/workflow-gate.sh` blocks the end of a turn while a step is
 `todo`. The `review` step cannot be skipped after code was built. When the user stops the run,
 run `workflow.sh close <file> "<reason>"`. When the user then asks for the build, run
@@ -120,6 +130,17 @@ the project `CLAUDE.md`. Check it with `curl -sf -o /dev/null <url>`.
   canvas exists: `qa-ui` then compares from the recordings, the screenshots and the code.
 
 ## 4. UI parity — the `qa-ui` agent
+
+**Check the first screen early, not only at the end.** When the plan has a UI design pass or a
+canvas, the build checks each screen as soon as it renders:
+
+1. After the first task that renders a new or changed screen, add a row
+   `workflow.sh add <file> visual.<screen> "qa-ui on <screen>" --after build.<n>`.
+2. Run the `qa-ui` agent on that screen only, against its design images.
+3. Fix the differences with the `fixer` before the next task that touches a screen starts.
+4. Mark the row done with the folder of the `qa-ui` screenshots. Repeat for each new screen.
+
+The step below is the final pass over every screen.
 
 Run this step when the plan has a UI design pass, or when a canvas exists for the change.
 The visual pass of the agent that built the UI does not replace this step. `/pr` refuses to

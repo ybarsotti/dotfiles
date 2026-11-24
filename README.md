@@ -771,7 +771,11 @@ Every planning run keeps a step file, `$RUN_DIR/chain.md`, with
 step of the build chain (`_shared/workflows/*.steps`). The orchestrator marks each step `done`
 with evidence, `skip` with a reason, or `wait` and `block` before it ends a turn. Each spawned
 agent (`implementer-*`, `fixer`, `plan-reviewer`, `qa-ui`, `qa-business`) keeps its own step
-file the same way. The final `review` step cannot be skipped once code was built.
+file the same way. The final `review` step cannot be skipped once code was built. An instruction
+of the user such as "validate with Codex before you build" becomes its own row before the build.
+A step whose id starts with `visual` or `qa-ui` is done only with screenshots as evidence. In a
+plan with UI, `qa-ui` checks each screen as soon as it renders, against the PNGs that the
+`ui-designer` exports at 1440 and 390 px; a Codex worker gets those PNGs with `codex exec -i`.
 
 `dot_claude/hooks/executable_workflow-gate.sh` runs on `Stop` and `SubagentStop`. It acts only on
 a session whose transcript holds the `[workflow-gate] tracking <file>` line that `init` prints,

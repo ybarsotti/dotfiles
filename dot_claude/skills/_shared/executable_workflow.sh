@@ -141,6 +141,21 @@ cmd_done() {
   case "$first" in
     /*/*|~/*) [ -e "${first/#\~/$HOME}" ] || die "evidence path does not exist: $first" ;;
   esac
+  # A visual check is proved by images, not by a sentence that the check ran.
+  case "$id" in
+    visual*|qa-ui*)
+      local img="${first/#\~/$HOME}"
+      if [ -d "$img" ]; then
+        [ -n "$(find "$img" -maxdepth 3 -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \) -print -quit)" ] \
+          || die "'$id' needs images: $first holds no png, jpg or webp"
+      else
+        case "$img" in
+          *.png|*.PNG|*.jpg|*.jpeg|*.webp) [ -f "$img" ] || die "'$id' needs images: $first does not exist" ;;
+          *) die "'$id' needs images: give a folder of screenshots or an image file, not '$evidence'" ;;
+        esac
+      fi
+      ;;
+  esac
   set_row "$file" "$id" x "$evidence"
   log_line "$file" "done $id: $evidence"
 }

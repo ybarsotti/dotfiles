@@ -24,7 +24,8 @@ The spawn message gives you:
 - the files you may edit, and the files you must not touch;
 - the run folder `$RUN_DIR` and your row of `$RUN_DIR/chain.md`, with its exact command;
 - the test command and the gates that prove the task is done;
-- the `Canvas:` URL of the plan's UI design pass, when the plan has one.
+- the `Canvas:` URL and the `Design images:` folder of the plan's UI design pass, when the
+  plan has one.
 
 When an input is missing, ask for it. Do not guess the scope.
 
@@ -51,6 +52,9 @@ Read these files before you write code. Follow them. Do not copy them into your 
    section 11 before you report done.
 3. `~/.claude/skills/_shared/external-services.md`: when the task calls an external service.
 4. The `ub-mode` skill and its gates.
+5. The design images of the screens of your task. Open each PNG with the Read tool before you
+   write the screen, and again before you report done. Match them: layout, spacing, type,
+   color, copy and states. The canvas source is not a substitute for the images.
 
 Run tests only through `~/.local/bin/test-local`, and only the tests of your task. Never run
 the full suite: CI runs it on the PR.

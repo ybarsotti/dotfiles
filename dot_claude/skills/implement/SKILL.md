@@ -52,6 +52,8 @@ Add one `build.<n>` row per task, in order: `workflow.sh add <file> build.<n> "<
    the outermost boundaries: the network, a third-party API, the clock.
 4. For a bug or a regression, use `superpowers:systematic-debugging` before you write the fix.
 5. Record each departure from the plan as a `D-NNN` row under the plan's `## Deviations`.
+   When the plan has a UI design pass, check each screen as soon as it renders, as section 4
+   of `after-approval.md` says. The next task that touches a screen waits for its `MATCH`.
 6. After each task, read its diff and run its tests and the gates of step 3. Then commit.
    Mark its row: `workflow.sh done <file> build.<n> "<commit sha>: <test command and result>"`.
    Run `workflow.sh status <file>` and tell the user what is done, what is next and what is

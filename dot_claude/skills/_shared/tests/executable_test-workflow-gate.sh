@@ -39,6 +39,12 @@ ok "done logs what is next" 'grep -q "done context: .*Next: pipeline" "$F"'
 "$W" log "$F" "watch job abc" >/dev/null
 ok "log adds a line to the Log" 'grep -q "watch job abc. Next:" "$F"'
 
+"$W" add "$F" visual.home "qa-ui on home" --after build >/dev/null
+ok "a visual step refuses a sentence as evidence" '! "$W" done "$F" visual.home "codex read the canvas files" 2>/dev/null'
+mkdir -p "$TMP/shots"; ok "a visual step refuses a folder with no image" '! "$W" done "$F" visual.home "$TMP/shots" 2>/dev/null'
+printf x > "$TMP/shots/home-1440.png"
+ok "a visual step accepts a folder of screenshots" '"$W" done "$F" visual.home "$TMP/shots" >/dev/null'
+
 ok "review can be skipped before any build" '"$W" skip "$F" review "plan only" >/dev/null'
 "$W" todo "$F" review >/dev/null
 "$W" done "$F" build.1 "pytest: 3 passed" >/dev/null
