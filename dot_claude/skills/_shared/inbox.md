@@ -39,6 +39,31 @@ A decision that you put in the Inbox stays there. Never ask it again in the chat
 `AskUserQuestion`. When the user comes back to the chat, tell them what waits, with the
 thread link.
 
+## Questions during a build chain
+
+After the plan is approved, a question never stops the run. Send it to the Inbox, keep the
+recommended answer as the working answer, and go on.
+
+1. **Ground the recommendation, in this order:**
+   1. the current rule: what the code or the data does today, with `file:line` or the query;
+   2. the documentation: the ticket, the plan, the project docs, an earlier decision;
+   3. when neither decides it: two or three options, each with its cost, and your pick.
+
+   Write the source on the `Recommended:` line, for example
+   `Recommended: keep today's rule (orders/service.py:88)`.
+2. **Batch.** Put every question that comes up before your next send in one message, one
+   `:::question` block each. Use one thread per run, named after the ticket or the branch.
+3. **Go on with the recommended answer.** Record it in `decisions.md` as
+   `pending: <thread link>`. Build it so that another answer is a small change.
+4. **The PR opens with the questions still open.** `/ship-it` lists each pending decision in
+   the PR body under `## Decisions waiting for confirmation`, with its thread link.
+5. **When the answer comes**, compare it with the working answer. The same answer: mark the
+   row of `decisions.md` confirmed. Another answer: change the code, run the tests, push, and
+   update the PR body.
+
+Stop the run only when no answer is safe to build on: a destructive migration, money, access
+or data shared across tenants. Then mark the step with `workflow.sh block` and wait.
+
 ## Replies
 
 A reply arrives in the session by itself when the session is idle. Its first line is

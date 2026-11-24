@@ -31,5 +31,5 @@ fi
 touch "$state/$key"
 find "$state" -type f -mtime +2 -delete 2>/dev/null || true
 
-reason="The plan is approved and the chain runs. A question here stops the run until the user comes back. Put it in the Inbox instead (_shared/inbox.md): a :::question block with a Recommended: line and a Holds up: line, then mark the step with workflow.sh block and go on with every step that does not depend on the answer. Ask with AskUserQuestion again, with the same question, only when no other step can go on or the Inbox is not available."
+reason="The plan is approved and the chain runs, so a question does not stop it. Follow _shared/inbox.md, section Questions during a build chain: send the question to the Inbox with a Recommended: line grounded first in the current rule (file:line), then in the docs, else in options; record it in decisions.md as pending; and go on with the recommended answer. Ask with AskUserQuestion again, with the same question, only when no answer is safe to build on (destructive migration, money, access, cross-tenant data) or the Inbox is not available."
 jq -n --arg r "$reason" '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:$r}}'

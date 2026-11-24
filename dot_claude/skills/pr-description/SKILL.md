@@ -21,7 +21,9 @@ its concrete fixes, and open/update the PR.
   `## Deviations from the plan`, `## How to review` (reading order, 3 to 5 risk links, what
   to skim), and — whenever the change touches UI — an
   **`## Evidence`** section (see Phase 2.5), and — whenever it touches who may do what — an
-  **`## Permissions`** section (see Phase 2.6).
+  **`## Permissions`** section (see Phase 2.6), and — whenever `decisions.md` has a
+  `pending:` row — **`## Decisions waiting for confirmation`**: each decision, the answer the
+  code uses now, and its Inbox thread link.
 - **Body must NOT contain**: a changed-file list, file paths as an inventory, or file/line
   counts. The 3 to 5 risk links of `## How to review` are the only file paths allowed. Objective about *what we solve*, not *what moved*.
 - **Writer is claude Sonnet. Reviewer is codex.** Any additional reviewers on the claude side are Sonnet; the codex reviewer stays codex.
