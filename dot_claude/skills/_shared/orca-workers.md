@@ -74,8 +74,17 @@ Print the result of section 1 before the first worker, in one line: `Workers: or
 6. Answer a question with `orca orchestration reply`. Send a fix to the worker that wrote the
    code with `orca orchestration send --to dispatch:<dispatch_id>`.
 7. After `worker_done`, read the diff, run the task's tests and gates, then commit.
-8. After the commit, close the worker:
-   `orca orchestration worker-release --dispatch <dispatch_id> --json`.
+8. After the commit, release the worker, then close its tab. `worker-release` never closes a
+   terminal that existed before `worker-start`, and step 3 creates the terminal first. So the
+   tab stays open until you close it:
+   ```bash
+   orca orchestration worker-release --dispatch <dispatch_id> --json
+   orca terminal close --terminal "$HANDLE" --tab --json
+   ```
+   Keep each `HANDLE` in `$RUN_DIR/workers.tsv` (`<dispatch_id>\t<handle>`), so a later turn
+   or a resumed session can still close it. Close the tab also when a worker fails, when you
+   stop it, and when you replace it with a subagent. Before the run reports done, run
+   `orca terminal list --json` and close each worker tab of this run that is still open.
 
 Never type into the terminal of a worker, and never poll a worker. Orca wakes this session
 when a worker finishes or asks. When you read its diff, check that it stays inside its task

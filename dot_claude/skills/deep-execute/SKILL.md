@@ -137,7 +137,9 @@ memory.** A decision no one recorded is absent from it, and that absence is the 
 output. Close with `finish-run.sh RUN_DIR [--qa PATH]`, which refuses a missing or unrendered
 report. Send the report summary to the run's Inbox thread with `report/index.html` in
 `attachments` (`_shared/inbox.md`). Then open the PR with `/pr` and its watch, and leave the
-lane loops alive; teardown (`lanes/<lane>/stop`) is a separate step the user confirms.
+lane loops alive: the PR watch can send review fixes to them. `/pr-approved` closes the lane
+tabs after the merge. When the user drops the run, stop each lane (`lanes/<lane>/stop`) and
+close its tab (`orca terminal close --terminal <block_ref> --tab --json`).
 
 ## Resume (`--resume RUN_DIR`)
 

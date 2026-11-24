@@ -65,6 +65,11 @@ ROOT=$(git rev-parse --show-toplevel)
 $S pending "$ROOT"
 ```
 
+The merged work needs no worker. In an Orca worktree, close the tab of each worker and each
+`/deep-execute` lane of this PR's runs (`workers.tsv` and the lane `block_ref`):
+`orca terminal close --terminal <handle> --tab --json`. Keep this session's own tab and the
+tabs of other runs. Do this also when the worktree stays.
+
 `keep: true` means the worktree stays. The reasons name what is left: uncommitted changes,
 commits not pushed, open steps of another run, or a breakdown with more tasks. For a
 breakdown, read it and check which tasks have a plan file; a task with no plan is still to do.

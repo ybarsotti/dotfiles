@@ -180,7 +180,9 @@ headless fallback with explicit visibility warning.
 
 ## Phase 3: execute with agent-browser
 
-Launch one Codex worker through `scripts/launch-codex-worker.sh`. Before browser commands,
+Launch one Codex worker through `scripts/launch-codex-worker.sh`. It prints the terminal
+handle. When the worker finishes or fails, close its tab:
+`orca terminal close --terminal <handle> --tab --json`. Before browser commands,
 worker must try:
 
 ```bash

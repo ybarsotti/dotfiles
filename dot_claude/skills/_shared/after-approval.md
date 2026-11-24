@@ -78,6 +78,12 @@ Opus, Sol or Astra. The build and the plan keep their own models.
 - A worker that must run without permission prompts starts in its own terminal:
   `orca terminal create --worktree "$WT" --command "claude --dangerously-skip-permissions" --json`,
   then `orca orchestration worker-start --task <task_id> --terminal <handle>`.
+- Close the tab of each worker when its work is settled. Orca closes the tab of a worker that
+  `worker-start` opened about 2 minutes after `worker_done`. It never closes a terminal that
+  you created first, nor a `--keep-open` worker. Close those yourself with
+  `orca terminal close --terminal <handle> --tab --json`: after `worker_done`, after a
+  failure, and when the user is done with a `--keep-open` worker. A finished run leaves no
+  worker tab open (`_shared/orca-workers.md` step 8).
 - Outside an Orca workspace (`orca worktree current` fails), use the `Agent` tool with the same
   agent name. Never use `claude -p` for an agent that needs the `Artifact` tool.
 
