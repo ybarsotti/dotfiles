@@ -31,7 +31,8 @@ each message of that stream.
 
 ## Do not use the Inbox for
 
-- A decision that stops all work now while the user is in the chat. Use `AskUserQuestion`.
+- A decision that stops all work now while the user is in the chat, outside a build chain.
+  Use `AskUserQuestion`. Inside a build chain, see "Decisions during a build chain".
 - The planning grill and the brainstorm. They are a conversation. Keep them in the chat.
 - An approval gate. The Plannotator plan review stays the gate for a plan.
 
@@ -39,30 +40,41 @@ A decision that you put in the Inbox stays there. Never ask it again in the chat
 `AskUserQuestion`. When the user comes back to the chat, tell them what waits, with the
 thread link.
 
-## Questions during a build chain
+## Decisions during a build chain
 
-After the plan is approved, a question never stops the run. Send it to the Inbox, keep the
-recommended answer as the working answer, and go on.
+After the plan is approved, the run never stops for a decision. The orchestrator decides,
+records the decision, and asks the user to review it in the Inbox. The run goes on.
 
-1. **Ground the recommendation, in this order:**
+1. **Choose the decision with the least impact.** Prefer, in this order:
    1. the current rule: what the code or the data does today, with `file:line` or the query;
-   2. the documentation: the ticket, the plan, the project docs, an earlier decision;
-   3. when neither decides it: two or three options, each with its cost, and your pick.
+   2. what the documentation says: the ticket, the plan, the project docs, an earlier decision;
+   3. the option that is easiest to undo and touches the least: no data rewrite, no deleted
+      data, no change of who may do what, no change to money. A risky part waits behind a
+      flag, or stays out of this PR as a named follow-up.
+2. **Record it** in `decisions.md`: the decision, the alternatives, the reason, and
+   `review: <thread link>`. Build it so that another answer is a small change.
+3. **Ask for a review, not for a decision.** Send one Inbox message per batch, one
+   `:::question` block per decision, in this form:
 
-   Write the source on the `Recommended:` line, for example
-   `Recommended: keep today's rule (orders/service.py:88)`.
-2. **Batch.** Put every question that comes up before your next send in one message, one
-   `:::question` block each. Use one thread per run, named after the ticket or the branch.
-3. **Go on with the recommended answer.** Record it in `decisions.md` as
-   `pending: <thread link>`. Build it so that another answer is a small change.
-4. **The PR opens with the questions still open.** `/ship-it` lists each pending decision in
-   the PR body under `## Decisions waiting for confirmation`, with its thread link.
-5. **When the answer comes**, compare it with the working answer. The same answer: mark the
-   row of `decisions.md` confirmed. Another answer: change the code, run the tests, push, and
-   update the PR body.
+   ```markdown
+   :::question
+   I chose to keep today's rule: an order without a contact is still accepted
+   (orders/service.py:88). Did I choose right?
 
-Stop the run only when no answer is safe to build on: a destructive migration, money, access
-or data shared across tenants. Then mark the step with `workflow.sh block` and wait.
+   - [ ] Yes, keep it
+   - [ ] Reject orders without a contact — the ticket hints at it, but it blocks 3 importers
+   - [ ] Ask for a contact only on new orders
+
+   Recommended: Yes, keep it
+   :::
+   ```
+
+   Use one thread per run, named after the ticket or the branch.
+4. **The PR opens with the reviews still open.** `/ship-it` lists each decision under
+   `## Decisions waiting for review` in the PR body, with its thread link.
+5. **When the answer comes**, compare it with the decision. The same: mark the row of
+   `decisions.md` confirmed. Another: change the code, run the tests, push, and update the PR
+   body.
 
 ## Replies
 

@@ -59,10 +59,10 @@ The `Monitor` catches the events that a lane emits.
 <seq>`. Until then every call returns the same trigger, so nothing is lost when you crash
 between the trigger and the reply.
 
-- **`question`** — answer from the plan or the contract when they decide it. Otherwise post it
-  to the run's Inbox thread with `Holds up: lane <LANE>`, ack it, and keep the other lanes
-  running (`~/.claude/skills/_shared/inbox.md`). Use `AskUserQuestion` only when every lane is
-  blocked or the Inbox is absent. Send the answer with `reply.sh RUN_DIR LANE "<answer>"`.
+- **`question`** — answer from the plan or the contract when they decide it. Otherwise take
+  the decision with the least impact, send it to the lane with `reply.sh RUN_DIR LANE
+  "<answer>"`, and post it for review (`_shared/inbox.md`, "Decisions during a build chain").
+  Ack it. No lane waits for the user.
 - **`waiting`** — read `board.sh RUN_DIR` and wake the lane only when every lane in its
   `depends_on` has emitted `done`. An unsent wake strands the lane: it is an incident.
 - **`blocked` — contract drift.** A worker blocked on the contract means the contract is

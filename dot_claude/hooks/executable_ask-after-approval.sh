@@ -31,5 +31,5 @@ fi
 touch "$state/$key"
 find "$state" -type f -mtime +2 -delete 2>/dev/null || true
 
-reason="The plan is approved and the chain runs, so a question does not stop it. Follow _shared/inbox.md, section Questions during a build chain: send the question to the Inbox with a Recommended: line grounded first in the current rule (file:line), then in the docs, else in options; record it in decisions.md as pending; and go on with the recommended answer. Ask with AskUserQuestion again, with the same question, only when no answer is safe to build on (destructive migration, money, access, cross-tenant data) or the Inbox is not available."
+reason="The plan is approved and the chain runs, so a decision never stops it. Follow _shared/inbox.md, section Decisions during a build chain: take the decision with the least impact (today's rule first, then the docs, then the easiest to undo), record it in decisions.md with its alternatives, send it to the Inbox as 'Did I choose right?', and go on. Ask with AskUserQuestion again, with the same question, only when the Inbox is not available."
 jq -n --arg r "$reason" '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:$r}}'

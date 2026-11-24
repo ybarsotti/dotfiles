@@ -15,9 +15,9 @@ approval" and "I want to review the plan first" ask for the Plannotator gate, wh
 has. When the gate approves, the chain starts. When you cannot tell whether the user wants the
 build, ask one question at the approval: build now, or stop at the plan. Never close the run
 on a guess.
-- A decision changes a requirement, a business rule, a contract or the scope, and no answer
-  is safe to build on. Any other question goes to the Inbox, and the run goes on with the
-  recommended answer (`_shared/inbox.md`, "Questions during a build chain").
+- A decision is never a stop. The orchestrator takes the decision with the least impact,
+  records it, sends it to the Inbox for review, and goes on (`_shared/inbox.md`, "Decisions
+  during a build chain").
 - A loop below reaches its round limit with failures left. Report them and ask.
 
 The ultracode question of option C is not a stop case. The planning skill asks it once, at
@@ -180,7 +180,7 @@ Run steps 4 and 5 in parallel. They touch different things.
 2. Re-run only the QA agent that found the problem, on the fixed commit.
 3. Stop after 3 rounds. Report what is still open and ask the user. The chain runs unattended,
    so ask each decision as an Inbox question when the Inbox exists, else `AskUserQuestion`
-   (`~/.claude/skills/_shared/inbox.md`, "Questions during a build chain").
+   (`~/.claude/skills/_shared/inbox.md`, "Decisions during a build chain").
 
 When a fix changes code that the review saw, run `/deep-review default --scope <commit before
 the fixes>..HEAD` once on the fixes only. Do not review the whole change again.
