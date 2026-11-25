@@ -131,19 +131,10 @@ Config lives in `~/.config/waveterm/` (flat JSON, `:` as level separator). Docs:
     else — there is no disk, network, swap or temperature series to configure. Use btop for those.
   - Icons are [Font Awesome](https://fontawesome.com/search) names without `fa-`; brand icons need the
     `brands@` prefix (e.g. `brands@docker`).
-  - The notifications widget runs `gh notify -w -e ci_activity`. Without the exclusion it is unusable
-    here: 34 of 36 unread notifications were `ci_activity` (workflow-run-failed), burying the two
-    that were an actual PR comment and state change. `-w` opens the preview pane; plain
-    `gh notify` in any terminal still shows everything including CI.
-  - That widget also prepends `~/.local/libexec/gh-nocolor` to `PATH`. **`gh` writes
-    `\033]11;?` (OSC 11, background colour) and `\033[6n` (cursor position) on every single
-    invocation** — verified with `script -q /dev/null gh api user`. Wave answers both, and when gh
-    runs underneath a live TUI (gh-notify shells out to `gh api` while fzf is on screen) the
-    replies land in that TUI's stdin: `11;rgb:0000/0000/0000` typed into the fzf query box, and
-    previously a crash in gh-dash, which dereferenced a not-yet-loaded config on the resulting
-    phantom keypress. `NO_COLOR=1` makes gh skip the queries; the shim scopes it to gh alone,
-    because fzf honours `NO_COLOR` too and would go monochrome. gh-notify's own colours are
-    emitted by the script, so they are unaffected.
+  - The notifications widget runs `gh notify -w -e ci_activity`: it hides CI notifications, and
+    `-w` opens the preview pane. Plain `gh notify` in any terminal shows everything.
+  - That widget prepends `~/.local/libexec/gh-nocolor` to `PATH`. The shim sets `NO_COLOR=1` for
+    `gh` only, so `gh` sends no terminal queries whose replies would land in the fzf query box.
 
 ### The agent group chat — `llmessage`
 

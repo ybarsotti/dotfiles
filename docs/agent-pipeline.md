@@ -112,10 +112,8 @@ deep-plan's last phase reads the plan's `## Execution shape`, picks one of four 
 criteria in `dot_claude/skills/_shared/plan-routing.md`, and writes the choice to
 `$RUN_DIR/execution-recommendation.md`. The recommended mode runs unless you named another.
 
-Before it offers those options it **re-runs `validate-plan.sh --root` from the project root** —
-the exact check `/deep-execute`'s `init-run.sh` will run. Phase 3 already validated before
-presenting the plan, but Plannotator's second pass can edit it afterwards, so a shape failure
-would otherwise surface only once you asked to build. It now fails at the recommendation instead.
+Before it offers those options it runs `validate-plan.sh --root` from the project root, the
+same check that `/deep-execute`'s `init-run.sh` runs.
 
 The four modes are A `/deep-execute` (parallel lanes), B the `implement` skill (serial, the
 default), C Claude `Workflow` and D a Codex implementer. `plan-routing.md` holds the criteria.
@@ -150,9 +148,7 @@ changes (backend, frontend), in parallel. It checks scope drift, the plan format
 patterns, reuse, the callers and flows the plan missed, external systems, architecture and edge
 cases.
 
-Plans follow `dot_claude/skills/_shared/plan-format.md`, not `superpowers:writing-plans`. The
-superpowers header sent the build to `subagent-driven-development`, which ends in
-`finishing-a-development-branch` and stops to ask. The plan header now points to `implement`
+Plans follow `dot_claude/skills/_shared/plan-format.md`. The plan header points to `implement`
 and `after-approval.md`.
 
 ### The step file and the workflow gate
@@ -227,58 +223,28 @@ waiting on each other:
 
 The `/ship-it` watch follows the same rule for each comment: fix or decline, reply, then resolve.
 
-### The Stop hook that refuses to lose the run report
+### The Stop hook for the run report
 
-Phase 5 was the only phase without a gate, and across three real runs the report was never built
-once. `finish-run.sh` checks for it, but something has to call `finish-run.sh` — and forgetting
-the last step *is* the failure being fixed.
+`~/.claude/hooks/unfinished-run-gate.sh` runs as a `Stop` hook. It blocks the end of the session
+while a recent `deep-execute` run has a manifest and no `report/index.html`. Each decision goes
+to `~/.local/state/deep-execute/stop-gate.log`. It stands aside:
 
-So `~/.claude/hooks/unfinished-run-gate.sh` runs as a `Stop` hook. It fires from the harness
-whether or not anyone remembered, and blocks the session from ending while a recent
-`deep-execute` run has a manifest and no rendered `report/index.html`.
+- when you say **`encerrar mesmo assim`** in the session;
+- after it blocked once for the run;
+- on `stop_hook_active`;
+- for a run whose `events.jsonl` did not change in a day.
 
-A blocking hook that misdiagnoses is worse than the problem — it traps a session with no way out
-but editing `settings.json` mid-irritation. There are three guards, and all three leave a trace
-in `~/.local/state/deep-execute/stop-gate.log`:
+### Run report
 
-- Say **`encerrar mesmo assim`** anywhere in the session and it stands aside.
-- It blocks **once per run**. After that the run is marked and never blocks again.
-- It honours `stop_hook_active`, so it cannot loop against its own block.
+A lane records each decision it takes during the run with `decision.sh RUN_DIR LANE TASK
+--title ... --rationale ... --alternative ... --tradeoff ...`. The script writes
+`lanes/<lane>/decisions/NNN.json` and emits a `decision` event for the report.
 
-It also ignores runs whose `events.jsonl` has not moved in a day: an abandoned run from last
-month must not block every session from now on.
-
-### Run report (what was built, and why)
-
-The approved plan records the decisions taken *before* code was written. Decisions taken
-*during* the run — which of two viable implementations a lane picked, what it assumed about a
-lane it doesn't own, where it worked around something the plan missed — otherwise die with the
-worker's session. `decision.sh` is the channel that outlives the pane:
-
-```bash
-decision.sh RUN_DIR LANE TASK --title "Materialized view for the totals" \
-  --rationale "The plan left the aggregation strategy open; a view keeps reads to one query." \
-  --alternative "Compute in the API layer — N+1 across three tables" \
-  --tradeoff "Up to 60s of refresh lag on the totals"
-```
-
-It writes `lanes/<lane>/decisions/NNN.json` and emits a `decision` event carrying only the
-headline — an `events.jsonl` line must stay single-line and under `PIPE_BUF` for concurrent
-appends to be atomic, and rationale is prose. `decision` events are deliberately not monitor
-triggers; they are for the report, not an interruption mid-round.
-
-After the final review, the frozen SHA, QA and the opened PR, `build-run-report.sh RUN_DIR
-[--final-sha SHA] [--review report.md] [--qa index.html] [--pr URL]` renders
-`RUN_DIR/report/index.html`: what was built (git diffstat, baseline → frozen SHA), the lane
-table with `owns`/`depends_on`, every recorded decision with its rejected alternatives and
-accepted tradeoffs, the plan's own pre-implementation rationale, drift (contract version moved,
-extra rounds, blocked lanes), the final board plus full event timeline, the review/QA evidence
-(screenshots and recordings live in the linked QA report), and the pull request. Self-contained
-HTML, light and dark, no external assets.
-
-Every claim on that page comes from a file in the run directory — it is never written or padded
-from a model's memory of the run. So a decision no lane recorded is simply absent, and the page
-says so rather than implying none were made.
+After the final review, QA and the PR, `build-run-report.sh RUN_DIR [--final-sha SHA]
+[--review report.md] [--qa index.html] [--pr URL]` renders `RUN_DIR/report/index.html`. The
+page shows what was built, the lane table, each decision with its alternatives and tradeoffs,
+the drift, the event timeline, the review and QA evidence, and the PR. Every line comes from a
+file in the run directory.
 
 An approved plan for `/deep-execute` extends deep-plan's normal plan format with an
 **Execution shape** (`Mode: parallel`, exactly one `orchestrator` lane, a lane table of

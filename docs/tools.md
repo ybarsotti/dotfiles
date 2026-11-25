@@ -352,15 +352,6 @@ For databases and heavy services (PostgreSQL, Kafka, Spark, etc.), use Docker Co
 ## Homebrew Tap Trust
 
 Homebrew 6 refuses to load formulae or casks from a third-party tap until that tap is trusted, so
-`run_onchange_01_homebrew_taps.sh.tmpl` runs `brew trust --tap` on each one after tapping. Without
-it a fresh install taps everything and then fails on `agent-deck`, `peon-ping`, `oh-my-posh`,
-and `borders`. Trust means Homebrew will load and run that tap's Ruby formula code; it is
+`run_onchange_01_homebrew_taps.sh.tmpl` runs `brew trust --tap` on each one after tapping. Trust means Homebrew will load and run that tap's Ruby formula code; it is
 recorded in `~/.config/homebrew/trust.json` and reversed with `brew untrust <tap>`. The script
 guards on `brew trust --help`, so it stays a no-op on Homebrew 5 and earlier.
-
-`sst/tap` used to be in that list and was removed: SST renamed itself to Anomaly, so the name now
-only resolves through a GitHub 301 to `anomalyco/homebrew-tap`. Because the tap name no longer
-matched its remote, `brew trust` recorded the raw clone URL rather than a tap name — and
-`brew untrust` could not undo it, since the URL resolves back to the *name* `anomalyco/tap`, which
-was never in the list. The stale entry had to be edited out of `trust.json` by hand. Nothing here
-installs from that tap anyway; `opencode` ships in `homebrew/core` now.

@@ -2,17 +2,10 @@
 
 The MCP servers, and which browser tool to use for which target.
 
-> **Where Claude Code actually reads MCP servers from.** `dot_claude/settings.json.tmpl` renders
-> an `mcpServers` block, and `~/.claude/mcp_servers.json` holds the same merged set, but neither
-> is what the CLI uses. Adding `kitesurf` and `obscura` to `~/.claude/settings.json` left both
-> absent from `claude mcp list`; registering `obscura` with `claude mcp add --scope user` put it
-> in `~/.claude.json` and it connected immediately. So `~/.claude.json` is the live registry.
->
-> That file is in `.chezmoiignore.tmpl` on purpose — it is rewritten on every launch — which
-> means `chezmoi apply` can never overwrite a server registered there. The tradeoff is that a
-> server registered this way does not travel to a new machine. `.chezmoidata/mcp-server.yml`
-> stays the written record of what each machine should have; register them on a fresh machine
-> with `claude mcp add --scope user <name> -- <command> [args...]`.
+> **Where Claude Code reads MCP servers from.** The CLI reads `~/.claude.json`.
+> `.chezmoiignore.tmpl` ignores that file, because Claude Code rewrites it on every launch.
+> `.chezmoidata/mcp-server.yml` records what each machine has. On a new machine, register each
+> server with `claude mcp add --scope user <name> -- <command> [args...]`.
 
 The following MCP servers are configured for Claude Code:
 
