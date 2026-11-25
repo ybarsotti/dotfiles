@@ -168,7 +168,9 @@ done < <(jq -r '.shared_read_only[]' <<<"$PLAN_JSON")
 UNCOMMITTED=""
 MISSING=""
 for p in "$CONTRACT_PATH" "${SHARED_ARR[@]}"; do
-  [ -f "${CWD}/${p}" ] || MISSING="${MISSING}${MISSING:+, }${p}"
+  # A shared entry can be a folder or a glob (`packages/kit/**`), so ask git, not `-f`.
+  [ -e "${CWD}/${p}" ] || [ -n "$(git -C "$CWD" ls-files -- ":(glob)$p" 2>/dev/null | head -1)" ] ||
+    MISSING="${MISSING}${MISSING:+, }${p}"
   [ -z "$(git -C "$CWD" status --porcelain -- "$p" 2>/dev/null)" ] || UNCOMMITTED="${UNCOMMITTED}${UNCOMMITTED:+, }${p}"
 done
 [ -z "$MISSING" ] || {

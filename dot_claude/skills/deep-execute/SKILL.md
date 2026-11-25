@@ -41,8 +41,10 @@ Scripts live in `~/.claude/skills/deep-execute/scripts/`. `RUN_DIR` defaults to
    directory: one rendered brief per lane (tasks, owns, test command, contract, script
    paths), the worker rules, and the agent and session id of each lane. It refuses a
    `RUN_DIR` that already holds a run.
-3. `orca-launch.sh RUN_DIR` opens one Orca terminal per lane in the run's workspace
-   (`orca worktree current`) and runs `worker-loop.sh` in it. Outside Orca, start
+3. `orca-launch.sh RUN_DIR LANE...` opens one Orca terminal per named lane in the run's
+   workspace (`orca worktree current`) and runs `worker-loop.sh` in it. Launch only the lanes
+   with an empty `depends_on`. Launch each other lane when every lane in its `depends_on`
+   emitted `done`. A lane that starts before its inputs exist only reports `blocked`. Outside Orca, start
    `worker-loop.sh RUN_DIR LANE` in any terminal, or with `nohup` (README, *Without Orca*).
 
 ## Phase 2 — Monitor and react
@@ -78,7 +80,8 @@ between the trigger and the reply.
 - **`done`** — commit the files of that lane at once, so an hour of lane work is never only
   in the worktree. Stage only its `owns` globs, because other lanes still write:
   `git add -- ':(glob)<owns glob>'...` and `git commit -m "<type>(<lane>): <tasks of the round>"`.
-  Never `git add -A` while a lane runs. Once every lane emitted `done` in this round, gate
+  Never `git add -A` while a lane runs. Then launch each lane whose `depends_on` lanes are now
+  all `done` (Phase 1 step 3). Once every lane emitted `done` in this round, gate
   the round.
 - **`invalid_event` / `fatal_signature` / `monitor_error`** — investigate the lane
   (`board.sh --lane LANE`, `lanes/<lane>/worker.log`) before you restart or escalate.
