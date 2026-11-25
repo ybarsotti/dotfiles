@@ -7,7 +7,8 @@ commands run at the same time on this machine. Each command still runs serially 
 
 A repository can set test variables for every worktree in `<git common dir>/test-local.env`
 (one KEY=VALUE per line). The file lives inside `.git`, so it is never committed, and each
-worktree finds it. Use it, for example, to turn on a migrated template database, so that a
+worktree finds it. Its values win over the caller's environment, so every agent of the
+repository shares one test setup, for example one test database server. Use it, for example, to turn on a migrated template database, so that a
 focused run does not apply every migration again. The key TEST_LOCAL_IGNORE_ARGS lists
 arguments to drop, separated by spaces: with a template database, `--create-db` only forces
 a rebuild that the template already does when a migration changes.
@@ -66,7 +67,7 @@ def main():
         if conflicting_flag(runner, arg):
             print(f"test-local: {arg} conflicts with the local test limit; remove it.", file=sys.stderr)
             return 64
-    env = {**repo_env(), **os.environ}
+    env = {**os.environ, **repo_env()}
     ignored = set(env.get("TEST_LOCAL_IGNORE_ARGS", "").split())
     if ignored & set(args):
         print(f"test-local: dropped {' '.join(sorted(ignored & set(args)))} (TEST_LOCAL_IGNORE_ARGS in test-local.env).",
