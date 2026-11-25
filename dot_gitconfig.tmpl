@@ -199,3 +199,7 @@
 
 [include]
     path = .config/git/delta/themes/catppuccin.gitconfig
+
+# Repositories under ~/Developer/Pers/ are personal: commit with the personal email.
+[includeIf "gitdir:~/Developer/Pers/"]
+    path = ~/.config/git/personal.gitconfig
