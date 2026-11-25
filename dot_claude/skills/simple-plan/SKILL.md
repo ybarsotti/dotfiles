@@ -45,6 +45,12 @@ user says not to build ("only plan", "do not implement", "não implementa"), run
 approval" is not that: it asks for the gate, and the build starts when the gate approves.
 Read the stop cases at the top of `~/.claude/skills/_shared/after-approval.md`.
 
+A new change request in the same session, after `close` or after the PR, is a new run of this
+skill. Reopen the step file (`workflow.sh reopen <file> "<the close reason>"`), or start a new
+run folder, and begin at the first open step. Never write the plan for it outside the skill:
+the plan review and the gate run for each change. A hook refuses a plan file in
+`docs/superpowers/plans/` when the step file of the session is closed.
+
 `$RUN_DIR` holds `context.md`, the review notes, and the `qa/` bundle. The plan is not stored
 there. The plan lives where `~/.claude/skills/_shared/plan-format.md` saves it:
 `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md` inside the project. `$RUN_DIR/plan.md`
