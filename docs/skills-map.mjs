@@ -617,6 +617,7 @@ if (
     clusters: clusterDiagrams(g),
     mermaidUrl: MERMAID_URL,
     repoUrl: "https://github.com/ybarsotti/dotfiles",
+    groupOf: clusterOf,
   });
   for (const [file, body] of [
     [OUT_MD, md],
