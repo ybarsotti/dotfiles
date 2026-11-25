@@ -45,6 +45,12 @@ A comment is valid when it names a concrete failure: wrong behaviour, a security
 integrity defect, a missed requirement, or a broken written repository rule. A severity label
 or a reviewer's insistence does not make a comment valid.
 
+**Only the delta after the first review round.** The first review of the PR covers the whole
+diff. After it, a new comment on lines that did not change since that review is a late
+finding. Fix it in this PR only when it names a CRITICAL or HIGH defect: data loss, security,
+money, or a broken requirement. Otherwise record it as a follow-up for the user and reply so.
+Each extra round costs a push and a full CI run.
+
 **No scope creep.** An optional abstraction, an unrelated cleanup, a cosmetic change or a
 speculative guard is not a reason to grow the PR. When a valid fix cannot fit the PR's
 intended outcome, tell the user. Do not expand the scope in silence.
@@ -56,7 +62,12 @@ intended outcome, tell the user. Do not expand the scope in silence.
 3. Rerun the tests that cover the changed code, then the checks the repository requires.
 4. A pending, skipped or absent check is not a passing check.
 5. Do not weaken a test, a lint rule or a threshold to close a comment.
-6. Commit and push through the repository's normal route.
+6. Fix every accepted comment of the round first, then push once. Wait until each reviewer
+   that the push starts has posted before the next round. One push per round, not one per
+   comment: each push starts the full CI again.
+7. Commit and push through the repository's normal route. When a pre-push hook refuses the
+   push, fix what it reports, commit, and push again. The hook runs the checks that CI would
+   fail on.
 
 ## 4. Reply and resolve
 
