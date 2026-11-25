@@ -190,8 +190,8 @@ records are the same: a lane's own account of its reasoning, not an audit trail.
 - The plan's validated agent runs; `--agent` overrides it with a line of `agents.allowlist`.
 - **Documentation is part of done.** The plan's `## Documentation impact` edits belong to a
   lane like any other file.
-- **Use the code-intel tools, not `grep`.** Serena for symbols, GitNexus (`impact`,
-  `detect_changes`) for blast radius, Graphify for cross-module questions. Tell every lane the
-  same, and refresh the indexes after the run.
+- **Use the code-intel tools, not `grep`.** Lanes run without MCP servers, so tell every lane
+  to use the `gitnexus` CLI (`context`, `impact`, `detect-changes`) and Graphify. You keep Serena
+  and the GitNexus MCP. Refresh the indexes after the run.
 - The run report is built from the run directory by `build-run-report.sh`, never written by
   hand.

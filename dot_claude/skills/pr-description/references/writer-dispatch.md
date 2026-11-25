@@ -21,6 +21,7 @@ claude -p \
   --model sonnet \
   --output-format text \
   --max-turns 4 \
+  --strict-mcp-config \
   --dangerously-skip-permissions \
   < "$RUN_DIR/writer-input.md" > "$RUN_DIR/draft.md"
 ```

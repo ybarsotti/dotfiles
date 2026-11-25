@@ -61,8 +61,12 @@ case "$RUNNER" in
   claude)
     # Headless print mode. Reviewers always run on Sonnet; --max-turns caps runaway sessions
     # while leaving enough room to explore a real multi-file diff before rendering a verdict.
+    # No MCP server, unless the persona needs one (requires_mcp): each server costs memory
+    # in every headless reviewer, and Serena alone holds about 3 GB.
+    MCP_ARGS=(--strict-mcp-config)
+    [ "${DEEP_REVIEW_KEEP_MCP:-0}" = 1 ] && MCP_ARGS=()
     run_with_timeout "$TIMEOUT" \
-      claude -p \
+      claude -p "${MCP_ARGS[@]}" \
         --model sonnet \
         --output-format text \
         --max-turns "${DEEP_REVIEW_MAX_TURNS:-20}" \

@@ -532,7 +532,10 @@ for ((i=0; i<${#PERSONAS[@]}; i++)); do
   log_file="${RUN_DIR}/logs/${persona_id}.log"
 
   log "  [${persona_id}] dispatching (${runner})"
-  "${SCRIPT_DIR}/reviewer.sh" "$runner" "$persona_id" "$RUN_DIR" "$TIMEOUT" \
+  keep_mcp=0
+  pidx="${PIDXS[$i]:-}"
+  if [ "${pidx:--1}" -ge 0 ] && [ "$(yq -r ".personas[$pidx].requires_mcp // [] | length" "$VARIANT_FILE")" -gt 0 ]; then keep_mcp=1; fi
+  DEEP_REVIEW_KEEP_MCP="$keep_mcp" "${SCRIPT_DIR}/reviewer.sh" "$runner" "$persona_id" "$RUN_DIR" "$TIMEOUT" \
     > "$result_file" 2> "$log_file" &
   PIDS+=($!)
   START_TS+=("$(date +%s)")

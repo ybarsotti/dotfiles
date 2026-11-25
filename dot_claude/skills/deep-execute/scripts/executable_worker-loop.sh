@@ -146,7 +146,8 @@ run_turn() {
 		;;
 	*)
 		# No sandbox: a claude lane relies on the shared-worktree boundary checks and the git deny.
-		args=(claude -p --dangerously-skip-permissions --disallowedTools "Bash(git:*)"
+		# No MCP server: each one costs memory in every lane. Lanes use the gitnexus CLI.
+		args=(claude -p --dangerously-skip-permissions --strict-mcp-config --disallowedTools "Bash(git:*)"
 			--append-system-prompt "$(cat "$SYSTEM_FILE")")
 		[ -n "$MODEL" ] && args+=(--model "$MODEL")
 		[ -n "$EFFORT" ] && args+=(--effort "$EFFORT")

@@ -175,6 +175,7 @@ claude -p \
   --model sonnet \
   --output-format text \
   --max-turns 2 \
+  --strict-mcp-config \
   --dangerously-skip-permissions \
   < "$SYNTH_PROMPT" \
   > "$REPORT_FILE" \

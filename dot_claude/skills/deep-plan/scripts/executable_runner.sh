@@ -30,6 +30,9 @@ CODEX_EFFORT="${DEEP_PLAN_CODEX_EFFORT:-medium}"
 # "Error: Reached max turns". Override with DEEP_PLAN_CLAUDE_MAX_TURNS.
 CLAUDE_MAX_TURNS="${DEEP_PLAN_CLAUDE_MAX_TURNS:-80}"
 
+# --strict-mcp-config with no --mcp-config starts no MCP server. Each headless agent started
+# every configured server (Serena alone holds about 3 GB), and an agent here needs none.
+
 if command -v gtimeout >/dev/null 2>&1; then
   run_with_timeout() { gtimeout "$@"; }
 elif command -v timeout >/dev/null 2>&1; then
@@ -51,6 +54,7 @@ case "$RUNNER" in
         --model "$MODEL" \
         --output-format text \
         --max-turns "$CLAUDE_MAX_TURNS" \
+        --strict-mcp-config \
         --dangerously-skip-permissions \
         < "$PROMPT_FILE"
     EXIT_CODE=$?
