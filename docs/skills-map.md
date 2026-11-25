@@ -12,7 +12,7 @@ The generator reads `dot_claude/skills/**/*.md`, `dot_claude/commands/*.md`, `do
 It writes `docs/skills-map.md` and `docs/skills-map.html`. A second run gives no diff.
 Run `node --test docs/skills-map.test.mjs` to test the edge extraction.
 
-Counts: 28 skills, 17 commands, 9 agents, 14 shared docs, 17 external references. 229 edges: 90 invokes skill, 11 spawns agent, 51 runs command, 77 reads shared doc.
+Counts: 28 skills, 17 commands, 9 agents, 15 shared docs, 17 external references. 238 edges: 90 invokes skill, 11 spawns agent, 55 runs command, 82 reads shared doc.
 
 ## Diagram 1: the main chains
 
@@ -34,6 +34,8 @@ flowchart LR
     dp("/deep-plan"):::command
     sp("/simple-plan"):::command
     qap("/qa-plan"):::command
+    rw("_shared/repo-workflow.md"):::shared
+    prv("plan-reviewer agents"):::agent
     pa("Plannotator approval"):::step
     wpp("workflow-post-plan"):::skill
   end
@@ -70,10 +72,14 @@ flowchart LR
     watch("PR watch: Monitor, then loop"):::step
     apc("address-pr-comments"):::skill
     fuj("follow-up-jira"):::skill
+    pra("/pr-approved (on your call)"):::command
   end
   dp -->|"Phase 2.4"| qap
+  dp -->|"Phase 0"| rw
+  sp -->|"Phase 0"| rw
+  sp -->|"Phase 3"| prv
   qap --> pa
-  sp --> pa
+  prv --> pa
   dp -->|"Phase 0.4"| rt
   sp -->|"Phase 0.5"| rt
   pa -->|"approved"| aa
@@ -92,7 +98,8 @@ flowchart LR
   pr -->|"Phase 2.7"| bs
   pr --> rep
   pr -->|"Phase 5"| watch
-  watch --> apc
+  watch -->|"one push per round"| apc
+  watch -->|"you approve"| pra
   wm -->|"criteria"| rt
   wm -->|"standard"| dp
   wm -->|"standard"| sp
@@ -131,22 +138,26 @@ flowchart LR
   linkStyle 19 stroke:#2563eb,stroke-width:2px
   linkStyle 20 stroke:#2563eb,stroke-width:2px
   linkStyle 21 stroke:#2563eb,stroke-width:2px
-  linkStyle 22 stroke:#16a34a,stroke-width:2px
-  linkStyle 23 stroke:#16a34a,stroke-width:2px
-  linkStyle 24 stroke:#16a34a,stroke-width:2px
-  linkStyle 25 stroke:#16a34a,stroke-width:2px
+  linkStyle 22 stroke:#2563eb,stroke-width:2px
+  linkStyle 23 stroke:#2563eb,stroke-width:2px
+  linkStyle 24 stroke:#2563eb,stroke-width:2px
+  linkStyle 25 stroke:#2563eb,stroke-width:2px
   linkStyle 26 stroke:#16a34a,stroke-width:2px
   linkStyle 27 stroke:#16a34a,stroke-width:2px
   linkStyle 28 stroke:#16a34a,stroke-width:2px
   linkStyle 29 stroke:#16a34a,stroke-width:2px
   linkStyle 30 stroke:#16a34a,stroke-width:2px
   linkStyle 31 stroke:#16a34a,stroke-width:2px
-  linkStyle 32 stroke:#ea580c,stroke-width:2px
-  linkStyle 33 stroke:#ea580c,stroke-width:2px
-  linkStyle 34 stroke:#ea580c,stroke-width:2px
-  linkStyle 35 stroke:#ea580c,stroke-width:2px
+  linkStyle 32 stroke:#16a34a,stroke-width:2px
+  linkStyle 33 stroke:#16a34a,stroke-width:2px
+  linkStyle 34 stroke:#16a34a,stroke-width:2px
+  linkStyle 35 stroke:#16a34a,stroke-width:2px
   linkStyle 36 stroke:#ea580c,stroke-width:2px
   linkStyle 37 stroke:#ea580c,stroke-width:2px
+  linkStyle 38 stroke:#ea580c,stroke-width:2px
+  linkStyle 39 stroke:#ea580c,stroke-width:2px
+  linkStyle 40 stroke:#ea580c,stroke-width:2px
+  linkStyle 41 stroke:#ea580c,stroke-width:2px
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
@@ -356,6 +367,7 @@ flowchart LR
     d_plan_page[("_shared/plan-page.md")]:::shared
     d_plan_routing[("_shared/plan-routing.md")]:::shared
     d_query_check[("_shared/query-check.md")]:::shared
+    d_repo_workflow[("_shared/repo-workflow.md")]:::shared
     d_spec_evidence[("_shared/spec-evidence.md")]:::shared
     d_stages[("_shared/stages.md")]:::shared
     d_ticket_start[("_shared/ticket-start.md")]:::shared
@@ -405,11 +417,13 @@ flowchart LR
   s_deep_plan -.-> c_simple_plan
   s_deep_plan --o d_after_approval
   s_deep_plan --o d_external_services
+  s_deep_plan --o d_inbox
   s_deep_plan --o d_orca_workers
   s_deep_plan --o d_plan_format
   s_deep_plan --o d_plan_page
   s_deep_plan --o d_plan_routing
   s_deep_plan --o d_query_check
+  s_deep_plan --o d_repo_workflow
   s_deep_plan --o d_spec_evidence
   s_deep_plan --o d_stages
   s_deep_plan --o d_ticket_start
@@ -447,6 +461,7 @@ flowchart LR
   s_simple_plan --o d_plan_page
   s_simple_plan --o d_plan_routing
   s_simple_plan --o d_query_check
+  s_simple_plan --o d_repo_workflow
   s_simple_plan --o d_spec_evidence
   s_simple_plan --o d_stages
   s_simple_plan --o d_ticket_start
@@ -511,8 +526,8 @@ flowchart LR
   linkStyle 46 stroke:#9ca3af
   linkStyle 47 stroke:#9ca3af
   linkStyle 48 stroke:#9ca3af
-  linkStyle 49 stroke:#2563eb
-  linkStyle 50 stroke:#2563eb
+  linkStyle 49 stroke:#9ca3af
+  linkStyle 50 stroke:#9ca3af
   linkStyle 51 stroke:#2563eb
   linkStyle 52 stroke:#2563eb
   linkStyle 53 stroke:#2563eb
@@ -521,24 +536,24 @@ flowchart LR
   linkStyle 56 stroke:#2563eb
   linkStyle 57 stroke:#2563eb
   linkStyle 58 stroke:#2563eb
-  linkStyle 59 stroke:#16a34a
-  linkStyle 60 stroke:#16a34a
-  linkStyle 61 stroke:#9ca3af
-  linkStyle 62 stroke:#9ca3af
-  linkStyle 63 stroke:#2563eb
-  linkStyle 64 stroke:#2563eb
+  linkStyle 59 stroke:#2563eb
+  linkStyle 60 stroke:#2563eb
+  linkStyle 61 stroke:#16a34a
+  linkStyle 62 stroke:#16a34a
+  linkStyle 63 stroke:#9ca3af
+  linkStyle 64 stroke:#9ca3af
   linkStyle 65 stroke:#2563eb
   linkStyle 66 stroke:#2563eb
   linkStyle 67 stroke:#2563eb
   linkStyle 68 stroke:#2563eb
   linkStyle 69 stroke:#2563eb
-  linkStyle 70 stroke:#db2777
-  linkStyle 71 stroke:#db2777
-  linkStyle 72 stroke:#16a34a
-  linkStyle 73 stroke:#16a34a
+  linkStyle 70 stroke:#2563eb
+  linkStyle 71 stroke:#2563eb
+  linkStyle 72 stroke:#db2777
+  linkStyle 73 stroke:#db2777
   linkStyle 74 stroke:#16a34a
-  linkStyle 75 stroke:#9ca3af
-  linkStyle 76 stroke:#9ca3af
+  linkStyle 75 stroke:#16a34a
+  linkStyle 76 stroke:#16a34a
   linkStyle 77 stroke:#9ca3af
   linkStyle 78 stroke:#9ca3af
   linkStyle 79 stroke:#9ca3af
@@ -548,9 +563,9 @@ flowchart LR
   linkStyle 83 stroke:#9ca3af
   linkStyle 84 stroke:#9ca3af
   linkStyle 85 stroke:#9ca3af
-  linkStyle 86 stroke:#2563eb
-  linkStyle 87 stroke:#2563eb
-  linkStyle 88 stroke:#2563eb
+  linkStyle 86 stroke:#9ca3af
+  linkStyle 87 stroke:#9ca3af
+  linkStyle 88 stroke:#9ca3af
   linkStyle 89 stroke:#2563eb
   linkStyle 90 stroke:#2563eb
   linkStyle 91 stroke:#2563eb
@@ -559,6 +574,9 @@ flowchart LR
   linkStyle 94 stroke:#2563eb
   linkStyle 95 stroke:#2563eb
   linkStyle 96 stroke:#2563eb
+  linkStyle 97 stroke:#2563eb
+  linkStyle 98 stroke:#2563eb
+  linkStyle 99 stroke:#2563eb
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
@@ -618,6 +636,7 @@ flowchart LR
     d_after_approval[("_shared/after-approval.md")]:::shared
     d_inbox[("_shared/inbox.md")]:::shared
     d_plan_routing[("_shared/plan-routing.md")]:::shared
+    d_repo_workflow[("_shared/repo-workflow.md")]:::shared
     d_spec_evidence[("_shared/spec-evidence.md")]:::shared
     d_ticket_start[("_shared/ticket-start.md")]:::shared
   end
@@ -640,6 +659,7 @@ flowchart LR
   s_pr_description -.-> c_qa_execute
   s_pr_description --o d_after_approval
   s_pr_description --o d_inbox
+  s_pr_description --o d_repo_workflow
   s_pr_description --o d_spec_evidence
   s_pr_description --> s_address_pr_comments
   s_pr_description --> s_blindspot
@@ -669,14 +689,15 @@ flowchart LR
   linkStyle 17 stroke:#9ca3af
   linkStyle 18 stroke:#9ca3af
   linkStyle 19 stroke:#9ca3af
-  linkStyle 20 stroke:#2563eb
+  linkStyle 20 stroke:#9ca3af
   linkStyle 21 stroke:#2563eb
   linkStyle 22 stroke:#2563eb
   linkStyle 23 stroke:#2563eb
   linkStyle 24 stroke:#2563eb
   linkStyle 25 stroke:#2563eb
   linkStyle 26 stroke:#2563eb
-  linkStyle 27 stroke:#9ca3af
+  linkStyle 27 stroke:#2563eb
+  linkStyle 28 stroke:#9ca3af
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
@@ -843,6 +864,7 @@ flowchart LR
   subgraph cl_review["review"]
     direction TB
     c_deep_review(["/deep-review"]):::command
+    c_simplify(["/simplify"]):::command
   end
   subgraph cl_shared_docs["shared-docs"]
     direction TB
@@ -855,6 +877,7 @@ flowchart LR
     d_plan_page[("_shared/plan-page.md")]:::shared
     d_plan_routing[("_shared/plan-routing.md")]:::shared
     d_query_check[("_shared/query-check.md")]:::shared
+    d_repo_workflow[("_shared/repo-workflow.md")]:::shared
     d_spec_evidence[("_shared/spec-evidence.md")]:::shared
     d_stages[("_shared/stages.md")]:::shared
     d_ticket_start[("_shared/ticket-start.md")]:::shared
@@ -874,6 +897,7 @@ flowchart LR
   d_after_approval --o d_inbox
   d_after_approval --o d_orca_workers
   d_after_approval --o d_plan_routing
+  d_after_approval --o d_repo_workflow
   d_after_approval -.-> s_implement
   d_after_approval --> s_implement
   d_after_approval --> s_video_demo
@@ -885,6 +909,7 @@ flowchart LR
   d_implementer_rules --o d_external_services
   d_implementer_rules --o d_ui_quality
   d_implementer_rules --> s_pr_description
+  d_inbox -.-> c_ship_it
   d_orca_workers -.-> c_deep_execute
   d_plan_format --o d_after_approval
   d_plan_format --o d_plan_routing
@@ -898,6 +923,9 @@ flowchart LR
   d_plan_routing -.-> c_simple_plan
   d_plan_routing --> s_implement
   d_plan_routing --> x_workflow_authoring
+  d_repo_workflow -.-> c_deep_review
+  d_repo_workflow -.-> c_ship_it
+  d_repo_workflow -.-> c_simplify
   d_stages -.-> c_deep_review
   d_stages --o d_ui_quality
   d_ui_quality ==> a_qa_ui
@@ -912,35 +940,40 @@ flowchart LR
   linkStyle 6 stroke:#9ca3af
   linkStyle 7 stroke:#9ca3af
   linkStyle 8 stroke:#9ca3af
-  linkStyle 9 stroke:#16a34a
-  linkStyle 10 stroke:#2563eb
+  linkStyle 9 stroke:#9ca3af
+  linkStyle 10 stroke:#16a34a
   linkStyle 11 stroke:#2563eb
   linkStyle 12 stroke:#2563eb
-  linkStyle 13 stroke:#db2777
-  linkStyle 14 stroke:#16a34a
+  linkStyle 13 stroke:#2563eb
+  linkStyle 14 stroke:#db2777
   linkStyle 15 stroke:#16a34a
   linkStyle 16 stroke:#16a34a
-  linkStyle 17 stroke:#9ca3af
+  linkStyle 17 stroke:#16a34a
   linkStyle 18 stroke:#9ca3af
-  linkStyle 19 stroke:#2563eb
-  linkStyle 20 stroke:#16a34a
-  linkStyle 21 stroke:#9ca3af
-  linkStyle 22 stroke:#9ca3af
+  linkStyle 19 stroke:#9ca3af
+  linkStyle 20 stroke:#2563eb
+  linkStyle 21 stroke:#16a34a
+  linkStyle 22 stroke:#16a34a
   linkStyle 23 stroke:#9ca3af
-  linkStyle 24 stroke:#2563eb
-  linkStyle 25 stroke:#2563eb
+  linkStyle 24 stroke:#9ca3af
+  linkStyle 25 stroke:#9ca3af
   linkStyle 26 stroke:#2563eb
-  linkStyle 27 stroke:#16a34a
-  linkStyle 28 stroke:#16a34a
+  linkStyle 27 stroke:#2563eb
+  linkStyle 28 stroke:#2563eb
   linkStyle 29 stroke:#16a34a
   linkStyle 30 stroke:#16a34a
-  linkStyle 31 stroke:#2563eb
-  linkStyle 32 stroke:#2563eb
-  linkStyle 33 stroke:#16a34a
-  linkStyle 34 stroke:#9ca3af
-  linkStyle 35 stroke:#db2777
+  linkStyle 31 stroke:#16a34a
+  linkStyle 32 stroke:#16a34a
+  linkStyle 33 stroke:#2563eb
+  linkStyle 34 stroke:#2563eb
+  linkStyle 35 stroke:#16a34a
   linkStyle 36 stroke:#16a34a
-  linkStyle 37 stroke:#2563eb
+  linkStyle 37 stroke:#16a34a
+  linkStyle 38 stroke:#16a34a
+  linkStyle 39 stroke:#9ca3af
+  linkStyle 40 stroke:#db2777
+  linkStyle 41 stroke:#16a34a
+  linkStyle 42 stroke:#2563eb
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
@@ -1087,20 +1120,20 @@ Skills that no other file references. Only the user or the description trigger s
 
 References to skills, agents or shared docs that this repository does not define. A name with a colon comes from a plugin. A name without a colon is a local skill, a plugin skill or a built-in, or the reference is broken:
 
-- `agent-browser:agent-browser`: `dot_claude/agents/qa-business.md:85`, `dot_claude/agents/qa-ui.md:55`, `dot_claude/agents/qa-ui.md:65`, `dot_claude/agents/ui-designer.md:54`, `dot_claude/agents/ui-designer.md:95`, `dot_claude/skills/_shared/ui-quality.md:147`
+- `agent-browser:agent-browser`: `dot_claude/agents/qa-business.md:85`, `dot_claude/agents/qa-ui.md:57`, `dot_claude/agents/qa-ui.md:70`, `dot_claude/agents/ui-designer.md:54`, `dot_claude/agents/ui-designer.md:95`, `dot_claude/skills/_shared/ui-quality.md:147`
 - `frontend-design:frontend-design`: `dot_claude/skills/simple-plan/references/ui-consultation.md:34`
 - `loop`: `dot_claude/skills/pr-description/references/watch.md:31`
-- `mattpocock-skills:domain-modeling`: `dot_claude/skills/deep-plan/README.md:92`, `dot_claude/skills/deep-plan/SKILL.md:96`, `dot_claude/skills/deep-plan/references/phase-0-details.md:40`
-- `mattpocock-skills:grilling`: `dot_claude/skills/deep-plan/README.md:92`, `dot_claude/skills/deep-plan/SKILL.md:95`, `dot_claude/skills/deep-plan/references/phase-0-details.md:39`, `dot_claude/skills/simple-plan/SKILL.md:85`, `dot_claude/commands/simple-plan.md:29`
+- `mattpocock-skills:domain-modeling`: `dot_claude/skills/deep-plan/README.md:92`, `dot_claude/skills/deep-plan/SKILL.md:102`, `dot_claude/skills/deep-plan/references/phase-0-details.md:40`
+- `mattpocock-skills:grilling`: `dot_claude/skills/deep-plan/README.md:92`, `dot_claude/skills/deep-plan/SKILL.md:101`, `dot_claude/skills/deep-plan/references/phase-0-details.md:39`, `dot_claude/skills/simple-plan/SKILL.md:91`, `dot_claude/commands/simple-plan.md:29`
 - `release-watch`: `dot_claude/skills/release/SKILL.md:179`, `dot_claude/skills/release/references/release-review.md:110`
-- `superpowers:brainstorming`: `dot_claude/skills/deep-plan/SKILL.md:107`, `dot_claude/skills/explore-options/SKILL.md:135`, `dot_claude/skills/simple-plan/SKILL.md:101`, `dot_claude/commands/deep-plan.md:15`, `dot_claude/commands/simple-plan.md:31`
+- `superpowers:brainstorming`: `dot_claude/skills/deep-plan/SKILL.md:113`, `dot_claude/skills/explore-options/SKILL.md:135`, `dot_claude/skills/simple-plan/SKILL.md:107`, `dot_claude/commands/deep-plan.md:15`, `dot_claude/commands/simple-plan.md:31`
 - `superpowers:executing-plans`: `dot_claude/skills/implement/SKILL.md:41`
 - `superpowers:finishing-a-development-branch`: `dot_claude/skills/deep-plan/templates/plan.md:3`, `dot_claude/skills/implement/SKILL.md:41`, `dot_claude/skills/_shared/plan-format.md:51`
 - `superpowers:subagent-driven-development`: `dot_claude/skills/implement/SKILL.md:40`
 - `superpowers:systematic-debugging`: `dot_claude/skills/implement/SKILL.md:50`, `dot_claude/skills/jira-workflow/SKILL.md:177`, `dot_claude/skills/pr-approved/SKILL.md:42`, `dot_claude/skills/pr-description/references/watch.md:18`
-- `superpowers:test-driven-development`: `dot_claude/skills/deep-plan/SKILL.md:227`, `dot_claude/skills/implement/SKILL.md:48`, `dot_claude/skills/simple-plan/references/plan-sections.md:123`
+- `superpowers:test-driven-development`: `dot_claude/skills/deep-plan/SKILL.md:248`, `dot_claude/skills/implement/SKILL.md:48`, `dot_claude/skills/simple-plan/references/plan-sections.md:123`
 - `superpowers:verification-before-completion`: `dot_claude/skills/jira-workflow/SKILL.md:178`
-- `superpowers:writing-plans`: `dot_claude/skills/deep-plan/README.md:72`, `dot_claude/skills/deep-plan/SKILL.md:114`, `dot_claude/skills/deep-plan/references/planner-drafting.md:9`, `dot_claude/skills/simple-plan/SKILL.md:168`, `dot_claude/skills/_shared/plan-format.md:4`
+- `superpowers:writing-plans`: `dot_claude/skills/deep-plan/README.md:72`, `dot_claude/skills/deep-plan/SKILL.md:120`, `dot_claude/skills/deep-plan/references/planner-drafting.md:9`, `dot_claude/skills/simple-plan/SKILL.md:174`, `dot_claude/skills/_shared/plan-format.md:4`
 - `tdd`: `dot_claude/skills/implement/SKILL.md:48`
 - `ui-ux-pro-max:ui-ux-pro-max`: `dot_claude/skills/deep-review/personas/senior-frontend.md:90`, `dot_claude/skills/deep-review/personas/ui-ux.md:9`, `dot_claude/skills/simple-plan/references/ui-consultation.md:10`, `dot_claude/commands/simple-plan.md:36`
 - `workflow-authoring`: `dot_claude/skills/_shared/plan-routing.md:115`
@@ -1128,9 +1161,9 @@ References to skills, agents or shared docs that this repository does not define
 | plan-reviewer | reads shared doc | ui-quality.md | `dot_claude/agents/plan-reviewer.md:49` |
 | qa-business | invokes skill | qa-test-plan | `dot_claude/agents/qa-business.md:82` |
 | qa-business | invokes skill | agent-browser:agent-browser | `dot_claude/agents/qa-business.md:85` |
-| qa-ui | runs command | /ship-it | `dot_claude/agents/qa-ui.md:94` |
-| qa-ui | reads shared doc | ui-quality.md | `dot_claude/agents/qa-ui.md:78` |
-| qa-ui | invokes skill | agent-browser:agent-browser | `dot_claude/agents/qa-ui.md:55` |
+| qa-ui | runs command | /ship-it | `dot_claude/agents/qa-ui.md:99` |
+| qa-ui | reads shared doc | ui-quality.md | `dot_claude/agents/qa-ui.md:83` |
+| qa-ui | invokes skill | agent-browser:agent-browser | `dot_claude/agents/qa-ui.md:57` |
 | ui-designer | spawns agent | qa-ui | `dot_claude/agents/ui-designer.md:126` |
 | ui-designer | reads shared doc | plan-page.md | `dot_claude/agents/ui-designer.md:125` |
 | ui-designer | reads shared doc | ui-quality.md | `dot_claude/agents/ui-designer.md:84` |
@@ -1168,26 +1201,28 @@ References to skills, agents or shared docs that this repository does not define
 | /simple-plan | invokes skill | superpowers:brainstorming | `dot_claude/commands/simple-plan.md:31` |
 | /simple-plan | invokes skill | ui-ux-pro-max:ui-ux-pro-max | `dot_claude/commands/simple-plan.md:36` |
 | /simplify | invokes skill | simplify | `dot_claude/commands/simplify.md:19` |
-| after-approval.md | spawns agent | fixer | `dot_claude/skills/_shared/after-approval.md:124` |
-| after-approval.md | spawns agent | qa-business | `dot_claude/skills/_shared/after-approval.md:165` |
-| after-approval.md | spawns agent | qa-ui | `dot_claude/skills/_shared/after-approval.md:69` |
-| after-approval.md | runs command | /deep-execute | `dot_claude/skills/_shared/after-approval.md:93` |
-| after-approval.md | runs command | /deep-review | `dot_claude/skills/_shared/after-approval.md:101` |
-| after-approval.md | runs command | /ship-it | `dot_claude/skills/_shared/after-approval.md:153` |
-| after-approval.md | reads shared doc | inbox.md | `dot_claude/skills/_shared/after-approval.md:181` |
-| after-approval.md | reads shared doc | orca-workers.md | `dot_claude/skills/_shared/after-approval.md:86` |
-| after-approval.md | reads shared doc | plan-routing.md | `dot_claude/skills/_shared/after-approval.md:92` |
-| after-approval.md | runs command | implement | `dot_claude/skills/_shared/after-approval.md:32` |
-| after-approval.md | invokes skill | implement | `dot_claude/skills/_shared/after-approval.md:93` |
-| after-approval.md | invokes skill | video-demo | `dot_claude/skills/_shared/after-approval.md:192` |
-| after-approval.md | invokes skill | workflow-post-implementation | `dot_claude/skills/_shared/after-approval.md:188` |
-| implementer-rules.md | spawns agent | qa-ui | `dot_claude/skills/_shared/implementer-rules.md:135` |
+| after-approval.md | spawns agent | fixer | `dot_claude/skills/_shared/after-approval.md:131` |
+| after-approval.md | spawns agent | qa-business | `dot_claude/skills/_shared/after-approval.md:172` |
+| after-approval.md | spawns agent | qa-ui | `dot_claude/skills/_shared/after-approval.md:72` |
+| after-approval.md | runs command | /deep-execute | `dot_claude/skills/_shared/after-approval.md:99` |
+| after-approval.md | runs command | /deep-review | `dot_claude/skills/_shared/after-approval.md:107` |
+| after-approval.md | runs command | /ship-it | `dot_claude/skills/_shared/after-approval.md:39` |
+| after-approval.md | reads shared doc | inbox.md | `dot_claude/skills/_shared/after-approval.md:19` |
+| after-approval.md | reads shared doc | orca-workers.md | `dot_claude/skills/_shared/after-approval.md:89` |
+| after-approval.md | reads shared doc | plan-routing.md | `dot_claude/skills/_shared/after-approval.md:98` |
+| after-approval.md | reads shared doc | repo-workflow.md | `dot_claude/skills/_shared/after-approval.md:94` |
+| after-approval.md | runs command | implement | `dot_claude/skills/_shared/after-approval.md:34` |
+| after-approval.md | invokes skill | implement | `dot_claude/skills/_shared/after-approval.md:99` |
+| after-approval.md | invokes skill | video-demo | `dot_claude/skills/_shared/after-approval.md:199` |
+| after-approval.md | invokes skill | workflow-post-implementation | `dot_claude/skills/_shared/after-approval.md:195` |
+| implementer-rules.md | spawns agent | qa-ui | `dot_claude/skills/_shared/implementer-rules.md:136` |
 | implementer-rules.md | runs command | /deep-execute | `dot_claude/skills/_shared/implementer-rules.md:4` |
 | implementer-rules.md | runs command | /deep-review | `dot_claude/skills/_shared/implementer-rules.md:5` |
 | implementer-rules.md | runs command | /ship-it | `dot_claude/skills/_shared/implementer-rules.md:16` |
 | implementer-rules.md | reads shared doc | external-services.md | `dot_claude/skills/_shared/implementer-rules.md:89` |
-| implementer-rules.md | reads shared doc | ui-quality.md | `dot_claude/skills/_shared/implementer-rules.md:125` |
+| implementer-rules.md | reads shared doc | ui-quality.md | `dot_claude/skills/_shared/implementer-rules.md:126` |
 | implementer-rules.md | invokes skill | pr-description | `dot_claude/skills/_shared/implementer-rules.md:16` |
+| inbox.md | runs command | /ship-it | `dot_claude/skills/_shared/inbox.md:73` |
 | orca-workers.md | runs command | /deep-execute | `dot_claude/skills/_shared/orca-workers.md:9` |
 | plan-format.md | reads shared doc | after-approval.md | `dot_claude/skills/_shared/plan-format.md:49` |
 | plan-format.md | reads shared doc | plan-routing.md | `dot_claude/skills/_shared/plan-format.md:48` |
@@ -1201,48 +1236,53 @@ References to skills, agents or shared docs that this repository does not define
 | plan-routing.md | runs command | /simple-plan | `dot_claude/skills/_shared/plan-routing.md:19` |
 | plan-routing.md | invokes skill | implement | `dot_claude/skills/_shared/plan-routing.md:45` |
 | plan-routing.md | invokes skill | workflow-authoring | `dot_claude/skills/_shared/plan-routing.md:115` |
+| repo-workflow.md | runs command | /deep-review | `dot_claude/skills/_shared/repo-workflow.md:31` |
+| repo-workflow.md | runs command | /ship-it | `dot_claude/skills/_shared/repo-workflow.md:33` |
+| repo-workflow.md | runs command | /simplify | `dot_claude/skills/_shared/repo-workflow.md:31` |
 | stages.md | runs command | /deep-review | `dot_claude/skills/_shared/stages.md:47` |
 | stages.md | reads shared doc | ui-quality.md | `dot_claude/skills/_shared/stages.md:48` |
 | ui-quality.md | spawns agent | qa-ui | `dot_claude/skills/_shared/ui-quality.md:160` |
 | ui-quality.md | runs command | /ship-it | `dot_claude/skills/_shared/ui-quality.md:160` |
 | ui-quality.md | invokes skill | agent-browser:agent-browser | `dot_claude/skills/_shared/ui-quality.md:147` |
 | deep-execute | runs command | /deep-review | `dot_claude/skills/deep-execute/README.md:130` |
-| deep-execute | runs command | /pr-approved | `dot_claude/skills/deep-execute/SKILL.md:140` |
+| deep-execute | runs command | /pr-approved | `dot_claude/skills/deep-execute/SKILL.md:158` |
 | deep-execute | runs command | /ship-it | `dot_claude/skills/deep-execute/README.md:133` |
 | deep-execute | runs command | /simplify | `dot_claude/skills/deep-execute/README.md:131` |
-| deep-execute | reads shared doc | after-approval.md | `dot_claude/skills/deep-execute/SKILL.md:69` |
+| deep-execute | reads shared doc | after-approval.md | `dot_claude/skills/deep-execute/SKILL.md:75` |
 | deep-execute | reads shared doc | implementer-rules.md | `dot_claude/skills/deep-execute/templates/worker-brief.md:38` |
-| deep-execute | reads shared doc | inbox.md | `dot_claude/skills/deep-execute/SKILL.md:64` |
-| deep-execute | reads shared doc | orca-workers.md | `dot_claude/skills/deep-execute/SKILL.md:111` |
+| deep-execute | reads shared doc | inbox.md | `dot_claude/skills/deep-execute/SKILL.md:70` |
+| deep-execute | reads shared doc | orca-workers.md | `dot_claude/skills/deep-execute/SKILL.md:125` |
 | deep-execute | reads shared doc | plan-routing.md | `dot_claude/skills/deep-execute/README.md:14` |
-| deep-execute | reads shared doc | spec-evidence.md | `dot_claude/skills/deep-execute/SKILL.md:83` |
-| deep-execute | invokes skill | simplify | `dot_claude/skills/deep-execute/SKILL.md:116` |
+| deep-execute | reads shared doc | spec-evidence.md | `dot_claude/skills/deep-execute/SKILL.md:94` |
+| deep-execute | invokes skill | simplify | `dot_claude/skills/deep-execute/SKILL.md:134` |
 | deep-execute | invokes skill | ub-mode | `dot_claude/skills/deep-execute/templates/worker-brief.md:49` |
-| deep-plan | spawns agent | ui-designer | `dot_claude/skills/deep-plan/SKILL.md:120` |
+| deep-plan | spawns agent | ui-designer | `dot_claude/skills/deep-plan/SKILL.md:126` |
 | deep-plan | runs command | /deep-execute | `dot_claude/skills/deep-plan/SKILL.md:11` |
 | deep-plan | runs command | /deep-review | `dot_claude/skills/deep-plan/references/execution-recommendation.md:29` |
 | deep-plan | runs command | /qa-plan | `dot_claude/skills/deep-plan/SKILL.md:23` |
 | deep-plan | runs command | /ship-it | `dot_claude/skills/deep-plan/README.md:111` |
-| deep-plan | runs command | /simple-plan | `dot_claude/skills/deep-plan/SKILL.md:81` |
+| deep-plan | runs command | /simple-plan | `dot_claude/skills/deep-plan/SKILL.md:87` |
 | deep-plan | reads shared doc | after-approval.md | `dot_claude/skills/deep-plan/README.md:66` |
 | deep-plan | reads shared doc | external-services.md | `dot_claude/skills/deep-plan/personas/planner-design-rules.md:13` |
+| deep-plan | reads shared doc | inbox.md | `dot_claude/skills/deep-plan/SKILL.md:204` |
 | deep-plan | reads shared doc | orca-workers.md | `dot_claude/skills/deep-plan/references/execution-recommendation.md:32` |
 | deep-plan | reads shared doc | plan-format.md | `dot_claude/skills/deep-plan/README.md:71` |
 | deep-plan | reads shared doc | plan-page.md | `dot_claude/skills/deep-plan/README.md:84` |
 | deep-plan | reads shared doc | plan-routing.md | `dot_claude/skills/deep-plan/README.md:67` |
 | deep-plan | reads shared doc | query-check.md | `dot_claude/skills/deep-plan/references/plan-gate-and-presentation.md:43` |
-| deep-plan | reads shared doc | spec-evidence.md | `dot_claude/skills/deep-plan/SKILL.md:196` |
+| deep-plan | reads shared doc | repo-workflow.md | `dot_claude/skills/deep-plan/SKILL.md:144` |
+| deep-plan | reads shared doc | spec-evidence.md | `dot_claude/skills/deep-plan/SKILL.md:217` |
 | deep-plan | reads shared doc | stages.md | `dot_claude/skills/deep-plan/SKILL.md:33` |
-| deep-plan | reads shared doc | ticket-start.md | `dot_claude/skills/deep-plan/SKILL.md:75` |
+| deep-plan | reads shared doc | ticket-start.md | `dot_claude/skills/deep-plan/SKILL.md:81` |
 | deep-plan | reads shared doc | ui-quality.md | `dot_claude/skills/deep-plan/personas/project-developer.md:25` |
 | deep-plan | invokes skill | implement | `dot_claude/skills/deep-plan/references/execution-recommendation.md:31` |
 | deep-plan | invokes skill | ub-mode | `dot_claude/skills/deep-plan/personas/planner-design-rules.md:3` |
-| deep-plan | invokes skill | workflow-post-plan | `dot_claude/skills/deep-plan/SKILL.md:222` |
+| deep-plan | invokes skill | workflow-post-plan | `dot_claude/skills/deep-plan/SKILL.md:243` |
 | deep-plan | invokes skill | mattpocock-skills:domain-modeling | `dot_claude/skills/deep-plan/README.md:92` |
 | deep-plan | invokes skill | mattpocock-skills:grilling | `dot_claude/skills/deep-plan/README.md:92` |
-| deep-plan | invokes skill | superpowers:brainstorming | `dot_claude/skills/deep-plan/SKILL.md:107` |
+| deep-plan | invokes skill | superpowers:brainstorming | `dot_claude/skills/deep-plan/SKILL.md:113` |
 | deep-plan | invokes skill | superpowers:finishing-a-development-branch | `dot_claude/skills/deep-plan/templates/plan.md:3` |
-| deep-plan | invokes skill | superpowers:test-driven-development | `dot_claude/skills/deep-plan/SKILL.md:227` |
+| deep-plan | invokes skill | superpowers:test-driven-development | `dot_claude/skills/deep-plan/SKILL.md:248` |
 | deep-plan | invokes skill | superpowers:writing-plans | `dot_claude/skills/deep-plan/README.md:72` |
 | deep-review | runs command | /deep-execute | `dot_claude/skills/deep-review/SKILL.md:182` |
 | deep-review | runs command | /simplify | `dot_claude/skills/deep-review/README.md:44` |
@@ -1266,8 +1306,8 @@ References to skills, agents or shared docs that this repository does not define
 | implement | invokes skill | superpowers:systematic-debugging | `dot_claude/skills/implement/SKILL.md:50` |
 | implement | invokes skill | superpowers:test-driven-development | `dot_claude/skills/implement/SKILL.md:48` |
 | implement | invokes skill | tdd | `dot_claude/skills/implement/SKILL.md:48` |
-| init-project | runs command | /release | `dot_claude/skills/init-project/SKILL.md:232` |
-| init-project | runs command | /release-announce | `dot_claude/skills/init-project/SKILL.md:232` |
+| init-project | runs command | /release | `dot_claude/skills/init-project/SKILL.md:241` |
+| init-project | runs command | /release-announce | `dot_claude/skills/init-project/SKILL.md:241` |
 | jira-workflow | runs command | /deep-plan | `dot_claude/skills/jira-workflow/SKILL.md:40` |
 | jira-workflow | runs command | /deep-review | `dot_claude/skills/jira-workflow/SKILL.md:224` |
 | jira-workflow | runs command | /ship-it | `dot_claude/skills/jira-workflow/SKILL.md:46` |
@@ -1281,47 +1321,49 @@ References to skills, agents or shared docs that this repository does not define
 | pr-approved | runs command | /ship-it | `dot_claude/skills/pr-approved/SKILL.md:58` |
 | pr-approved | invokes skill | address-pr-comments | `dot_claude/skills/pr-approved/SKILL.md:29` |
 | pr-approved | invokes skill | superpowers:systematic-debugging | `dot_claude/skills/pr-approved/SKILL.md:42` |
-| pr-description | spawns agent | qa-business | `dot_claude/skills/pr-description/SKILL.md:89` |
-| pr-description | runs command | /deep-review | `dot_claude/skills/pr-description/SKILL.md:84` |
+| pr-description | spawns agent | qa-business | `dot_claude/skills/pr-description/SKILL.md:92` |
+| pr-description | runs command | /deep-review | `dot_claude/skills/pr-description/SKILL.md:87` |
 | pr-description | runs command | /pr-approved | `dot_claude/skills/pr-description/README.md:32` |
 | pr-description | runs command | /qa-execute | `dot_claude/skills/pr-description/references/evidence.md:23` |
-| pr-description | reads shared doc | after-approval.md | `dot_claude/skills/pr-description/SKILL.md:79` |
+| pr-description | reads shared doc | after-approval.md | `dot_claude/skills/pr-description/SKILL.md:82` |
 | pr-description | reads shared doc | inbox.md | `dot_claude/skills/pr-description/references/watch.md:37` |
-| pr-description | reads shared doc | spec-evidence.md | `dot_claude/skills/pr-description/SKILL.md:64` |
+| pr-description | reads shared doc | repo-workflow.md | `dot_claude/skills/pr-description/SKILL.md:41` |
+| pr-description | reads shared doc | spec-evidence.md | `dot_claude/skills/pr-description/SKILL.md:67` |
 | pr-description | invokes skill | address-pr-comments | `dot_claude/skills/pr-description/references/watch.md:11` |
-| pr-description | invokes skill | blindspot | `dot_claude/skills/pr-description/SKILL.md:154` |
+| pr-description | invokes skill | blindspot | `dot_claude/skills/pr-description/SKILL.md:157` |
 | pr-description | invokes skill | video-demo | `dot_claude/skills/pr-description/references/evidence.md:18` |
 | pr-description | invokes skill | loop | `dot_claude/skills/pr-description/references/watch.md:31` |
 | pr-description | invokes skill | superpowers:systematic-debugging | `dot_claude/skills/pr-description/references/watch.md:18` |
 | release | invokes skill | release-announce | `dot_claude/skills/release/SKILL.md:174` |
 | release | invokes skill | release-watch | `dot_claude/skills/release/SKILL.md:179` |
 | release-announce | reads shared doc | inbox.md | `dot_claude/skills/release-announce/SKILL.md:122` |
-| simple-plan | spawns agent | plan-reviewer | `dot_claude/skills/simple-plan/SKILL.md:198` |
+| simple-plan | spawns agent | plan-reviewer | `dot_claude/skills/simple-plan/SKILL.md:205` |
 | simple-plan | spawns agent | ui-designer | `dot_claude/skills/simple-plan/references/ui-consultation.md:25` |
-| simple-plan | runs command | /deep-plan | `dot_claude/skills/simple-plan/SKILL.md:75` |
-| simple-plan | runs command | /qa-plan | `dot_claude/skills/simple-plan/SKILL.md:257` |
-| simple-plan | runs command | /ship-it | `dot_claude/skills/simple-plan/SKILL.md:269` |
+| simple-plan | runs command | /deep-plan | `dot_claude/skills/simple-plan/SKILL.md:81` |
+| simple-plan | runs command | /qa-plan | `dot_claude/skills/simple-plan/SKILL.md:264` |
+| simple-plan | runs command | /ship-it | `dot_claude/skills/simple-plan/SKILL.md:276` |
 | simple-plan | reads shared doc | after-approval.md | `dot_claude/skills/simple-plan/SKILL.md:12` |
 | simple-plan | reads shared doc | external-services.md | `dot_claude/skills/simple-plan/references/constraints.md:22` |
-| simple-plan | reads shared doc | orca-workers.md | `dot_claude/skills/simple-plan/SKILL.md:205` |
-| simple-plan | reads shared doc | plan-format.md | `dot_claude/skills/simple-plan/SKILL.md:49` |
-| simple-plan | reads shared doc | plan-page.md | `dot_claude/skills/simple-plan/SKILL.md:242` |
-| simple-plan | reads shared doc | plan-routing.md | `dot_claude/skills/simple-plan/SKILL.md:76` |
-| simple-plan | reads shared doc | query-check.md | `dot_claude/skills/simple-plan/SKILL.md:191` |
+| simple-plan | reads shared doc | orca-workers.md | `dot_claude/skills/simple-plan/SKILL.md:212` |
+| simple-plan | reads shared doc | plan-format.md | `dot_claude/skills/simple-plan/SKILL.md:55` |
+| simple-plan | reads shared doc | plan-page.md | `dot_claude/skills/simple-plan/SKILL.md:249` |
+| simple-plan | reads shared doc | plan-routing.md | `dot_claude/skills/simple-plan/SKILL.md:82` |
+| simple-plan | reads shared doc | query-check.md | `dot_claude/skills/simple-plan/SKILL.md:197` |
+| simple-plan | reads shared doc | repo-workflow.md | `dot_claude/skills/simple-plan/SKILL.md:204` |
 | simple-plan | reads shared doc | spec-evidence.md | `dot_claude/skills/simple-plan/references/plan-sections.md:137` |
-| simple-plan | reads shared doc | stages.md | `dot_claude/skills/simple-plan/SKILL.md:132` |
+| simple-plan | reads shared doc | stages.md | `dot_claude/skills/simple-plan/SKILL.md:138` |
 | simple-plan | reads shared doc | ticket-start.md | `dot_claude/skills/simple-plan/references/context-brief.md:24` |
-| simple-plan | reads shared doc | ui-quality.md | `dot_claude/skills/simple-plan/SKILL.md:158` |
-| simple-plan | invokes skill | blindspot | `dot_claude/skills/simple-plan/SKILL.md:224` |
-| simple-plan | invokes skill | implement | `dot_claude/skills/simple-plan/SKILL.md:262` |
-| simple-plan | invokes skill | shed-light | `dot_claude/skills/simple-plan/SKILL.md:237` |
-| simple-plan | invokes skill | ub-mode | `dot_claude/skills/simple-plan/SKILL.md:150` |
-| simple-plan | invokes skill | workflow-post-plan | `dot_claude/skills/simple-plan/SKILL.md:250` |
+| simple-plan | reads shared doc | ui-quality.md | `dot_claude/skills/simple-plan/SKILL.md:164` |
+| simple-plan | invokes skill | blindspot | `dot_claude/skills/simple-plan/SKILL.md:231` |
+| simple-plan | invokes skill | implement | `dot_claude/skills/simple-plan/SKILL.md:269` |
+| simple-plan | invokes skill | shed-light | `dot_claude/skills/simple-plan/SKILL.md:244` |
+| simple-plan | invokes skill | ub-mode | `dot_claude/skills/simple-plan/SKILL.md:156` |
+| simple-plan | invokes skill | workflow-post-plan | `dot_claude/skills/simple-plan/SKILL.md:257` |
 | simple-plan | invokes skill | frontend-design:frontend-design | `dot_claude/skills/simple-plan/references/ui-consultation.md:34` |
-| simple-plan | invokes skill | mattpocock-skills:grilling | `dot_claude/skills/simple-plan/SKILL.md:85` |
-| simple-plan | invokes skill | superpowers:brainstorming | `dot_claude/skills/simple-plan/SKILL.md:101` |
+| simple-plan | invokes skill | mattpocock-skills:grilling | `dot_claude/skills/simple-plan/SKILL.md:91` |
+| simple-plan | invokes skill | superpowers:brainstorming | `dot_claude/skills/simple-plan/SKILL.md:107` |
 | simple-plan | invokes skill | superpowers:test-driven-development | `dot_claude/skills/simple-plan/references/plan-sections.md:123` |
-| simple-plan | invokes skill | superpowers:writing-plans | `dot_claude/skills/simple-plan/SKILL.md:168` |
+| simple-plan | invokes skill | superpowers:writing-plans | `dot_claude/skills/simple-plan/SKILL.md:174` |
 | simple-plan | invokes skill | ui-ux-pro-max:ui-ux-pro-max | `dot_claude/skills/simple-plan/references/ui-consultation.md:10` |
 | workflow-finish | runs command | /ship-it | `dot_claude/skills/workflow-finish/SKILL.md:3` |
 | workflow-finish | reads shared doc | workflow-artifacts.md | `dot_claude/skills/workflow-finish/SKILL.md:15` |

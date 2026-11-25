@@ -689,11 +689,13 @@ Three slash commands chain together for planning and parallel execution of non-t
 - **`/deep-plan`** - Multi-agent planning pipeline (Opus + Codex draft, a 5-persona review
   loop, a Plannotator approval gate). Plan captures ticket/Slack sources, requirements
   coverage, applicable user journey, data-column population, and substantial-UI design
-  handoff. Stops at an **approved plan** — it never builds or reviews code itself. Its last
-  phase is an **execution recommendation** (below).
+  handoff. After the approval it runs the build chain through to the PR, unless you said to
+  stop at the plan. Its last planning phase is an **execution recommendation** (below).
 - **`/deep-execute <plan.md>`** - Runs an approved parallel plan as lane workers sharing ONE
-  git worktree, one **Orca terminal** per lane (`orca-launch.sh`; any terminal or `nohup`
-  outside Orca). Each lane runs `worker-loop.sh`: the first turn sends the lane's rendered
+  git worktree, one **Orca terminal** per lane (`orca-launch.sh RUN_DIR LANE...`; any terminal
+  or `nohup` outside Orca). The orchestrator launches first the lanes with an empty
+  `depends_on`, and launches each other lane when all lanes it depends on emitted `done`. A lane
+  that starts before its inputs exist can only report `blocked`. Each lane runs `worker-loop.sh`: the first turn sends the lane's rendered
   brief, and each later turn delivers the numbered replies that `reply.sh` published. `done`
   ends a round, not the lane, so review and QA fixes go back to the lane that owns the code.
   Each claude lane is pinned to its own `--session-id`, also across a relaunch, because all
@@ -790,6 +792,39 @@ says "encerrar mesmo assim". It trusts only a step file under `~/.claude/*-runs/
 with `# Workflow:`, because any text in a transcript can contain a tracking line. The test is
 `_shared/tests/executable_test-workflow-gate.sh`.
 
+##### Execution order
+
+Each step ends before the next one starts, unless the step says otherwise.
+
+1. **Intake.** A Jira key starts `jira-workflow`, which claims the ticket
+   (`_shared/ticket-start.md`). Otherwise you run `/simple-plan` (small or medium change) or
+   `/deep-plan` (large or risky change). `_shared/plan-routing.md` holds the criteria.
+2. **Repository workflow.** The planning skill reads the repository's own workflow first
+   (`_shared/repo-workflow.md`). A stage that the repository covers replaces the matching
+   chain step, so one change never goes through two review systems.
+3. **Plan.** Grill, brainstorm when the design is open, then draft in
+   `_shared/plan-format.md`. The draft lives in the run folder.
+4. **Plan review.** `simple-plan` starts one `plan-reviewer` agent per side (backend,
+   frontend) in parallel. `deep-plan` runs its 5-persona loop. Three rounds at most.
+5. **Gate.** Plannotator shows the plan. No annotations means approved. Only then does the plan
+   reach `docs/superpowers/plans/` (the `plan-path-guard.sh` hook refuses it earlier). A new
+   change request after a closed run starts a new run with `workflow.sh reopen`.
+6. **Build.** `implement` (serial, option B) or `/deep-execute` (parallel lanes, option A),
+   under TDD. Each implementer runs only its own focused tests, lint and type check. The
+   orchestrator commits each lane's `owns` globs as soon as the lane reports `done`.
+7. **Review, once over the whole change.** `/deep-review` runs its personas in parallel. Each
+   fix round reviews only the fix delta (`--scope <commit before the fixes>`), never the whole
+   PR again. Three fix rounds at most. A separate fixer applies the fixes.
+8. **QA.** `qa-ui` compares the screens with the design canvas. `qa-business` runs the flows
+   in the real app. Failures go to the fixer, three rounds at most.
+9. **Demo and report.** A narrated demo for a user feature, then the HTML run report.
+10. **PR.** `/ship-it` writes the body, opens the PR and watches it. Review comments go to
+    `address-pr-comments`: one push per round, and after the first round only comments on
+    the delta, or CRITICAL and HIGH defects, change the PR. Each push starts the full CI, so
+    fewer pushes means a faster PR.
+11. **Merge, on your call.** `/pr-approved` resolves the threads, waits for CI, squash-merges
+    and removes the worktree.
+
 The whole flow, from the plan to the merge:
 
 ```mermaid
@@ -798,13 +833,45 @@ flowchart TD
     G --> R["plan review<br/>plan-reviewer ×1-2 (simple) · 5 personas (deep)<br/>≤ 3 rounds"]
     R --> A[Plannotator gate<br/>no annotations = approved]
     A --> B["build: implement or /deep-execute<br/>one build.n row per task"]
-    B --> DR["final /deep-review, full process<br/>≤ 3 fix rounds · cannot be skipped"]
+    B --> DR["final /deep-review over the whole change<br/>fix rounds review only the delta · ≤ 3 · cannot be skipped"]
     DR --> Q[qa-ui · qa-business → fixer, ≤ 3 rounds]
     Q --> D[demo → run report]
-    D --> PR["/ship-it with watch<br/>every comment: reply + resolve"]
-    PR --> PA["/pr-approved<br/>threads → CI → squash merge → cleanup"]
+    D --> PR["/ship-it with watch<br/>comments: one push per round, delta only"]
+    PR --> PA["/pr-approved, on your call<br/>threads → CI → squash merge → cleanup"]
     S{{"workflow-gate.sh<br/>Stop / SubagentStop"}} -. blocks while a step is todo .-> B
 ```
+
+##### Hooks that keep the chain honest
+
+| Hook | Event | What it does |
+|---|---|---|
+| `workflow-gate.sh` | `Stop`, `SubagentStop` | Blocks the end of a turn while a step of the step file is `todo`. |
+| `plan-path-guard.sh` | `PreToolUse` on `Write` and `Edit` | Refuses a plan in `docs/superpowers/plans/` before its Plannotator gate, so no plan skips the review. |
+| `ask-after-approval.sh` | `PreToolUse` on `AskUserQuestion` | After the approval, sends a question to the Inbox instead of stopping the run. The same question asked twice passes. |
+| `unfinished-run-gate.sh` | `Stop` | Blocks the end of a session once while a `deep-execute` run has no report. |
+
+##### Keeping the machine responsive
+
+Several agent sessions share this machine. These parts keep them from filling memory or
+waiting on each other:
+
+- **`~/.local/bin/test-local`** runs focused tests in two slots that all sessions share. A run
+  waits in the queue for up to 9 minutes and then exits 75. A repository can set test
+  variables for all its worktrees in `<git common dir>/test-local.env`, which lives inside
+  `.git` and is never committed. Its values win over the caller's environment, so all agents
+  share one setup, for example one test database server with a migrated template. The key
+  `TEST_LOCAL_IGNORE_ARGS` lists arguments to drop, such as `--create-db` when the template
+  rebuilds itself.
+- **A repository's own pre-push checks** go in `<git common dir>/agent-pre-push`, called from
+  `.git/hooks/pre-push`. Like `test-local.env`, it stays inside `.git`, so the checks of a
+  work repository never enter these dotfiles or that repository's history.
+- **Headless agents start without MCP servers.** Every `claude -p` of the planners, reviewers,
+  aggregator, PR writer and deep-execute lanes passes `--strict-mcp-config`. A reviewer whose
+  persona declares `requires_mcp` keeps them. Lanes use the `gitnexus` CLI instead of its MCP.
+- **`~/.local/bin/serena-mcp`** starts Serena only in a folder with `.serena/project.yml`.
+  Elsewhere it answers the MCP handshake with no tools. Each Serena server holds about 3 GB.
+- **`~/.local/bin/browser-reaper`** runs from launchd every 10 minutes. It stops an agent
+  browser older than 2 hours, or one that holds more than `BROWSER_REAPER_MAX_MB` (4096 MB).
 
 ##### Closing an approved PR — `/pr-approved`
 

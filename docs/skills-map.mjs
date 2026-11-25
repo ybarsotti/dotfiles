@@ -367,6 +367,8 @@ const CHAIN_NODES = [
   ["dp", "plan", "/deep-plan", "c_deep_plan"],
   ["sp", "plan", "/simple-plan", "c_simple_plan"],
   ["qap", "plan", "/qa-plan", "c_qa_plan"],
+  ["rw", "plan", "_shared/repo-workflow.md", "d_repo_workflow"],
+  ["prv", "plan", "plan-reviewer agents", "a_plan_reviewer"],
   ["pa", "plan", "Plannotator approval", null],
   ["wpp", "plan", "workflow-post-plan", "s_workflow_post_plan"],
   ["aa", "build", "_shared/after-approval.md", "d_after_approval"],
@@ -393,6 +395,7 @@ const CHAIN_NODES = [
   ["watch", "watch", "PR watch: Monitor, then loop", null],
   ["apc", "watch", "address-pr-comments", "s_address_pr_comments"],
   ["fuj", "watch", "follow-up-jira", "s_follow_up_jira"],
+  ["pra", "watch", "/pr-approved (on your call)", "c_pr_approved"],
 ];
 const CHAINS = [
   {
@@ -400,8 +403,11 @@ const CHAINS = [
     color: "#2563eb",
     edges: [
       ["dp", "qap", "Phase 2.4"],
+      ["dp", "rw", "Phase 0"],
+      ["sp", "rw", "Phase 0"],
+      ["sp", "prv", "Phase 3"],
       ["qap", "pa"],
-      ["sp", "pa"],
+      ["prv", "pa"],
       ["dp", "rt", "Phase 0.4"],
       ["sp", "rt", "Phase 0.5"],
       ["pa", "aa", "approved"],
@@ -420,7 +426,8 @@ const CHAINS = [
       ["pr", "bs", "Phase 2.7"],
       ["pr", "rep"],
       ["pr", "watch", "Phase 5"],
-      ["watch", "apc"],
+      ["watch", "apc", "one push per round"],
+      ["watch", "pra", "you approve"],
     ],
   },
   {
