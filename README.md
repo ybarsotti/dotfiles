@@ -109,7 +109,7 @@ Run `just` to see the full list of available commands.
 | [docs/tools.md](docs/tools.md) | Every installed tool and package, by category, and the Homebrew tap trust |
 | [docs/configuration.md](docs/configuration.md) | Cursor, Git, Zsh, Tmux, Wave Terminal, the agent group chat and pre-commit |
 | [docs/agent-pipeline.md](docs/agent-pipeline.md) | Claude Code, the planning and build chain, its execution order, hooks and machine limits |
-| [docs/skills-map.md](docs/skills-map.md) | The generated map of skills, commands and agents |
+| [docs/skills-map.md](docs/skills-map.md) | The generated map of skills, commands and agents. Open `docs/skills-map.html` for the browsable site |
 | [docs/mcp-servers.md](docs/mcp-servers.md) | MCP servers and the browser tools |
 | [docs/git.md](docs/git.md) | P4Merge and the Git aliases |
 | [docs/troubleshooting.md](docs/troubleshooting.md) | Fixes for common problems |
