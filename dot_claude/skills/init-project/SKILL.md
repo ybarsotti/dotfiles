@@ -193,18 +193,27 @@ Run this when `env.example` has `COMPOSE_PROFILES=observability`, after the loop
 
 1. Confirm that `.serena/project.yml` exists and that its language list holds every language
    of the apps. When it does not, run `just sync-apps` and report the result.
-2. `git add -A`, then `git commit -m "chore: initial project scaffold"`. The project hooks run.
+2. Check the git identity: `git config user.email` must be the email of the account that will
+   own the repository (a personal project must not commit with a work email). When it does not
+   match, stop and ask. Do not change the global git configuration.
+3. `git add -A`, then `git commit -m "chore: initial project scaffold"`. The project hooks run.
    When a hook fails, fix the cause, stage again and commit again. Use the user's git identity
    and signing settings. When signing fails, report it and stop; do not turn signing off.
-3. `just index`. It builds the GitNexus index, which needs a commit. `.gitnexus/` stays
+4. `just index`. It builds the GitNexus index, which needs a commit. `.gitnexus/` stays
    ignored.
 
 ## 11. GitHub
 
 Only when `--github` is `private` or `public`. Follow `reference.md` ("Create the GitHub
 repository"). It creates the repository and pushes `main`. It lets GitHub Actions open pull
-requests, and it protects `main` with the required check `all-green`. Tell the user that the
+requests, and it protects `main` with the required check `all-green` (a private repository of a
+free account cannot have it: say that `all-green` is then not enforced). Tell the user that the
 first release PR appears after the first Conventional Commit on `main` that touches an app.
+
+Then watch the first CI run of `main` (`gh run watch <id> --exit-status` for `ci` and
+`security`). A red run is a failure of the green loop: read `gh run view <id> --log-failed`,
+fix the cause in the project, record each template defect for the final report, and push
+again. The project is done only when both runs are green.
 
 ## 12. Audit
 
@@ -227,7 +236,7 @@ Keep it short. Include:
 - the mode, the template source and ref, and the reason for the mode;
 - what the run created: the core, each app with its kind and port, the services;
 - the round count of the green loop, and each failure that remains;
-- the commit hash, and the GitHub URL when one exists;
+- the commit hash, the GitHub URL when one exists, and the result of the first CI run;
 - the dashboard URL and the result of `just otel-check`;
 - the commands: `just dev`, `just check`, `/release`, `/release-announce`,
   `just release-notes`, `just version`, `just otel-check`;
