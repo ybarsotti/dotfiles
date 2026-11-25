@@ -51,7 +51,8 @@ same points after the run.
    and `dryer --threshold 0.8 <files>`. `mutator` and coverage CRAP run in CI. When two fixes
    that share one premise fail the same check, stop, test the premise, and emit `question`
    if it is false.
-5. Log every path you wrote with `--files`, then emit `task_done`.
+5. Check for lint and type escapes: `grep -nE 'noqa|type: ?ignore|pyright: ?ignore|eslint-disable|@ts-(ignore|expect-error)|nolint|biome-ignore' <files you wrote>` must print nothing.
+6. Log every path you wrote with `--files`, then emit `task_done`.
 
 When every task is done and the lane test command passes, emit `done` and stop. The loop keeps
 your session. The orchestrator sends the next instruction as a reply, which starts your next turn.

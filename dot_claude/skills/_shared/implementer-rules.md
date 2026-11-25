@@ -103,8 +103,9 @@ Read the **Core** section, then the section of your work: **Backend**, **UI**, o
 37. Mock only the outermost external call: HTTP, a broker, an SDK or the clock. Run the code
     of the project for real.
 38. Freeze the clock. Wait on a condition, never on a fixed sleep.
-39. Never weaken a check to make it pass: no lower limit, no skipped test, no `noqa`, no cast,
-    no suppression without a reason on the same line.
+39. Never weaken a check to make it pass: no lower limit, no skipped test, no cast, and no lint
+    or type escape (`noqa`, `type: ignore`, `eslint-disable`, `@ts-ignore`, `nolint`). A reason
+    on the line does not make an escape allowed. When the cause cannot be fixed, report it.
 
 ### Before you report done
 

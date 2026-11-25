@@ -323,6 +323,20 @@ if [ -n "$PRIOR" ] && [ ! -f "${PRIOR}/findings.jsonl" ]; then
 fi
 PRIOR_RUN="$PRIOR" "${SCRIPT_DIR}/collect-context.sh" "$RUN_DIR" "$SCOPE" "$TASK"
 
+# Codex refuses an input above 1 048 576 characters, so a large diff fails every Codex
+# reviewer after it starts. Move those reviewers to Claude before the dispatch.
+# The cap leaves room for the persona prompt.
+CODEX_MAX_CONTEXT="${DEEP_REVIEW_CODEX_MAX_CONTEXT:-900000}"
+CONTEXT_CHARS=$(wc -m < "${RUN_DIR}/context.md" | tr -d ' ')
+if [ "$CONTEXT_CHARS" -gt "$CODEX_MAX_CONTEXT" ]; then
+  for ((i=0; i<${#RUNNERS[@]}; i++)); do
+    if [ "${RUNNERS[$i]}" = "codex" ]; then
+      RUNNERS[i]="claude"
+      log "  [${PERSONAS[$i]}] codex -> claude: context has ${CONTEXT_CHARS} characters, above ${CODEX_MAX_CONTEXT}"
+    fi
+  done
+fi
+
 # --- Phase 2: Build per-reviewer prompts ---
 OUTPUT_SCHEMA=$(yq '.output_schema' "$VARIANT_FILE")
 

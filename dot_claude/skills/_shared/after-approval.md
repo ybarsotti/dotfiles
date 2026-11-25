@@ -35,7 +35,8 @@ plan approval, before this chain starts (`plan-routing.md`). This chain never as
    `workflow.sh init "$RUN_DIR/chain.md" implement --plan <plan>`.
 4. Add one build row per task of the plan, in order:
    `workflow.sh add "$RUN_DIR/chain.md" build.<n> "<task>" --after build`.
-5. Mark each step when it ends, with its evidence:
+5. Mark each step in the same turn that it ends, with its evidence. A row that still says
+   `waiting` after its step ended blocks `/ship-it`:
    - `workflow.sh done <file> <id> "<path, URL, or command and result>"`;
    - `workflow.sh skip <file> <id> "<reason>"` when the step does not apply;
    - `workflow.sh wait <file> <id> "<worker>"` before you end a turn to wait for a worker;

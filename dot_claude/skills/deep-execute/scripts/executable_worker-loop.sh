@@ -114,6 +114,9 @@ mkdir -p "${LANE_DIR}/bin"
 printf '#!/bin/sh\necho "workers never run git; the orchestrator commits" >&2\nexit 1\n' >"${LANE_DIR}/bin/git"
 chmod +x "${LANE_DIR}/bin/git"
 export PATH="${LANE_DIR}/bin:${PATH}"
+# Project hooks read this to skip their git checks: the git shim makes them fail in a lane,
+# and the round gate checks the lane instead.
+export DEEP_EXECUTE_LANE="$LANE"
 printf '%s\n' "$$" >"${LANE_DIR}/loop.pid"
 
 # macOS ships no `timeout`: gtimeout, then timeout, then perl's alarm.

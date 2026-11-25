@@ -52,7 +52,12 @@ $W status "$F"                    # what is done and what is left
       skill and the user's logged-in profile, in the focused view of that artboard. If the
       page needs a login you do not have, compare against the source only, and say so in the
       report.
-3. Screenshot the implementation with the `agent-browser:agent-browser` skill. Take each state
+   Export the artboard images once per run, to `<output folder>/artboards/`. When that folder
+   already holds them, reuse them and do not capture them again.
+3. Screenshot the implementation with the `agent-browser:agent-browser` skill.
+   Start every browser of the app with the same `--session-name qa-ui-<app>`, so the login
+   state survives a browser restart. Log in once; after a restart, check that you are still
+   logged in before you take a screenshot. Take each state
    at 1440 px and at 390 px. Drive the app into each state through the UI or through fixture
    data.
 4. Compare element by element. Copy that explains internals (a job, a schedule, a sync, an

@@ -306,6 +306,9 @@ stateDiagram-v2
   Two lanes behind a materialized contract normally wait on nothing — that is what the contract
   buys. Write `none` when they are genuinely independent; `none` everywhere across many lanes is
   worth a second look, and the validator says so without failing the plan.
+- `test_command` runs only the tests and checks of the lane's own files: its test files
+  through `test-local`, and the lint and type check of its app. Never the full suite of the
+  repository: the round gate runs it after each round, and CI runs the full suites on the PR.
 - `mock_command` is currently read by nothing in `/deep-execute`. Fill it if it documents intent,
   but no script consumes it today.
 

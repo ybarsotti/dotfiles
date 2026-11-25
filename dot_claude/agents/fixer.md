@@ -55,6 +55,10 @@ Read these files before you change code. Follow them. Do not copy them into your
 Run tests only through `~/.local/bin/test-local`, and only the tests of your task. Never run
 the full suite: CI runs it on the PR.
 
+Never add a lint or type escape: `# noqa`, `# type: ignore`, `eslint-disable`, `@ts-ignore`,
+`@ts-expect-error`, `//nolint` or another suppression. Fix the cause. When you cannot fix it,
+stop and report the finding with its rule.
+
 For each finding:
 
 1. Find the root cause. Fix it where all callers route through, not only on the reported path.
@@ -76,7 +80,8 @@ The fix is done when all of these are true:
 
 - each finding is fixed or reported as not fixed, with the reason;
 - the test command passes;
-- the gates of `ub-mode` pass.
+- the gates of `ub-mode` pass;
+- `grep -nE 'noqa|type: ?ignore|pyright: ?ignore|eslint-disable|@ts-(ignore|expect-error)|nolint|biome-ignore' <files you wrote>` prints nothing.
 
 ## Output
 

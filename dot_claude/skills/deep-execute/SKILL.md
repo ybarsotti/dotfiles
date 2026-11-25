@@ -55,6 +55,10 @@ knows only the first four goes silent on a crash, and silence reads as "still wo
 
 The `Monitor` catches the events that a lane emits.
 
+**Wait for events; never poll.** Between two events, end the turn. Do not read lane terminals,
+run `board.sh`, run tests or post "still building" status on a timer: each check rereads the
+whole context of this session. Report to the user only when a lane finishes, fails or asks.
+
 **Acknowledge each event trigger after you acted on it:** `monitor-events.sh RUN_DIR --ack
 <seq>`. Until then every call returns the same trigger, so nothing is lost when you crash
 between the trigger and the reply.
@@ -71,7 +75,11 @@ between the trigger and the reply.
   bump its semantic version, commit it, run `contract-bump.sh RUN_DIR <version>`, then `reply.sh RUN_DIR --all
   "<new version + summary>"`. The bump records the approved checkpoint that the gate compares
   the contract against.
-- **`done`** — record it; once every lane emitted `done` in this round, gate the round.
+- **`done`** — commit the files of that lane at once, so an hour of lane work is never only
+  in the worktree. Stage only its `owns` globs, because other lanes still write:
+  `git add -- ':(glob)<owns glob>'...` and `git commit -m "<type>(<lane>): <tasks of the round>"`.
+  Never `git add -A` while a lane runs. Once every lane emitted `done` in this round, gate
+  the round.
 - **`invalid_event` / `fatal_signature` / `monitor_error`** — investigate the lane
   (`board.sh --lane LANE`, `lanes/<lane>/worker.log`) before you restart or escalate.
 - **`vanished_pane`** — the worker loop died. Relaunch it with `orca-launch.sh RUN_DIR LANE`;
@@ -94,10 +102,13 @@ owning lane with `reply.sh`, rerun the gate — never advance the round on a fai
 `warn` items never block, but read each attribution warning before you commit. After 3 failed
 gates of one round, the gate refuses the round: `AskUserQuestion`.
 
-When the round passes, commit it (`git add -A && git commit`). Do not run `/deep-review` on
+Run the gate only, not the full suites. The lane test commands are focused, and CI runs the
+full suites on the PR (`~/.claude/CLAUDE.md`, "Test Runs — CI First"). When the round passes,
+commit what is left (`git add -A && git commit`). Do not run `/deep-review` on
 the round: the panel reviews the whole run once, in Phase 4.
 Round 1 gets orchestrator review before anything reaches the human. Then bump
-`manifest.json`'s `round` and start the next round, or go to Phase 4.
+`manifest.json`'s `round` and start the next round, or mark the build done
+(`workflow.sh done <step file> build "<round gate JSON path>, <commit>"`) and go to Phase 4.
 
 **After `max_rounds` rounds, stop and `AskUserQuestion`.** `round-gate.sh` refuses a round above
 the cap on its own.
@@ -111,7 +122,10 @@ commit. A file that no lane owns goes to a fresh implementer worker
 (`~/.claude/skills/_shared/orca-workers.md`). Mark the phases with
 `set-phase.sh RUN_DIR review|qa|delivery` as you reach steps 2, 3 and 7. Record each landed and
 rejected finding with `decision.sh` while it is still true. Mark each chain step in the step
-file that the plan header names (`**Step file:**`) with `~/.claude/skills/_shared/workflow.sh`.
+file that the plan header names (`**Step file:**`) with `~/.claude/skills/_shared/workflow.sh`
+at the moment it ends, in the same turn: `review` after the last review round, `qa-ui` and
+`qa-business` with their verdicts, `fix` after the last fix round. Use `workflow.sh wait` with
+the round number while a step loops. `/ship-it` reads this file, so a stale row blocks the PR.
 The final review over the whole change always runs (`/deep-review`, or the code review stage
 of the repository workflow); its step cannot be skipped.
 After the last fix round converges and before the freeze, run `Skill(skill="simplify")` once over

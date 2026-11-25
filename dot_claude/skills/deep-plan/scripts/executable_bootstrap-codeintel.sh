@@ -6,7 +6,8 @@
 #   bootstrap-codeintel.sh <run-dir>
 #
 # Side effects:
-#   - gitnexus analyze  (if .gitnexus/ already initialized for this repo)
+#   - gitnexus analyze --index-only (if this repo is indexed). The flag keeps the
+#     CLI from writing its skills, hooks and CLAUDE.md block into the project.
 #   - graphify update . (if graphify-out/graph.json already exists)
 #   - none for Serena: its MCP server starts with --project-from-cwd and
 #     serves the repository at the session's working directory.
@@ -31,15 +32,16 @@ if command -v gitnexus >/dev/null 2>&1 && [ -d .git ]; then
   # status` for detection: prints "Repository not indexed" + exits non-zero
   # when this repo is unknown.
   if gitnexus status >/tmp/codeintel-gn-status-$$.log 2>&1; then
-    echo "bootstrap-codeintel: running gitnexus analyze..." >&2
-    if gitnexus analyze >/tmp/codeintel-gitnexus-$$.log 2>&1; then
+    echo "bootstrap-codeintel: running gitnexus analyze --index-only..." >&2
+    if GITNEXUS_MEMORY=off NODE_OPTIONS=--max-old-space-size=4096 \
+      gitnexus analyze --index-only --workers 2 >/tmp/codeintel-gitnexus-$$.log 2>&1; then
       GITNEXUS_STATUS="fresh"
     else
       GITNEXUS_STATUS="stale"
       echo "bootstrap-codeintel: gitnexus analyze failed; see /tmp/codeintel-gitnexus-$$.log" >&2
     fi
   else
-    GITNEXUS_STATUS="not-indexed (run: gitnexus analyze)"
+    GITNEXUS_STATUS="not-indexed (run: gitnexus analyze --index-only)"
   fi
 fi
 

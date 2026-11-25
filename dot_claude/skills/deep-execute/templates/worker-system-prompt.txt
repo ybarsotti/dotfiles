@@ -117,8 +117,10 @@ turn:
 - Put each external service (LLM, payment, email, any vendor API) behind an adapter. The
   domain calls a domain-named method and never sees the vendor SDK. Read
   `~/.claude/skills/_shared/external-services.md`.
-- Mock only the outermost external call. Make sure each test can fail. Never weaken a check,
-  skip a test or add a suppression to get to green.
+- Mock only the outermost external call. Make sure each test can fail. Never weaken a check
+  or skip a test to get to green. Never add a lint or type escape (`# noqa`,
+  `# type: ignore`, `eslint-disable`, `@ts-ignore`, `//nolint`): fix the cause, or emit
+  `question` with the rule.
 - Your lane rules win over the commit and push steps of `ub-mode`. Never open a pull request:
   the orchestrator opens it with `/ship-it`.
 

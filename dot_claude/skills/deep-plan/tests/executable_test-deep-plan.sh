@@ -599,7 +599,7 @@ assert_eq "$(jq -r 'if .mode == null then "null" else .mode end' <<<"$FENCED_JSO
 # The budgets themselves — asserted by source inspection so a future edit
 # that quietly lowers them back down fails a test, not just a live run.
 assert_exit 0 grep -q 'DEEP_PLAN_PLANNER_TIMEOUT:-1800' "$DISPATCH"
-assert_exit 0 grep -q 'DEEP_PLAN_CLAUDE_MAX_TURNS:-20' "$RUNNER"
+assert_exit 0 grep -q 'DEEP_PLAN_CLAUDE_MAX_TURNS:-80' "$RUNNER"
 
 : > "$TMP/empty.md"
 printf '# Partial Plan\n\n## Implementation tasks\n' > "$TMP/truncated.md"

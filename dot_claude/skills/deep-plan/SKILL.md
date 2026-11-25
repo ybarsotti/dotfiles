@@ -123,6 +123,9 @@ plan format on every run, then record it with `superpowers-invoke.sh "$RUN_DIR" 
    the Opus planner and the Codex planner (skipped with `--no-codex`) headless, in parallel.
 5. Synthesize **one** merged plan into `$RUN_DIR/plan.md`. Resolve disagreements by keeping the
    stricter requirement.
+6. Check the size: `wc -c "$RUN_DIR/plan.md"`. Above 100 KB, split the change into stages
+   (`_shared/stages.md`), one PR each. Plan only the first stage now, and move the other stages
+   to `## Stages`. Each review round reads the whole plan, and the user must read it at the gate.
 
 **TDD & mocking policy the plan MUST encode** (into `## TDD test list`): the build follows strict
 red-green-refactor, and mocks **only the outermost boundaries** (network, 3rd-party APIs,
@@ -139,7 +142,10 @@ stage instead of this loop.
    parallel. Each writes `verdict-<persona>-iter<N>.json`.
 2. Run `aggregate-verdicts.sh "$RUN_DIR" "$ITER"`. Exit 0 means all APPROVED: go to Phase 3.
    Exit 1 means continue.
-3. Apply the consolidated `proposed_edits` to `plan.md`. Increment ITER. Loop.
+3. Apply the consolidated `proposed_edits` to `plan.md`. Replace the text that an edit
+   changes; do not append a second version. Record the plan size of the round in the step
+   note: `workflow.sh wait "$RUN_DIR/chain.md" plan-review "round $ITER, $(wc -c < "$RUN_DIR/plan.md") bytes"`.
+   Increment ITER. Loop.
 4. If ITER > `--max-plan-iter`: use `AskUserQuestion` to present the remaining disagreements per
    persona. Apply the user decisions to `plan.md`. Treat as approved.
 
@@ -186,6 +192,12 @@ Plannotator, never as a terminal wall of text:
    with `superpowers-invoke.sh "$RUN_DIR" plannotator-annotate`. That pass is the approval.
 2. Print the humanized summary in the chat: goal, approach, key decisions, risks, sequence, and
    the link to `$RUN_DIR/plan.md`.
+
+When the user delegated the approval ("deliver it", "do not wait for me") and you pass the gate
+for them, record it in `decisions.md`. Then send one Inbox thread with every row of
+`decisions.md` as a `:::question` block (`_shared/inbox.md`, "Decisions during a build chain"),
+and put the thread link in the evidence of the `gate` step. A gate passed for the user with no
+Inbox thread is not done.
 
 Do **not** paste the full `plan.md` into the chat.
 

@@ -26,8 +26,9 @@ CODEX_EFFORT="${DEEP_PLAN_CODEX_EFFORT:-medium}"
 # then emit a full multi-task plan — 8 turns is not enough budget for that
 # and the old default silently truncated drafts mid-generation (validated
 # now by validate-draft.sh, but the fix is to stop starving the planner in
-# the first place). Override with DEEP_PLAN_CLAUDE_MAX_TURNS.
-CLAUDE_MAX_TURNS="${DEEP_PLAN_CLAUDE_MAX_TURNS:-20}"
+# the first place). A full plan run needed 80 turns, and 20 stopped the planner with
+# "Error: Reached max turns". Override with DEEP_PLAN_CLAUDE_MAX_TURNS.
+CLAUDE_MAX_TURNS="${DEEP_PLAN_CLAUDE_MAX_TURNS:-80}"
 
 if command -v gtimeout >/dev/null 2>&1; then
   run_with_timeout() { gtimeout "$@"; }
