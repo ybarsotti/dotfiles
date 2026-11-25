@@ -3,7 +3,9 @@
 #
 # A browser is abandoned when its root Chrome process runs longer than
 # BROWSER_REAPER_MAX_AGE_SECONDS (default: 2 hours) and uses a throwaway
-# profile from agent-browser, Puppeteer or Playwright. The user's own Chrome
+# profile from agent-browser, Puppeteer or Playwright. A browser of that kind
+# is also stopped at any age when it and its helpers hold more memory than
+# BROWSER_REAPER_MAX_MB (default: 4096). One QA browser held 18 GB. The user's own Chrome
 # uses its default profile, so this script never matches it.
 #
 # The script also exports AGENT_BROWSER_IDLE_TIMEOUT_MS to launchd. GUI apps
@@ -14,6 +16,7 @@
 set -euo pipefail
 
 max_age="${BROWSER_REAPER_MAX_AGE_SECONDS:-7200}"
+max_mb="${BROWSER_REAPER_MAX_MB:-4096}"
 profile_pattern='user-data-dir=[^ ]*(agent-browser-chrome-|puppeteer_dev_chrome_profile-|playwright_chromiumdev_profile-)'
 dry_run=false
 [ "${1:-}" = "--dry-run" ] && dry_run=true
@@ -36,17 +39,47 @@ old_browsers() {
         }' <(ps -Ao pid=,comm=) <(ps -Ao pid=,ppid=,etime=,args=)
 }
 
-while read -r pid ppid age; do
-    [ -n "$pid" ] || continue
+# Prints "pid ppid megabytes" for every root browser whose process tree holds more than max_mb.
+# The memory is the footprint that top reports, as Activity Monitor shows it.
+big_browsers() {
+    awk -v max="$max_mb" -v pat="$profile_pattern" '
+        FNR == 1 { f++ }
+        f == 1 {
+            if ($1 !~ /^[0-9]+$/) next
+            v = $2; sub(/[+-]$/, "", v); u = substr(v, length(v)); n = v + 0
+            mb[$1] = (u == "G") ? n * 1024 : (u == "M") ? n : (u == "K") ? n / 1024 : n / 1048576
+            next
+        }
+        f == 2 { pid = $1; sub(/^ *[0-9]+ /, ""); exe[pid] = $0; next }
+        {
+            parent[$1] = $2
+            if (exe[$1] ~ /Chrom|chrome-headless-shell/ && $0 ~ pat && $0 !~ /--type=/) root[$1] = $2
+        }
+        END {
+            for (p in parent) { r = p; for (i = 0; i < 4 && !(r in root); i++) r = parent[r]; if (r in root) total[r] += mb[p] }
+            for (r in root) if (total[r] > max) printf "%s %s %d\n", r, root[r], total[r]
+        }' <(top -l 1 -stats pid,mem) <(ps -Ao pid=,comm=) <(ps -Ao pid=,ppid=,args=) 2>/dev/null
+}
+
+# reap PID PPID REASON
+reap() {
+    local pid="$1" ppid="$2" parent_args
     parent_args="$(ps -o args= -p "$ppid" 2>/dev/null || true)"
-    echo "$(date '+%F %T') reap pid=$pid age=${age}s parent=$ppid ${parent_args:0:80}"
-    "$dry_run" && continue
+    echo "$(date '+%F %T') reap pid=$pid $3 parent=$ppid ${parent_args:0:80}"
+    "$dry_run" && return 0
     kill "$pid" 2>/dev/null || true
     # agent-browser runs one daemon per session. It has no use without its Chrome.
     case "$parent_args" in
         *agent-browser*) kill "$ppid" 2>/dev/null || true ;;
     esac
+}
+
+while read -r pid ppid age; do
+    [ -n "$pid" ] && reap "$pid" "$ppid" "age=${age}s"
 done < <(old_browsers roots)
+while read -r pid ppid mb; do
+    [ -n "$pid" ] && reap "$pid" "$ppid" "memory=${mb}MB"
+done < <(big_browsers)
 
 "$dry_run" && exit 0
 
