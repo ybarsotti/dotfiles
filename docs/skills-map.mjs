@@ -100,6 +100,18 @@ export function frontmatter(text) {
   return fm;
 }
 
+// The level-2 and level-3 headings of a file, outside code fences: the steps a reader sees.
+function outline(text) {
+  const out = [];
+  let fence = false;
+  for (const line of text.split("\n")) {
+    if (/^\s*(```|~~~)/.test(line)) fence = !fence;
+    const m = !fence && line.match(/^(#{2,3})\s+(.+?)\s*#*\s*$/);
+    if (m && !BLOCKED.test(m[2])) out.push([m[1].length, m[2].replace(/[`*]/g, "")]);
+  }
+  return out.slice(0, 40);
+}
+
 function scan() {
   const nodes = new Map(); // id -> node
   const dropped = [];
@@ -113,6 +125,7 @@ function scan() {
       file: rel(file),
       files: files.map(rel),
       description: fm.description || "",
+      outline: outline(text),
     };
     if (BLOCKED.test(node.name) || BLOCKED.test(node.description)) {
       dropped.push(node.name);
@@ -603,6 +616,7 @@ if (
     chain: chainDiagram(g.byId),
     clusters: clusterDiagrams(g),
     mermaidUrl: MERMAID_URL,
+    repoUrl: "https://github.com/ybarsotti/dotfiles",
   });
   for (const [file, body] of [
     [OUT_MD, md],
