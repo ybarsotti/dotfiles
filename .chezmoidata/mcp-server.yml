@@ -57,10 +57,10 @@ mcp_servers:
         - exec "$HOME/.local/share/obscura/obscura" mcp --allow-private-network
 
     # The uv tool install (run_once_03). uvx fetched the git repository on each start.
+    # serena-mcp starts Serena only in a folder with .serena/project.yml (dot_local/bin).
     serena:
-      command: serena
+      command: serena-mcp
       args:
-        - start-mcp-server
         - --context
         - claude-code
         - --project-from-cwd

@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Starts the Serena MCP server only in a project that has `.serena/project.yml`.
+#
+# Each agent session starts its own Serena server, and each server holds about 3 GB with its
+# language servers. Most sessions run in folders without a Serena project. In such a folder,
+# this script runs an empty MCP server instead: it answers the handshake with no tools, so the
+# client shows no connection error.
+#
+# Usage: serena-mcp <arguments of `serena start-mcp-server`>
+set -euo pipefail
+
+root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+if [ -f "$root/.serena/project.yml" ]; then
+  exec serena start-mcp-server "$@"
+fi
+
+exec python3 -I -c '
+import json, sys
+for line in sys.stdin:
+    try:
+        msg = json.loads(line)
+    except ValueError:
+        continue
+    if "id" not in msg:
+        continue
+    method = msg.get("method")
+    if method == "initialize":
+        result = {"protocolVersion": msg.get("params", {}).get("protocolVersion", "2025-06-18"),
+                  "capabilities": {"tools": {}},
+                  "serverInfo": {"name": "serena-off", "version": "0"},
+                  "instructions": "Serena is off: this folder has no .serena/project.yml."}
+        reply = {"jsonrpc": "2.0", "id": msg["id"], "result": result}
+    elif method == "tools/list":
+        reply = {"jsonrpc": "2.0", "id": msg["id"], "result": {"tools": []}}
+    elif method == "ping":
+        reply = {"jsonrpc": "2.0", "id": msg["id"], "result": {}}
+    else:
+        reply = {"jsonrpc": "2.0", "id": msg["id"], "error": {"code": -32601, "message": "method not found"}}
+    sys.stdout.write(json.dumps(reply) + "\n")
+    sys.stdout.flush()
+'
