@@ -8,7 +8,9 @@ commands run at the same time on this machine. Each command still runs serially 
 A repository can set test variables for every worktree in `<git common dir>/test-local.env`
 (one KEY=VALUE per line). The file lives inside `.git`, so it is never committed, and each
 worktree finds it. Use it, for example, to turn on a migrated template database, so that a
-focused run does not apply every migration again.
+focused run does not apply every migration again. The key TEST_LOCAL_IGNORE_ARGS lists
+arguments to drop, separated by spaces: with a template database, `--create-db` only forces
+a rebuild that the template already does when a migration changes.
 """
 
 import fcntl
@@ -64,6 +66,12 @@ def main():
         if conflicting_flag(runner, arg):
             print(f"test-local: {arg} conflicts with the local test limit; remove it.", file=sys.stderr)
             return 64
+    env = {**repo_env(), **os.environ}
+    ignored = set(env.get("TEST_LOCAL_IGNORE_ARGS", "").split())
+    if ignored & set(args):
+        print(f"test-local: dropped {' '.join(sorted(ignored & set(args)))} (TEST_LOCAL_IGNORE_ARGS in test-local.env).",
+              file=sys.stderr)
+        args = [a for a in args if a not in ignored]
     state = Path.home() / ".cache" / "test-local"
     state.mkdir(mode=0o700, parents=True, exist_ok=True)
     slots = max(1, int(os.environ.get("TEST_LOCAL_SLOTS", "2")))
@@ -90,7 +98,7 @@ def main():
     with lock:
         try:
             result = subprocess.run([*COMMANDS[runner], *args], check=False, pass_fds=(lock.fileno(),),
-                                    env={**repo_env(), **os.environ})
+                                    env=env)
         except FileNotFoundError as exc:
             print(f"test-local: {exc}", file=sys.stderr)
             return 127
