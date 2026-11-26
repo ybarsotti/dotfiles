@@ -191,10 +191,6 @@ startup_timeout_sec = 30
 command = "serena-mcp"
 args = ["--context", "codex", "--project-from-cwd"]
 
-[mcp_servers.notetaker]
-command = "/Users/barsotti/.local/bin/uv"
-args = ["--directory", "/Users/barsotti/Developer/Pers/notetaker", "run", "notetaker", "mcp", "--api-url", "http://127.0.0.1:8742"]
-
 [mcp_servers.ai-memory]
 url = "http://127.0.0.1:49374/mcp"
 default_tools_approval_mode = "approve"

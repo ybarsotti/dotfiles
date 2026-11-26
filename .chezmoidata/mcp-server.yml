@@ -76,17 +76,6 @@ mcp_servers:
       type: http
       url: https://mcp.atlassian.com/v1/mcp/authv2
 
-    notetaker:
-      command: /Users/barsotti/.local/bin/uv
-      args:
-        - --directory
-        - /Users/barsotti/Developer/Pers/notetaker
-        - run
-        - notetaker
-        - mcp
-        - --api-url
-        - http://127.0.0.1:8742
-
   # Optional / situational (uncomment and move to the right section):
   #
   # shared:
