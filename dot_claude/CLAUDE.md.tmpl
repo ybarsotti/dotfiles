@@ -117,6 +117,10 @@ done. Deliver the polished version first. Do not wait for the user to ask.
 - When a design canvas exists for the change, the `qa-ui` agent compares the screens with it
   before the PR. This applies also when you orchestrate agents without a planning skill. The
   visual pass of the builder does not replace it, and `/ship-it` refuses to open without it.
+- A mockup, canvas, artboard or layout of a screen always goes through the `ui-designer`
+  agent, also when the user asks for it outside a plan. Do not draw it yourself. The agent
+  starts from the real screens: it reads their code and components, and screenshots them
+  when the app runs. A running app is not required: without one, it works from the code.
 
 # Agent Models
 

@@ -29,6 +29,8 @@ Use the code-intelligence MCP servers in `~/.codex/config.toml` when they are av
 - When you write production code as a worker of the build chain, read
   `~/.claude/skills/_shared/implementer-rules.md` as your brief says.
 - Before you write UI code, read `~/.claude/skills/_shared/ui-quality.md`.
+- Never draw a mockup or layout of a screen from memory. Start from the real screens: read
+  their code and components, and screenshot them when the app runs.
 - Write code, identifiers, comments, docs and commit messages in English.
 - Leave full suites, end-to-end runs and whole-project checks to CI. Push the branch and read
   the result with `gh pr checks`. Run a full suite locally only when the user asks for it.
