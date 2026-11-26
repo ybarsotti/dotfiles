@@ -281,6 +281,16 @@
         "hooks": [
           {
             "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/.local/bin/prompt-router hook",
+            "timeout": 15,
+            "async": true
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
             "command": "agent-deck hook-handler",
             "async": true,
             "timeout": 10

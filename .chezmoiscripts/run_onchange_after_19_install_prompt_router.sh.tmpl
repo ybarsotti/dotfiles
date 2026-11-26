@@ -1,0 +1,42 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# run_onchange_after_19_install_prompt_router.sh.tmpl
+#
+# Installs prompt-router, the UserPromptSubmit hook that suggests a fitting skill, agent or
+# command. The project lives in its own private repository. This script only installs it.
+# chezmoi runs the script again when PROMPT_ROUTER_REF changes.
+#
+# The script does not edit the hook configs. ~/.claude/settings.json and ~/.codex/hooks.json
+# are edited by hand: see AGENTS-INSTALL.md in the repository.
+
+set -uo pipefail
+
+PROMPT_ROUTER_REF="997e2eccc4b02106077e41f708f054020e09f680"
+REPO="git+ssh://git@github.com/ybarsotti/prompt-router.git"
+
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:$PATH"
+
+if ! command -v uv >/dev/null 2>&1; then
+    echo "⚠️  prompt-router: uv is missing, skipped"
+    exit 0
+fi
+
+echo "📥 Installing prompt-router at ${PROMPT_ROUTER_REF:0:7}..."
+if ! uv tool install --force --quiet "${REPO}@${PROMPT_ROUTER_REF}"; then
+    echo "⚠️  prompt-router: install failed (no access to the private repository?), skipped"
+    exit 0
+fi
+
+# The embedding model. Without Ollama, the router uses only its fixed rules.
+if command -v ollama >/dev/null 2>&1; then
+    brew services start ollama >/dev/null 2>&1 || true
+    ollama pull nomic-embed-text >/dev/null 2>&1 || echo "⚠️  prompt-router: model pull failed"
+fi
+
+# chezmoi manages the config: ~/.config/prompt-router/config.toml (shadow mode at first).
+
+prompt-router index >/dev/null 2>&1 || echo "⚠️  prompt-router: index build failed, the hook rebuilds it"
+echo "✅ prompt-router installed: $(command -v prompt-router)"
+
+{{ end -}}

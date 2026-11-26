@@ -1,0 +1,49 @@
+# Copy to ~/.config/prompt-router/config.toml. Every key is optional.
+# Lists replace the defaults. Tables merge with the defaults.
+
+mode = "shadow"   # shadow: log only | hint: one hint from the judge | top3: three candidates, no judge
+
+# Machine-written prompts and short replies in other languages get no hint.
+skip_patterns = [
+  '^\s*[/$!#<]',
+  '(?i)^\s*(y|yes|no|ok|okay|go|continue|sim|nao|não|pode|beleza|boa|[a-d1-9])\W*$',
+  '(?i)^(coordinator|## reply from|# lane|you are (a|the) .*worker|\[from )',
+]
+
+# A prompt that matches a pattern gets the target at once, with no embedding call.
+[[rules]]
+pattern = '^\s*[A-Z][A-Z0-9]+-\d+\b|atlassian\.net/browse/'   # a ticket key or ticket URL
+target = "jira-workflow"
+
+[catalog]
+sources = [
+  "~/.claude/skills/*/SKILL.md",
+  "~/.claude/agents/*.md",
+  "~/.claude/commands/*.md",
+  "~/.agents/skills/*/SKILL.md",
+  # "~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/skills/*/SKILL.md",
+]
+
+[clients.claude]
+style = "slash"    # hint reads "/name"
+agents = true      # agents are valid targets
+
+[clients.codex]
+style = "skill"    # hint reads "the name skill"
+agents = false
+
+[embedding]
+url = "http://127.0.0.1:11434"
+model = "nomic-embed-text"
+timeout = 1.5
+
+[judge]
+backend = "claude"   # claude | none (none gives top 3 hint mode)
+model = "haiku"
+timeout = 5.0
+min_chars = 80
+env_unset = ["CLAUDE_CODE_OAUTH_TOKEN"]   # remove a token that is not valid for the child process
+
+[thresholds]
+floor = 0.55
+shortlist = 5

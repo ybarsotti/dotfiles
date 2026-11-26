@@ -203,6 +203,10 @@ Every tool that `.chezmoidata/packages.yaml` installs, by category. Update this 
   - Usage: `gws gmail +triage`, `gws calendar +agenda`, `gws drive files list --params '{"pageSize":10}'`
   - Setup: save the OAuth client to `~/.config/gws/client_secret.json`, then run `gws auth login -s gmail,calendar,drive`
   - Agents use it through the `google-workspace` skill
+- **`prompt-router`** - UserPromptSubmit hook that suggests a fitting skill, agent or command (private repo `ybarsotti/prompt-router`)
+  - Install: `.chezmoiscripts/run_onchange_after_19_install_prompt_router.sh.tmpl` (uv tool, Ollama `nomic-embed-text`)
+  - Config: `~/.config/prompt-router/config.toml`; `mode = "shadow"` logs only, `hint` injects one hint
+  - Usage: `prompt-router doctor`, `prompt-router shadow-report`; off: `PROMPT_ROUTER_OFF=1` or `touch ~/.cache/prompt-router/off`
 - **`gastown`** - Multi-agent orchestration (coordinates Claude, Codex, Gemini workers)
   - Usage: `gt install ~/gt --git`, `gt mayor attach`
   - Install: Via `brew install gastown`
