@@ -53,7 +53,7 @@ Every tool that `.chezmoidata/packages.yaml` installs, by category. Update this 
   `.chezmoiexternal.toml` pins the darwin-arm64 engine by checksum in
   `~/.local/share/impeccable/`, and a wrapper in `~/.local/bin` runs it with telemetry off.
   `ui-quality.md` section 11 uses it. Exit code 2 means findings.
-  - `impeccable detect --cdp 9222 --target localhost --viewport 390x844` - scan a live page
+  - `impeccable detect --cdp 9222 --target localhost --json` - scan a live page at the window's own size
   - `impeccable detect --changed` - pattern scan of the changed source files
   - Bump: change the commit in the URL and its `checksum.sha256` together
 

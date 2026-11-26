@@ -177,13 +177,16 @@ Do this after the UI builds and before review. A screen nobody looked at is not 
 7. Fill each screen with worst-case data and screenshot it again: a long name, an email
    without a break point, counts of 0, 1 and 1,284, empty optional fields, a long translated
    label. The layout holds, the text truncates or wraps, and plurals read right.
-8. Run an accessibility scan on each screen with axe-core, for example
-   `agent-browser eval` with `axe.run()`, or `@axe-core/playwright` when the project has it.
-   Fix each `serious` and `critical` violation.
+8. Run an accessibility scan on each screen with axe-core. Use `@axe-core/playwright` when the
+   project has it. Else get the script with `npm pack axe-core@4` into the run folder, inject
+   `package/axe.min.js` into the page (`agent-browser eval`), then run `axe.run()`. Fix each
+   `serious` and `critical` violation.
 9. Run the code checklist of `~/.claude/skills/_shared/ui-code-checklist.md` on each changed UI
    file. Fix each hit.
    Then run the slop detector on each screen of the running app, at desktop width and at
-   390 px: `impeccable detect --cdp <DevTools port> --target <URL part> --viewport 390x844`.
+   390 px: `impeccable detect --cdp <DevTools port> --target <URL part>`. `--viewport` does
+   not work with `--cdp`, so set the width on the browser window first. An empty output and
+   exit code 0 mean no finding; save `--json` output (`[]`) as the evidence.
    Without a DevTools port, run `impeccable detect --changed`; it only matches patterns in
    source files, so its result is a lower bound. Exit code 2 means findings. Fix each finding
    that the project's design system does not ask for, and write the reason next to each one
