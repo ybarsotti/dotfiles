@@ -42,8 +42,8 @@ $W status "$F"                    # what is done and what is left
 ## 1. Pre-flight
 
 1. **Set the depth by risk.** A change that touches money, customer data, permissions, or
-   anything that prints, ships, charges or emails gets all four lenses below. A low-risk
-   internal screen gets lenses 1 and 4. Write the depth and the reason at the top of the report.
+   anything that prints, ships, charges or emails gets all five lenses below. A low-risk
+   internal screen gets lenses 1, 4 and 5. Write the depth and the reason at the top of the report.
 2. **Prove the build.** Confirm that the environment runs the SHA under test. When it cannot
    prove the SHA, mark the run `BLOCKED: commit not provable`. When a deploy is in progress,
    wait for it to finish. A test during a rollout produces false findings.
@@ -56,7 +56,7 @@ $W status "$F"                    # what is done and what is left
 ## 2. Build the scenarios
 
 With a `qa-plan.yaml`, its scenarios are the script. Add the lenses it does not cover.
-Otherwise derive the scenarios from the plan through four lenses:
+Otherwise derive the scenarios from the plan through five lenses:
 
 1. **Requirements.** One scenario per requirement, rule and `Cover now` or `Fail loudly` edge
    case. Treat every "already tested" claim in the plan as unverified.
@@ -73,6 +73,12 @@ Otherwise derive the scenarios from the plan through four lenses:
    excludes. Confirm that excluded scopes stay unchanged.
 4. **Real user.** Walk the flow as the person who uses it: their role, their hurry, their
    data. Check the error messages, the empty states and the labels.
+5. **Regression.** Test the existing flows that the change can break. When a
+   `regression-map.md` exists beside `qa-plan.yaml`, run its `REG` scenarios. Else build the
+   map yourself with the "Regression map" steps in `~/.claude/skills/qa-test-plan/SKILL.md`,
+   from the diff between the base branch and the SHA under test. A flow that an automated
+   test covers needs no scenario. Every depth includes this lens: a low-risk change runs the
+   happy path of each flow at risk 3 or more.
 
 Give each scenario a priority: **P0** money or data integrity, **P1** a broken flow with a
 workaround, **P2** cosmetic. Give each a one-line reason that names its lens or technique.
@@ -111,7 +117,8 @@ such as a deploy during the test, is a process finding: report it and pause.
 
 ## Output
 
-Write `report.md`, the coverage matrix, the videos and the screenshots to the output folder.
+Write `report.md`, the regression map, the coverage matrix, the videos and the screenshots to
+the output folder.
 Return the scenario table:
 
 | id | scenario | lens | priority | requirement or rule | expected | actual | verdict | evidence |

@@ -97,6 +97,8 @@ Require mapper to write only structured `QA_PLAN` containing:
   Reversibility 5 means a data rewrite, a sent email or a payment. Order the scenarios by
   risk. A scenario at 4 or 5 gets every applicable edge case and checks each side effect in
   each system it reaches. A scenario at 1 or 2 gets the happy path and one failure case;
+- **regression scenarios for the existing flows that the change can break**, from the
+  regression map below;
 - one scenario per meaningful persona/flow combination;
 - explicit preconditions and isolated test data;
 - happy path plus invalid, empty, permission, refresh/back, concurrency, boundary, and
@@ -107,7 +109,29 @@ Require mapper to write only structured `QA_PLAN` containing:
   what does not happen (no row saved, no email sent). Pick the classes that apply from the
   catalog below.
 
-**Out-of-pattern input catalog.**
+**Regression map.**
+
+The plan lists what the change must do. The regression map lists what the change must not
+break: the flows that already exist and share code, data or contracts with the change.
+
+1. List what the change touches: the changed symbols from the diff or the plan, the tables
+   and columns, the API routes and payloads, the shared components, the jobs, the settings
+   and the feature flags.
+2. Find who else uses each one. In a project with a GitNexus index, run `impact` on each
+   changed symbol, and `detect_changes` on the diff. Else search the callers with `rg`. Group
+   the callers into user flows: a screen, an API consumer, a job, a report, an email.
+3. Drop the flows that the plan already covers. For each remaining flow, score its risk with
+   the same 1 to 5 scale as the scenarios. Write why the change can reach it.
+4. Check the automated tests. A flow with a test that runs the changed code path is covered
+   by CI. Name the test and add no scenario for it. QA covers the flows that no test reaches.
+5. Add one requirement per remaining flow, with the id `REG-<n>` and the text "<flow> keeps
+   working as before". Map it to a scenario. A flow at risk 1 or 2 gets one happy-path
+   scenario. A flow at risk 3 or more also gets the failure case that the change can affect.
+6. Write the map to `regression-map.md` beside `qa-plan.yaml`: one row per flow, with its
+   risk, the reason, and its coverage (`REG` scenario, a named test, or `not reachable`). When the change
+   shares nothing with other flows, write one line that says so and why. Never leave the map
+   out without that line.
+
 
 Start from the rules of the project, not from generic values. For each field, read its limits
 where the code defines them: the column size and type, the model or ORM validators, the API
@@ -156,8 +180,8 @@ Validate:
 uv run ~/.claude/skills/qa-test-plan/scripts/qa_artifacts.py validate-plan "$QA_PLAN"
 ```
 
-Spawn one Codex document reviewer on `gpt-6.1-terra` (`codex exec --model gpt-6.1-terra`). Ask it to inspect implementation plan and validated YAML
-for missing requirements, personas, branches, preconditions, data isolation, actionable steps,
+Spawn one Codex document reviewer on `gpt-6.1-terra` (`codex exec --model gpt-6.1-terra`). Ask it to inspect implementation plan, validated YAML and
+`regression-map.md` for missing requirements, callers the regression map missed, personas, branches, preconditions, data isolation, actionable steps,
 objective expectations, and evidence coverage. Apply concrete fixes to YAML, then validate again.
 
 Render human document deterministically:
@@ -256,6 +280,7 @@ Return:
 
 - [ ] structured-plan-valid
 - [ ] requirements-covered
+- [ ] regression-map-written
 - [ ] personas-and-edges-covered
 - [ ] plan-reviewed-by-codex
 - [ ] exact-commit-recorded
