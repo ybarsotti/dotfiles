@@ -1,7 +1,7 @@
 # Copy to ~/.config/prompt-router/config.toml. Every key is optional.
 # Lists replace the defaults. Tables merge with the defaults.
 
-mode = "shadow"   # shadow: log only | hint: one hint from the judge | top3: three candidates, no judge
+mode = "hint"   # shadow: log only | hint: one hint from the judge | top3: three candidates, no judge
 
 # Machine-written prompts and short replies in other languages get no hint.
 skip_patterns = [
@@ -23,6 +23,8 @@ sources = [
   "~/.agents/skills/*/SKILL.md",
   # "~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/skills/*/SKILL.md",
 ]
+# Leftovers of an old Codex command migration: they only add noise to the shortlist.
+exclude = ["source-command-*"]
 
 [clients.claude]
 style = "slash"    # hint reads "/name"
@@ -41,11 +43,11 @@ timeout = 1.5
 backend = "claude"   # claude | none (none gives top 3 hint mode)
 model = "haiku"
 timeout = 5.0
-min_chars = 80
+min_chars = 40   # the judge also runs on short prompts with a clear match
 env_unset = ["CLAUDE_CODE_OAUTH_TOKEN"]   # remove a token that is not valid for the child process
 
 [thresholds]
-floor = 0.55
+floor = 0.50   # Portuguese prompts score about 0.05 lower; the judge drops weak fits
 shortlist = 5
 
 [pretool]
