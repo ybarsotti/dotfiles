@@ -87,6 +87,12 @@ Every tool that `.chezmoidata/packages.yaml` installs, by category. Update this 
   - Usage: `act`, `act -l` (list workflows), `act push` (simulate push event)
 - **`terraform`** - Infrastructure as Code tool
   - Usage: `terraform init`, `terraform plan`, `terraform apply`
+- **`cloudflare-wrangler`** - Cloudflare Workers CLI for local development and deploys
+  - Usage: `wrangler login`, `wrangler dev`, `wrangler deploy`, `wrangler tail`
+- **`cf`** - Cloudflare CLI (beta), installed with npm; covers the whole Cloudflare API
+  - Usage: `cf auth login`, `cf --help`
+- **`cloudflared`** - Cloudflare Tunnel client
+  - Usage: `cloudflared tunnel --url http://localhost:3000` (the URL is public)
 
 ## System Tools & Terminal Enhancements
 - **`ripgrep`** - Fast text search tool

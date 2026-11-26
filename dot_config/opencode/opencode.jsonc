@@ -86,6 +86,7 @@
     }
   },
   "mcp": {
+    "cloudflare": { "type": "remote", "url": "https://mcp.cloudflare.com/mcp", "enabled": true, "oauth": {} },
     "context7": {
       "type": "local",
       "command": [

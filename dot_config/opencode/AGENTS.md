@@ -52,3 +52,7 @@ reports, and memory files. Write complete sentences with articles. This prose is
 - **Chat replies**: `caveman` wins while it is active. Fragments and dropped articles are its purpose. STE governs the persisted artifacts that caveman already exempts.
 - **Code**: `ponytail` decides what gets built. STE shapes only the prose around it.
 - **Never compress away** a negation, a number, a unit, an exact error string, or a safety warning. Brevity never outranks accuracy.
+
+# Cloudflare
+
+When interacting with Cloudflare, use the cf CLI unless the project has a Wrangler configuration file.

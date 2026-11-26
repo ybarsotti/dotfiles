@@ -195,6 +195,9 @@ args = ["--context", "codex", "--project-from-cwd"]
 url = "http://127.0.0.1:49374/mcp"
 default_tools_approval_mode = "approve"
 
+[mcp_servers.cloudflare]
+url = "https://mcp.cloudflare.com/mcp"
+
 [mcp_servers.aws-mcp]
 command = "uvx"
 args = ["mcp-proxy-for-aws@latest", "https://aws-mcp.us-east-1.api.aws/mcp", "--metadata", "INSTALL_SOURCE=aws-cli"]

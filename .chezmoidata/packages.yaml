@@ -25,6 +25,8 @@ packages:
 
         infrastructure:
           - terraform         # Infrastructure as Code tool
+          - cloudflare-wrangler  # Cloudflare Workers CLI (wrangler): dev, deploy, KV/R2/D1
+          - cloudflared          # Cloudflare Tunnel client
 
         data_engineering:
           - duckdb            # Fast in-process analytical database (embedded, no server)

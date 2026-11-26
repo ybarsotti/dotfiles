@@ -29,6 +29,7 @@ MARKETPLACES=(
   "pydantic/skills"
   "DietrichGebert/ponytail"
   "cathrynlavery/diagram-design"
+  "cloudflare/skills"
 )
 
 echo "Registering custom marketplaces..."
@@ -77,6 +78,7 @@ PLUGINS=(
   "diagram-design@diagram-design"
   "sentry@claude-plugins-official"
   "gopls-lsp@claude-plugins-official"
+  "cloudflare@cloudflare"
 )
 
 echo "Installing Claude Code plugins..."
@@ -101,6 +103,8 @@ if command -v npx &>/dev/null; then
     echo "  → ${skill}"
     npx -y skills add ${skill} --yes --global --agent claude-code codex 2>/dev/null || true
   done
+  # Claude Code gets these from the cloudflare@cloudflare plugin.
+  npx -y skills add cloudflare/skills --skill '*' --yes --global --agent codex opencode 2>/dev/null || true
 fi
 
 # Caveman standalone hooks (SessionStart + UserPromptSubmit + statusline badge).
