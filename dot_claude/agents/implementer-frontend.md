@@ -98,3 +98,4 @@ Reply with a short summary:
 4. The gate output.
 5. The paths of the visual pass screenshots and of the interaction audit output.
 6. Each departure from the plan, with the reason.
+7. The reference files and the reference component you followed, and the pattern and motion you took from them.

@@ -28,6 +28,14 @@ Read the **Core** section, then the section of your work: **Backend**, **UI**, o
 3. Search for an existing helper, type, constant or component before you write one. Then use
    the standard library, the platform, and an installed dependency, in that order. Do not add
    a dependency for what a few lines can do.
+3a. Before the first line of code, find the pattern of the project for what you build. Pick
+   two or three files that already do the same kind of work. Write down what they share:
+   - backend: the folder and file of each part, the layering, how they declare types and
+     schemas, function or class, naming, error handling, and the test layout;
+   - UI: how a component is split and named, its props and state, its styling method, its
+     tokens, its motion and its tests.
+   Follow that pattern. Put the reference files and the pattern in your final report. When
+   two patterns compete, follow the newer one, and say so in the report.
 
 ### Scope and design
 
@@ -124,6 +132,14 @@ Read the **Core** section, then the section of your work: **Backend**, **UI**, o
 ## UI
 
 46. Before the code, open the design and read `~/.claude/skills/_shared/ui-quality.md`.
+46a. Find the closest existing component or screen of the same kind in the app, for example
+    another table, card, dialog or form. Study its style, its states and its motion, and
+    follow them. When the task has no design and the app has no close reference, stop and
+    report it. The session that started you then asks the `ui-designer` agent for the
+    structure. Do not invent the look yourself.
+46b. Make each component feel alive, in the style of the project: hover, press and focus
+    feedback on every control, a short transition between states, an entrance for new
+    content, and color that carries the brand. A static, plain component is not done.
 47. Reuse the components and tokens of the project. Do not hardcode a colour, a spacing or a
     radius.
 48. Build each state: loading, empty, error, pending, success and no permission.

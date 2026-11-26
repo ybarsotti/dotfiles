@@ -111,6 +111,9 @@ emails, notifications, exports and any page made for users.
   effect.
 - Transition between states with a short fade or slide, 150 ms to 250 ms.
 - Give hover and press a small, fast response on interactive components.
+- Give components personality. Use the accent color, a micro-interaction on the main action,
+  and the motion style of the closest existing screen. Plain gray boxes with no feedback are
+  not done.
 - Count up a headline number when it first appears.
 - Do not animate a frequent action, every list item, or content that the user is reading.
 - Respect `prefers-reduced-motion`: replace movement with an instant change or a fade.

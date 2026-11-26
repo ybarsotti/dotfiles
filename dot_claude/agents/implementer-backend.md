@@ -83,3 +83,4 @@ Reply with a short summary:
 3. The test command and the last lines of its output.
 4. The gate output.
 5. Each departure from the plan, with the reason.
+6. The reference files you followed, and the pattern you took from them.
