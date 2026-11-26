@@ -12,7 +12,7 @@ The generator reads `dot_claude/skills/**/*.md`, `dot_claude/commands/*.md`, `do
 It writes `docs/skills-map.md` and `docs/skills-map.html`. A second run gives no diff.
 Run `node --test docs/skills-map.test.mjs` to test the edge extraction.
 
-Counts: 29 skills, 18 commands, 9 agents, 15 shared docs, 17 external references. 240 edges: 90 invokes skill, 11 spawns agent, 56 runs command, 83 reads shared doc.
+Counts: 29 skills, 18 commands, 10 agents, 15 shared docs, 17 external references. 246 edges: 90 invokes skill, 16 spawns agent, 56 runs command, 84 reads shared doc.
 
 ## Diagram 1: the main chains
 
@@ -232,6 +232,7 @@ flowchart LR
     s_pr_approved("pr-approved"):::skill
     s_ub_mode("ub-mode"):::skill
     a_architecture_critic{{"architecture-critic"}}:::agent
+    a_copy_reviewer{{"copy-reviewer"}}:::agent
     a_fixer{{"fixer"}}:::agent
     a_implementer_backend{{"implementer-backend"}}:::agent
     a_implementer_frontend{{"implementer-frontend"}}:::agent
@@ -255,6 +256,7 @@ flowchart LR
     d_plan_format[("_shared/plan-format.md")]:::shared
     d_ui_quality[("_shared/ui-quality.md")]:::shared
   end
+  a_copy_reviewer --o d_ui_quality
   a_fixer --o d_external_services
   a_fixer --o d_implementer_rules
   a_fixer --o d_ui_quality
@@ -280,25 +282,26 @@ flowchart LR
   linkStyle 0 stroke:#9ca3af
   linkStyle 1 stroke:#9ca3af
   linkStyle 2 stroke:#9ca3af
-  linkStyle 3 stroke:#2563eb
-  linkStyle 4 stroke:#9ca3af
+  linkStyle 3 stroke:#9ca3af
+  linkStyle 4 stroke:#2563eb
   linkStyle 5 stroke:#9ca3af
-  linkStyle 6 stroke:#2563eb
-  linkStyle 7 stroke:#9ca3af
+  linkStyle 6 stroke:#9ca3af
+  linkStyle 7 stroke:#2563eb
   linkStyle 8 stroke:#9ca3af
   linkStyle 9 stroke:#9ca3af
-  linkStyle 10 stroke:#2563eb
-  linkStyle 11 stroke:#9ca3af
+  linkStyle 10 stroke:#9ca3af
+  linkStyle 11 stroke:#2563eb
   linkStyle 12 stroke:#9ca3af
   linkStyle 13 stroke:#9ca3af
   linkStyle 14 stroke:#9ca3af
-  linkStyle 15 stroke:#16a34a
-  linkStyle 16 stroke:#9ca3af
-  linkStyle 17 stroke:#2563eb
-  linkStyle 18 stroke:#16a34a
+  linkStyle 15 stroke:#9ca3af
+  linkStyle 16 stroke:#16a34a
+  linkStyle 17 stroke:#9ca3af
+  linkStyle 18 stroke:#2563eb
   linkStyle 19 stroke:#16a34a
-  linkStyle 20 stroke:#2563eb
+  linkStyle 20 stroke:#16a34a
   linkStyle 21 stroke:#2563eb
+  linkStyle 22 stroke:#2563eb
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
@@ -334,6 +337,7 @@ flowchart LR
     direction TB
     c_pr_approved(["/pr-approved"]):::command
     s_ub_mode("ub-mode"):::skill
+    a_copy_reviewer{{"copy-reviewer"}}:::agent
     a_plan_reviewer{{"plan-reviewer"}}:::agent
   end
   subgraph cl_planning["planning"]
@@ -416,6 +420,7 @@ flowchart LR
   s_deep_execute --o d_spec_evidence
   s_deep_execute --> s_simplify
   s_deep_execute --> s_ub_mode
+  s_deep_plan ==> a_copy_reviewer
   s_deep_plan ==> a_ui_designer
   s_deep_plan -.-> c_deep_execute
   s_deep_plan -.-> c_deep_review
@@ -456,6 +461,7 @@ flowchart LR
   s_implement --> x_superpowers_systematic_debugging
   s_implement --> x_superpowers_test_driven_development
   s_implement --> x_tdd
+  s_simple_plan ==> a_copy_reviewer
   s_simple_plan ==> a_plan_reviewer
   s_simple_plan ==> a_ui_designer
   s_simple_plan -.-> c_deep_plan
@@ -517,12 +523,12 @@ flowchart LR
   linkStyle 30 stroke:#2563eb
   linkStyle 31 stroke:#2563eb
   linkStyle 32 stroke:#db2777
-  linkStyle 33 stroke:#16a34a
+  linkStyle 33 stroke:#db2777
   linkStyle 34 stroke:#16a34a
   linkStyle 35 stroke:#16a34a
   linkStyle 36 stroke:#16a34a
   linkStyle 37 stroke:#16a34a
-  linkStyle 38 stroke:#9ca3af
+  linkStyle 38 stroke:#16a34a
   linkStyle 39 stroke:#9ca3af
   linkStyle 40 stroke:#9ca3af
   linkStyle 41 stroke:#9ca3af
@@ -535,7 +541,7 @@ flowchart LR
   linkStyle 48 stroke:#9ca3af
   linkStyle 49 stroke:#9ca3af
   linkStyle 50 stroke:#9ca3af
-  linkStyle 51 stroke:#2563eb
+  linkStyle 51 stroke:#9ca3af
   linkStyle 52 stroke:#2563eb
   linkStyle 53 stroke:#2563eb
   linkStyle 54 stroke:#2563eb
@@ -545,24 +551,24 @@ flowchart LR
   linkStyle 58 stroke:#2563eb
   linkStyle 59 stroke:#2563eb
   linkStyle 60 stroke:#2563eb
-  linkStyle 61 stroke:#16a34a
+  linkStyle 61 stroke:#2563eb
   linkStyle 62 stroke:#16a34a
-  linkStyle 63 stroke:#9ca3af
+  linkStyle 63 stroke:#16a34a
   linkStyle 64 stroke:#9ca3af
-  linkStyle 65 stroke:#2563eb
+  linkStyle 65 stroke:#9ca3af
   linkStyle 66 stroke:#2563eb
   linkStyle 67 stroke:#2563eb
   linkStyle 68 stroke:#2563eb
   linkStyle 69 stroke:#2563eb
   linkStyle 70 stroke:#2563eb
   linkStyle 71 stroke:#2563eb
-  linkStyle 72 stroke:#db2777
+  linkStyle 72 stroke:#2563eb
   linkStyle 73 stroke:#db2777
-  linkStyle 74 stroke:#16a34a
-  linkStyle 75 stroke:#16a34a
+  linkStyle 74 stroke:#db2777
+  linkStyle 75 stroke:#db2777
   linkStyle 76 stroke:#16a34a
-  linkStyle 77 stroke:#9ca3af
-  linkStyle 78 stroke:#9ca3af
+  linkStyle 77 stroke:#16a34a
+  linkStyle 78 stroke:#16a34a
   linkStyle 79 stroke:#9ca3af
   linkStyle 80 stroke:#9ca3af
   linkStyle 81 stroke:#9ca3af
@@ -573,8 +579,8 @@ flowchart LR
   linkStyle 86 stroke:#9ca3af
   linkStyle 87 stroke:#9ca3af
   linkStyle 88 stroke:#9ca3af
-  linkStyle 89 stroke:#2563eb
-  linkStyle 90 stroke:#2563eb
+  linkStyle 89 stroke:#9ca3af
+  linkStyle 90 stroke:#9ca3af
   linkStyle 91 stroke:#2563eb
   linkStyle 92 stroke:#2563eb
   linkStyle 93 stroke:#2563eb
@@ -584,6 +590,8 @@ flowchart LR
   linkStyle 97 stroke:#2563eb
   linkStyle 98 stroke:#2563eb
   linkStyle 99 stroke:#2563eb
+  linkStyle 100 stroke:#2563eb
+  linkStyle 101 stroke:#2563eb
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
@@ -721,6 +729,10 @@ flowchart LR
     direction TB
     x_agent_browser_agent_browser[["agent-browser:agent-browser"]]:::external
   end
+  subgraph cl_other["other"]
+    direction TB
+    a_copy_reviewer{{"copy-reviewer"}}:::agent
+  end
   subgraph cl_pr_ticket["pr-ticket"]
     direction TB
     c_ship_it(["/ship-it"]):::command
@@ -740,6 +752,7 @@ flowchart LR
   end
   a_qa_business --> s_qa_test_plan
   a_qa_business --> x_agent_browser_agent_browser
+  a_qa_ui ==> a_copy_reviewer
   a_qa_ui -.-> c_ship_it
   a_qa_ui --o d_ui_quality
   a_qa_ui --> x_agent_browser_agent_browser
@@ -748,12 +761,13 @@ flowchart LR
   c_qa_test_plan --> s_qa_test_plan
   linkStyle 0 stroke:#2563eb
   linkStyle 1 stroke:#2563eb
-  linkStyle 2 stroke:#16a34a
-  linkStyle 3 stroke:#9ca3af
-  linkStyle 4 stroke:#2563eb
+  linkStyle 2 stroke:#db2777
+  linkStyle 3 stroke:#16a34a
+  linkStyle 4 stroke:#9ca3af
   linkStyle 5 stroke:#2563eb
   linkStyle 6 stroke:#2563eb
   linkStyle 7 stroke:#2563eb
+  linkStyle 8 stroke:#2563eb
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
@@ -846,9 +860,11 @@ flowchart LR
   subgraph cl_media_design["media-design"]
     direction TB
     s_video_demo("video-demo"):::skill
+    a_ui_designer{{"ui-designer"}}:::agent
   end
   subgraph cl_other["other"]
     direction TB
+    a_copy_reviewer{{"copy-reviewer"}}:::agent
     a_fixer{{"fixer"}}:::agent
   end
   subgraph cl_planning["planning"]
@@ -895,6 +911,7 @@ flowchart LR
     direction TB
     s_workflow_post_implementation("workflow-post-implementation"):::skill
   end
+  d_after_approval ==> a_copy_reviewer
   d_after_approval ==> a_fixer
   d_after_approval ==> a_qa_business
   d_after_approval ==> a_qa_ui
@@ -910,6 +927,7 @@ flowchart LR
   d_after_approval --> s_video_demo
   d_after_approval --> s_workflow_post_implementation
   d_implementer_rules ==> a_qa_ui
+  d_implementer_rules ==> a_ui_designer
   d_implementer_rules -.-> c_deep_execute
   d_implementer_rules -.-> c_deep_review
   d_implementer_rules -.-> c_ship_it
@@ -941,46 +959,48 @@ flowchart LR
   linkStyle 0 stroke:#db2777
   linkStyle 1 stroke:#db2777
   linkStyle 2 stroke:#db2777
-  linkStyle 3 stroke:#16a34a
+  linkStyle 3 stroke:#db2777
   linkStyle 4 stroke:#16a34a
   linkStyle 5 stroke:#16a34a
-  linkStyle 6 stroke:#9ca3af
+  linkStyle 6 stroke:#16a34a
   linkStyle 7 stroke:#9ca3af
   linkStyle 8 stroke:#9ca3af
   linkStyle 9 stroke:#9ca3af
-  linkStyle 10 stroke:#16a34a
-  linkStyle 11 stroke:#2563eb
+  linkStyle 10 stroke:#9ca3af
+  linkStyle 11 stroke:#16a34a
   linkStyle 12 stroke:#2563eb
   linkStyle 13 stroke:#2563eb
-  linkStyle 14 stroke:#db2777
-  linkStyle 15 stroke:#16a34a
-  linkStyle 16 stroke:#16a34a
+  linkStyle 14 stroke:#2563eb
+  linkStyle 15 stroke:#db2777
+  linkStyle 16 stroke:#db2777
   linkStyle 17 stroke:#16a34a
-  linkStyle 18 stroke:#9ca3af
-  linkStyle 19 stroke:#9ca3af
-  linkStyle 20 stroke:#2563eb
-  linkStyle 21 stroke:#16a34a
-  linkStyle 22 stroke:#16a34a
-  linkStyle 23 stroke:#9ca3af
-  linkStyle 24 stroke:#9ca3af
+  linkStyle 18 stroke:#16a34a
+  linkStyle 19 stroke:#16a34a
+  linkStyle 20 stroke:#9ca3af
+  linkStyle 21 stroke:#9ca3af
+  linkStyle 22 stroke:#2563eb
+  linkStyle 23 stroke:#16a34a
+  linkStyle 24 stroke:#16a34a
   linkStyle 25 stroke:#9ca3af
-  linkStyle 26 stroke:#2563eb
-  linkStyle 27 stroke:#2563eb
+  linkStyle 26 stroke:#9ca3af
+  linkStyle 27 stroke:#9ca3af
   linkStyle 28 stroke:#2563eb
-  linkStyle 29 stroke:#16a34a
-  linkStyle 30 stroke:#16a34a
+  linkStyle 29 stroke:#2563eb
+  linkStyle 30 stroke:#2563eb
   linkStyle 31 stroke:#16a34a
   linkStyle 32 stroke:#16a34a
-  linkStyle 33 stroke:#2563eb
-  linkStyle 34 stroke:#2563eb
-  linkStyle 35 stroke:#16a34a
-  linkStyle 36 stroke:#16a34a
+  linkStyle 33 stroke:#16a34a
+  linkStyle 34 stroke:#16a34a
+  linkStyle 35 stroke:#2563eb
+  linkStyle 36 stroke:#2563eb
   linkStyle 37 stroke:#16a34a
   linkStyle 38 stroke:#16a34a
-  linkStyle 39 stroke:#9ca3af
-  linkStyle 40 stroke:#db2777
-  linkStyle 41 stroke:#16a34a
-  linkStyle 42 stroke:#2563eb
+  linkStyle 39 stroke:#16a34a
+  linkStyle 40 stroke:#16a34a
+  linkStyle 41 stroke:#9ca3af
+  linkStyle 42 stroke:#db2777
+  linkStyle 43 stroke:#16a34a
+  linkStyle 44 stroke:#2563eb
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a

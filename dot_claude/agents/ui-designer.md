@@ -118,7 +118,13 @@ Return:
   which the plan records in its UI design pass;
 - the screenshot path of each current screen and reference screen, from step 2;
 - one line per artboard: the screen, the state, and the component it reuses;
+- `Copy: <output folder>/copy.tsv`: one row per text that a user reads on the artboards, with
+  the columns `id`, `screen`, `element` and `text`;
 - every assumption you made, as a list.
+
+Before you hand over, the session that started you sends `copy.tsv` to the `copy-reviewer`
+agent and returns its table to you. Apply each `cut` and `rewrite` row to the artboards. Then
+show the canvas to the user.
 
 Then stay open. The user may comment on the canvas or write to you here. Read new comments
 with `ArtifactComments`, revise the artboards, and say what changed. When you receive the plan

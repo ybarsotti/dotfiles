@@ -124,7 +124,8 @@ plan format on every run, then record it with `superpowers-invoke.sh "$RUN_DIR" 
 1. Read `~/.claude/skills/_shared/plan-format.md`.
 2. Record the receipt.
 3. Start the `ui-designer` agent as an Orca worker with `--keep-open` when the change touches an
-   interface.
+   interface. When it hands over `copy.tsv`, run the `copy-reviewer` agent on that file only,
+   and send its table back to the worker.
 4. Run `~/.claude/skills/deep-plan/scripts/dispatch-planners.sh "$RUN_DIR" "$TASK_DESC"`. It runs
    the Opus planner and the Codex planner (skipped with `--no-codex`) headless, in parallel.
 5. Synthesize **one** merged plan into `$RUN_DIR/plan.md`. Resolve disagreements by keeping the

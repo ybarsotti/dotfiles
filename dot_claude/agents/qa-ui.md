@@ -79,7 +79,10 @@ $W status "$F"                    # what is done and what is left
 6. When no app runs, do not stop. Take frames from the recordings and the screenshots, and
    read the code of each element at the commit. Mark each state that no recording shows as
    `code only`.
-7. Without a canvas, compare against the UI design pass and section 11 of
+7. Write `copy.tsv` to the output folder: one row per text that a user reads on each changed
+   screen and state, with the columns `id`, `screen`, `element` and `text`. Take the text
+   from the screen, not from the code. The `copy-reviewer` agent reads this file.
+8. Without a canvas, compare against the UI design pass and section 11 of
    `~/.claude/skills/_shared/ui-quality.md`.
 
 ## Output
