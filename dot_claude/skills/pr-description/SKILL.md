@@ -81,7 +81,7 @@ Follow sections 2, 4 and 5 of `~/.claude/skills/_shared/spec-evidence.md`.
 
 A PR opens only after the build chain ran (`~/.claude/skills/_shared/after-approval.md`). This
 gate applies to every caller: a planning skill, `implement`, `deep-execute`, an orchestrator
-that starts its own agents, or a direct `/ship-it`. Run the three checks against HEAD.
+that starts its own agents, or a direct `/ship-it`. Run these checks against HEAD.
 
 1. **Code review.** One of these covers HEAD:
    - a `/deep-review` run: `~/.claude/skills/deep-review/scripts/check-stale.sh <run-dir>`
@@ -93,6 +93,8 @@ that starts its own agents, or a direct `/ship-it`. Run the three checks against
    report that names an older commit counts only when no product code changed after it. When
    the environment did not answer, the recorded line `QA skipped: <url> did not answer`
    counts instead.
+0. **Run report.** When a run folder exists, its `report` step is done with an existing
+   `report/index.html`. Build the report first (`after-approval.md` section 8) when it is not.
 3. **UI parity.** When the change alters UI and a design canvas exists for it: a `qa-ui`
    report with `Verdict: MATCH at <sha>`, where `<sha>` is HEAD or a commit after which no UI
    file changed. Look for the canvas in the `Canvas:` line of the plan, in the run's

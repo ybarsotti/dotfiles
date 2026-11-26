@@ -155,6 +155,13 @@ cmd_done() {
         esac
       fi
       ;;
+    report)
+      # The run report is a page the user reads, not a PR link or a sentence.
+      case "$first" in
+        *.html) [ -f "${first/#\~/$HOME}" ] || die "'report' needs the report page: $first does not exist" ;;
+        *) die "'report' needs the path of the report page (index.html), not '$evidence'" ;;
+      esac
+      ;;
   esac
   set_row "$file" "$id" x "$evidence"
   log_line "$file" "done $id: $evidence"

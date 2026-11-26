@@ -240,7 +240,20 @@ and D do not write. For options B, C and D, write `$RUN_DIR/report/index.html` y
 8. **Open items** — everything still open, with the reason.
 
 Copy each image and video into `$RUN_DIR/report/media/` and link it by a relative path.
-Then run `open "$RUN_DIR/report/index.html"` and give the user the absolute path.
+
+Deliver it so the user sees it:
+
+1. Publish the page as a private artifact with the `Artifact` tool: `file_path` is
+   `$RUN_DIR/report/index.html`, and `files` maps each `media/` file. Under Codex, which has
+   no `Artifact` tool, run `open "$RUN_DIR/report/index.html"`.
+2. Mark the step with `workflow.sh done <file> report "$RUN_DIR/report/index.html"`. The
+   script refuses a PR link or a sentence as evidence.
+3. Put the artifact link and the absolute path in your final message to the user, and in the
+   PR body as `Run report: <link>`.
+
+Skip the report only in a plan-only run, where another session builds the change. That
+session owns the report. A PR body, a draft PR or pending QA does not replace it: write the
+report with the open items marked as open.
 
 After `/ship-it` opens the PR, send the finished-work summary to the Inbox thread of the ticket or
 branch: the PR in `pulls`, the QA screenshots in the body, and the report and videos in
