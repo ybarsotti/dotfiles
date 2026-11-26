@@ -12,7 +12,7 @@ The generator reads `dot_claude/skills/**/*.md`, `dot_claude/commands/*.md`, `do
 It writes `docs/skills-map.md` and `docs/skills-map.html`. A second run gives no diff.
 Run `node --test docs/skills-map.test.mjs` to test the edge extraction.
 
-Counts: 28 skills, 18 commands, 9 agents, 15 shared docs, 17 external references. 240 edges: 90 invokes skill, 11 spawns agent, 56 runs command, 83 reads shared doc.
+Counts: 29 skills, 18 commands, 9 agents, 15 shared docs, 17 external references. 240 edges: 90 invokes skill, 11 spawns agent, 56 runs command, 83 reads shared doc.
 
 ## Diagram 1: the main chains
 
@@ -228,6 +228,7 @@ flowchart LR
     c_slack_reply(["/slack-reply"]):::command
     s_dashboard_design("dashboard-design"):::skill
     s_find_skills("find-skills"):::skill
+    s_google_workspace("google-workspace"):::skill
     s_pr_approved("pr-approved"):::skill
     s_ub_mode("ub-mode"):::skill
     a_architecture_critic{{"architecture-critic"}}:::agent

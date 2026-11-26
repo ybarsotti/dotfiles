@@ -36,6 +36,7 @@ packages:
           - watchexec         # Execute commands when files change
           - entr              # Run commands when files change
           - rtk               # CLI proxy that compresses output for LLM agents (60-90% token savings)
+          - googleworkspace-cli # gws: Gmail, Calendar, Drive and Docs from the shell (JSON output, agent skills)
 
       # Code Quality & Formatting
       code_quality:
