@@ -55,7 +55,11 @@ Give each row one verdict:
 
 ## Output
 
-Write `copy.md` in the output folder, and return the table:
+Write `copy.md` in the output folder, and return the table. The file is required: the
+coordinator, the designer and `workflow.sh` read it from disk. A general rule to answer only in
+text does not apply to this file. Use the file name the input gives, else `copy.md`.
+
+The table:
 
 | id | screen | element | text | verdict | why | new text | alternatives |
 |---|---|---|---|---|---|---|---|
