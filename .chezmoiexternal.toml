@@ -102,3 +102,12 @@ checksum.sha256 = "7777281b83dca37b3d886c07d3f9de2b1332d167d2d341081485a1cfd840f
 exact = true
 stripComponents = 3
 include = ["*/skills/supabase-postgres-best-practices/**"]
+
+# impeccable UI slop detector (Apache-2.0), engine binary for darwin-arm64, pinned by checksum.
+# The ~/.local/bin/impeccable wrapper runs it with telemetry off. Upstream: github.com/pbakaus/impeccable
+[".local/share/impeccable"]
+type = "archive"
+url = "https://registry.npmjs.org/@impeccable/cli-darwin-arm64/-/cli-darwin-arm64-0.1.31.tgz"
+checksum.sha256 = "d2f0aff2df8c79721c786db23792fb37b74435447c794790ffbf109f1f289b83"
+exact = true
+stripComponents = 1

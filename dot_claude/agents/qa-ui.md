@@ -78,6 +78,8 @@ $W status "$F"                    # what is done and what is left
    Each element it lists (no `cursor: pointer`, or no `:hover` rule) is a difference row.
    Run the code checklist of `~/.claude/skills/_shared/ui-code-checklist.md` on the changed UI
    files. Each hit is a difference row with its `file:line`.
+   Run `impeccable detect` as section 11 step 9 of `ui-quality.md` describes. Each finding
+   that the design system does not ask for is a difference row.
 6. When no app runs, do not stop. Take frames from the recordings and the screenshots, and
    read the code of each element at the commit. Mark each state that no recording shows as
    `code only`.

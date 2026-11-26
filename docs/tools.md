@@ -48,6 +48,13 @@ Every tool that `.chezmoidata/packages.yaml` installs, by category. Update this 
   rules: queries, indexes, locks, schema types, RLS and migrations. `.chezmoiexternal.toml` pins
   it to a commit in `~/.claude/skills/`. The skill loads by itself for SQL work, and
   implementer rule 44a points to it.
+- **`impeccable`** - UI slop detector (Apache-2.0): about 60 deterministic rules with no LLM, such
+  as gradient text, glow shadows, low contrast, cramped padding and buzzwords.
+  `.chezmoiexternal.toml` pins the darwin-arm64 engine by checksum in
+  `~/.local/share/impeccable/`, and a wrapper in `~/.local/bin` runs it with telemetry off.
+  `ui-quality.md` section 11 uses it. Exit code 2 means findings.
+  - `impeccable detect --cdp 9222 --target localhost --viewport 390x844` - scan a live page
+  - `impeccable detect --changed` - pattern scan of the changed source files
   - Bump: change the commit in the URL and its `checksum.sha256` together
 
 ## Version Managers & Runtimes

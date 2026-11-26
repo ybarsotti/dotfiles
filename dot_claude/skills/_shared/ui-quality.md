@@ -182,6 +182,12 @@ Do this after the UI builds and before review. A screen nobody looked at is not 
    Fix each `serious` and `critical` violation.
 9. Run the code checklist of `~/.claude/skills/_shared/ui-code-checklist.md` on each changed UI
    file. Fix each hit.
+   Then run the slop detector on each screen of the running app, at desktop width and at
+   390 px: `impeccable detect --cdp <DevTools port> --target <URL part> --viewport 390x844`.
+   Without a DevTools port, run `impeccable detect --changed`; it only matches patterns in
+   source files, so its result is a lower bound. Exit code 2 means findings. Fix each finding
+   that the project's design system does not ask for, and write the reason next to each one
+   you keep. When `impeccable` is not installed, say so in the evidence.
 10. Keep the final screenshots. The review and the PR use them as evidence.
 
 This pass is the check of the builder. It does not prove that the screen matches a design

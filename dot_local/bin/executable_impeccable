@@ -1,0 +1,6 @@
+#!/bin/sh
+# Runs the impeccable detector from its pinned binary (.chezmoiexternal.toml), with telemetry
+# off. ui-quality.md section 11 uses `impeccable detect`. Scan a live page through the
+# DevTools port of a running browser: `impeccable detect --cdp <port> --target <url part>`.
+export IMPECCABLE_NO_TELEMETRY=1 DO_NOT_TRACK=1
+exec "$HOME/.local/share/impeccable/bin/impeccable" "$@"
