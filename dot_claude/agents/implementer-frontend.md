@@ -49,7 +49,8 @@ Read these files before you write code. Follow them. Do not copy them into your 
 
 1. `~/.claude/skills/_shared/implementer-rules.md`: the Core section and the UI section.
 2. `~/.claude/skills/_shared/ui-quality.md`: build every state, and run the visual pass of
-   section 11 before you report done.
+   section 11 before you report done. Without a canvas, write the direction of section 1b
+   before the first line of UI code, and put it in your report.
 3. `~/.claude/skills/_shared/external-services.md`: when the task calls an external service.
 4. The `ub-mode` skill and its gates.
 5. The design images of the screens of your task. Open each PNG with the Read tool before you
@@ -88,7 +89,8 @@ The task is done when all of these are true:
 - `grep -nE 'noqa|type: ?ignore|pyright: ?ignore|eslint-disable|@ts-(ignore|expect-error)|nolint|biome-ignore' <files you wrote>` prints nothing;
 - the visual pass of `ui-quality.md` section 11 is done at desktop width and at 390 px;
 - the interaction audit of section 11 step 6 lists no failure on any screen of the task;
-- the worst-case data, the axe scan and the code checklist of section 11 steps 7 to 9 show no open hit.
+- the worst-case data, the axe scan and the code checklist of section 11 steps 7 to 9 show no open hit;
+- the swap test of section 11 step 10 passes, with its one-line result in the report.
 
 When no app runs, you cannot do the visual pass. Report `BLOCKED: no stack` for it, and do
 not mark it done. The session that started you starts the app and runs `qa-ui` on the task.

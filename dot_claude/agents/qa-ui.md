@@ -86,7 +86,9 @@ $W status "$F"                    # what is done and what is left
 7. Write `copy.tsv` to the output folder: one row per text that a user reads on each changed
    screen and state, with the columns `id`, `screen`, `element`, `purpose` and `text`. Take the text
    from the screen, not from the code. The `ux-writer` agent reviews this file.
-8. Without a canvas, compare against the UI design pass and section 11 of
+8. Run the swap test of `ui-quality.md` section 1b on the screenshots. A screen that fails it is
+   a `major` difference row: name what makes it generic.
+9. Without a canvas, compare against the UI design pass and section 11 of
    `~/.claude/skills/_shared/ui-quality.md`.
 
 ## Output

@@ -14,6 +14,29 @@ done, and the user must never need to ask for the polish.
   totals, and emails them to the client." Design for that task, not for the list of fields.
 - Find the shortcut the real task needs. Example: "copy everything, formatted for an email".
 - Pick one screen of this project as the visual reference, and follow it.
+- Order the screen by the task, not by the data. Put what needs action now first and make it
+  big. Put what is done last, or collapse it. A flat list sorted by date is a defect when some
+  rows need action and others do not. Example: "3 to ship today" leads; shipped orders fold.
+
+## 1b. Design direction, before the first artboard or line of UI code
+
+The checks of this file only remove defects. They do not give a screen character. A screen
+that passes every check can still look like any other admin. So write a direction first, in
+five lines, and put it in the plan, the canvas notes or the implementer report:
+
+1. **Task:** the one job the main user comes to do, and the number or the action it centers on.
+2. **Concept:** one idea taken from the product's world, not from UI trends. Example: for
+   shipping, statuses look like shipping labels or stamps, and the order number reads like a
+   label. When the project has a design system, the concept works inside it.
+3. **Signature moment:** one memorable detail per screen, tied to the task. Example: a shipped
+   row slides out of "To ship" into the done count.
+4. **Scale contrast:** the one or two elements that are much bigger or bolder than the rest.
+   Equal weight everywhere is a defect.
+5. **Not this:** the generic version you refuse, in one line.
+
+When the project has no visual reference, use the `frontend-design` skill to pick the
+direction. The swap test closes the visual pass: hide the logo and the product name. If the
+screen could belong to any other admin, it is not done.
 
 ## 2. Reuse before you build
 
@@ -127,9 +150,9 @@ emails, notifications, exports and any page made for users.
 - Stagger a group entrance by 30 to 80 ms per item, under about 300 ms in total. The main item
   moves most, support items move less, decoration only fades. One entrance per container.
 - Give hover and press a small, fast response on interactive components.
-- Give components personality. Use the accent color, a micro-interaction on the main action,
-  and the motion style of the closest existing screen. Plain gray boxes with no feedback are
-  not done.
+- Give components personality through the direction of section 1b: the concept, the
+  signature moment, the accent color on the main action, and the motion style of the closest
+  existing screen. Plain gray boxes with no feedback are not done.
 - Count up a headline number when it first appears.
 - Do not animate a frequent action, every list item, or content that the user is reading.
   Never animate a keyboard shortcut or a command palette toggle.
@@ -191,7 +214,9 @@ Do this after the UI builds and before review. A screen nobody looked at is not 
    source files, so its result is a lower bound. Exit code 2 means findings. Fix each finding
    that the project's design system does not ask for, and write the reason next to each one
    you keep. When `impeccable` is not installed, say so in the evidence.
-10. Keep the final screenshots. The review and the PR use them as evidence.
+10. Run the swap test of section 1b on the final screenshots. Write the result in one line:
+    what makes this screen belong to this product.
+11. Keep the final screenshots. The review and the PR use them as evidence.
 
 This pass is the check of the builder. It does not prove that the screen matches a design
 canvas. When a canvas exists, the `qa-ui` agent makes that comparison, and `/ship-it` requires it.

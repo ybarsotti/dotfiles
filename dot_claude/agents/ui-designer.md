@@ -74,6 +74,10 @@ new project, no screens` in `design-map.md` with the evidence, such as an empty 
 
 ## 4. Draw the canvas
 
+Write the design direction of `~/.claude/skills/_shared/ui-quality.md` section 1b first, in
+`design-map.md` under `## Direction`. Each artboard follows it. Show the direction to the user
+with the canvas.
+
 Get the copy before you draw. Write `copy.tsv` to the output folder: one row per text a user
 will read on the artboards, with the columns `id`, `screen`, `element`, `purpose` (what the
 user wants to do there and in which state) and an empty `text`. Ask the session that started
