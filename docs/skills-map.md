@@ -12,7 +12,7 @@ The generator reads `dot_claude/skills/**/*.md`, `dot_claude/commands/*.md`, `do
 It writes `docs/skills-map.md` and `docs/skills-map.html`. A second run gives no diff.
 Run `node --test docs/skills-map.test.mjs` to test the edge extraction.
 
-Counts: 28 skills, 17 commands, 9 agents, 15 shared docs, 17 external references. 238 edges: 90 invokes skill, 11 spawns agent, 55 runs command, 82 reads shared doc.
+Counts: 28 skills, 18 commands, 9 agents, 15 shared docs, 17 external references. 240 edges: 90 invokes skill, 11 spawns agent, 56 runs command, 83 reads shared doc.
 
 ## Diagram 1: the main chains
 
@@ -223,6 +223,7 @@ flowchart LR
   end
   subgraph cl_other["other"]
     direction TB
+    c_orchestrate(["/orchestrate"]):::command
     c_pr_approved(["/pr-approved"]):::command
     c_slack_reply(["/slack-reply"]):::command
     s_dashboard_design("dashboard-design"):::skill
@@ -249,6 +250,7 @@ flowchart LR
     direction TB
     d_external_services[("_shared/external-services.md")]:::shared
     d_implementer_rules[("_shared/implementer-rules.md")]:::shared
+    d_orca_workers[("_shared/orca-workers.md")]:::shared
     d_plan_format[("_shared/plan-format.md")]:::shared
     d_ui_quality[("_shared/ui-quality.md")]:::shared
   end
@@ -267,6 +269,8 @@ flowchart LR
   a_plan_reviewer --o d_implementer_rules
   a_plan_reviewer --o d_plan_format
   a_plan_reviewer --o d_ui_quality
+  c_orchestrate -.-> c_ship_it
+  c_orchestrate --o d_orca_workers
   c_pr_approved --> s_pr_approved
   s_pr_approved -.-> c_deep_execute
   s_pr_approved -.-> c_ship_it
@@ -287,11 +291,13 @@ flowchart LR
   linkStyle 12 stroke:#9ca3af
   linkStyle 13 stroke:#9ca3af
   linkStyle 14 stroke:#9ca3af
-  linkStyle 15 stroke:#2563eb
-  linkStyle 16 stroke:#16a34a
-  linkStyle 17 stroke:#16a34a
-  linkStyle 18 stroke:#2563eb
-  linkStyle 19 stroke:#2563eb
+  linkStyle 15 stroke:#16a34a
+  linkStyle 16 stroke:#9ca3af
+  linkStyle 17 stroke:#2563eb
+  linkStyle 18 stroke:#16a34a
+  linkStyle 19 stroke:#16a34a
+  linkStyle 20 stroke:#2563eb
+  linkStyle 21 stroke:#2563eb
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
