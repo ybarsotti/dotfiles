@@ -103,6 +103,9 @@ emails, notifications, exports and any page made for users.
 - Every interactive element has hover, active, focus-visible and disabled styles.
 - Colour carries meaning through the project's semantic tokens: success, warning, danger,
   info. Colour never carries meaning alone. Add text, an icon or a shape.
+- Style the browser surfaces with the project's tokens: text selection, caret, scrollbar and
+  focus ring. A dark theme sets `color-scheme: dark`.
+- A destructive action that can be reversed offers an undo window instead of a confirm dialog.
 
 ## 8. Motion
 
@@ -111,13 +114,25 @@ emails, notifications, exports and any page made for users.
   The defaults below apply only where the design says nothing.
 - Use the project's animation utility or library. Do not add a new animation library for one
   effect.
-- Transition between states with a short fade or slide, 150 ms to 250 ms.
+- Transition between states with a short fade or slide. Durations: press 100 to 160 ms,
+  tooltip and small popover 125 to 200 ms, dropdown 150 to 250 ms, modal and drawer 200 to
+  500 ms. Other UI motion stays under 300 ms.
+- Easing: enter and exit use a strong ease-out, `cubic-bezier(0.23, 1, 0.32, 1)`. Movement on
+  the screen uses `cubic-bezier(0.77, 0, 0.175, 1)`. Never use `ease-in` on UI.
+- Animate only `transform` and `opacity`. Never write `transition: all`. A new input
+  interrupts a running animation.
+- A pressable element scales to 0.97 on `:active`. A new element enters from `scale(0.95)`
+  with opacity 0, never from `scale(0)`. A popover grows from its trigger
+  (`transform-origin`). A modal stays centered.
+- Stagger a group entrance by 30 to 80 ms per item, under about 300 ms in total. The main item
+  moves most, support items move less, decoration only fades. One entrance per container.
 - Give hover and press a small, fast response on interactive components.
 - Give components personality. Use the accent color, a micro-interaction on the main action,
   and the motion style of the closest existing screen. Plain gray boxes with no feedback are
   not done.
 - Count up a headline number when it first appears.
 - Do not animate a frequent action, every list item, or content that the user is reading.
+  Never animate a keyboard shortcut or a command palette toggle.
 - Respect `prefers-reduced-motion`: replace movement with an instant change or a fade.
 
 ## 9. Layout, mobile and actions
@@ -159,7 +174,15 @@ Do this after the UI builds and before review. A screen nobody looked at is not 
    `agent-browser eval "$(cat ~/.claude/skills/_shared/scripts/interaction-audit.js)"`.
    It lists each visible clickable element without `cursor: pointer` or without a `:hover`
    rule. Done when `failures` is empty. Save the output next to the screenshots.
-7. Keep the final screenshots. The review and the PR use them as evidence.
+7. Fill each screen with worst-case data and screenshot it again: a long name, an email
+   without a break point, counts of 0, 1 and 1,284, empty optional fields, a long translated
+   label. The layout holds, the text truncates or wraps, and plurals read right.
+8. Run an accessibility scan on each screen with axe-core, for example
+   `agent-browser eval` with `axe.run()`, or `@axe-core/playwright` when the project has it.
+   Fix each `serious` and `critical` violation.
+9. Run the code checklist of `~/.claude/skills/_shared/ui-code-checklist.md` on each changed UI
+   file. Fix each hit.
+10. Keep the final screenshots. The review and the PR use them as evidence.
 
 This pass is the check of the builder. It does not prove that the screen matches a design
 canvas. When a canvas exists, the `qa-ui` agent makes that comparison, and `/ship-it` requires it.

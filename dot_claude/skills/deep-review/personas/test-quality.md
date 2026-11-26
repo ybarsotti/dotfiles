@@ -51,6 +51,11 @@ Each item below names the evidence you must cite. A finding without that evidenc
 12. **Snapshot spam.** A snapshot is longer than about 50 lines, or it holds data that the test
     does not care about, such as ids, timestamps, or unrelated markup. Cite the snapshot file
     and its length. Name the fields that the test must assert on instead.
+13. **A missing property test.** The diff changes a parser, a serializer, an encoder and its
+    decoder, or money and date arithmetic, and the tests list only a few hand-picked examples.
+    Name the property (a round trip, an invariant, two implementations that must agree) and
+    the library of the project that generates the inputs (Hypothesis, fast-check, rapid). Idea
+    from the Trail of Bits `property-based-testing` skill.
 
 ## The mock boundary
 
@@ -100,4 +105,5 @@ Tick every item with `record.sh --check` before you finish.
 - [ ] `mutants` — Item 10: A surviving mutant on a changed line.
 - [ ] `nondeterminism` — Item 11: Non-determinism.
 - [ ] `snapshots` — Item 12: Snapshot spam.
+- [ ] `properties` — Item 13: A missing property test.
 - [ ] `vacuous` — A test that still passes when the code under test returns nothing.

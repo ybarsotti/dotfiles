@@ -12,7 +12,7 @@ The generator reads `dot_claude/skills/**/*.md`, `dot_claude/commands/*.md`, `do
 It writes `docs/skills-map.md` and `docs/skills-map.html`. A second run gives no diff.
 Run `node --test docs/skills-map.test.mjs` to test the edge extraction.
 
-Counts: 29 skills, 18 commands, 10 agents, 16 shared docs, 19 external references. 253 edges: 92 invokes skill, 19 spawns agent, 56 runs command, 86 reads shared doc.
+Counts: 29 skills, 18 commands, 10 agents, 17 shared docs, 22 external references. 260 edges: 95 invokes skill, 21 spawns agent, 56 runs command, 88 reads shared doc.
 
 ## Diagram 1: the main chains
 
@@ -755,12 +755,14 @@ flowchart LR
   end
   subgraph cl_shared_docs["shared-docs"]
     direction TB
+    d_ui_code_checklist[("_shared/ui-code-checklist.md")]:::shared
     d_ui_quality[("_shared/ui-quality.md")]:::shared
   end
   a_qa_business --> s_qa_test_plan
   a_qa_business --> x_agent_browser_agent_browser
   a_qa_ui ==> a_ux_writer
   a_qa_ui -.-> c_ship_it
+  a_qa_ui --o d_ui_code_checklist
   a_qa_ui --o d_ui_quality
   a_qa_ui --> x_agent_browser_agent_browser
   c_qa_execute --> s_qa_test_plan
@@ -771,10 +773,11 @@ flowchart LR
   linkStyle 2 stroke:#db2777
   linkStyle 3 stroke:#16a34a
   linkStyle 4 stroke:#9ca3af
-  linkStyle 5 stroke:#2563eb
+  linkStyle 5 stroke:#9ca3af
   linkStyle 6 stroke:#2563eb
   linkStyle 7 stroke:#2563eb
   linkStyle 8 stroke:#2563eb
+  linkStyle 9 stroke:#2563eb
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
@@ -789,6 +792,8 @@ flowchart LR
 flowchart LR
   subgraph cl_external["external"]
     direction TB
+    x_property_based_testing[["property-based-testing"]]:::external
+    x_sharp_edges[["sharp-edges"]]:::external
     x_ui_ux_pro_max_ui_ux_pro_max[["ui-ux-pro-max:ui-ux-pro-max"]]:::external
   end
   subgraph cl_other["other"]
@@ -830,6 +835,8 @@ flowchart LR
   s_deep_review --o d_ui_quality
   s_deep_review --> s_simplify
   s_deep_review --> s_ub_mode
+  s_deep_review --> x_property_based_testing
+  s_deep_review --> x_sharp_edges
   s_deep_review --> x_ui_ux_pro_max_ui_ux_pro_max
   linkStyle 0 stroke:#2563eb
   linkStyle 1 stroke:#16a34a
@@ -845,6 +852,8 @@ flowchart LR
   linkStyle 11 stroke:#2563eb
   linkStyle 12 stroke:#2563eb
   linkStyle 13 stroke:#2563eb
+  linkStyle 14 stroke:#2563eb
+  linkStyle 15 stroke:#2563eb
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
@@ -860,6 +869,7 @@ flowchart LR
   subgraph cl_external["external"]
     direction TB
     x_agent_browser_agent_browser[["agent-browser:agent-browser"]]:::external
+    x_supabase_postgres_best_practices[["supabase-postgres-best-practices"]]:::external
     x_superpowers_finishing_a_development_branch[["superpowers:finishing-a-development-branch"]]:::external
     x_superpowers_writing_plans[["superpowers:writing-plans"]]:::external
     x_ux_copy[["ux-copy"]]:::external
@@ -874,6 +884,7 @@ flowchart LR
   subgraph cl_other["other"]
     direction TB
     a_fixer{{"fixer"}}:::agent
+    a_implementer_frontend{{"implementer-frontend"}}:::agent
     a_ux_writer{{"ux-writer"}}:::agent
   end
   subgraph cl_planning["planning"]
@@ -913,6 +924,7 @@ flowchart LR
     d_spec_evidence[("_shared/spec-evidence.md")]:::shared
     d_stages[("_shared/stages.md")]:::shared
     d_ticket_start[("_shared/ticket-start.md")]:::shared
+    d_ui_code_checklist[("_shared/ui-code-checklist.md")]:::shared
     d_ui_quality[("_shared/ui-quality.md")]:::shared
     d_ux_writing[("_shared/ux-writing.md")]:::shared
     d_workflow_artifacts[("_shared/workflow-artifacts.md")]:::shared
@@ -944,6 +956,7 @@ flowchart LR
   d_implementer_rules --o d_external_services
   d_implementer_rules --o d_ui_quality
   d_implementer_rules --> s_pr_description
+  d_implementer_rules --> x_supabase_postgres_best_practices
   d_inbox -.-> c_ship_it
   d_orca_workers -.-> c_deep_execute
   d_plan_format --o d_after_approval
@@ -963,9 +976,12 @@ flowchart LR
   d_repo_workflow -.-> c_simplify
   d_stages -.-> c_deep_review
   d_stages --o d_ui_quality
+  d_ui_code_checklist ==> a_implementer_frontend
+  d_ui_code_checklist ==> a_qa_ui
   d_ui_quality ==> a_qa_ui
   d_ui_quality ==> a_ux_writer
   d_ui_quality -.-> c_ship_it
+  d_ui_quality --o d_ui_code_checklist
   d_ui_quality --o d_ux_writing
   d_ui_quality --> x_agent_browser_agent_browser
   d_ux_writing ==> a_ux_writer
@@ -995,34 +1011,38 @@ flowchart LR
   linkStyle 20 stroke:#9ca3af
   linkStyle 21 stroke:#9ca3af
   linkStyle 22 stroke:#2563eb
-  linkStyle 23 stroke:#16a34a
+  linkStyle 23 stroke:#2563eb
   linkStyle 24 stroke:#16a34a
-  linkStyle 25 stroke:#9ca3af
+  linkStyle 25 stroke:#16a34a
   linkStyle 26 stroke:#9ca3af
   linkStyle 27 stroke:#9ca3af
-  linkStyle 28 stroke:#2563eb
+  linkStyle 28 stroke:#9ca3af
   linkStyle 29 stroke:#2563eb
   linkStyle 30 stroke:#2563eb
-  linkStyle 31 stroke:#16a34a
+  linkStyle 31 stroke:#2563eb
   linkStyle 32 stroke:#16a34a
   linkStyle 33 stroke:#16a34a
   linkStyle 34 stroke:#16a34a
-  linkStyle 35 stroke:#2563eb
+  linkStyle 35 stroke:#16a34a
   linkStyle 36 stroke:#2563eb
-  linkStyle 37 stroke:#16a34a
+  linkStyle 37 stroke:#2563eb
   linkStyle 38 stroke:#16a34a
   linkStyle 39 stroke:#16a34a
   linkStyle 40 stroke:#16a34a
-  linkStyle 41 stroke:#9ca3af
-  linkStyle 42 stroke:#db2777
+  linkStyle 41 stroke:#16a34a
+  linkStyle 42 stroke:#9ca3af
   linkStyle 43 stroke:#db2777
-  linkStyle 44 stroke:#16a34a
-  linkStyle 45 stroke:#9ca3af
-  linkStyle 46 stroke:#2563eb
-  linkStyle 47 stroke:#db2777
+  linkStyle 44 stroke:#db2777
+  linkStyle 45 stroke:#db2777
+  linkStyle 46 stroke:#db2777
+  linkStyle 47 stroke:#16a34a
   linkStyle 48 stroke:#9ca3af
-  linkStyle 49 stroke:#2563eb
+  linkStyle 49 stroke:#9ca3af
   linkStyle 50 stroke:#2563eb
+  linkStyle 51 stroke:#db2777
+  linkStyle 52 stroke:#9ca3af
+  linkStyle 53 stroke:#2563eb
+  linkStyle 54 stroke:#2563eb
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a

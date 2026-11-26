@@ -44,5 +44,6 @@ Tick every item with `record.sh --check` before you finish.
 - [ ] `web` — CSRF, cookie flags, JWT handling, CORS and TLS validation on the changed endpoints.
 - [ ] `abuse` — A rate limit or a cost bound on a public, unauthenticated or costly endpoint.
 - [ ] `dependencies` — Known CVEs in a new or changed dependency.
+- [ ] `secure-defaults` — A new option, flag or config is safe by default; a security check is opt-out, never opt-in.
 - [ ] `leaks` — Error responses and logs reveal no internals and no personal data.
 - [ ] `scanners` — Every hit under `## Security signals` is a recorded finding, or the note refutes it with evidence. The note names each scanner that is not installed, failed or timed out.

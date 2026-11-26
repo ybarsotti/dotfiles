@@ -44,6 +44,10 @@ Every tool that `.chezmoidata/packages.yaml` installs, by category. Update this 
   - `crapper --changed --threshold 10` - CRAP score per function (complexity and coverage)
   - `dryer --changed --threshold 0.8` - structural duplication
   - `mutator --max-workers 2 src/file.py` - mutation testing (survivors and uncovered lines)
+- **`supabase-postgres-best-practices`** - Claude Code skill from Supabase (MIT) with Postgres
+  rules: queries, indexes, locks, schema types, RLS and migrations. `.chezmoiexternal.toml` pins
+  it to a commit in `~/.claude/skills/`. The skill loads by itself for SQL work, and
+  implementer rule 44a points to it.
   - Bump: change the commit in the URL and its `checksum.sha256` together
 
 ## Version Managers & Runtimes

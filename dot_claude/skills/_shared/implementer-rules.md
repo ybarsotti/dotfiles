@@ -133,7 +133,15 @@ Read the **Core** section, then the section of your work: **Backend**, **UI**, o
     unique and check constraints. Put a queried field in a column, not in JSON.
 44. Write one reversible migration per change. Old code still runs during the deploy, so
     expand first and remove later.
-45. Make no call to an outside service inside a transaction.
+44a. Keep a migration safe on a big table (strong_migrations, MIT):
+    - add a check or foreign key constraint `NOT VALID`, then `VALIDATE` it in a later migration;
+    - create an index `CONCURRENTLY`, outside a transaction;
+    - never set `NOT NULL` or a volatile default in one step: add the column, backfill in
+      throttled batches outside the migration transaction, then add the constraint;
+    - index each foreign key column.
+    For Postgres work, load the `supabase-postgres-best-practices` skill.
+45. Make no call to an outside service inside a transaction. Keep transactions short. A job
+    queue in a table takes rows with `FOR UPDATE SKIP LOCKED`.
 
 ## UI
 

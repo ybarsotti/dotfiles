@@ -87,7 +87,8 @@ The task is done when all of these are true:
 - the gates of `ub-mode` pass;
 - `grep -nE 'noqa|type: ?ignore|pyright: ?ignore|eslint-disable|@ts-(ignore|expect-error)|nolint|biome-ignore' <files you wrote>` prints nothing;
 - the visual pass of `ui-quality.md` section 11 is done at desktop width and at 390 px;
-- the interaction audit of section 11 step 6 lists no failure on any screen of the task.
+- the interaction audit of section 11 step 6 lists no failure on any screen of the task;
+- the worst-case data, the axe scan and the code checklist of section 11 steps 7 to 9 show no open hit.
 
 When no app runs, you cannot do the visual pass. Report `BLOCKED: no stack` for it, and do
 not mark it done. The session that started you starts the app and runs `qa-ui` on the task.

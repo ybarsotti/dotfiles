@@ -130,7 +130,10 @@ Schema pass, for every changed migration, model, or table definition:
   prefix, and a composite index whose column order does not match the query's predicates.
 - **Migration safety**: an operation that takes a long lock on a large table, such as adding
   an index without `CONCURRENTLY` on Postgres or rewriting a table to add a column; a
-  destructive change with no backfill; a migration with no way back.
+  destructive change with no backfill; a migration with no way back. Also a constraint added
+  without `NOT VALID` and a later `VALIDATE`; a `NOT NULL` or a volatile default set in one
+  step on a big table instead of a batched backfill; a foreign key column with no index; a job
+  queue in a table read without `FOR UPDATE SKIP LOCKED` (strong_migrations, Supabase).
 - **Old code during the deploy.** The migration runs while instances of the previous release
   still serve requests. Flag a change that the old code cannot survive: a dropped or renamed
   column or table that the old code still reads or writes, a `NOT NULL` column with no

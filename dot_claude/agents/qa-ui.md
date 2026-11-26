@@ -76,6 +76,8 @@ $W status "$F"                    # what is done and what is left
    On each screen, with or without a motion spec, run the interaction audit:
    `agent-browser eval "$(cat ~/.claude/skills/_shared/scripts/interaction-audit.js)"`.
    Each element it lists (no `cursor: pointer`, or no `:hover` rule) is a difference row.
+   Run the code checklist of `~/.claude/skills/_shared/ui-code-checklist.md` on the changed UI
+   files. Each hit is a difference row with its `file:line`.
 6. When no app runs, do not stop. Take frames from the recordings and the screenshots, and
    read the code of each element at the commit. Mark each state that no recording shows as
    `code only`.

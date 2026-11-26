@@ -150,6 +150,13 @@ when the diff adds the second one. Do not propose a pattern for one variant or f
 nobody asked for: that is the premature abstraction `simplicity` reports. Prefer the pattern
 the repository already uses for the same problem, and cite it as `path:line`.
 
+- **A sharp edge in a new contract.** A new function, option or config that is easy to use
+  wrong: the unsafe choice is the default, a security check is opt-in, two parameters of the
+  same type can be swapped, or a "do not call this when…" rule lives only in a comment. Record
+  it as MEDIUM and name the safe default or the type that makes the misuse impossible. Reject
+  the excuses "the caller knows", "it is documented" and "we can add a check later". Idea from
+  the Trail of Bits `sharp-edges` skill.
+
 ## Scope
 
 This persona reads whatever languages the diff contains. The examples above lean on one stack
@@ -172,6 +179,7 @@ Tick every item with `record.sh --check` before you finish.
 - [ ] `cycles` — Dependency cycles the diff creates.
 - [ ] `removals` — The orphan chain and the surviving callers of a removed contract.
 - [ ] `concept-home` — One concept, one home.
+- [ ] `sharp-edges` — A new contract whose default or shape invites misuse.
 - [ ] `illegal-states` — Types that let two fields disagree or let a wrong value be written; outside data parsed more than once, or past the boundary unparsed.
 - [ ] `bolt-on` — A requirement bolted onto a design that a smaller redesign would serve.
 - [ ] `patterns` — Variants that share one lifecycle: Strategy, Template Method or a table.
