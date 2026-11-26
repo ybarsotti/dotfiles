@@ -69,7 +69,8 @@ When the plan is wrong or a fix needs a file outside your scope, stop and report
 
 The task is done when all of these are true:
 
-- the new tests fail without your change and pass with it;
+- the new tests fail without your change and pass with it, and your report holds the red run
+  output (rule 39a of `implementer-rules.md`);
 - the test command of the task passes;
 - the gates of `ub-mode` pass;
 - `grep -nE 'noqa|type: ?ignore|pyright: ?ignore|eslint-disable|@ts-(ignore|expect-error)|nolint|biome-ignore' <files you wrote>` prints nothing.

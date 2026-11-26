@@ -55,6 +55,7 @@ the `Workers:` line.
 Each brief is self-contained, because the worker sees nothing of this chat. Write:
 
 - the goal of the batch, and why;
+- the full text of `constraints.md`: each limit and choice the user stated in this chat;
 - the files it may edit, and the files it must not touch;
 - what you already know or ruled out;
 - the check that proves it is done (a test command, an output, a screenshot);

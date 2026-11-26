@@ -38,7 +38,10 @@ plan approval, before this chain starts (`plan-routing.md`). This chain never as
 5. Mark each step in the same turn that it ends, with its evidence. A row that still says
    `waiting` after its step ended blocks `/ship-it`:
    - `workflow.sh done <file> <id> "<path, URL, or command and result>"`;
-   - `workflow.sh skip <file> <id> "<reason>"` when the step does not apply;
+   - `workflow.sh skip <file> <id> "<reason>"` when the step does not apply. To skip a planning
+     or review step (grill, plan review, a review round, blindspot, Plannotator, `/deep-review`,
+     QA), the reason must quote the user's message in this run that names the step. Without
+     that quote, run the step;
    - `workflow.sh wait <file> <id> "<worker>"` before you end a turn to wait for a worker;
    - `workflow.sh block <file> <id> "<question>"` before you ask the user.
 6. At the end of each task and each step, run `workflow.sh status <file>`. Tell the user in one
@@ -178,6 +181,12 @@ row to the `fixer`. A `cut` or `rewrite` row blocks the PR until it is fixed or 
 it in writing. Run it with the `Agent` tool, also in Orca: it reads one file and needs no
 pane. Record it with `workflow.sh add <file> copy "copy review"`, then
 `workflow.sh done <file> copy "<path of copy-review.md>"`.
+
+### Open `qa-ui` rows
+
+A `qa-ui` row of any severity, LOW included, blocks the merge until the `fixer` fixes it or
+the user waives it in writing. A round cap does not waive a row. When an implementer reports
+`BLOCKED: no stack`, start the app and run `qa-ui` on that task before the next task starts.
 
 ## 5. Business rules and end to end — the `qa-business` agent
 

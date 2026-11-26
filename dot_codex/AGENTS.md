@@ -103,3 +103,17 @@ reports, and memory files. Write complete sentences with articles. This prose is
 # Cloudflare
 
 When interacting with Cloudflare, use the cf CLI unless the project has a Wrangler configuration file.
+
+## User Instructions and Reports
+
+- When the user limits the scope, or names a tool, a name or an approach, append their exact
+  words to `constraints.md` in the run folder (`$RUN_DIR`), or to the scratchpad when no run
+  exists. Read the file again before each phase. Put its full text in every agent or worker
+  brief. A constraint holds until the user changes it.
+- Run every step of a skill. Skip a planning or review step (grill, plan review, a review
+  round, blindspot, Plannotator, code review, QA) only when the user's message names that
+  step. Quote that message in the skip reason.
+- When you summarize a handoff, a ticket or a document, list each item you drop or defer,
+  with the reason.
+- Mark each fact about an external system as READ, with its source, or INFERRED. Never state
+  an INFERRED fact as a fact.

@@ -115,6 +115,12 @@ Read the **Core** section, then the section of your work: **Backend**, **UI**, o
     or type escape (`noqa`, `type: ignore`, `eslint-disable`, `@ts-ignore`, `nolint`). A reason
     on the line does not make an escape allowed. When the cause cannot be fixed, report it.
 
+39a. Run the red test and the green test of your change through `~/.local/bin/test-local`, one
+    test file at a time. Paste the last lines of the red run in your report. Run `crapper`,
+    `dryer` and every other gate only with the explicit paths of the files you changed. Never
+    start a suite or a gate that covers more than those files. Stop a command that runs for
+    more than 2 minutes, and report it.
+
 ### Before you report done
 
 40. Update the docs, the plan and the specs that your change makes wrong.

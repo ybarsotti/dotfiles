@@ -81,12 +81,16 @@ When the plan is wrong or a fix needs a file outside your scope, stop and report
 
 The task is done when all of these are true:
 
-- the new tests fail without your change and pass with it;
+- the new tests fail without your change and pass with it, and your report holds the red run
+  output (rule 39a of `implementer-rules.md`);
 - the test command of the task passes;
 - the gates of `ub-mode` pass;
 - `grep -nE 'noqa|type: ?ignore|pyright: ?ignore|eslint-disable|@ts-(ignore|expect-error)|nolint|biome-ignore' <files you wrote>` prints nothing;
 - the visual pass of `ui-quality.md` section 11 is done at desktop width and at 390 px;
 - the interaction audit of section 11 step 6 lists no failure on any screen of the task.
+
+When no app runs, you cannot do the visual pass. Report `BLOCKED: no stack` for it, and do
+not mark it done. The session that started you starts the app and runs `qa-ui` on the task.
 
 ## Output
 

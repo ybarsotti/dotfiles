@@ -126,6 +126,20 @@ done. Deliver the polished version first. Do not wait for the user to ask.
   starts from the real screens: it reads their code and components, and screenshots them
   when the app runs. A running app is not required: without one, it works from the code.
 
+# User Instructions and Reports
+
+- When the user limits the scope, or names a tool, a name or an approach, append their exact
+  words to `constraints.md` in the run folder (`$RUN_DIR`), or to the scratchpad when no run
+  exists. Read the file again before each phase. Put its full text in every agent or worker
+  brief. A constraint holds until the user changes it.
+- Run every step of a skill. Skip a planning or review step (grill, plan review, a review
+  round, blindspot, Plannotator, code review, QA) only when the user's message names that
+  step. Quote that message in the skip reason.
+- When you summarize a handoff, a ticket or a document, list each item you drop or defer,
+  with the reason.
+- Mark each fact about an external system as READ, with its source, or INFERRED. Never state
+  an INFERRED fact as a fact.
+
 # Agent Models
 
 Subagents run on Sonnet by default (`CLAUDE_CODE_SUBAGENT_MODEL`). A `model` argument on the
