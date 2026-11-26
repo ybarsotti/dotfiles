@@ -47,3 +47,7 @@ env_unset = ["CLAUDE_CODE_OAUTH_TOKEN"]   # remove a token that is not valid for
 [thresholds]
 floor = 0.55
 shortlist = 5
+
+[pretool]
+# shadow logs decisions, deny-once blocks one call, and off disables this hook.
+mode = "shadow"

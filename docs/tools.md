@@ -207,6 +207,7 @@ Every tool that `.chezmoidata/packages.yaml` installs, by category. Update this 
   - Install: `.chezmoiscripts/run_onchange_after_19_install_prompt_router.sh.tmpl` (uv tool, Ollama `nomic-embed-text`)
   - Config: `~/.config/prompt-router/config.toml`; `mode = "shadow"` logs only, `hint` injects one hint
   - Usage: `prompt-router doctor`, `prompt-router shadow-report`; off: `PROMPT_ROUTER_OFF=1` or `touch ~/.cache/prompt-router/off`
+  - Also a PreToolUse hook (`prompt-router pretool`) that checks agent spawns; `[pretool] mode = "shadow"` logs only
 - **`gastown`** - Multi-agent orchestration (coordinates Claude, Codex, Gemini workers)
   - Usage: `gt install ~/gt --git`, `gt mayor attach`
   - Install: Via `brew install gastown`

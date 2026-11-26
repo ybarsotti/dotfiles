@@ -116,6 +116,16 @@
     ],
     "PreToolUse": [
       {
+        "matcher": "Agent|Task|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{ .chezmoi.homeDir }}/.local/bin/prompt-router pretool",
+            "timeout": 8
+          }
+        ]
+      },
+      {
         "matcher": "Write|Edit",
         "hooks": [
           {
