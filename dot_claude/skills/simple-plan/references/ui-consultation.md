@@ -27,9 +27,10 @@ intentions. A screen whose plan is silent about them gets built without them.
    app URL or run command. It maps the project's design system from the code, reads and
    screenshots the screens it changes, then draws them on a Design canvas while you draft. The user can iterate on the canvas in parallel. Record its `Canvas:`, its `Design images:` folder, its `Motion spec:` and
    `Design system:` URLs in the UI design pass.
-   When it hands over `copy.tsv`, start the `copy-reviewer` agent with the `Agent` tool on that
-   file only, and send its table back to the `ui-designer` worker before the user reviews the
-   canvas.
+   The worker asks you for copy before it draws: run the `ux-writer` agent in `write` mode on
+   its `copy.tsv` with the `Agent` tool, and send the table back. When it hands over, run the
+   `ux-writer` in `review` mode on the final `copy.tsv`, and send that table back before the
+   user reviews the canvas.
 
 Fold the answer into the plan's `UI design pass` section, and into `Project fit`, `Affected
 files` and `Edge cases`. The plan names the existing component it reuses instead of leaving

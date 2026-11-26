@@ -172,15 +172,15 @@ canvas exists, it compares each element with its artboard. The implementation mu
 artboard: layout, spacing, copy, color, type, states and icons. The agent returns one row per
 difference.
 
-### Copy review — the `copy-reviewer` agent
+### Copy review — the `ux-writer` agent
 
-After the final `qa-ui` pass, start the `copy-reviewer` agent with the `copy.tsv` of `qa-ui`,
-one line about who reads the screens, and the output folder `$RUN_DIR/qa/copy/`. Give it
+After the final `qa-ui` pass, start the `ux-writer` agent in `review` mode with the `copy.tsv` of `qa-ui`,
+one line about who reads the screens, the project's `docs/voice.md` when it exists, and the output folder `$RUN_DIR/qa/copy/`. Give it
 nothing else: it judges the words without the code or the plan. Send each `cut` and `rewrite`
 row to the `fixer`. A `cut` or `rewrite` row blocks the PR until it is fixed or the user waives
 it in writing. Run it with the `Agent` tool, also in Orca: it reads one file and needs no
 pane. Record it with `workflow.sh add <file> copy "copy review"`, then
-`workflow.sh done <file> copy "<path of copy-review.md>"`.
+`workflow.sh done <file> copy "<path of copy.md>"`.
 
 ### Open `qa-ui` rows
 

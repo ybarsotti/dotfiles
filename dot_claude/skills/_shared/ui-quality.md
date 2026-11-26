@@ -91,6 +91,8 @@ emails, notifications, exports and any page made for users.
 - An error says what happened and what the user can do next. Never a code, an exception name
   or a stack trace.
 - Do not explain a rule the user cannot act on. Show its result instead.
+- The `ux-writer` agent writes and reviews this text, with the patterns of
+  `~/.claude/skills/_shared/ux-writing.md`.
 - Keep it short and plain. One idea per sentence.
 
 ## 7. Visual finish

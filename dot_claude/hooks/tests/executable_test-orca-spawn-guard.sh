@@ -25,7 +25,7 @@ check "plain ls" allow w1 "$(bash_payload 'ls -la')"
 check "outside Orca" allow "" "$(bash_payload 'codex exec "y"')"
 check "Agent implementer" deny w1 "$(agent_payload implementer-backend)"
 check "Agent Explore" allow w1 "$(agent_payload Explore)"
-check "Agent copy-reviewer" allow w1 "$(agent_payload copy-reviewer)"
+check "Agent ux-writer" allow w1 "$(agent_payload ux-writer)"
 check "Agent implementer outside Orca" allow "" "$(agent_payload implementer-backend)"
 check "Codex shell payload" deny w1 '{"tool_name":"Bash","turn_id":"t","tool_input":{"command":"codex exec \"y\""}}'
 echo "$pass passed, $fail failed"

@@ -74,6 +74,12 @@ new project, no screens` in `design-map.md` with the evidence, such as an empty 
 
 ## 4. Draw the canvas
 
+Get the copy before you draw. Write `copy.tsv` to the output folder: one row per text a user
+will read on the artboards, with the columns `id`, `screen`, `element`, `purpose` (what the
+user wants to do there and in which state) and an empty `text`. Ask the session that started
+you for the `ux-writer` table in `write` mode (`orca orchestration ask`, or your report
+outside Orca). Put that copy on the artboards. Do not write user-facing text yourself.
+
 1. Start from the Design type with `action: "quickstart"`, then follow the type's own
    instructions. Use the project's design system from step 2.
 2. Use the title `<ticket key or feature> — <screen>`.
@@ -119,11 +125,11 @@ Return:
 - the screenshot path of each current screen and reference screen, from step 2;
 - one line per artboard: the screen, the state, and the component it reuses;
 - `Copy: <output folder>/copy.tsv`: one row per text that a user reads on the artboards, with
-  the columns `id`, `screen`, `element` and `text`;
+  the columns `id`, `screen`, `element`, `purpose` and `text`, as it stands on the artboards;
 - every assumption you made, as a list.
 
-Before you hand over, the session that started you sends `copy.tsv` to the `copy-reviewer`
-agent and returns its table to you. Apply each `cut` and `rewrite` row to the artboards. Then
+Before you hand over, the session that started you runs the `ux-writer` agent on `copy.tsv`
+in `review` mode and returns its table to you. Apply each `cut` and `rewrite` row to the artboards. Then
 show the canvas to the user.
 
 Then stay open. The user may comment on the canvas or write to you here. Read new comments

@@ -12,7 +12,7 @@ The generator reads `dot_claude/skills/**/*.md`, `dot_claude/commands/*.md`, `do
 It writes `docs/skills-map.md` and `docs/skills-map.html`. A second run gives no diff.
 Run `node --test docs/skills-map.test.mjs` to test the edge extraction.
 
-Counts: 29 skills, 18 commands, 10 agents, 15 shared docs, 17 external references. 246 edges: 90 invokes skill, 16 spawns agent, 56 runs command, 84 reads shared doc.
+Counts: 29 skills, 18 commands, 10 agents, 16 shared docs, 19 external references. 253 edges: 92 invokes skill, 19 spawns agent, 56 runs command, 86 reads shared doc.
 
 ## Diagram 1: the main chains
 
@@ -188,6 +188,10 @@ flowchart LR
     s_video_demo("video-demo"):::skill
     a_ui_designer{{"ui-designer"}}:::agent
   end
+  subgraph cl_other["other"]
+    direction TB
+    a_ux_writer{{"ux-writer"}}:::agent
+  end
   subgraph cl_qa["qa"]
     direction TB
     a_qa_ui{{"qa-ui"}}:::agent
@@ -198,13 +202,15 @@ flowchart LR
     d_ui_quality[("_shared/ui-quality.md")]:::shared
   end
   a_ui_designer ==> a_qa_ui
+  a_ui_designer ==> a_ux_writer
   a_ui_designer --o d_plan_page
   a_ui_designer --o d_ui_quality
   a_ui_designer --> x_agent_browser_agent_browser
   linkStyle 0 stroke:#db2777
-  linkStyle 1 stroke:#9ca3af
+  linkStyle 1 stroke:#db2777
   linkStyle 2 stroke:#9ca3af
-  linkStyle 3 stroke:#2563eb
+  linkStyle 3 stroke:#9ca3af
+  linkStyle 4 stroke:#2563eb
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
@@ -232,12 +238,12 @@ flowchart LR
     s_pr_approved("pr-approved"):::skill
     s_ub_mode("ub-mode"):::skill
     a_architecture_critic{{"architecture-critic"}}:::agent
-    a_copy_reviewer{{"copy-reviewer"}}:::agent
     a_fixer{{"fixer"}}:::agent
     a_implementer_backend{{"implementer-backend"}}:::agent
     a_implementer_frontend{{"implementer-frontend"}}:::agent
     a_plan_reviewer{{"plan-reviewer"}}:::agent
     a_security_auditor{{"security-auditor"}}:::agent
+    a_ux_writer{{"ux-writer"}}:::agent
   end
   subgraph cl_planning["planning"]
     direction TB
@@ -255,8 +261,8 @@ flowchart LR
     d_orca_workers[("_shared/orca-workers.md")]:::shared
     d_plan_format[("_shared/plan-format.md")]:::shared
     d_ui_quality[("_shared/ui-quality.md")]:::shared
+    d_ux_writing[("_shared/ux-writing.md")]:::shared
   end
-  a_copy_reviewer --o d_ui_quality
   a_fixer --o d_external_services
   a_fixer --o d_implementer_rules
   a_fixer --o d_ui_quality
@@ -272,6 +278,7 @@ flowchart LR
   a_plan_reviewer --o d_implementer_rules
   a_plan_reviewer --o d_plan_format
   a_plan_reviewer --o d_ui_quality
+  a_ux_writer --o d_ux_writing
   c_orchestrate -.-> c_ship_it
   c_orchestrate --o d_orca_workers
   c_pr_approved --> s_pr_approved
@@ -282,15 +289,15 @@ flowchart LR
   linkStyle 0 stroke:#9ca3af
   linkStyle 1 stroke:#9ca3af
   linkStyle 2 stroke:#9ca3af
-  linkStyle 3 stroke:#9ca3af
-  linkStyle 4 stroke:#2563eb
+  linkStyle 3 stroke:#2563eb
+  linkStyle 4 stroke:#9ca3af
   linkStyle 5 stroke:#9ca3af
-  linkStyle 6 stroke:#9ca3af
-  linkStyle 7 stroke:#2563eb
+  linkStyle 6 stroke:#2563eb
+  linkStyle 7 stroke:#9ca3af
   linkStyle 8 stroke:#9ca3af
   linkStyle 9 stroke:#9ca3af
-  linkStyle 10 stroke:#9ca3af
-  linkStyle 11 stroke:#2563eb
+  linkStyle 10 stroke:#2563eb
+  linkStyle 11 stroke:#9ca3af
   linkStyle 12 stroke:#9ca3af
   linkStyle 13 stroke:#9ca3af
   linkStyle 14 stroke:#9ca3af
@@ -337,8 +344,8 @@ flowchart LR
     direction TB
     c_pr_approved(["/pr-approved"]):::command
     s_ub_mode("ub-mode"):::skill
-    a_copy_reviewer{{"copy-reviewer"}}:::agent
     a_plan_reviewer{{"plan-reviewer"}}:::agent
+    a_ux_writer{{"ux-writer"}}:::agent
   end
   subgraph cl_planning["planning"]
     direction TB
@@ -420,8 +427,8 @@ flowchart LR
   s_deep_execute --o d_spec_evidence
   s_deep_execute --> s_simplify
   s_deep_execute --> s_ub_mode
-  s_deep_plan ==> a_copy_reviewer
   s_deep_plan ==> a_ui_designer
+  s_deep_plan ==> a_ux_writer
   s_deep_plan -.-> c_deep_execute
   s_deep_plan -.-> c_deep_review
   s_deep_plan -.-> c_qa_plan
@@ -461,9 +468,9 @@ flowchart LR
   s_implement --> x_superpowers_systematic_debugging
   s_implement --> x_superpowers_test_driven_development
   s_implement --> x_tdd
-  s_simple_plan ==> a_copy_reviewer
   s_simple_plan ==> a_plan_reviewer
   s_simple_plan ==> a_ui_designer
+  s_simple_plan ==> a_ux_writer
   s_simple_plan -.-> c_deep_plan
   s_simple_plan -.-> c_qa_plan
   s_simple_plan -.-> c_ship_it
@@ -731,7 +738,7 @@ flowchart LR
   end
   subgraph cl_other["other"]
     direction TB
-    a_copy_reviewer{{"copy-reviewer"}}:::agent
+    a_ux_writer{{"ux-writer"}}:::agent
   end
   subgraph cl_pr_ticket["pr-ticket"]
     direction TB
@@ -752,7 +759,7 @@ flowchart LR
   end
   a_qa_business --> s_qa_test_plan
   a_qa_business --> x_agent_browser_agent_browser
-  a_qa_ui ==> a_copy_reviewer
+  a_qa_ui ==> a_ux_writer
   a_qa_ui -.-> c_ship_it
   a_qa_ui --o d_ui_quality
   a_qa_ui --> x_agent_browser_agent_browser
@@ -855,6 +862,8 @@ flowchart LR
     x_agent_browser_agent_browser[["agent-browser:agent-browser"]]:::external
     x_superpowers_finishing_a_development_branch[["superpowers:finishing-a-development-branch"]]:::external
     x_superpowers_writing_plans[["superpowers:writing-plans"]]:::external
+    x_ux_copy[["ux-copy"]]:::external
+    x_ux_writing[["ux-writing"]]:::external
     x_workflow_authoring[["workflow-authoring"]]:::external
   end
   subgraph cl_media_design["media-design"]
@@ -864,8 +873,8 @@ flowchart LR
   end
   subgraph cl_other["other"]
     direction TB
-    a_copy_reviewer{{"copy-reviewer"}}:::agent
     a_fixer{{"fixer"}}:::agent
+    a_ux_writer{{"ux-writer"}}:::agent
   end
   subgraph cl_planning["planning"]
     direction TB
@@ -905,16 +914,17 @@ flowchart LR
     d_stages[("_shared/stages.md")]:::shared
     d_ticket_start[("_shared/ticket-start.md")]:::shared
     d_ui_quality[("_shared/ui-quality.md")]:::shared
+    d_ux_writing[("_shared/ux-writing.md")]:::shared
     d_workflow_artifacts[("_shared/workflow-artifacts.md")]:::shared
   end
   subgraph cl_workflow["workflow"]
     direction TB
     s_workflow_post_implementation("workflow-post-implementation"):::skill
   end
-  d_after_approval ==> a_copy_reviewer
   d_after_approval ==> a_fixer
   d_after_approval ==> a_qa_business
   d_after_approval ==> a_qa_ui
+  d_after_approval ==> a_ux_writer
   d_after_approval -.-> c_deep_execute
   d_after_approval -.-> c_deep_review
   d_after_approval -.-> c_ship_it
@@ -954,8 +964,14 @@ flowchart LR
   d_stages -.-> c_deep_review
   d_stages --o d_ui_quality
   d_ui_quality ==> a_qa_ui
+  d_ui_quality ==> a_ux_writer
   d_ui_quality -.-> c_ship_it
+  d_ui_quality --o d_ux_writing
   d_ui_quality --> x_agent_browser_agent_browser
+  d_ux_writing ==> a_ux_writer
+  d_ux_writing --o d_ui_quality
+  d_ux_writing --> x_ux_copy
+  d_ux_writing --> x_ux_writing
   linkStyle 0 stroke:#db2777
   linkStyle 1 stroke:#db2777
   linkStyle 2 stroke:#db2777
@@ -999,8 +1015,14 @@ flowchart LR
   linkStyle 40 stroke:#16a34a
   linkStyle 41 stroke:#9ca3af
   linkStyle 42 stroke:#db2777
-  linkStyle 43 stroke:#16a34a
-  linkStyle 44 stroke:#2563eb
+  linkStyle 43 stroke:#db2777
+  linkStyle 44 stroke:#16a34a
+  linkStyle 45 stroke:#9ca3af
+  linkStyle 46 stroke:#2563eb
+  linkStyle 47 stroke:#db2777
+  linkStyle 48 stroke:#9ca3af
+  linkStyle 49 stroke:#2563eb
+  linkStyle 50 stroke:#2563eb
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
