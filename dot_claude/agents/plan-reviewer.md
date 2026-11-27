@@ -76,6 +76,11 @@ Check every item for your lens. A finding states the problem, the evidence and t
    no abstraction for one caller.
 6. **Least code.** Constraint rule 1: the plan takes the first rung that holds. Name what the
    plan can delete.
+6a. **Domain model.** Flag a second boolean or status that must stay in sync with another, a
+   stored value that the plan can derive, an override column where the plan can change the
+   existing choice, and a feature that only adds one more branch to an existing `if` chain.
+   Propose the structure that removes them: a state machine, a derived value, a lookup table.
+   Flag a column or enum value named for a vendor instead of its domain role.
 7. **Callers and flows.** Each caller from step 2 that the change affects is in the plan, with
    a test. A removed or changed contract lists all its callers.
 8. **External systems.** Each call to an external service sits behind an adapter, as

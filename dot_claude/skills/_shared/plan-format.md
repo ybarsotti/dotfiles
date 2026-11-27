@@ -162,7 +162,11 @@ After you write the plan, check it against the spec. Fix each problem in the pla
 8. **Domain names.** A table, column or enum value names the domain role, not the vendor:
    `tracking_source = "carrier_api"`, not `<vendor>_booked`. The vendor name stays inside its
    adapter (`external-services.md`).
-9. **Size.** A plan above 60 KB repeats itself or holds too much scope. Remove the repeats
+9. **Revisions.** When a requirement changes, rewrite each affected section as if the new
+   requirement had been there from the start. Remove the text it replaces. Do not append a
+   "Revision N" section on top of the old design; record the change in one line of the
+   decision log.
+10. **Size.** A plan above 60 KB repeats itself or holds too much scope. Remove the repeats
    first, then move scope to a stage or a follow-up ticket.
 
 ## 8. After the plan

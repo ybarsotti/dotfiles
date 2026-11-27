@@ -260,7 +260,11 @@ classDiagram
 <!-- Applies=yes when the change introduces or alters a state machine: an order/subscription
      status, an approval workflow, a retry/backoff lifecycle, a feature-flag rollout.
      Enumerate every state and every legal transition, including the terminal and error ones.
-     Applies=no otherwise. Say so and delete the fence. -->
+     Applies=no otherwise. Say so and delete the fence.
+     When the machine has async steps, retries, timeouts or more than one actor, model it with
+     the `pstack:statechart` skill: each rule the user agrees to becomes an invariant that TLC
+     checks on every path. Put its chart here in place of the hand-drawn one, and list each
+     broken rule with its shortest path. -->
 - Applies: <yes|no>
 - Not applicable: <reason, only when Applies is no>
 

@@ -111,6 +111,11 @@ Read the **Core** section, then the section of your work: **Backend**, **UI**, o
 37. Mock only the outermost external call: HTTP, a broker, an SDK or the clock. Run the code
     of the project for real.
 38. Freeze the clock. Wait on a condition, never on a fixed sleep.
+38a. Test behavior, not implementation. Assert what a caller can observe: the return value,
+    the error type, the stored state, the call that an external service receives. A test must
+    fail when the behavior breaks, and pass when only the internals change. Derive the
+    expected value from the requirement, not from the code under test.
+
 39. Never weaken a check to make it pass: no lower limit, no skipped test, no cast, and no lint
     or type escape (`noqa`, `type: ignore`, `eslint-disable`, `@ts-ignore`, `nolint`). A reason
     on the line does not make an escape allowed. When the cause cannot be fixed, report it.
@@ -125,6 +130,11 @@ Read the **Core** section, then the section of your work: **Backend**, **UI**, o
 
 40. Update the docs, the plan and the specs that your change makes wrong.
 41. Leave no generated output, scratch file or absolute home path in the change.
+42. When two fixes that rest on the same premise fail the same check, stop. Write the premise
+    in one sentence, and test it directly before you write a third fix.
+43. Before you report a performance number (faster, slower, a latency, a query time), run the
+    `pstack:benchmark-checklist` skill. Report the median of at least 5 runs, the range and the
+    limiter, or call the result inconclusive.
 
 ## Backend
 

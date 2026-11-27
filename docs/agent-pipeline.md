@@ -105,6 +105,38 @@ Three slash commands chain together for planning and parallel execution of non-t
   `map[string]interface{}`, missing return types, `list[str, str]`) and primitive obsession
   (`str` for an id, `float` for money, swappable same-typed parameters).
 
+### Plan quality rules
+
+Both `/simple-plan` and `/deep-plan` apply these rules. The skills call them, so you do not
+type a command for them.
+
+- **Context.** The context phase lists the in-flight work: open and draft pull requests,
+  recent branches and open tickets that touch the same endpoint, model or integration. The
+  plan builds on that work, not beside it.
+- **Vendor facts.** The planner reads the vendor documentation before it states how a service
+  behaves, and marks each fact READ or INFERRED (`_shared/external-services.md`).
+- **Least new state.** Each new table, column, field and control names its source: the
+  ticket, a document or the user's words. The plan reuses an existing concept, then derives a
+  value, then changes an existing choice, and only then adds state. Schema names use the
+  domain role, not the vendor (`_shared/plan-format.md` section 7).
+- **Size.** Each fact appears once. A revision rewrites the affected sections instead of
+  adding a "Revision N" layer. Above 60 KB the plan removes repeats; above 100 KB it splits
+  into stages.
+- **State machines.** A flow with async steps, retries, timeouts or several actors goes
+  through `pstack:statechart`: TLC checks each agreed rule on every path, and the plan shows
+  the chart and the shortest path to each broken rule.
+- **Plan page.** The page shows the requirements with their sources and status, the flow of
+  today and the new flow, the schema with the reason each new column lives where it does, and
+  a glossary. The Plannotator gate runs in the background, so a timeout does not lose
+  annotations (`_shared/plan-page.md`).
+- **Proof.** `blindspot` grades each claim from "said so" to "reproduced in the app".
+  Implementers test behavior, not internals, and stop after two failed fixes on one premise
+  to test the premise. Each performance number goes through `pstack:benchmark-checklist`.
+
+The `pstack` plugin (github.com/cursor/plugins, MIT) supplies `statechart`,
+`benchmark-checklist`, `why`, `reflect`, `correct`, `ketchup`, `sharpen` and `reframe`. Its
+marketplace has `autoUpdate` on, so new releases arrive without `claude plugin update`.
+
 ### Execution recommendation (how the plan gets built)
 
 The approved plan says *what* to build; how it gets built is a separate call, and it is yours.

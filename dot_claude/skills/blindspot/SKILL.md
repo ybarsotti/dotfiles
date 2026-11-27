@@ -40,6 +40,21 @@ question: **what did I never look at?**
 5. **Report what changed.** List the claims you verified, the claims you rewrote, and the
    claims that stay unverified with the reason.
 
+### How far each claim got
+
+A READ claim still has a strength. For each claim that the work's safety depends on, take it
+as far down this list as is cheap, and say where it stopped:
+
+1. You said so. This proves nothing.
+2. You cited the line: a real `file:line`, or the library's own source.
+3. You walked the failure step by step, and it does not reach the bad state.
+4. You ran it: a script or a test calls the real code and fails loud when the claim is false.
+5. You reproduced it in the running app.
+
+Most changes are safe because of one fact, such as "this call only removes entries that are
+already expired". Find that fact, and take it to step 4. When you cannot, mark it unproven.
+Do not round up. (Adapted from the `blast-radius` skill of pstack (MIT, github.com/cursor/plugins/tree/main/pstack).)
+
 ## Surfaces that go unread
 
 | Surface | The trap |

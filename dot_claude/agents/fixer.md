@@ -62,6 +62,8 @@ stop and report the finding with its rule.
 For each finding:
 
 1. Find the root cause. Fix it where all callers route through, not only on the reported path.
+   When a fix for the same finding failed before, write the premise that both fixes assumed,
+   and test it before the next fix.
 2. Write a test that fails before the fix and passes after it. A copy or style finding needs
    no test.
 3. Change only what the finding needs. Do not refactor nearby code.
