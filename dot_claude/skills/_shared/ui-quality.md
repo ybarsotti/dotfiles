@@ -210,7 +210,9 @@ Do this after the UI builds and before review. A screen nobody looked at is not 
    file. Fix each hit.
    Then run the slop detector on each screen of the running app, at desktop width and at
    390 px: `impeccable detect --cdp <DevTools port> --target <URL part>`. `--viewport` does
-   not work with `--cdp`, so set the width on the browser window first. An empty output and
+   not work with `--cdp`, so set the width on the browser window first. Scan one tab at a
+   time and bring it to the front first (`curl <port>/json/activate/<id>`). A background tab
+   prints "was hidden" and skips the contrast pass, but still returns `[]`. An empty output and
    exit code 0 mean no finding; save `--json` output (`[]`) as the evidence.
    Without a DevTools port, run `impeccable detect --changed`; it only matches patterns in
    source files, so its result is a lower bound. Exit code 2 means findings. Fix each finding
