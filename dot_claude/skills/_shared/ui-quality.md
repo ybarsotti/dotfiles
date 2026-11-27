@@ -35,7 +35,9 @@ five lines, and put it in the plan, the canvas notes or the implementer report:
 5. **Not this:** the generic version you refuse, in one line.
 
 When the project has no visual reference, use the `frontend-design` skill to pick the
-direction. The swap test closes the visual pass: hide the logo and the product name. If the
+direction. For a landing page or a marketing page, use the `hallmark` skill instead when it
+is installed. Do not use `hallmark` for app screens: its rules target heroes, navs and
+footers. The swap test closes the visual pass: hide the logo and the product name. If the
 screen could belong to any other admin, it is not done.
 
 ## 2. Reuse before you build
