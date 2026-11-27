@@ -29,11 +29,9 @@ Do these steps for every plan.
    - **Data**: each new or changed table, with its columns, types, nullability, defaults,
      keys, indexes and constraints; each removed column; the migration count; and the ER
      diagram. Show it as a table per entity, not as prose. Give each new column one line on
-     why it lives on that table and not on a parent or child table. State each fallback
-     rule, such as "the location value, else the organization value".
+     why it lives on that table and not on a parent or child table.
    - **API and events**: each new or changed endpoint, payload, event or job contract.
-   - **Permissions**: the role table, when access changes. For each new field that a user
-     can see, the roles that see it.
+   - **Permissions**: the role table, when access changes.
    - **UI**: the canvas link and the design images, when the plan has a UI design pass.
    - **User-facing copy**: each new text, as the user will read it.
    When the plan changes none of these, say so in one line on the page.
