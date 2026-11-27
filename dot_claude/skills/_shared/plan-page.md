@@ -21,23 +21,37 @@ Do these steps for every plan.
    list.
 3. Keep every contract the user approves, in full, even when it is technical. Distilling never
    drops one of these:
+   - **Requirements**: the requirements matrix, one row per requirement, with its source
+     (ticket, document, or the user's words), its status (solved, partly, not solved) and the
+     part of the plan that solves it. List each addition beyond the ticket with its source.
+   - **Flow**: the end-to-end flow across every system that the change touches. Show the
+     flow of today first, then the new flow, so the reader sees what changes.
    - **Data**: each new or changed table, with its columns, types, nullability, defaults,
      keys, indexes and constraints; each removed column; the migration count; and the ER
-     diagram. Show it as a table per entity, not as prose.
+     diagram. Show it as a table per entity, not as prose. Give each new column one line on
+     why it lives on that table and not on a parent or child table. State each fallback
+     rule, such as "the location value, else the organization value".
    - **API and events**: each new or changed endpoint, payload, event or job contract.
-   - **Permissions**: the role table, when access changes.
+   - **Permissions**: the role table, when access changes. For each new field that a user
+     can see, the roles that see it.
    - **UI**: the canvas link and the design images, when the plan has a UI design pass.
    - **User-facing copy**: each new text, as the user will read it.
    When the plan changes none of these, say so in one line on the page.
+   Add a short glossary: each domain term and acronym that the page uses, in one line each.
 4. Reuse the Mermaid diagrams of the plan. Do not draw a second version of a diagram.
 5. Write the page beside the plan as `plan.html` (`$RUN_DIR/plan.html` or
    `${PLAN_PATH%.md}.html`). Follow the Plan path structure: summary strip, timeline, SVG flow,
    risks, open questions.
-6. Run the gate:
+6. Run the gate in the background, because the user can take more than an hour to read:
 
    ```bash
    plannotator annotate plan.html --gate
    ```
+
+   Start it with `run_in_background: true`, and wait for its notification. Do not run it in
+   the foreground with the default timeout: a timeout loses every annotation. When the gate
+   ends without a result, open it again at once and tell the user that earlier annotations
+   did not arrive.
 
 7. Map each annotation back to its section in `plan.md`. Edit `plan.md`, then render the page
    again.

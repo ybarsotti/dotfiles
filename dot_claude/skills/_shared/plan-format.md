@@ -131,6 +131,10 @@ A step is ready when the implementer can write exactly one reasonable thing from
 Exact user-facing copy in the plan follows section 6b of `~/.claude/skills/_shared/ui-quality.md`:
 it says what the user sees or gets, never how the system works underneath.
 
+Write each fact once, in the task that owns it. Another section points to that task
+(`Task 4`) and does not repeat the test names, file paths or values. A summary table holds
+one line per row, not a copy of the task.
+
 A plan holds the decisions that the implementer cannot make alone. A plan longer than its code
 is a transcript, not a plan. A line that decides nothing ("TBD", "handle edge cases", "add
 validation", a type that no task defines) is a gap.
@@ -147,6 +151,19 @@ After you write the plan, check it against the spec. Fix each problem in the pla
 4. **Review Focus.** Each line has its test in the task that owns the code.
 5. **Proportion.** When code blocks are most of the plan, replace bodies with signatures, test
    names and assertions.
+6. **Source for each addition.** Each new table, column, field, setting and UI control names
+   its source: the ticket, a linked document, or the user's words. Cut an addition with no
+   source, or ask the user about it. A convenience that you thought of is not a source.
+7. **Least new state.** Use the first rung that holds:
+   1. reuse a concept that the product already has, such as an existing option or setting;
+   2. derive the value from data that already exists, instead of storing a flag;
+   3. change the existing choice, instead of adding an override column;
+   4. only then, add new state.
+8. **Domain names.** A table, column or enum value names the domain role, not the vendor:
+   `tracking_source = "carrier_api"`, not `<vendor>_booked`. The vendor name stays inside its
+   adapter (`external-services.md`).
+9. **Size.** A plan above 60 KB repeats itself or holds too much scope. Remove the repeats
+   first, then move scope to a stage or a follow-up ticket.
 
 ## 8. After the plan
 

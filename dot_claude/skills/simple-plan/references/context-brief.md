@@ -22,3 +22,7 @@ This file belongs to `simple-plan`. `SKILL.md` names the step that needs it.
 8. When the task names a ticket, or the branch name holds a ticket key, read the ticket. Copy
    each acceptance criterion and each stated requirement into the brief, word for word. For a
    Jira key, run `~/.claude/skills/_shared/ticket-start.md` once.
+9. Find the in-flight work. For each repository that the change touches, list the open and
+   draft pull requests, the branches of the last 30 days, and the open tickets that touch the
+   same endpoint, model or integration. Read each match and record its decisions in the
+   brief. The plan builds on that work, not beside it.

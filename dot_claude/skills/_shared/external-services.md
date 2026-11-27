@@ -53,6 +53,16 @@ it already calls domain-named methods.
 The plan names each external service the change calls, the shape (A or B), the reason, the
 adapter's place, and its domain-named methods.
 
+Read the service's documentation before you state how it behaves: what a response means, which
+fields exist, which events it sends, and how to subscribe. Use the vendor's API reference, the
+recorded responses in the codebase, and the read-only production data when the user allows it.
+Mark each fact READ, with its source, or INFERRED. When the documentation does not cover a
+point, write "the documentation shows no <field or behavior>". Never write "likely" or
+"probably" about a vendor behavior that a read can settle.
+
+A column, a table or an enum value in the domain names the role, not the vendor. The vendor
+name stays inside the adapter, so a second vendor needs a new value, not a new column.
+
 ## In a review
 
 Flag as MEDIUM:

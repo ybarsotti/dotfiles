@@ -59,7 +59,8 @@ If any are missing, loop back once into Phase 2 with a synthetic CHANGES_REQUEST
 The plan is always reviewed in the Plannotator UI:
 
 1. **Gate the plan page.** `plannotator annotate "$RUN_DIR/plan.html" --gate` blocks until the
-   user approves or returns annotations. Address **every** annotation in `plan.md`, re-run
+   user approves or returns annotations. Run it in the background, as `_shared/plan-page.md`
+   step 6 says. Address **every** annotation in `plan.md`, re-run
    `finalize-plan.sh` (validate + tick together), re-render the page, then re-open it. Loop
    until the user approves with no annotations. Record it:
    ```

@@ -78,7 +78,14 @@ Create `$RUN_DIR/related-context.md` before drafting. Record `Ticket:` and `Slac
 Use connected ticket and Slack tools when available; inspect the ticket description, comments
 and linked threads. Preserve URLs plus one-line relevance. If none exist or access is
 unavailable, record where you checked; never fabricate context. With a Jira key, run
-`_shared/ticket-start.md` first. `dispatch-planners.sh` and `dispatch-reviewers.sh` include
+`_shared/ticket-start.md` first.
+
+Also record `In-flight work:` in the same file. For each repository that the change touches,
+list the open and draft pull requests, the branches of the last 30 days, and the open tickets
+that touch the same endpoint, model or integration (`gh pr list --state open --search <term>`,
+`git branch -r --sort=-committerdate`). Read each match, and record the decisions and the
+reasons of its author. The plan builds on in-flight work instead of building a second copy,
+and names the merge order. `dispatch-planners.sh` and `dispatch-reviewers.sh` include
 this artifact when present.
 
 ## Phase 0.4 — Is this the right pipeline?
@@ -130,7 +137,8 @@ plan format on every run, then record it with `superpowers-invoke.sh "$RUN_DIR" 
    the Opus planner and the Codex planner (skipped with `--no-codex`) headless, in parallel.
 5. Synthesize **one** merged plan into `$RUN_DIR/plan.md`. Resolve disagreements by keeping the
    stricter requirement.
-6. Check the size: `wc -c "$RUN_DIR/plan.md"`. Above 100 KB, split the change into stages
+6. Check the size: `wc -c "$RUN_DIR/plan.md"`. Above 60 KB, remove the repeats first
+   (`plan-format.md` section 6). Above 100 KB, split the change into stages
    (`_shared/stages.md`), one PR each. Plan only the first stage now, and move the other stages
    to `## Stages`. Each review round reads the whole plan, and the user must read it at the gate.
 

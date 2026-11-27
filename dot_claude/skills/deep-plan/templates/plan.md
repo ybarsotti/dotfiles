@@ -58,9 +58,11 @@
      apps/pricing -k organization`, not "Pytest tests 3, 4, 5". Prose is still allowed for a
      criterion a human observes; it is recorded as unverified rather than failed, because
      forcing a command there would only produce a fake one. -->
-| status | requirement | how the plan satisfies it | verification |
-|---|---|---|---|
-| ✅ Planned | <requirement> | <task/interface/behavior> | `<runnable command>` or <observed evidence> |
+<!-- `source` names where the requirement comes from: the ticket, a linked document, or the
+     user's words in quotes. A requirement with no source is a scope addition: cut it, or ask. -->
+| status | requirement | how the plan satisfies it | verification | source |
+|---|---|---|---|---|
+| ✅ Planned | <requirement> | <task/interface/behavior> | `<runnable command>` or <observed evidence> | <ticket, document, or the user's quoted words> |
 
 Ticket coverage: <N of M ticket criteria planned; each criterion left out, with the reason and where it goes (non-goal, later stage, question). `no ticket` when none exists>
 
