@@ -12,7 +12,7 @@ The generator reads `dot_claude/skills/**/*.md`, `dot_claude/commands/*.md`, `do
 It writes `docs/skills-map.md` and `docs/skills-map.html`. A second run gives no diff.
 Run `node --test docs/skills-map.test.mjs` to test the edge extraction.
 
-Counts: 29 skills, 18 commands, 10 agents, 17 shared docs, 26 external references. 266 edges: 101 invokes skill, 21 spawns agent, 56 runs command, 88 reads shared doc.
+Counts: 29 skills, 18 commands, 10 agents, 17 shared docs, 26 external references. 267 edges: 102 invokes skill, 21 spawns agent, 56 runs command, 88 reads shared doc.
 
 ## Diagram 1: the main chains
 
@@ -326,7 +326,7 @@ flowchart LR
     x_frontend_design_frontend_design[["frontend-design:frontend-design"]]:::external
     x_mattpocock_skills_domain_modeling[["mattpocock-skills:domain-modeling"]]:::external
     x_mattpocock_skills_grilling[["mattpocock-skills:grilling"]]:::external
-    x_pstack_statechart[["pstack:statechart"]]:::external
+    x_statechart[["statechart"]]:::external
     x_superpowers_brainstorming[["superpowers:brainstorming"]]:::external
     x_superpowers_executing_plans[["superpowers:executing-plans"]]:::external
     x_superpowers_finishing_a_development_branch[["superpowers:finishing-a-development-branch"]]:::external
@@ -453,7 +453,7 @@ flowchart LR
   s_deep_plan --> s_workflow_post_plan
   s_deep_plan --> x_mattpocock_skills_domain_modeling
   s_deep_plan --> x_mattpocock_skills_grilling
-  s_deep_plan --> x_pstack_statechart
+  s_deep_plan --> x_statechart
   s_deep_plan --> x_superpowers_brainstorming
   s_deep_plan --> x_superpowers_finishing_a_development_branch
   s_deep_plan --> x_superpowers_test_driven_development
@@ -795,6 +795,7 @@ flowchart LR
 flowchart LR
   subgraph cl_external["external"]
     direction TB
+    x_benchmark_checklist[["benchmark-checklist"]]:::external
     x_blast_radius[["blast-radius"]]:::external
     x_property_based_testing[["property-based-testing"]]:::external
     x_sharp_edges[["sharp-edges"]]:::external
@@ -840,6 +841,7 @@ flowchart LR
   s_deep_review --o d_ui_quality
   s_deep_review --> s_simplify
   s_deep_review --> s_ub_mode
+  s_deep_review --> x_benchmark_checklist
   s_deep_review --> x_property_based_testing
   s_deep_review --> x_sharp_edges
   s_deep_review --> x_ui_ux_pro_max_ui_ux_pro_max
@@ -860,6 +862,7 @@ flowchart LR
   linkStyle 14 stroke:#2563eb
   linkStyle 15 stroke:#2563eb
   linkStyle 16 stroke:#2563eb
+  linkStyle 17 stroke:#2563eb
   classDef skill fill:#dbeafe,stroke:#2563eb,color:#0f172a
   classDef command fill:#dcfce7,stroke:#16a34a,color:#0f172a
   classDef agent fill:#fce7f3,stroke:#db2777,color:#0f172a
@@ -875,8 +878,8 @@ flowchart LR
   subgraph cl_external["external"]
     direction TB
     x_agent_browser_agent_browser[["agent-browser:agent-browser"]]:::external
+    x_benchmark_checklist[["benchmark-checklist"]]:::external
     x_frontend_design[["frontend-design"]]:::external
-    x_pstack_benchmark_checklist[["pstack:benchmark-checklist"]]:::external
     x_supabase_postgres_best_practices[["supabase-postgres-best-practices"]]:::external
     x_superpowers_finishing_a_development_branch[["superpowers:finishing-a-development-branch"]]:::external
     x_superpowers_writing_plans[["superpowers:writing-plans"]]:::external
@@ -965,7 +968,7 @@ flowchart LR
   d_implementer_rules --o d_external_services
   d_implementer_rules --o d_ui_quality
   d_implementer_rules --> s_pr_description
-  d_implementer_rules --> x_pstack_benchmark_checklist
+  d_implementer_rules --> x_benchmark_checklist
   d_implementer_rules --> x_supabase_postgres_best_practices
   d_inbox -.-> c_ship_it
   d_orca_workers -.-> c_deep_execute
@@ -981,7 +984,7 @@ flowchart LR
   d_plan_routing -.-> c_simple_plan
   d_plan_routing --> s_implement
   d_plan_routing --> x_workflow_authoring
-  d_query_check --> x_pstack_benchmark_checklist
+  d_query_check --> x_benchmark_checklist
   d_repo_workflow -.-> c_deep_review
   d_repo_workflow -.-> c_ship_it
   d_repo_workflow -.-> c_simplify

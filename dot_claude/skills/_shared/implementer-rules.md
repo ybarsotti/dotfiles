@@ -132,8 +132,9 @@ Read the **Core** section, then the section of your work: **Backend**, **UI**, o
 41. Leave no generated output, scratch file or absolute home path in the change.
 42. When two fixes that rest on the same premise fail the same check, stop. Write the premise
     in one sentence, and test it directly before you write a third fix.
-43. Before you report a performance number (faster, slower, a latency, a query time), run the
-    `pstack:benchmark-checklist` skill. Report the median of at least 5 runs, the range and the
+43. Before you report a performance number (faster, slower, a latency, a query time), read the pstack
+    `benchmark-checklist` skill and follow it. The Skill tool refuses it, so read it by path:
+    `ls -d ~/.claude/plugins/cache/cursor-plugins/pstack/[0-9]*/skills/benchmark-checklist/SKILL.md | sort -V | tail -1`. Report the median of at least 5 runs, the range and the
     limiter, or call the result inconclusive.
 
 ## Backend

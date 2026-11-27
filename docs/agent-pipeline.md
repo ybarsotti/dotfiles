@@ -123,7 +123,7 @@ type a command for them.
   adding a "Revision N" layer. Above 60 KB the plan removes repeats; above 100 KB it splits
   into stages.
 - **State machines.** A flow with async steps, retries, timeouts or several actors goes
-  through `pstack:statechart`: TLC checks each agreed rule on every path, and the plan shows
+  through the pstack `statechart` skill: TLC checks each agreed rule on every path, and the plan shows
   the chart and the shortest path to each broken rule.
 - **Plan page.** The page shows the requirements with their sources and status, the flow of
   today and the new flow, the schema with the reason each new column lives where it does, and
@@ -131,11 +131,14 @@ type a command for them.
   annotations (`_shared/plan-page.md`).
 - **Proof.** `blindspot` grades each claim from "said so" to "reproduced in the app".
   Implementers test behavior, not internals, and stop after two failed fixes on one premise
-  to test the premise. Each performance number goes through `pstack:benchmark-checklist`.
+  to test the premise. Each performance number goes through the pstack `benchmark-checklist` skill.
 
 The `pstack` plugin (github.com/cursor/plugins, MIT) supplies `statechart`,
 `benchmark-checklist`, `why`, `reflect`, `correct`, `ketchup`, `sharpen` and `reframe`. Its
 marketplace has `autoUpdate` on, so new releases arrive without `claude plugin update`.
+Each pstack skill sets `disable-model-invocation: true`, so the Skill tool refuses it. You
+start one by typing its command, such as `/why`. The harness reads `statechart` and
+`benchmark-checklist` by path instead, so they run inside the flow without a command.
 
 ### Execution recommendation (how the plan gets built)
 

@@ -16,7 +16,8 @@ handler → service → repo → response. Flag:
   public, unauthenticated or rate-limited only per link, ask for a bound on admission and one
   deadline for the whole operation that cancels queued work. A latency that the plan, the PR
   or a benchmark reports is evidence; read it. A performance claim with one run, no range,
-  no limiter or no error count is unproven: flag it and point to `pstack:benchmark-checklist`.
+  no limiter or no error count is unproven: flag it and point to the pstack
+  `benchmark-checklist` skill.
 - Responses that leak internals: stack traces, driver errors, internal ids.
 - Idempotency gaps on state writes, especially on retried or queued work.
 - **Orchestration more sequential or less atomic than it needs to be**, judged as a design

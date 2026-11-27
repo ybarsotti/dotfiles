@@ -262,7 +262,8 @@ classDiagram
      Enumerate every state and every legal transition, including the terminal and error ones.
      Applies=no otherwise. Say so and delete the fence.
      When the machine has async steps, retries, timeouts or more than one actor, model it with
-     the `pstack:statechart` skill: each rule the user agrees to becomes an invariant that TLC
+     the pstack `statechart` skill. The Skill tool refuses it, so read it by path:
+     `ls -d ~/.claude/plugins/cache/cursor-plugins/pstack/[0-9]*/skills/statechart/SKILL.md | sort -V | tail -1`. Each rule the user agrees to becomes an invariant that TLC
      checks on every path. Put its chart here in place of the hand-drawn one, and list each
      broken rule with its shortest path. -->
 - Applies: <yes|no>

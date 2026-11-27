@@ -129,8 +129,9 @@ For each query, give:
 - the plan node that costs the most, quoted from the `EXPLAIN` output;
 - the index that the query uses, or the sequential scan;
 - the estimated rows and the actual rows, and the skew between them;
-- the time before and after the optimization, and where it was measured. Run the
-  `pstack:benchmark-checklist` skill on it: the median of at least 5 alternating runs, the
+- the time before and after the optimization, and where it was measured. Read the pstack
+  `benchmark-checklist` skill by path, because the Skill tool refuses it:
+  `ls -d ~/.claude/plugins/cache/cursor-plugins/pstack/[0-9]*/skills/benchmark-checklist/SKILL.md | sort -V | tail -1`. Apply it: the median of at least 5 alternating runs, the
   range, and proof that the query returned the same rows on both sides;
 - the `shared hit + read` buffers before and after. A warm cache hides cost. For example, and
   only as an illustration, not as sizing data: 800k buffers can run in 1 s on an idle replica
